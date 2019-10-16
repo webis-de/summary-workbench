@@ -1,0 +1,20 @@
+version: "3"
+services:
+    main:
+        image: local:latest
+        build: .
+        ports:
+            - "5000:5000"
+        networks:
+            - intern
+        volumes:
+            - ../application/:/application
+            - pip:/root/.local
+#        environment:
+        command: sh boot.sh
+
+networks:
+    intern:
+
+volumes:
+    pip:
