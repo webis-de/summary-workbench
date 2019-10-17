@@ -1,0 +1,9 @@
+#!/bin/sh
+
+CURRPATH="$(dirname $0)"
+DOCKERPATH=$CURRPATH/..
+
+cd $DOCKERPATH
+
+docker-compose down
+echo "stopped application"

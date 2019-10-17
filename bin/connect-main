@@ -1,3 +1,0 @@
-#!/bin/sh
-
-docker exec -it docker_ir_1 bash -c "echo '' > ~/.inputrc && pipenv run bash"
