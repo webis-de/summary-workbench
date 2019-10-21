@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "7b72fc90f4859d7451a17db3f315a822b404a6d1548d469dc46aa48750e6b63c"
+            "sha256": "a8bb5e2ef4623fa3e75f76095914a7253e9c8ccc44b2f9a6ddb8318ef3402cca"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -98,6 +98,13 @@
             ],
             "version": "==1.1.1"
         },
+        "pyrouge": {
+            "hashes": [
+                "sha256:364f1dd65a5aabeb40eb4cdf967bc0cb495073885c75eaf09c960fc9ea1696a3"
+            ],
+            "index": "pypi",
+            "version": "==0.1.3"
+        },
         "python-dotenv": {
             "hashes": [
                 "sha256:debd928b49dbc2bf68040566f55cdb3252458036464806f4094487244e2a4093",
@@ -105,6 +112,14 @@
             ],
             "index": "pypi",
             "version": "==0.10.3"
+        },
+        "rouge": {
+            "hashes": [
+                "sha256:8738a39c38c4555860e43102108c1e2a1efe201a3f13abdb5d8fe4a7c280d213",
+                "sha256:f374ba2c297f4d3ef89189c2edeaf4ecde14e8005e817e680d99d16e92ced00b"
+            ],
+            "index": "pypi",
+            "version": "==0.3.2"
         },
         "visitor": {
             "hashes": [

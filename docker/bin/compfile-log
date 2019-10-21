@@ -1,0 +1,8 @@
+#!/bin/sh
+
+CURRPATH="$(dirname $0)"
+DOCKERPATH=$CURRPATH/..
+
+cd $DOCKERPATH
+
+docker-compose logs -f
