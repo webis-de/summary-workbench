@@ -1,13 +1,13 @@
 from flask import render_template, redirect, jsonify, url_for, flash
 from app import app
 from app.forms import FilesSubmitForm, FileUploadForm
+from app.filehandler import FileHandler
 from rouge import Rouge
 from collections import defaultdict
-import time
 
 
-left_docs = {}
-right_docs = {}
+left_docs = FileHandler()
+right_docs = FileHandler()
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -16,8 +16,8 @@ def index():
     form_upload_left = FileUploadForm(prefix="form_left")
     form_upload_right = FileUploadForm(prefix="form_right")
 
-    form_choice.file_left.choices = [(key,key) for key, _ in sorted(left_docs.items(), key=lambda x: x[1][0], reverse=True)]
-    form_choice.file_right.choices = [(key,key) for key, _ in sorted(right_docs.items(), key=lambda x: x[1][0], reverse=True)]
+    form_choice.file_left.choices = left_docs.choices()
+    form_choice.file_right.choices = right_docs.choices()
 
     try:
         if form_choice.validate_on_submit():
@@ -38,16 +38,17 @@ def index():
         if form_upload_left.validate_on_submit():
             filename = form_upload_left.file.data.filename
             filecontent = form_upload_left.file.data.read().decode("utf-8")
-            left_docs[filename] = (time.time(), filecontent.splitlines())
+            left_docs[filename] = filecontent.splitlines()
         if form_upload_right.validate_on_submit():
             filename = form_upload_right.file.data.filename
             filecontent = form_upload_right.file.data.read().decode("utf-8")
-            right_docs[filename] = (time.time(), filecontent.splitlines())
+            right_docs[filename] = filecontent.splitlines()
     except Exception as e:
         flash(str(e))
 
-    form_choice.file_left.choices = [(key,key) for key, _ in sorted(left_docs.items(), key=lambda x: x[1][0], reverse=True)]
-    form_choice.file_right.choices = [(key,key) for key, _ in sorted(right_docs.items(), key=lambda x: x[1][0], reverse=True)]
+    form_choice.file_left.choices = left_docs.choices()
+    form_choice.file_right.choices = right_docs.choices()
+
     return render_template("index.html", form_choice=form_choice, form_upload_left=form_upload_left, form_upload_right=form_upload_right, results=None)
 
 
