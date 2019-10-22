@@ -25,51 +25,96 @@
     </nav>
 {% endblock %}
 
+{% block head %}
+{{ super() }}
+<style>
+.fileUpload {
+    position: relative;
+    overflow: hidden;
+}
+.fileUpload input.upload {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    opacity: 0;
+    filter: alpha(opacity=0);
+}
+</style>
+{% endblock %}
+
+
 {% block content %}
     <div class="container">
         <h1 class="page-header">compfile</h1>
 
         <div class="well">
-            <form id="form_choice" class="form-horizontal" method="post">
+            <div class="form-horizontal">
                 <div class="form-group">
                     <div class="col-xs-6">
-                        {{ form_choice.file_left(class="form-control") }}
+                        <div class="input-group">
+                            {{ form_choice.file_left(class="form-control", form="form_choice") }}
+                            <div class="input-group-btn">
+                                <div class="fileUpload btn btn-primary glyphicon glyphicon-upload">
+                                    {{ form_upload_left.file(class="upload", onchange="this.form.submit()", form="form_upload_left") }}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="col-xs-6">
-                        {{ form_choice.file_right(class="form-control") }}
+                        <div class="input-group">
+                            {{ form_choice.file_right(class="form-control", form="form_choice") }}
+                            <div class="input-group-btn">
+                                <div class="fileUpload btn btn-primary glyphicon glyphicon-upload">
+                                    {{ form_upload_right.file(class="upload", onchange="this.form.submit()", form="form_upload_right") }}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </form>
-            <div class="row">
-                <form id="form_upload_left" class="col-xs-6" method="post" enctype="multipart/form-data">
-                    {{ form_upload_left.file(class="btn btn-info", onchange="this.form.submit()") }}
-                </form>
-                <form id="form_upload_right"class="col-xs-6" method="post" enctype="multipart/form-data">
-                    {{ form_upload_right.file(class="btn btn-info", onchange="this.form.submit()") }}
-                </form>
             </div>
+
+            <form id="form_choice" method="post"></form>
+            <form id="form_upload_left" method="post" enctype="multipart/form-data"></form>
+            <form id="form_upload_right" method="post" enctype="multipart/form-data"></form>
+
             <br>
             <div class="container-fluid">
                 <button class="btn-lg btn btn-success glyphicon glyphicon-play-circle" type="submit" form="form_choice"></button>
                 <a class="pull-right btn-lg btn btn-danger glyphicon glyphicon-trash" href="/delete"></a>
             </div>
         </div>
-    <br>
-    <br>
     </div>
-        {% if results %}
-        <div class="container-fluid">
-        <div class="row">
-            <pre class="col-xs-6 pre-scrollable">
-{{ results[0] }}
-            </pre>
-            <pre class="col-xs-6 pre-scrollable">
-{{ results[1] }}
-            </pre>
+    {% if table %}
+    <br>
+    <br>
+        <div class="container">
+            <div class="well">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                        {% for head in table["thead"] %}
+                            <th>{{ head }}</th>
+                        {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for key, value in table["tbody"].items() %}
+                        <tr>
+                            <td>{{ key }}</td>
+                            {% for v in value %}
+                            <td>{{ v }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
-        </div>
-        </div>
-        {% endif %}
+    </div>
+{{ results }}
+    {% endif %}
     <!--
     kbd
     pre
