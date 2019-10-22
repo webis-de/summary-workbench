@@ -15,3 +15,6 @@ class FileHandler():
 
     def choices(self):
         return [(key,key) for key, _ in sorted(self.files.items(), key=lambda x: x[1][0], reverse=True)]
+
+    def clear(self):
+        self.files.clear()

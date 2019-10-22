@@ -21,8 +21,8 @@ def index():
 
     try:
         if form_choice.validate_on_submit():
-            file_left = left_docs[form_choice.file_left.data][1]
-            file_right = right_docs[form_choice.file_right.data][1]
+            file_left = left_docs[form_choice.file_left.data]
+            file_right = right_docs[form_choice.file_right.data]
             rouge = Rouge()
             results = rouge.get_scores(file_left, file_right, avg=True)
             table = {}
