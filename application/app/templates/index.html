@@ -1,5 +1,48 @@
 {% extends "bootstrap/base.html" %}
 
+{% block styles %}
+{{ super() }}
+    <style>
+        .fileUpload {
+            position: relative;
+            overflow: hidden;
+        }
+        .fileUpload input.upload {
+            position: absolute;
+            top: 0;
+            right: 0;
+            margin: 0;
+            padding: 0;
+            opacity: 0;
+            filter: alpha(opacity=0);
+        }
+        .panel-heading h3 {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: normal;
+            width: 75%;
+            padding-top: 8px;
+        }
+        #save-code {
+            background: None;
+        }
+    </style>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        document.onkeydown=function(evt){
+            var keyCode = evt ? (evt.which ? evt.which : evt.keyCode) : event.keyCode;
+            if(keyCode == 13)
+            {
+                document.getElementById("form_choice").submit()
+            }
+        }
+    </script>
+{% endblock %}
+
 {% block title %} CompareFile {% endblock %}
 
 {% block navbar %}
@@ -10,25 +53,6 @@
             </div>
         </div>
     </nav>
-{% endblock %}
-
-{% block head %}
-{{ super() }}
-<style>
-.fileUpload {
-    position: relative;
-    overflow: hidden;
-}
-.fileUpload input.upload {
-    position: absolute;
-    top: 0;
-    right: 0;
-    margin: 0;
-    padding: 0;
-    opacity: 0;
-    filter: alpha(opacity=0);
-}
-</style>
 {% endblock %}
 
 {% block content %}
@@ -73,7 +97,7 @@
 
             <br>
             <div class="container-fluid">
-                <button class="btn-lg btn btn-success glyphicon glyphicon-play-circle" type="submit" form="form_choice"></button>
+                <button class="btn-lg btn btn-success" type="submit" form="form_choice">compute</button>
                 <a class="pull-right btn-lg btn btn-danger glyphicon glyphicon-trash" href="/delete"></a>
             </div>
         </div>
@@ -94,27 +118,74 @@
 
     {% if table %}
     <div class="container">
-        <div class="well">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                    {% for head in table["thead"] %}
-                        <th>{{ head }}</th>
-                    {% endfor %}
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for key, value in table["tbody"].items() %}
-                    <tr>
-                        <td>{{ key }}</td>
-                        {% for v in value %}
-                        <td>{{ v }}</td>
+        <div class="panel panel-success">
+            <div class="panel-heading clearfix">
+                <h3 class="panel-title pull-left"><code id="save-code">{{ form_save.name(form="form_save") }}</code></h3>
+                <button class="btn-sm btn-info pull-right glyphicon glyphicon-save" form="form_save"></button>
+            </div>
+            <div class="panel-body">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                        {% for head in table["thead"] %}
+                            <th>{{ head }}</th>
                         {% endfor %}
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for key, value in table["tbody"].items() %}
+                        <tr>
+                            <td>{{ key }}</td>
+                            {% for v in value %}
+                            <td>{{ v }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
+
+    <form id="form_save" method="post">
+        {{ form_save.hidden_tag() }}
+    </form>
     {% endif %}
+
+    <div class="panel-group">
+    {% for name, table in saved_metrics %}
+        <div class="container">
+            {% if loop.index % 2 == 0 %}
+            <div class="panel panel-info">
+            {% else %}
+            <div class="panel panel-warning">
+            {% endif %}
+                <div class="panel-heading clearfix">
+                    <h3 class="panel-title pull-left"><code>{{ name }}</code></h3>
+                </div>
+                <div class="panel-body">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                            {% for head in table["thead"] %}
+                                <th>{{ head }}</th>
+                            {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for key, value in table["tbody"].items() %}
+                            <tr>
+                                <td>{{ key }}</td>
+                                {% for v in value %}
+                                <td>{{ v }}</td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
 {% endblock %}
