@@ -170,25 +170,35 @@
                         </a>
                         <div id="collapse{{ loop.index }}" class="collapse">
                             <div class="panel-body">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                        {% for head in table["thead"] %}
-                                            <th>{{ head }}</th>
-                                        {% endfor %}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for key, value in table["tbody"].items() %}
-                                        <tr>
-                                            <td>{{ key }}</td>
-                                            {% for v in value %}
-                                            <td>{{ v }}</td>
-                                            {% endfor %}
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
+                                <ul class="nav nav-tabs">
+                                    <li class="active"><a data-toggle="tab" href="#metric_info{{ loop.index }}">Metric Info</a></li>
+                                    <li><a data-toggle="tab" href="#comparisons{{ loop.index }}">Comparisons</a></li>
+                                </ul>
+                                <div class="tab-content">
+                                    <div class="tab-pane active" id="metric_info{{ loop.index }}">
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                {% for head in table["thead"] %}
+                                                    <th>{{ head }}</th>
+                                                {% endfor %}
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for key, value in table["tbody"].items() %}
+                                                <tr>
+                                                    <td>{{ key }}</td>
+                                                    {% for v in value %}
+                                                    <td>{{ v }}</td>
+                                                    {% endfor %}
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="tab-pane" id="comparisons{{ loop.index }}">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
