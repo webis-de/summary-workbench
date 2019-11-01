@@ -1,8 +1,6 @@
-from flask import request
 from flask_wtf import FlaskForm
 from wtforms import HiddenField, TextField, SelectField, FileField
 from wtforms.validators import DataRequired
-
 
 
 class FilesSubmitForm(FlaskForm):

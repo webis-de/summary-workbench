@@ -1,5 +1,6 @@
 import time
 
+
 class FileHandler():
     def __init__(self):
         self.files = {}
@@ -14,7 +15,11 @@ class FileHandler():
         del self.files[key]
 
     def choices(self):
-        return [(key,key) for key, _ in sorted(self.files.items(), key=lambda x: x[1][0], reverse=True)]
+        return [(key, key) for key, _ in sorted(
+            self.files.items(),
+            key=lambda x: x[1][0],
+            reverse=True
+        )]
 
     def clear(self):
         self.files.clear()
