@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# compfile (docker-compose) up
+
 CURRPATH="$(dirname $0)"
 DOCKERPATH=$CURRPATH/..
 

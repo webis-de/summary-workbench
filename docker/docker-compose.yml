@@ -9,8 +9,7 @@ services:
             - intern
         volumes:
             - ../application/:/application
-            - pip:/root/.local
-#        environment:
+            - pip:/root/.local/share/virtualenvs
         command: sh boot.sh
 
 networks:

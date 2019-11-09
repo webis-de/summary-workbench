@@ -13,3 +13,4 @@ flask-bootstrap = "*"
 pyrouge = "*"
 rouge = "*"
 six = "*"
+nlg-eval = {editable = true,git = "https://github.com/Maluuba/nlg-eval.git",ref = "master"}

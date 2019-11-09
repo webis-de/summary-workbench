@@ -1,3 +1,5 @@
 #!/bin/sh
 
+# compfile connect vimode
+
 docker exec -it docker_main_1 bash -c "echo 'set editing-mode vi' > ~/.inputrc && pipenv run bash"
