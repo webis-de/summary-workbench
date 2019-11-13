@@ -10,6 +10,7 @@ services:
         volumes:
             - ../application/:/application
             - pip:/root/.local/share/virtualenvs
+            - cache:/root/.cache/compfile
         command: sh boot.sh
 
 networks:
@@ -17,3 +18,4 @@ networks:
 
 volumes:
     pip:
+    cache:

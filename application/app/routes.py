@@ -2,26 +2,31 @@ from ast import literal_eval
 from collections import defaultdict
 
 from flask import flash, redirect, render_template, url_for
-from rouge import Rouge
 
 from app import app
 from app.filehandler import FileHandler
 from app.forms import FilesSubmitForm, FileUploadForm, OutputSaveForm
+from app.metrics import Metrics
 
 
 LEFT_DOCS = FileHandler()
 RIGHT_DOCS = FileHandler()
 SAVED_METRICS = []
 
+metrics = Metrics()
+
 
 def gen_table(table_dict):
     table = {}
     thead = [""]
     tbody = defaultdict(list)
+
     for metric, metric_info in table_dict.items():
         thead.append(metric)
+
         for key, value in metric_info.items():
             tbody[key].append("{:.2f}".format(value))
+
     table["thead"] = thead
     table["tbody"] = tbody
 
@@ -43,8 +48,10 @@ def index():
             file_right_name = form_choice.file_right.data
             file_left = LEFT_DOCS[file_left_name]
             file_right = RIGHT_DOCS[file_right_name]
-            rouge = Rouge()
-            table_dict = rouge.get_scores(file_left, file_right, avg=True)
+
+            scores = metrics.compute(["rouge"], file_left, file_right)
+            table_dict = scores["rouge"]
+
             table = gen_table(table_dict)
             form_save.name.data = file_left_name + "-" + file_right_name
             form_save.metric_info.data = table_dict
@@ -73,6 +80,7 @@ def index():
             name = form_save.name.data
             table = gen_table(literal_eval(form_save.metric_info.data))
             SAVED_METRICS.insert(0, (name, table))
+
     except Exception as e:
         flash(str(e))
 
