@@ -3,6 +3,12 @@
 {% block styles %}
 {{ super() }}
     <style>
+        body {
+            background-color: grey;
+        }
+        .page-header {
+            color: white;
+        }
         .fileUpload {
             position: relative;
             overflow: hidden;
@@ -37,8 +43,40 @@
             var keyCode = evt ? (evt.which ? evt.which : evt.keyCode) : event.keyCode;
             if(keyCode == 13)
             {
-                document.getElementById("form_choice").submit()
+                $(document).getElementById("form_choice").submit()
             }
+        }
+    </script>
+    <script>
+        metric_toggle = function(e){
+            is_set = null
+            if ($(e).hasClass("btn-primary")) {
+                $(e).removeClass("btn-primary")
+                $(e).addClass("btn-default")
+                is_set = false
+            } else {
+                $(e).removeClass("btn-default")
+                $(e).addClass("btn-primary")
+                is_set = true
+            }
+
+            info = JSON.stringify({
+                "metric": $(e).attr("value"),
+                "is_set": is_set
+            })
+            $.ajax({
+                type: "POST",
+                url: "/setting",
+                data: { info: info },
+                success: function(d) {
+                    if (d["success"] == false) {
+                        alert("Invalid Value")
+                    }
+                },
+                error: function(d) {
+                    alert("Server Error")
+                }
+            })
         }
     </script>
 {% endblock %}
@@ -59,25 +97,44 @@
     <div class="container">
         <h1 class="page-header">compfile</h1>
 
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                available metrics
+            </div>
+            <div class="panel-body">
+                <div class="btn-group btn-group-justified">
+                {% for metric, setting_info in settings.items() %}
+                    {% if setting_info["is_set"] %}
+                    <a class="btn btn-primary" value="{{ metric }}" onClick="metric_toggle(this)">
+                    {% else %}
+                    <a class="btn btn-default" value="{{ metric }}" onClick="metric_toggle(this)">
+                    {% endif %}
+                        {{ setting_info["readable"] }}
+                    </a>
+                {% endfor %}
+                </div>
+            </div>
+        </div>
         <div class="well">
             <div class="form-horizontal">
                 <div class="form-group">
                     <div class="col-xs-6">
                         <div class="input-group">
-                            {{ form_choice.file_left(class="form-control", form="form_choice") }}
+                            {{ form_choice.file_hyp(class="form-control", form="form_choice") }}
                             <div class="input-group-btn">
                                 <div class="fileUpload btn btn-primary glyphicon glyphicon-upload">
-                                    {{ form_upload_left.file(class="upload", onchange="this.form.submit()", form="form_upload_left") }}
+                                    {{ form_upload_hyp.file(class="upload", onchange="this.form.submit()", form="form_upload_hyp") }}
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="col-xs-6">
                         <div class="input-group">
-                            {{ form_choice.file_right(class="form-control", form="form_choice") }}
+                            {{ form_choice.file_ref(class="form-control", form="form_choice") }}
                             <div class="input-group-btn">
                                 <div class="fileUpload btn btn-primary glyphicon glyphicon-upload">
-                                    {{ form_upload_right.file(class="upload", onchange="this.form.submit()", form="form_upload_right") }}
+                                    {{ form_upload_ref.file(class="upload", onchange="this.form.submit()", form="form_upload_ref") }}
                                 </div>
                             </div>
                         </div>
@@ -88,11 +145,11 @@
             <form id="form_choice" method="post">
                 {{ form_choice.hidden_tag() }}
             </form>
-            <form id="form_upload_left" method="post" enctype="multipart/form-data">
-                {{ form_upload_left.hidden_tag() }}
+            <form id="form_upload_hyp" method="post" enctype="multipart/form-data">
+                {{ form_upload_hyp.hidden_tag() }}
             </form>
-            <form id="form_upload_right" method="post" enctype="multipart/form-data">
-                {{ form_upload_right.hidden_tag() }}
+            <form id="form_upload_ref" method="post" enctype="multipart/form-data">
+                {{ form_upload_ref.hidden_tag() }}
             </form>
 
             <br>
@@ -118,33 +175,51 @@
     {% endif %}
     {% endwith %}
 
-    {% if table %}
+    {% if result_tables %}
     <div class="container">
         <div class="panel panel-success">
             <div class="panel-heading clearfix">
-                <h3 class="panel-title pull-left"><code id="save-code">{{ form_save.name(form="form_save") }}</code></h3>
-                <button class="btn-sm btn-info pull-right glyphicon glyphicon-save" form="form_save"></button>
+                <h3 class="panel-title pull-hyp"><code id="save-code">{{ form_save.name(form="form_save") }}</code></h3>
+                <button class="btn-sm btn-info pull-ref glyphicon glyphicon-save" form="form_save"></button>
             </div>
             <div class="panel-body">
-                <table class="table">
-                    <thead>
-                        <tr>
-                        {% for head in table["thead"] %}
-                            <th>{{ head }}</th>
-                        {% endfor %}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for key, value in table["tbody"].items() %}
-                        <tr>
-                            <td>{{ key }}</td>
-                            {% for v in value %}
-                            <td>{{ v }}</td>
-                            {% endfor %}
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <ul class="nav nav-tabs">
+                    {% for metric in result_tables.keys() %}
+                    {% if loop.index == 1 %}
+                    <li class="active"><a data-toggle="tab" href="#result_{{ metric }}">{{ metric }}</a></li>
+                    {% else %}
+                    <li><a data-toggle="tab" href="#result_{{ metric }}">{{ metric }}</a></li>
+                    {% endif %}
+                    {% endfor %}
+                </ul>
+                <div class="tab-content">
+                    {% for metric, table in result_tables.items() %}
+                    {% if loop.index == 1 %}
+                    <div class="tab-pane active" id="result_{{ metric }}">
+                    {% else %}
+                    <div class="tab-pane" id="result_{{ metric }}">
+                    {% endif %}
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                {% for head in table["thead"] %}
+                                    <th>{{ head }}</th>
+                                {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in table["tbody"] %}
+                                <tr>
+                                    {% for cell in row %}
+                                    <td>{{ cell }}</td>
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </div>
@@ -161,21 +236,37 @@
             <div id="saved-metrics" class="collapse">
                 <div id="accordion" class="panel-group">
                     <br>
-                    {% for name, table in saved_metrics %}
+                    {% for name, tables in saved_metrics %}
+                    {% set loop_index = loop.index %}
                     <div class="panel panel-default">
-                        <a data-toggle="collapse" data-parent="#accordion" href="#collapse{{ loop.index }}">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#collapse{{ loop_index }}">
                             <div class="panel-heading clearfix">
-                                <h3 class="panel-title pull-left"><code>{{ name }}</code></h3>
+                                <h3 class="panel-title pull-hyp"><code>{{ name }}</code>
+                                    {% for metric in tables.keys() %}
+                                    <span class="label label-default">{{ metric }}</span>
+                                    {% endfor %}
+                                </h3>
                             </div>
                         </a>
-                        <div id="collapse{{ loop.index }}" class="collapse">
+                        <div id="collapse{{ loop_index }}" class="collapse">
                             <div class="panel-body">
                                 <ul class="nav nav-tabs">
-                                    <li class="active"><a data-toggle="tab" href="#metric_info{{ loop.index }}">Metric Info</a></li>
-                                    <li><a data-toggle="tab" href="#comparisons{{ loop.index }}">Comparisons</a></li>
+                                    {% for metric in tables.keys() %}
+                                    {% if loop.index == 1 %}
+                                    <li class="active"><a data-toggle="tab" href="#saved_{{ metric }}{{ loop_index }}">{{ metric }}</a></li>
+                                    {% else %}
+                                    <li><a data-toggle="tab" href="#saved_{{ metric }}{{ loop_index }}">{{ metric }}</a></li>
+                                    {% endif %}
+                                    {% endfor %}
+                                    <li><a data-toggle="tab" href="#saved_comparisons{{ loop_index }}">Comparisons</a></li>
                                 </ul>
                                 <div class="tab-content">
-                                    <div class="tab-pane active" id="metric_info{{ loop.index }}">
+                                    {% for metric, table in tables.items() %}
+                                    {% if loop.index == 1 %}
+                                    <div class="tab-pane active" id="saved_{{ metric }}{{ loop_index }}">
+                                    {% else %}
+                                    <div class="tab-pane" id="saved_{{ metric }}{{ loop_index }}">
+                                    {% endif %}
                                         <table class="table">
                                             <thead>
                                                 <tr>
@@ -185,18 +276,18 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {% for key, value in table["tbody"].items() %}
+                                                {% for row in table["tbody"] %}
                                                 <tr>
-                                                    <td>{{ key }}</td>
-                                                    {% for v in value %}
-                                                    <td>{{ v }}</td>
+                                                    {% for cell in row %}
+                                                    <td>{{ cell }}</td>
                                                     {% endfor %}
                                                 </tr>
                                                 {% endfor %}
                                             </tbody>
                                         </table>
                                     </div>
-                                    <div class="tab-pane" id="comparisons{{ loop.index }}">
+                                    {% endfor %}
+                                    <div class="tab-pane" id="saved_comparisons{{ loop_index }}">
                                     </div>
                                 </div>
                             </div>

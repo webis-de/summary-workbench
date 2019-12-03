@@ -1,11 +1,11 @@
 from flask_wtf import FlaskForm
-from wtforms import HiddenField, TextField, SelectField, FileField
+from wtforms import HiddenField, TextField, SelectField, FileField, BooleanField
 from wtforms.validators import DataRequired
 
 
 class FilesSubmitForm(FlaskForm):
-    file_left = SelectField("file_left", validators=[DataRequired()])
-    file_right = SelectField("file_right", validators=[DataRequired()])
+    file_hyp = SelectField("file_hyp", validators=[DataRequired()])
+    file_ref = SelectField("file_ref", validators=[DataRequired()])
 
     def __init__(self, *args, **kwargs):
         super(FilesSubmitForm, self).__init__(*args, **kwargs)

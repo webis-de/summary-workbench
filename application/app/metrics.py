@@ -1,4 +1,5 @@
 import os
+from app import app
 
 import numpy as np
 from gensim.models import KeyedVectors
@@ -51,15 +52,20 @@ class Metrics():
         # nlgeval wants a list of a list of references
         # rouge only wants a single list of references
         ref_list_list = [ref_list]
-        ref_list_zip = list(map(list, zip(*ref_list_list)))
+        ref_list_zip = [[ref] for ref in ref_list]
+        hyp_list_zip = [[hyp] for hyp in hyp_list]
+
         refs = dict(enumerate(ref_list_zip))
-        hyps = dict(enumerate([[e] for e in hyp_list]))
+        hyps = dict(enumerate(hyp_list_zip))
 
         results = {}
 
         for metric in scorable_metrics:
             scorer = self.metric_scorers[metric]
-            results[metric] = scorer.compute_score(refs, hyps)
+            score = scorer.compute_score(refs, hyps)[0]
+            if metric == "bleu":
+                score = dict(zip(["Bleu_1", "Bleu_2", "Bleu_3", "Bleu_4"], score))
+            results[metric] = score
 
         if 'rouge' in metrics:
             score = self.rouge.get_scores(hyp_list, ref_list, avg=True)

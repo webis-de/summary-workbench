@@ -1,11 +1,11 @@
 import os
 from app import app
+from app.metrics import Metrics
+from pprint import pprint
 
 
 def testcompute():
-    from app.metrics import Metrics
     from nlgeval import NLGEval
-    from pprint import pprint
 
     os.environ["NLGEVAL_DATA"] = "/root/.cache/compfile"
 
@@ -45,4 +45,4 @@ def testcompute():
 
 @app.shell_context_processor
 def make_shell_context():
-    return {"a": testcompute}
+    return {"a": testcompute, "m": Metrics(), "pprint": pprint}
