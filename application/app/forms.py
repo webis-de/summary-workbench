@@ -19,8 +19,10 @@ class FileUploadForm(FlaskForm):
 
 
 class OutputSaveForm(FlaskForm):
-    metric_info = HiddenField("metric_info", validators=[DataRequired()])
     name = TextField("name", validators=[DataRequired()])
+    metric_info = HiddenField("metric_info", validators=[DataRequired()])
+    hyps = HiddenField("hyps", validators=[DataRequired()])
+    refs = HiddenField("refs", validators=[DataRequired()])
 
     def __init__(self, *args, **kwargs):
         super(OutputSaveForm, self).__init__(*args, **kwargs)

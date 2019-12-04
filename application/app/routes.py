@@ -8,6 +8,7 @@ from flask import request
 
 from app import app
 from app.filehandler import FileHandler
+from app.savedcalculations import SavedCalculations
 from app.forms import FilesSubmitForm, FileUploadForm, OutputSaveForm
 from app.metrics import Metrics
 
@@ -15,23 +16,23 @@ from app.metrics import Metrics
 
 HYP_DOCS = None
 REF_DOCS = None
-SAVED_METRICS = None
+SAVED_CALCULATIONS = None
 SETTINGS = None
 
 METRICS = None
 
 
 @app.before_first_request
-def load_recources():
+def load_resources():
     global HYP_DOCS
     global REF_DOCS
-    global SAVED_METRICS
+    global SAVED_CALCULATIONS
     global METRICS
     global SETTINGS
 
     HYP_DOCS = FileHandler()
     REF_DOCS = FileHandler()
-    SAVED_METRICS = []
+    SAVED_CALCULATIONS = SavedCalculations()
 
     METRICS = Metrics()
     SETTINGS = {}
@@ -43,15 +44,6 @@ def load_recources():
             "readable": metric_readable,
         }
 
-METRICS = Metrics()
-SETTINGS = {}
-
-for metric in sorted(METRICS.avail_metrics):
-    metric_readable = " ".join(map(str.capitalize, metric.split("_")))
-    SETTINGS[metric] = {
-        "is_set": True,
-        "readable": metric_readable,
-    }
 
 def gen_rouge_table(rouge_info):
     table = {}
@@ -108,42 +100,51 @@ def index():
     form_choice.file_hyp.choices = HYP_DOCS.choices()
     form_choice.file_ref.choices = REF_DOCS.choices()
 
-    if form_choice.validate_on_submit():
-        file_hyp_name = form_choice.file_hyp.data
-        file_ref_name = form_choice.file_ref.data
-        file_hyp = HYP_DOCS[file_hyp_name]
-        file_ref = REF_DOCS[file_ref_name]
+    try:
+        if form_choice.validate_on_submit():
+            file_hyp_name = form_choice.file_hyp.data
+            file_ref_name = form_choice.file_ref.data
+            file_hyp = HYP_DOCS[file_hyp_name]
+            file_ref = REF_DOCS[file_ref_name]
 
-        score_tables = get_info(file_hyp, file_ref)
+            # dict for later literal_eval if want to save
+            score_tables = dict(get_info(file_hyp, file_ref))
 
-        form_save.name.data = file_hyp_name + "-" + file_ref_name
-        form_save.metric_info.data = dict(score_tables)
+            form_save.name.data = file_hyp_name + "-" + file_ref_name
+            form_save.metric_info.data = score_tables
+            form_save.hyps.data = file_hyp
+            form_save.refs.data = file_ref
 
-        return render_template(
-            "index.html",
-            form_choice=form_choice,
-            form_upload_hyp=form_upload_hyp,
-            form_upload_ref=form_upload_ref,
-            form_save=form_save,
-            result_tables=score_tables,
-            saved_metrics=SAVED_METRICS,
-            settings=SETTINGS,
-        )
+            return render_template(
+                "index.html",
+                form_choice=form_choice,
+                form_upload_hyp=form_upload_hyp,
+                form_upload_ref=form_upload_ref,
+                form_save=form_save,
+                result_tables=score_tables,
+                saved_calcuations=SAVED_CALCULATIONS,
+                settings=SETTINGS,
+            )
 
-    if form_upload_hyp.validate_on_submit():
-        filename = form_upload_hyp.file.data.filename
-        filecontent = form_upload_hyp.file.data.read().decode("utf-8")
-        HYP_DOCS[filename] = filecontent.splitlines()
+        if form_upload_hyp.validate_on_submit():
+            filename = form_upload_hyp.file.data.filename
+            filecontent = form_upload_hyp.file.data.read().decode("utf-8")
+            HYP_DOCS[filename] = filecontent.splitlines()
 
-    if form_upload_ref.validate_on_submit():
-        filename = form_upload_ref.file.data.filename
-        filecontent = form_upload_ref.file.data.read().decode("utf-8")
-        REF_DOCS[filename] = filecontent.splitlines()
+        if form_upload_ref.validate_on_submit():
+            filename = form_upload_ref.file.data.filename
+            filecontent = form_upload_ref.file.data.read().decode("utf-8")
+            REF_DOCS[filename] = filecontent.splitlines()
 
-    if form_save.validate_on_submit():
-        name = form_save.name.data
-        tables = OrderedDict(sorted(literal_eval(form_save.metric_info.data).items()))
-        SAVED_METRICS.insert(0, (name, tables))
+        if form_save.validate_on_submit():
+            name = form_save.name.data
+            tables = form_save.metric_info.data
+            hyps = literal_eval(form_save.hyps.data)
+            refs = literal_eval(form_save.refs.data)
+            tables = OrderedDict(sorted(literal_eval(tables).items()))
+            SAVED_CALCULATIONS.append(name, tables, hyps, refs)
+    except Exception as e:
+        flash(e)
 
 
     form_choice.file_hyp.choices = HYP_DOCS.choices()
@@ -154,7 +155,7 @@ def index():
         form_choice=form_choice,
         form_upload_hyp=form_upload_hyp,
         form_upload_ref=form_upload_ref,
-        saved_metrics=SAVED_METRICS,
+        saved_calculations=SAVED_CALCULATIONS,
         settings=SETTINGS,
     )
 
@@ -178,3 +179,17 @@ def submit_setting():
         return jsonify({"success": False})
 
     return jsonify({"success": True})
+
+
+@app.route("/getsaved", methods=["POST"])
+def get_saved():
+    try:
+        info = json.loads(request.form["info"])
+        id = info["id"]
+        _, _, hyps, refs = SAVED_CALCULATIONS.get(id)
+        return jsonify({
+            "success": True,
+            "hyps_refs": list(map(list, zip(hyps, refs)))
+        })
+    except Exception as e:
+        return jsonify({"success": False})

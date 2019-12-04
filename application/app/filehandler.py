@@ -1,25 +1,10 @@
-import time
+from collections import OrderedDict
 
 
-class FileHandler():
-    def __init__(self):
-        self.files = {}
-
-    def __getitem__(self, key):
-        return self.files[key][1]
-
+class FileHandler(OrderedDict):
     def __setitem__(self, key, value):
-        self.files[key] = (time.time(), value)
-
-    def __delitem__(self, key):
-        del self.files[key]
+        super(FileHandler, self).__setitem__(key, value)
+        self.move_to_end(key)
 
     def choices(self):
-        return [(key, key) for key, _ in sorted(
-            self.files.items(),
-            key=lambda x: x[1][0],
-            reverse=True
-        )]
-
-    def clear(self):
-        self.files.clear()
+        return [(key, key) for key, _ in reversed(self.items())]
