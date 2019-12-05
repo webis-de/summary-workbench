@@ -87,7 +87,7 @@ def gen_tables(scores):
 
 def get_info(file_hyp, file_ref):
     set_metrics = [metric for metric, info in SETTINGS.items() if info["is_set"]]
-    scores = METRICS.compute(set_metrics, file_hyp, file_hyp)
+    scores = METRICS.compute(set_metrics, file_hyp, file_ref)
     return gen_tables(scores)
 
 
