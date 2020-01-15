@@ -1,8 +1,9 @@
 import os
-from app import app
+from app import create_app
 from app.metrics import Metrics
 from pprint import pprint
 
+app = create_app()
 
 def testcompute():
     from nlgeval import NLGEval

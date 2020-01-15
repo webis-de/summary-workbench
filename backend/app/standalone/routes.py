@@ -6,12 +6,11 @@ from flask import flash, redirect, render_template, url_for
 from flask import jsonify
 from flask import request
 
-from app import app
+from . import bp
+from .forms import FilesSubmitForm, FileUploadForm, OutputSaveForm
 from app.filehandler import FileHandler
 from app.savedcalculations import SavedCalculations
-from app.forms import FilesSubmitForm, FileUploadForm, OutputSaveForm
 from app.metrics import Metrics
-
 
 
 HYP_DOCS = None
@@ -22,7 +21,6 @@ SETTINGS = None
 METRICS = None
 
 
-@app.before_first_request
 def load_resources():
     global HYP_DOCS
     global REF_DOCS
@@ -43,6 +41,7 @@ def load_resources():
             "is_set": False,
             "readable": metric_readable,
         }
+bp.before_app_first_request(load_resources)
 
 
 def gen_rouge_table(rouge_info):
@@ -91,7 +90,7 @@ def get_info(file_hyp, file_ref):
     return gen_tables(scores)
 
 
-@app.route("/", methods=["GET", "POST"])
+@bp.route("/", methods=["GET", "POST"])
 def index():
     form_choice = FilesSubmitForm()
     form_upload_hyp = FileUploadForm(prefix="form_hyp")
@@ -160,7 +159,7 @@ def index():
     )
 
 
-@app.route("/delete", methods=["GET", "POST"])
+@bp.route("/delete", methods=["GET", "POST"])
 def upload_hyp():
     HYP_DOCS.clear()
     REF_DOCS.clear()
@@ -168,7 +167,7 @@ def upload_hyp():
     return redirect(url_for("index"))
 
 
-@app.route("/setting", methods=["POST"])
+@bp.route("/setting", methods=["POST"])
 def submit_setting():
     try:
         info = json.loads(request.form["info"])
@@ -181,7 +180,7 @@ def submit_setting():
     return jsonify({"success": True})
 
 
-@app.route("/getsaved", methods=["POST"])
+@bp.route("/getsaved", methods=["POST"])
 def get_saved():
     try:
         info = json.loads(request.form["info"])

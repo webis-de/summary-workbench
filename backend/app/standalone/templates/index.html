@@ -54,7 +54,7 @@
 
 {% block scripts %}
     {{ super() }}
-    <script src="{{ url_for('static', filename='fragcolors.js') }}"></script>
+    <script src="{{ url_for('standalone.static', filename='fragcolors.js') }}"></script>
     <script>
         document.onkeydown=function(evt){
             var keyCode = evt ? (evt.which ? evt.which : evt.keyCode) : event.keyCode;
@@ -83,7 +83,7 @@
             })
             $.ajax({
                 type: "POST",
-                url: "/setting",
+                url: "/standalone/setting",
                 data: { info: info },
                 success: function(d) {
                     if (d["success"] == false) {
@@ -100,7 +100,7 @@
             if (tbody.children().length == 0) {
                 $.ajax({
                     type: "POST",
-                    url: "/getsaved",
+                    url: "/standalone/getsaved",
                     data : { info: JSON.stringify({"id": id}) },
                     success: function(d) {
                         if (d["success"] == false) {

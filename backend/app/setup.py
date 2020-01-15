@@ -1,7 +1,7 @@
 import os
 from sys import stderr
+import click
 
-from app import app
 from app.constants import data_path, glove_bin
 
 
@@ -32,7 +32,7 @@ def download_file(url, save_path):
         logging.exception("Error downloading file.")
 
 
-@app.cli.command(help="download necessary data")
+@click.command(help="download necessary data")
 def setup():
     from zipfile import ZipFile
     from gensim.models import KeyedVectors
