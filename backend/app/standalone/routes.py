@@ -164,7 +164,7 @@ def upload_hyp():
     HYP_DOCS.clear()
     REF_DOCS.clear()
 
-    return redirect(url_for("index"))
+    return redirect(url_for("standalone.index"))
 
 
 @bp.route("/setting", methods=["POST"])
