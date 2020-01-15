@@ -1,12 +1,10 @@
 from ast import literal_eval
 from collections import defaultdict, OrderedDict
-import json
-
-from flask import flash, redirect, render_template, url_for
-from flask import jsonify
 from flask import request
+from flask_restful import Resource
+from marshmallow import Schema, fields
 
-from . import bp
+from .. import bp
 from .forms import FilesSubmitForm, FileUploadForm, OutputSaveForm
 from app.common.filehandler import FileHandler
 from app.common.savedcalculations import SavedCalculations
@@ -17,9 +15,7 @@ HYP_DOCS = None
 REF_DOCS = None
 SAVED_CALCULATIONS = None
 SETTINGS = None
-
 METRICS = None
-
 
 def load_resources():
     global HYP_DOCS
@@ -42,6 +38,61 @@ def load_resources():
             "readable": metric_readable,
         }
 bp.before_app_first_request(load_resources)
+
+
+class SettingSchema(Schema):
+    metric = fields.String()
+    is_set = fields.Boolean()
+
+
+class Setting(Resource):
+    def post(self):
+        setting_loader = SettingSchema()
+        try:
+            setting = setting_loader.load(request.json)
+            metric, is_set = setting.metric, setting.is_set
+            SETTINGS[metric]["is_set"] = is_set
+        except Exception as e:
+            return {"success": False}
+
+        return {"success": True}
+
+    def delete(self):
+        HYP_DOCS.clear()
+        REF_DOCS.clear()
+        return '', 200
+
+
+class Session(Resource):
+    def delete(self):
+        pass
+
+
+class HypForm(Resource):
+    def post(self):
+        pass
+
+
+class RefForm(Resource):
+    def post(self):
+        pass
+
+
+class CalculationSchema(Resource):
+    id = fields.Int()
+
+
+class Calculation(Resource):
+    def get(self):
+        try:
+            info = (request.form["info"])
+            id = info["id"]
+            _, _, hyps, refs = SAVED_CALCULATIONS.get(id)
+            return {
+                "hyps_refs": list(map(list, zip(hyps, refs)))
+            }
+        except Exception as e:
+            return '', 400
 
 
 def gen_rouge_table(rouge_info):
@@ -157,38 +208,3 @@ def index():
         saved_calculations=SAVED_CALCULATIONS,
         settings=SETTINGS,
     )
-
-
-@bp.route("/delete", methods=["GET", "POST"])
-def upload_hyp():
-    HYP_DOCS.clear()
-    REF_DOCS.clear()
-
-    return redirect(url_for("standalone.index"))
-
-
-@bp.route("/setting", methods=["POST"])
-def submit_setting():
-    try:
-        info = json.loads(request.form["info"])
-        metric = info["metric"]
-        is_set = info["is_set"]
-        SETTINGS[metric]["is_set"] = is_set
-    except Exception as e:
-        return jsonify({"success": False})
-
-    return jsonify({"success": True})
-
-
-@bp.route("/getsaved", methods=["POST"])
-def get_saved():
-    try:
-        info = json.loads(request.form["info"])
-        id = info["id"]
-        _, _, hyps, refs = SAVED_CALCULATIONS.get(id)
-        return jsonify({
-            "success": True,
-            "hyps_refs": list(map(list, zip(hyps, refs)))
-        })
-    except Exception as e:
-        return jsonify({"success": False})

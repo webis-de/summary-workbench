@@ -2,7 +2,7 @@ import os
 from sys import stderr
 import click
 
-from app.constants import data_path, glove_bin
+from app.common.constants import data_path, glove_bin
 
 
 def download_file(url, save_path):

@@ -6,7 +6,8 @@ from nlgeval import Bleu, Cider, Meteor
 from nltk.tokenize import word_tokenize
 from rouge import Rouge
 from sklearn.metrics.pairwise import cosine_similarity
-from app.constants import data_path, glove_bin
+
+from app.common.constants import data_path, glove_bin
 
 
 class Embedding():

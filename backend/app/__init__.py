@@ -9,7 +9,7 @@ from app.api import bp as api_bp
 from app.standalone import bp as standalone_bp
 
 # commands
-from app.setup import setup
+from app.common.setup import setup
 
 # services
 bootstrap = Bootstrap()
