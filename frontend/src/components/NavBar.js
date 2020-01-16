@@ -1,15 +1,12 @@
 import React from "react";
+import Navbar from "react-bootstrap/Navbar";
 
 function NavBar() {
   return (
-    <nav class="navbar navbar-default">
-        <div class="container">
-            <div class="navbar-header">
-                <a class="navbar-brand" href="#">CompareFile</a>
-            </div>
-        </div>
-    </nav>
-  )
+    <Navbar class="navbar navbar-default">
+      <Navbar.Brand href="#">CompareFile</Navbar.Brand>
+    </Navbar>
+  );
 }
 
-export default NavBar
+export default NavBar;

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import Card from 'react-bootstrap/Card'
+import ButtonGroup from 'react-bootstrap/ButtonGroup'
+import Button from 'react-bootstrap/Button'
 
 
-function Settings() {
+function Settings(prop) {
   const settings = [
     {
       metric: "Cider",
@@ -15,19 +17,18 @@ function Settings() {
   ];
   const onClick = () => alert("Hallo");
   return (
-    <Card variant="panel-default">
-      <Card.Header>available metrics</Card.Header>
-      <div class="panel-body">
-        <div class="btn-group btn-group-justified">
+    <Card className={prop.className ? prop.className : ""}>
+      <Card.Header>Choose metrics</Card.Header>
+      <Card.Body>
+        <ButtonGroup className="d-flex">
           {settings.map(({ metric, is_set }) => (
-            <a
-              className={"btn " + is_set ? "btn-primary" : "btn-default"}
-              value={metric}
+            <Button
+              variant={is_set ? "primary" : "default"}
               onClick={onClick}
-            > {metric} </a>
+            > {metric} </Button>
           ))}
-        </div>
-      </div>
+        </ButtonGroup>
+      </Card.Body>
     </Card>
   );
 }

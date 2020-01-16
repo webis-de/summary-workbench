@@ -2,7 +2,10 @@ td {
     text-align: justify;
     text-justify: inter-word;
 }
-body { background-color: grey; }
+body {
+  background-color: grey;
+  font-family: monospace;
+}
 .label-default { color: lightgrey; }
 .page-header { color: white; }
 .fileUpload {
