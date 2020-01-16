@@ -3,9 +3,9 @@ from collections import defaultdict, OrderedDict
 from flask import request
 from flask_restful import Resource
 from marshmallow import Schema, fields
+from flask import current_app
 
 from .. import bp
-from .forms import FilesSubmitForm, FileUploadForm, OutputSaveForm
 from app.common.filehandler import FileHandler
 from app.common.savedcalculations import SavedCalculations
 from app.common.metrics import Metrics
@@ -16,6 +16,7 @@ REF_DOCS = None
 SAVED_CALCULATIONS = None
 SETTINGS = None
 METRICS = None
+
 
 def load_resources():
     global HYP_DOCS
@@ -38,61 +39,6 @@ def load_resources():
             "readable": metric_readable,
         }
 bp.before_app_first_request(load_resources)
-
-
-class SettingSchema(Schema):
-    metric = fields.String()
-    is_set = fields.Boolean()
-
-
-class Setting(Resource):
-    def post(self):
-        setting_loader = SettingSchema()
-        try:
-            setting = setting_loader.load(request.json)
-            metric, is_set = setting.metric, setting.is_set
-            SETTINGS[metric]["is_set"] = is_set
-        except Exception as e:
-            return {"success": False}
-
-        return {"success": True}
-
-    def delete(self):
-        HYP_DOCS.clear()
-        REF_DOCS.clear()
-        return '', 200
-
-
-class Session(Resource):
-    def delete(self):
-        pass
-
-
-class HypForm(Resource):
-    def post(self):
-        pass
-
-
-class RefForm(Resource):
-    def post(self):
-        pass
-
-
-class CalculationSchema(Resource):
-    id = fields.Int()
-
-
-class Calculation(Resource):
-    def get(self):
-        try:
-            info = (request.form["info"])
-            id = info["id"]
-            _, _, hyps, refs = SAVED_CALCULATIONS.get(id)
-            return {
-                "hyps_refs": list(map(list, zip(hyps, refs)))
-            }
-        except Exception as e:
-            return '', 400
 
 
 def gen_rouge_table(rouge_info):
@@ -141,70 +87,142 @@ def get_info(file_hyp, file_ref):
     return gen_tables(scores)
 
 
-@bp.route("/", methods=["GET", "POST"])
-def index():
-    form_choice = FilesSubmitForm()
-    form_upload_hyp = FileUploadForm(prefix="form_hyp")
-    form_upload_ref = FileUploadForm(prefix="form_ref")
-    form_save = OutputSaveForm()
-    form_choice.file_hyp.choices = HYP_DOCS.choices()
-    form_choice.file_ref.choices = REF_DOCS.choices()
+class SettingSchema(Schema):
+    metric = fields.String()
+    is_set = fields.Boolean()
 
-    try:
-        if form_choice.validate_on_submit():
-            file_hyp_name = form_choice.file_hyp.data
-            file_ref_name = form_choice.file_ref.data
-            file_hyp = HYP_DOCS[file_hyp_name]
-            file_ref = REF_DOCS[file_ref_name]
 
-            # dict for later literal_eval if want to save
-            score_tables = dict(get_info(file_hyp, file_ref))
+class Setting(Resource):
+    def post(self):
+        setting_loader = SettingSchema()
+        try:
+            setting = setting_loader.load(request.json)
+            metric, is_set = setting["metric"], setting["is_set"]
+            current_app.logger.info(setting)
+            SETTINGS[metric]["is_set"] = is_set
+        except Exception as e:
+            return '', 400
 
-            form_save.name.data = file_hyp_name + "-" + file_ref_name
-            form_save.metric_info.data = score_tables
-            form_save.hyps.data = file_hyp
-            form_save.refs.data = file_ref
+        return '', 200
 
-            return render_template(
-                "index.html",
-                form_choice=form_choice,
-                form_upload_hyp=form_upload_hyp,
-                form_upload_ref=form_upload_ref,
-                form_save=form_save,
-                result_tables=score_tables,
-                saved_calcuations=SAVED_CALCULATIONS,
-                settings=SETTINGS,
-            )
+    def delete(self):
+        HYP_DOCS.clear()
+        REF_DOCS.clear()
+        return '', 200
 
-        if form_upload_hyp.validate_on_submit():
-            filename = form_upload_hyp.file.data.filename
-            filecontent = form_upload_hyp.file.data.read().decode("utf-8")
+
+class Session(Resource):
+    def delete(self):
+        HYP_DOCS = FileHandler()
+        REF_DOCS = FileHandler()
+        SAVED_CALCULATIONS = SavedCalculations()
+
+        SETTINGS = {}
+
+        for metric in sorted(METRICS.avail_metrics):
+            metric_readable = " ".join(map(str.capitalize, metric.split("_")))
+            SETTINGS[metric] = {
+                "is_set": False,
+                "readable": metric_readable,
+            }
+
+
+class HypRefSchema(Resource):
+    filename = fields.String()
+    filecontent = fields.String()
+
+
+class Hyp(Resource):
+    def get(self):
+        hyps = HYP_DOCS.choices()
+        return {
+            "hyps": hyps
+        }, 200
+
+    def post(self):
+        hyp_loader = HypRefSchema()
+        try:
+            hyp = hyp_loader.load(request.json)
+
+            filename, filecontent = hyp["filename"], hyp["filecontent"]
+
             HYP_DOCS[filename] = filecontent.splitlines()
+        except:
+            return '', 400
 
-        if form_upload_ref.validate_on_submit():
-            filename = form_upload_ref.file.data.filename
-            filecontent = form_upload_ref.file.data.read().decode("utf-8")
+        return '', 200
+
+
+class Ref(Resource):
+    def get(self):
+        refs = REF_DOCS.choices()
+        return {
+            "refs": refs
+        }, 200
+
+    def post(self):
+        ref_loader = HypRefSchema()
+        try:
+            ref = ref_loader.load(request.json)
+
+            filename, filecontent = ref["filename"], ref["filecontent"]
+
             REF_DOCS[filename] = filecontent.splitlines()
+        except:
+            return '', 400
 
-        if form_save.validate_on_submit():
-            name = form_save.name.data
-            tables = form_save.metric_info.data
-            hyps = literal_eval(form_save.hyps.data)
-            refs = literal_eval(form_save.refs.data)
+        return '', 200
+
+
+class CalculationSchema(Resource):
+    hypname = fields.String()
+    refname = fields.String()
+
+
+class Calculation(Resource):
+    def get(self):
+        calculation_loader = CalculationSchema()
+        try:
+            file_names = calculation_loader.load(request.json)
+            hypname, refname = file_names["hypname"], file_names["refname"]
+            hypdata = HYP_DOCS[hypname]
+            refdata = REF_DOCS[refname]
+        except:
+            return '', 400
+
+        return {
+            "hypdata": hypdata
+            "refdata": refdata
+        }, 200
+
+    def post(self):
+        try:
+            data = request.json
+            name = data["name"]
+            tables = data["metric_info"]
+            hyps = literal_eval(data["hyps"])
+            refs = literal_eval(data["refs"])
             tables = OrderedDict(sorted(literal_eval(tables).items()))
             SAVED_CALCULATIONS.append(name, tables, hyps, refs)
-    except Exception as e:
-        flash(e)
+        except:
+            return '', 400
+
+        return '', 200
 
 
-    form_choice.file_hyp.choices = HYP_DOCS.choices()
-    form_choice.file_ref.choices = REF_DOCS.choices()
+class SavedSchema(Schema):
+    id = fields.String()
 
-    return render_template(
-        "index.html",
-        form_choice=form_choice,
-        form_upload_hyp=form_upload_hyp,
-        form_upload_ref=form_upload_ref,
-        saved_calculations=SAVED_CALCULATIONS,
-        settings=SETTINGS,
-    )
+
+class SavedCalculations(Resource):
+    def get(self):
+        saved_loader = SavedSchema()
+        try:
+            info = saved_loader.load(request.json)
+            id = info["id"]
+            _, _, hyps, refs = SAVED_CALCULATIONS.get(id)
+            return {
+                "hyps_refs": list(map(list, zip(hyps, refs)))
+            }, 200
+        except Exception as e:
+            return '', 400

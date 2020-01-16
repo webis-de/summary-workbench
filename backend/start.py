@@ -1,6 +1,6 @@
 import os
 from app import create_app
-from app.metrics import Metrics
+from app.common.metrics import Metrics
 from pprint import pprint
 
 app = create_app()

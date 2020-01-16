@@ -1,21 +1,22 @@
 version: "3"
 services:
-    main:
-        image: local:latest
-        build: .
-        ports:
-            - "5000:5000"
-        networks:
-            - intern
-        volumes:
-            - ../application/:/application
-            - pip:/root/.local/share/virtualenvs
-            - cache:/root/.cache/compfile
-        command: sh boot.sh
+  main:
+    image: local:latest
+    build: .
+    ports:
+      - "5000:5000"
+    networks:
+      - intern
+    volumes:
+      - ../backend/:/app
+      - pip:/root/.local/share/virtualenvs
+      - cache:/root/.cache/compfile
+    working_dir: /app
+    command: sh boot.sh
 
 networks:
-    intern:
+  intern:
 
 volumes:
-    pip:
-    cache:
+  pip:
+  cache:
