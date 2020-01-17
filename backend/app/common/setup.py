@@ -1,8 +1,8 @@
 import os
 from sys import stderr
-import click
 
-from app.common.constants import data_path, glove_bin
+import click
+from flask.cli import current_app, with_appcontext
 
 
 def download_file(url, save_path):
@@ -33,10 +33,14 @@ def download_file(url, save_path):
 
 
 @click.command(help="download necessary data")
+@with_appcontext
 def setup():
     from zipfile import ZipFile
     from gensim.models import KeyedVectors
     from gensim.scripts.glove2word2vec import glove2word2vec
+
+    data_path = current_app.config.get("DATA_PATH")
+    glove_bin = current_app.config.get("GLOVE_BIN")
 
     if not os.path.exists(data_path):
         try:

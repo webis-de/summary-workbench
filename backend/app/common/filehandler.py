@@ -7,4 +7,4 @@ class FileHandler(OrderedDict):
         self.move_to_end(key)
 
     def choices(self):
-        return [(key, key) for key, _ in reversed(self.items())]
+        return list(reversed(self.keys()))
