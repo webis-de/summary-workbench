@@ -21,8 +21,9 @@ class ChooseFile extends Component {
   onChange = () => {
     const files = this.refs.fileinput.files;
     if (files.length > 0) {
-      files[0].text().then(text => {
-        const filename = this.refs.fileinput.value;
+      const file = files[0]
+      file.text().then(text => {
+        const filename = file.name;
         const filecontent = text;
         const method = "POST";
         const body = JSON.stringify({ filename, filecontent });
