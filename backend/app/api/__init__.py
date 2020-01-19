@@ -22,13 +22,13 @@ bp.before_app_first_request(load_resources)
 
 from .resources.hyp import Hyp
 from .resources.ref import Ref
-from .resources.saved import Saved
+from .resources.savedcalculations import SavedCalculations
 from .resources.session import Session
 from .resources.setting import Setting
-from .resources.calculation import CalculationRes
+from .resources.lastcalculation import LastCalculation
 
-api.add_resource(CalculationRes, "/calculation")
+api.add_resource(LastCalculation, "/calculation")
 api.add_resource(Hyp, "/hyp")
 api.add_resource(Ref, "/ref")
-api.add_resource(Saved, "/saved")
+api.add_resource(SavedCalculations, "/save/<string:name>")
 api.add_resource(Setting, "/setting")

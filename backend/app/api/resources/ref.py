@@ -12,7 +12,7 @@ class Ref(Resource):
     def get(self):
         try:
             refs = current_app.REF_DOCS.choices()
-            return {"refs": refs}, 200
+            return refs, 200
         except:
             return '', 400
 

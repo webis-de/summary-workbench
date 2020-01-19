@@ -7,12 +7,15 @@ import Result from "./components/Result";
 import Container from "react-bootstrap/Container";
 
 function App() {
+  const computeOnClick = (hypfile, reffile) => {
+    alert(hypfile + reffile);
+  };
   return (
     <>
       <NavBar />
       <Container className="mt-3">
         <Settings className="mb-3" />
-        <Upload className="mb-3" />
+        <Upload className="mb-3" computeOnClick={computeOnClick} />
         <Result className="mb-3" />
         <Saved className="mb-3" />
       </Container>

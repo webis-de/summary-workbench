@@ -12,7 +12,7 @@ class Hyp(Resource):
     def get(self):
         try:
             hyps = current_app.HYP_DOCS.choices()
-            return {"hyps": hyps}, 200
+            return hyps, 200
         except:
             return '', 400
 

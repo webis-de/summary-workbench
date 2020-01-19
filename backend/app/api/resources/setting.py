@@ -5,16 +5,23 @@ from marshmallow import Schema, fields
 
 class SettingSchema(Schema):
     metric = fields.String()
-    value = fields.Boolean()
+    is_set = fields.Boolean()
 
 
 class Setting(Resource):
-    def post(self):
+    def get(self):
+        try:
+            return current_app.SETTINGS.todict(), 200
+        except:
+            return '', 400
+
+    def patch(self):
         try:
             setting_loader = SettingSchema()
+            current_app.logger.info(request.json)
             setting = setting_loader.load(request.json)
-            metric, value = setting["metric"], setting["value"]
-            current_app.SETTINGS.set_metric(metric, value)
+            metric, is_set = setting["metric"], setting["is_set"]
+            current_app.SETTINGS.set_metric(metric, is_set)
             return '', 200
         except Exception as e:
             return '', 400

@@ -1,8 +1,8 @@
-from scorer.bleuscorer import BleuScorer
-from scorer.ciderscorer import CiderScorer
-from scorer.greedymatchingscorer import GreedyMatchingScorer
-from scorer.meteorscorer import MeteorScorer
-from scorer.rougescorer import RougeScorer
+from .scorer.bleuscorer import BleuScorer
+from .scorer.ciderscorer import CiderScorer
+from .scorer.greedymatchingscorer import GreedyMatchingScorer
+from .scorer.meteorscorer import MeteorScorer
+from .scorer.rougescorer import RougeScorer
 
 
 class Metrics():
@@ -20,10 +20,10 @@ class Metrics():
                 'scorer': GreedyMatchingScorer(),
                 'readable': 'Greedy Matching',
             },
-            'meteor': {
-                'scorer': MeteorScorer(),
-                'readable': 'Meteor'
-            },
+#             'meteor': {
+#                 'scorer': MeteorScorer(),
+#                 'readable': 'Meteor'
+#             },
             'rouge': {
                 'scorer': RougeScorer(),
                 'readable': 'Rouge',
@@ -40,7 +40,7 @@ class Metrics():
         available_metrics = set(self.metrics)
 
         unknown_metrics = request_metrics - available_metrics
-        if not unknown_metrics is {}:
+        if not len(unknown_metrics) == 0:
             raise ValueError(unknown_metrics)
 
         scorable_metrics = available_metrics & request_metrics

@@ -3,7 +3,7 @@ import Navbar from "react-bootstrap/Navbar";
 
 function NavBar() {
   return (
-    <Navbar class="navbar navbar-default">
+    <Navbar className="navbar navbar-default">
       <Navbar.Brand href="#">CompareFile</Navbar.Brand>
     </Navbar>
   );

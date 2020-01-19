@@ -40,7 +40,7 @@ function Saved(prop) {
               <Card.Body>
                 <Tabs defaultActiveKey="home">
                   <Tab eventKey="home" title="Home">
-                    <Table striped borderd hover>
+                    <Table striped bordered hover>
                       <thead>
                         <tr>
                           <th>lul</th>
