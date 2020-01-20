@@ -14,12 +14,13 @@ class LastCalculation(Resource):
     def get(self):
         try:
             name, calculation = current_app.LAST_CALCULATION
-            if request.json["type"] == "scores":
+            type = request.args["type"]
+            if type == "scores":
                 return {
                     "name": name,
                     "scores": calculation.scores,
                 }, 200
-            elif request.json["type"] == "hyps_refs":
+            elif type == "hyps_refs":
                 return {
                     "hyps": calculation.hyps,
                     "refs": calculation.refs,
@@ -41,10 +42,10 @@ class LastCalculation(Resource):
                 hyps,
                 refs
             )
-            current_app.LAST_CALCULATION = {
-                "name": hypname+"-"+refname,
-                "calculation": Calculation(hyps, refs, scores),
-            }
+            current_app.LAST_CALCULATION = (
+                hypname+"-"+refname,
+                Calculation(hyps, refs, scores),
+            )
             return '', 200
         except Exception as e:
             current_app.logger.info(e)

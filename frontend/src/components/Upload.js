@@ -21,7 +21,7 @@ class ChooseFile extends Component {
   onChange = () => {
     const files = this.refs.fileinput.files;
     if (files.length > 0) {
-      const file = files[0]
+      const file = files[0];
       file.text().then(text => {
         const filename = file.name;
         const filecontent = text;
@@ -35,15 +35,29 @@ class ChooseFile extends Component {
           const method = "GET";
           fetch("http://localhost:5000/api/" + this.props.endpoint, { method })
             .then(response => response.json())
-            .then(files => this.setState({ files }));
-      })});
+            .then(files => {
+              this.setState({ files });
+              if (files.length > 0) {
+                this.props.setFilename(files[0]);
+              }
+            });
+        });
+      });
     }
+  };
+  selectOnChange = e => {
+    this.props.setFilename(e.target.value);
   };
   componentDidMount() {
     const method = "GET";
     fetch("http://localhost:5000/api/" + this.props.endpoint, { method })
       .then(response => response.json())
-      .then(files => this.setState({ files }));
+      .then(files => {
+        this.setState({ files });
+        if (files.length > 0) {
+          this.props.setFilename(files[0]);
+        }
+      });
   }
   render() {
     return (
@@ -51,10 +65,11 @@ class ChooseFile extends Component {
         <InputGroup.Prepend>
           <InputGroup.Text>{this.props.name}:</InputGroup.Text>
         </InputGroup.Prepend>
-        <FormControl className="custom-select" as="select">
-          <option value="" selected disabled hidden>
-            Choose {this.props.name}
-          </option>
+        <FormControl
+          className="custom-select"
+          as="select"
+          onChange={this.selectOnChange}
+        >
           {this.state.files.map(filename => (
             <option>{filename}</option>
           ))}
@@ -80,14 +95,27 @@ function Upload(props) {
       <Card.Body className="p-3">
         <Row className="mb-3">
           <Col>
-            <ChooseFile endpoint="hyp" name="HypFile" />
+            <ChooseFile
+              endpoint="hyp"
+              name="HypFile"
+              setFilename={props.setHypfilename}
+            />
           </Col>
           <Col>
-            <ChooseFile endpoint="ref" name="RefFile" />
+            <ChooseFile
+              endpoint="ref"
+              name="RefFile"
+              setFilename={props.setReffilename}
+            />
           </Col>
         </Row>
         <div>
-          <Button className="float-left" variant="success" size="lg" onClick={props.computeOnClick}>
+          <Button
+            className="float-left"
+            variant="success"
+            size="lg"
+            onClick={props.computeOnClick}
+          >
             compute
           </Button>
           <Button className="float-right" variant="danger" size="lg">
