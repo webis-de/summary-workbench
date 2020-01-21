@@ -3,17 +3,18 @@ from flask_restful import Resource
 from marshmallow import Schema, fields
 
 
-class SavedCalculations(Resource):
+class SavedCalculationsResource(Resource):
     def get(self):
         try:
             return list(current_app.SAVED_CALCULATIONS), 200
         except Exception as e:
             return '', 400
 
-    def post(self, name):
+    def post(self):
         try:
-            current_app.SAVED_CALCULATIONS[name] = current_app.LAST_CALCULATION
+            name = request.json["name"]
+            current_app.SAVED_CALCULATIONS[name] = current_app.LAST_CALCULATION[1]
             current_app.LAST_CALCULATION = None
             return '', 200
-        except:
+        except Exception as e:
             return '', 400

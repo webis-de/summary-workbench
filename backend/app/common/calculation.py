@@ -13,15 +13,15 @@ class SavedCalculations():
         self.saved = OrderedDict()
 
     def __setitem__(self, name, calculation):
+        assert isinstance(calculation, Calculation)
         oldname = name
         i = 1
-        while True:
-            try:
-                self.saved[name] = calculation
-                break
-            except:
-                name = oldname + "-" + str(i)
-                i += 1
+
+        while name in self.saved:
+            name = oldname + "-" + str(i)
+            i += 1
+
+        self.saved[name] = calculation
 
     def __getitem__(self, name):
         return self.saved[name]
@@ -30,4 +30,4 @@ class SavedCalculations():
         return self.saved.get(id)
 
     def __iter__(self):
-        yield from reversed(self.saved)
+        yield from reversed(list(map(lambda x: (x[0], x[1].scores), self.saved.items())))

@@ -71,7 +71,7 @@ class ChooseFile extends Component {
           onChange={this.selectOnChange}
         >
           {this.state.files.map(filename => (
-            <option>{filename}</option>
+            <option key={filename}>{filename}</option>
           ))}
         </FormControl>
         <input

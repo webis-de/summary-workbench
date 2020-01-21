@@ -10,7 +10,7 @@ class LastCalculationSchema(Schema):
     refname = fields.String()
 
 
-class LastCalculation(Resource):
+class LastCalculationResource(Resource):
     def get(self):
         try:
             name, calculation = current_app.LAST_CALCULATION
@@ -21,9 +21,13 @@ class LastCalculation(Resource):
                     "scores": calculation.scores,
                 }, 200
             elif type == "hyps_refs":
+                start = int(request.args["start"])
+                end = int(request.args["end"])
+                assert start >= 0
+                assert end >= 0
                 return {
-                    "hyps": calculation.hyps,
-                    "refs": calculation.refs,
+                    "hyps": calculation.hyps[start:end],
+                    "refs": calculation.refs[start:end],
                 }, 200
             else:
                 return '', 400

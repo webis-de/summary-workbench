@@ -8,7 +8,7 @@ class HypSchema(Schema):
     filecontent = fields.String()
 
 
-class Hyp(Resource):
+class HypResource(Resource):
     def get(self):
         try:
             hyps = current_app.HYP_DOCS.choices()

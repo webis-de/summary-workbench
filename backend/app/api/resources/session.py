@@ -7,7 +7,7 @@ from app.common.metrics import Metrics
 from app.common.settings import Settings
 
 
-class Session(Resource):
+class SessionResource(Resource):
     def delete(self):
         current_app.HYP_DOCS = FileHandler()
         current_app.REF_DOCS = FileHandler()

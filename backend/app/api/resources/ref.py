@@ -8,7 +8,7 @@ class RefSchema(Schema):
     filecontent = fields.String()
 
 
-class Ref(Resource):
+class RefResource(Resource):
     def get(self):
         try:
             refs = current_app.REF_DOCS.choices()

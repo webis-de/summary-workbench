@@ -11,7 +11,6 @@ class App extends Component {
     super(props);
     this.hypfilename = null;
     this.reffilename = null;
-    this.resultRef = React.createRef();
   }
   setHypfilename = filename => {
     this.hypfilename = filename;
@@ -41,7 +40,7 @@ class App extends Component {
       <>
         <NavBar />
         <Container className="mt-3">
-          <Settings ref={this.resultRef} className="mb-3" />
+          <Settings className="mb-3" />
           <Upload
             className="mb-3"
             computeOnClick={this.computeOnClick}

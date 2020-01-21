@@ -8,7 +8,7 @@ class SettingSchema(Schema):
     is_set = fields.Boolean()
 
 
-class Setting(Resource):
+class SettingResource(Resource):
     def get(self):
         try:
             return current_app.SETTINGS.todict(), 200
@@ -18,7 +18,6 @@ class Setting(Resource):
     def patch(self):
         try:
             setting_loader = SettingSchema()
-            current_app.logger.info(request.json)
             setting = setting_loader.load(request.json)
             metric, is_set = setting["metric"], setting["is_set"]
             current_app.SETTINGS.set_metric(metric, is_set)
