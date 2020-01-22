@@ -14,13 +14,7 @@ class LastCalculationResource(Resource):
     def get(self):
         try:
             name, calculation = current_app.LAST_CALCULATION
-            type = request.args["type"]
-            if type == "scores":
-                return {
-                    "name": name,
-                    "scores": calculation.scores,
-                }, 200
-            elif type == "hyps_refs":
+            try:
                 start = int(request.args["start"])
                 end = int(request.args["end"])
                 assert start >= 0
@@ -29,10 +23,13 @@ class LastCalculationResource(Resource):
                     "hyps": calculation.hyps[start:end],
                     "refs": calculation.refs[start:end],
                 }, 200
-            else:
-                return '', 400
+            except:
+                return {
+                    "name": name,
+                    "scores": calculation.scores,
+                }, 200
         except:
-            return '', 400
+            return '', 404
 
     def put(self):
         try:

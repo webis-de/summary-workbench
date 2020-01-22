@@ -8,13 +8,13 @@ import Badge from "react-bootstrap/Badge";
 import CalculationInfo from "./CalculationInfo";
 
 function Saved(prop) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const [calculations, setCalculations] = useState([]);
   const [availSettings, setAvailSettings] = useState([]);
 
   useEffect(() => {
     const method = "GET";
-    fetch("http://localhost:5000/api/save", { method })
+    fetch("http://localhost:5000/api/calculations", { method })
       .then(response => response.json())
       .then(data => setCalculations(data));
 
@@ -41,20 +41,18 @@ function Saved(prop) {
                     {name}
                   </Accordion.Toggle>
                   {availSettings.map(setting => 
-                  <>
-                  <Badge
+                  <Badge key={setting}
                     className="mx-1 my-2 mb-1 float-right"
                     variant={Object.keys(scores).includes(setting) ? "primary" : "secondary"}
                     pill
                   >
                     {setting}
                   </Badge>
-                  </>
                   )}
                 </Card.Header>
                 <Accordion.Collapse eventKey={name}>
                   <Card.Body>
-                    <CalculationInfo scores={scores} />
+                    <CalculationInfo scores={scores} fetchUrlInfix={"calculation/" + name} computeDirect={false}/>
                   </Card.Body>
                 </Accordion.Collapse>
               </Card>

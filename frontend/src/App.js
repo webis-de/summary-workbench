@@ -25,12 +25,11 @@ class App extends Component {
         hypname: this.hypfilename,
         refname: this.reffilename
       });
-      fetch("http://localhost:5000/api/calculation", {
+      fetch("http://localhost:5000/api/lastcalculation", {
         method,
         body,
         headers: { "Content-Type": "application/json" }
-      });
-      this.setState({});
+      }).then(() => window.location.reload())
     } else {
       alert("choose file");
     }

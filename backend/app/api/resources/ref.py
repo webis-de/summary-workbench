@@ -25,3 +25,10 @@ class RefResource(Resource):
             return '', 200
         except:
             return '', 400
+
+    def delete(self):
+        try:
+            current_app.REF_DOCS.clear()
+            return '', 200
+        except:
+            return '', 400

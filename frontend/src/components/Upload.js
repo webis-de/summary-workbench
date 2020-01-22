@@ -14,11 +14,11 @@ class ChooseFile extends Component {
       files: []
     };
   }
-  onClick = () => {
+  fileUploadOnClick = () => {
     const fileinput = this.refs.fileinput;
     fileinput.click();
   };
-  onChange = () => {
+  fileSelectOnChange = () => {
     const files = this.refs.fileinput.files;
     if (files.length > 0) {
       const file = files[0];
@@ -77,10 +77,10 @@ class ChooseFile extends Component {
         <input
           ref="fileinput"
           type="file"
-          onChange={this.onChange}
+          onChange={this.fileSelectOnChange}
           style={{ display: "none" }}
         />
-        <Button variant="primary" onClick={this.onClick}>
+        <Button variant="primary" onClick={this.fileUploadOnClick}>
           <FaUpload />
         </Button>
       </InputGroup>
@@ -89,6 +89,19 @@ class ChooseFile extends Component {
 }
 
 function Upload(props) {
+  const deleteButtonOnClick = () => {
+    const method = "DELETE"
+    const hypDelRequest = fetch("http://localhost:5000/api/hyp", { method, })
+    const refDelRequest = fetch("http://localhost:5000/api/ref", { method, })
+    hypDelRequest.then(hypDelResponse => {
+      refDelRequest.then( refDelResponse => {
+        if (!hypDelResponse.ok || !refDelResponse.ok) {
+          alert("delete error")
+        }
+        window.location.reload()
+      })
+    })
+  }
   return (
     <Card className={props.className ? props.className : ""}>
       <Card.Header> Choose File </Card.Header>
@@ -118,7 +131,7 @@ function Upload(props) {
           >
             compute
           </Button>
-          <Button className="float-right" variant="danger" size="lg">
+          <Button className="float-right" variant="danger" size="lg" onClick={deleteButtonOnClick}>
             <FaTrash />
           </Button>
         </div>

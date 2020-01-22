@@ -24,11 +24,3 @@ class SettingResource(Resource):
             return '', 200
         except Exception as e:
             return '', 400
-
-    def delete(self):
-        try:
-            current_app.HYP_DOCS.clear()
-            current_app.REF_DOCS.clear()
-            return '', 200
-        except:
-            return '', 400
