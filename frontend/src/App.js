@@ -29,7 +29,7 @@ class App extends Component {
         method,
         body,
         headers: { "Content-Type": "application/json" }
-      }).then(() => window.location.reload())
+      }).then(() => window.location.reload());
     } else {
       alert("choose file");
     }

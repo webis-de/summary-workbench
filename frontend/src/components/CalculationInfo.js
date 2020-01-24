@@ -4,6 +4,9 @@ import Tabs from "react-bootstrap/Tabs";
 import Tab from "react-bootstrap/Tab";
 import Table from "react-bootstrap/Table";
 
+import markup from "../common/fragcolors";
+import Markup from "./Markup";
+
 function scoreInfoToArray(scoreInfo) {
   const xkeys = Object.keys(scoreInfo);
   const ykeys = Object.keys(scoreInfo[xkeys[0]]);
@@ -52,17 +55,20 @@ function CompareTable(props) {
     <Table>
       <thead>
         <tr>
-          {thead.map(cell => (
-            <th>{cell}</th>
+          {thead.map((cell, i) => (
+            <th key={i}>{cell}</th>
           ))}
         </tr>
       </thead>
       <tbody>
         {props.compare.map(([number, hypothesis, reference]) => (
-          <tr>
+          <tr key={number}>
             <td>{number}</td>
-            <td>{hypothesis}</td>
-            <td>{reference}</td>
+            {markup(hypothesis, reference).map((markupedText, i) => (
+              <td key={i}>
+                <Markup markupedText={markupedText} />
+              </td>
+            ))}
           </tr>
         ))}
       </tbody>
@@ -77,35 +83,38 @@ function CalculationInfo(props) {
   const start = 0;
   const end = 100;
 
-  const fetchCompareData = useCallback((start, end) => {
-    const method = "GET";
-    fetch(
-      "http://localhost:5000/api/" +
-        encodeURIComponent(props.fetchUrlInfix) +
-        `?start=${start}&end=${end}`,
-      { method }
-    ).then(response => {
-      if (response.ok) {
-        response.json().then(data => {
-          const hyps = data.hyps;
-          const refs = data.refs;
-          if (hyps.length !== refs.length) {
-            alert("not same amount of hyps and refs");
-          }
-          const num_hyps_refs = hyps.length;
-          let pos = start + 1;
-          let comp = [];
-          for (let i = 0; i < num_hyps_refs; i++) {
-            comp.push([pos, hyps[i], refs[i]]);
-            pos += 1;
-          }
-          setCompare(comp);
-        });
-      } else {
-        alert("server error");
-      }
-    });
-  }, [props.fetchUrlInfix])
+  const fetchCompareData = useCallback(
+    (start, end) => {
+      const method = "GET";
+      fetch(
+        "http://localhost:5000/api/" +
+          encodeURIComponent(props.fetchUrlInfix) +
+          `?start=${start}&end=${end}`,
+        { method }
+      ).then(response => {
+        if (response.ok) {
+          response.json().then(data => {
+            const hyps = data.hyps;
+            const refs = data.refs;
+            if (hyps.length !== refs.length) {
+              alert("not same amount of hyps and refs");
+            }
+            const num_hyps_refs = hyps.length;
+            let pos = start + 1;
+            let comp = [];
+            for (let i = 0; i < num_hyps_refs; i++) {
+              comp.push([pos, hyps[i], refs[i]]);
+              pos += 1;
+            }
+            setCompare(comp);
+          });
+        } else {
+          alert("server error");
+        }
+      });
+    },
+    [props.fetchUrlInfix]
+  );
 
   useEffect(() => {
     if (!hasScores && props.computeDirect) {
@@ -145,7 +154,11 @@ function CalculationInfo(props) {
         ))}
       </Tab>
       <Tab className="p-3" eventKey="compare" title="Compare">
-        {compare !== null ? <CompareTable compare={compare} /> : <>{'Click "Compare" to load data'}</>}
+        {compare !== null ? (
+          <CompareTable compare={compare} />
+        ) : (
+          <>{'Click "Compare" to load data'}</>
+        )}
       </Tab>
     </Tabs>
   );
