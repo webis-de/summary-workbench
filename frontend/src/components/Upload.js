@@ -5,7 +5,12 @@ import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
 import InputGroup from "react-bootstrap/InputGroup";
 import FormControl from "react-bootstrap/FormControl";
-import { FaUpload, FaTrash } from "react-icons/fa";
+import {
+  FaRegFile,
+  FaUpload,
+  FaTrash,
+  FaArrowAltCircleDown
+} from "react-icons/fa";
 
 class ChooseFile extends Component {
   constructor(props) {
@@ -90,31 +95,34 @@ class ChooseFile extends Component {
 
 function Upload(props) {
   const deleteButtonOnClick = () => {
-    const method = "DELETE"
-    const hypDelRequest = fetch("http://localhost:5000/api/hyp", { method, })
-    const refDelRequest = fetch("http://localhost:5000/api/ref", { method, })
+    const method = "DELETE";
+    const hypDelRequest = fetch("http://localhost:5000/api/hyp", { method });
+    const refDelRequest = fetch("http://localhost:5000/api/ref", { method });
     hypDelRequest.then(hypDelResponse => {
-      refDelRequest.then( refDelResponse => {
+      refDelRequest.then(refDelResponse => {
         if (!hypDelResponse.ok || !refDelResponse.ok) {
-          alert("delete error")
+          alert("delete error");
         }
-        window.location.reload()
-      })
-    })
-  }
+        window.location.reload();
+      });
+    });
+  };
   return (
     <Card className={props.className ? props.className : ""}>
-      <Card.Header> Choose File </Card.Header>
+      <Card.Header>
+        {" "}
+        <FaRegFile /> Choose File{" "}
+      </Card.Header>
       <Card.Body className="p-3">
-        <Row className="mb-3">
-          <Col>
+        <Row>
+          <Col className="mb-3" md={6}>
             <ChooseFile
               endpoint="hyp"
               name="HypFile"
               setFilename={props.setHypfilename}
             />
           </Col>
-          <Col>
+          <Col className="mb-3" lg={6}>
             <ChooseFile
               endpoint="ref"
               name="RefFile"
@@ -122,17 +130,17 @@ function Upload(props) {
             />
           </Col>
         </Row>
-        <div>
+        <div className="d-flex flex-sm-row flex-column justify-content-between">
           <Button
-            className="float-left"
+            className="mb-2 m-sm-0"
             variant="success"
             size="lg"
             onClick={props.computeOnClick}
           >
-            compute
+            <FaArrowAltCircleDown /> Compute
           </Button>
-          <Button className="float-right" variant="danger" size="lg" onClick={deleteButtonOnClick}>
-            <FaTrash />
+          <Button variant="danger" size="lg" onClick={deleteButtonOnClick}>
+            <FaTrash /> Delete Files
           </Button>
         </div>
       </Card.Body>

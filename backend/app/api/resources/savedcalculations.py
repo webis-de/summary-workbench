@@ -23,6 +23,13 @@ class SavedCalculationResource(Resource):
         except:
             return '', 404
 
+    def delete(self, name):
+        try:
+            del current_app.SAVED_CALCULATIONS[name]
+            return '', 200
+        except:
+            return '', 404
+
 
 class SavedCalculationsResource(Resource):
     def get(self):

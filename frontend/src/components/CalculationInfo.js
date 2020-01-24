@@ -12,11 +12,9 @@ function scoreInfoToArray(scoreInfo) {
   const ykeys = Object.keys(scoreInfo[xkeys[0]]);
   const head = [""].concat(xkeys);
   const body = [];
-  for (const i in ykeys) {
-    const ykey = ykeys[i];
+  for (const ykey of ykeys) {
     const row = [ykey];
-    for (const j in xkeys) {
-      const xkey = xkeys[j];
+    for (const xkey of xkeys) {
       row.push(scoreInfo[xkey][ykey]);
     }
     body.push(row);
@@ -31,7 +29,7 @@ function ScoreTable(props) {
       <thead>
         <tr>
           {head.map(cell => (
-            <th>{cell}</th>
+            <th>{typeof cell === "number" ? cell.toFixed(4) : cell}</th>
           ))}
         </tr>
       </thead>
@@ -39,7 +37,7 @@ function ScoreTable(props) {
         {body.map(row => (
           <tr>
             {row.map(cell => (
-              <td>{cell}</td>
+              <td>{typeof cell === "number" ? cell.toFixed(4) : cell}</td>
             ))}
           </tr>
         ))}
@@ -145,7 +143,7 @@ function CalculationInfo(props) {
             <Card.Header bg="info">{scoreName}</Card.Header>
             <Card.Body>
               {typeof scoreInfo === "number" ? (
-                scoreInfo
+                scoreInfo.toFixed(4)
               ) : (
                 <ScoreTable scoreInfo={scoreInfo} />
               )}

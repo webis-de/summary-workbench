@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Card from "react-bootstrap/Card";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 import Button from "react-bootstrap/Button";
+import { FaCogs } from "react-icons/fa";
 
 function Settings(prop) {
   const [settings, setSettings] = useState({});
@@ -28,9 +29,11 @@ function Settings(prop) {
 
   return (
     <Card className={prop.className ? prop.className : ""}>
-      <Card.Header>Choose metrics</Card.Header>
+      <Card.Header>
+        <FaCogs /> Choose metrics
+      </Card.Header>
       <Card.Body>
-        <ButtonGroup className="d-flex">
+        <ButtonGroup className="d-flex flex-column flex-sm-row">
           {Object.keys(settings).map(metric => {
             const { is_set, readable } = settings[metric];
             return (
