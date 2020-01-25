@@ -110,8 +110,7 @@ function Upload(props) {
   return (
     <Card className={props.className ? props.className : ""}>
       <Card.Header>
-        {" "}
-        <FaRegFile /> Choose File{" "}
+        <FaRegFile /> Choose File
       </Card.Header>
       <Card.Body className="p-3">
         <Row>

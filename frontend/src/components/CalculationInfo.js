@@ -8,18 +8,23 @@ import markup from "../common/fragcolors";
 import Markup from "./Markup";
 
 function scoreInfoToArray(scoreInfo) {
-  const xkeys = Object.keys(scoreInfo);
-  const ykeys = Object.keys(scoreInfo[xkeys[0]]);
-  const head = [""].concat(xkeys);
-  const body = [];
-  for (const ykey of ykeys) {
-    const row = [ykey];
-    for (const xkey of xkeys) {
-      row.push(scoreInfo[xkey][ykey]);
+  const scoreValues = Object.values(scoreInfo);
+  if (scoreValues.every(v => typeof v === "number")) {
+    return [Object.keys(scoreInfo), [scoreValues]];
+  } else {
+    const xkeys = Object.keys(scoreInfo);
+    const ykeys = Object.keys(scoreInfo[xkeys[0]]);
+    const head = [""].concat(xkeys);
+    const body = [];
+    for (const ykey of ykeys) {
+      const row = [ykey];
+      for (const xkey of xkeys) {
+        row.push(scoreInfo[xkey][ykey]);
+      }
+      body.push(row);
     }
-    body.push(row);
+    return [head, body];
   }
-  return [head, body];
 }
 
 function ScoreTable(props) {
@@ -28,16 +33,18 @@ function ScoreTable(props) {
     <Table>
       <thead>
         <tr>
-          {head.map(cell => (
-            <th>{typeof cell === "number" ? cell.toFixed(4) : cell}</th>
+          {head.map((cell, i) => (
+            <th key={i}>{typeof cell === "number" ? cell.toFixed(4) : cell}</th>
           ))}
         </tr>
       </thead>
       <tbody>
-        {body.map(row => (
-          <tr>
-            {row.map(cell => (
-              <td>{typeof cell === "number" ? cell.toFixed(4) : cell}</td>
+        {body.map((row, rownum) => (
+          <tr key={rownum}>
+            {row.map((cell, colnum) => (
+              <td key={colnum}>
+                {typeof cell === "number" ? cell.toFixed(4) : cell}
+              </td>
             ))}
           </tr>
         ))}
@@ -139,8 +146,8 @@ function CalculationInfo(props) {
         disabled={hasScores ? false : true}
       >
         {scoreEntries.map(([scoreName, scoreInfo]) => (
-          <Card className="m-2" key={scoreName}>
-            <Card.Header bg="info">{scoreName}</Card.Header>
+          <Card className="m-2" key={scoreName} border="dark">
+            <Card.Header>{scoreName}</Card.Header>
             <Card.Body>
               {typeof scoreInfo === "number" ? (
                 scoreInfo.toFixed(4)
