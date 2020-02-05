@@ -1,0 +1,31 @@
+version: "3"
+services:
+  backend:
+    image: backend:latest
+    build: docker/backend
+    working_dir: /app
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend/:/app
+      - pip:/root/.local/share/virtualenvs
+      - cache:/root/.cache/compfile
+      - nltk_data:/root/nltk_data
+    command: bash boot.sh
+
+  frontend:
+    image: frontend:latest
+    build: docker/frontend
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/:/app
+      - node_modules:/app/node_modules
+    command: bash -c "npm install && npm start"
+
+volumes:
+  pip:
+  nltk_data:
+  cache:
+  node_modules:

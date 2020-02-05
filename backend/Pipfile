@@ -6,14 +6,14 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-python-dotenv = "*"
 flask = "*"
-flask-wtf = "*"
-flask-bootstrap = "*"
-pyrouge = "*"
-rouge = "*"
-six = "*"
-nlg-eval = {editable = true,git = "https://github.com/Maluuba/nlg-eval.git",ref = "master"}
-flask-restful = "*"
-marshmallow = "*"
+flask-restx = "*"
 flask-cors = "*"
+gunicorn = "*"
+marshmallow = "*"
+six = "*"
+rouge = "*"
+nlg-eval = {editable = true,git = "https://github.com/Maluuba/nlg-eval.git",ref = "master"}
+
+[requires]
+python_version = "3.8"

@@ -27,8 +27,8 @@ function scoreInfoToArray(scoreInfo) {
   }
 }
 
-function ScoreTable(props) {
-  const [head, body] = scoreInfoToArray(props.scoreInfo);
+function ScoreTable({ scoreInfo }) {
+  const [head, body] = scoreInfoToArray(scoreInfo);
   return (
     <Table>
       <thead>
@@ -81,9 +81,11 @@ function CompareTable(props) {
   );
 }
 
-function CalculationInfo(props) {
+const CalculationInfo = ({ scores, fetchUrlInfix, computeDirect }) => {
   const [compare, setCompare] = useState(null);
-  const scoreEntries = Object.entries(props.scores);
+  const [hasLoaded, setHasLoaded] useState(false);
+  const [isLoading, setIsLoading] useState(false);
+  const scoreEntries = Object.entries(scores);
   const hasScores = scoreEntries.length > 0;
   const start = 0;
   const end = 100;
@@ -93,7 +95,7 @@ function CalculationInfo(props) {
       const method = "GET";
       fetch(
         "http://localhost:5000/api/" +
-          encodeURIComponent(props.fetchUrlInfix) +
+          encodeURIComponent(fetchUrlInfix) +
           `?start=${start}&end=${end}`,
         { method }
       ).then(response => {
@@ -118,14 +120,14 @@ function CalculationInfo(props) {
         }
       });
     },
-    [props.fetchUrlInfix]
+    [fetchUrlInfix]
   );
 
   useEffect(() => {
-    if (!hasScores && props.computeDirect) {
+    if (!hasScores && computeDirect) {
       fetchCompareData(start, end);
     }
-  }, [hasScores, props.computeDirect, fetchCompareData]);
+  }, [hasScores, computeDirect, fetchCompareData]);
 
   const onSelect = a => {
     if (a === "compare" && compare === null) {
@@ -167,6 +169,6 @@ function CalculationInfo(props) {
       </Tab>
     </Tabs>
   );
-}
+};
 
 export default CalculationInfo;

@@ -1,5 +1,5 @@
 from flask import current_app, request
-from flask_restful import Resource
+from flask_restx import Resource
 from marshmallow import Schema, fields
 
 
@@ -13,7 +13,8 @@ class HypResource(Resource):
         try:
             hyps = current_app.HYP_DOCS.choices()
             return hyps, 200
-        except:
+        except Exception as e:
+            current_app.logger.warn(e)
             return '', 400
 
     def post(self):
@@ -23,12 +24,14 @@ class HypResource(Resource):
             filename, filecontent = hyp["filename"], hyp["filecontent"]
             current_app.HYP_DOCS[filename] = filecontent.splitlines()
             return '', 200
-        except:
+        except Exception as e:
+            current_app.logger.warn(e)
             return '', 400
 
     def delete(self):
         try:
             current_app.HYP_DOCS.clear()
             return '', 200
-        except:
+        except Exception as e:
+            current_app.logger.warn(e)
             return '', 400

@@ -1,5 +1,5 @@
 from flask import Blueprint, current_app
-from flask_restful import Api
+from flask_restx import Api
 
 bp = Blueprint("api", __name__)
 api = Api(bp)

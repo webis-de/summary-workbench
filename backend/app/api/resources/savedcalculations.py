@@ -1,5 +1,5 @@
 from flask import current_app, request
-from flask_restful import Resource
+from flask_restx import Resource
 from marshmallow import Schema, fields
 
 class SavedCalculationResource(Resource):
@@ -20,14 +20,16 @@ class SavedCalculationResource(Resource):
                     "name": name,
                     "scores": calculation.scores,
                 }, 200
-        except:
+        except Exception as e:
+            current_app.logger.warn(e)
             return '', 404
 
     def delete(self, name):
         try:
             del current_app.SAVED_CALCULATIONS[name]
             return '', 200
-        except:
+        except Exception as e:
+            current_app.logger.warn(e)
             return '', 404
 
 
@@ -36,6 +38,7 @@ class SavedCalculationsResource(Resource):
         try:
             return list(current_app.SAVED_CALCULATIONS), 200
         except Exception as e:
+            current_app.logger.warn(e)
             return '', 400
 
     def post(self):
@@ -45,4 +48,5 @@ class SavedCalculationsResource(Resource):
             current_app.LAST_CALCULATION = None
             return '', 200
         except Exception as e:
+            current_app.logger.warn(e)
             return '', 400

@@ -6,54 +6,37 @@ import Button from "react-bootstrap/Button";
 import { FaUpload } from "react-icons/fa";
 
 import CalculationInfo from "./CalculationInfo";
+import { getCalculationRequest, saveCalculationRequest } from "../common/api";
 
-function Result(props) {
+const Result = ({ className }) => {
   const [name, setName] = useState(null);
   const [scores, setScores] = useState(null);
-
   useEffect(() => {
-    const method = "GET";
-    fetch("http://localhost:5000/api/lastcalculation", { method }).then(
-      response => {
-        if (response.ok) {
-          response.json().then(({ name, scores }) => {
-            setName(name);
-            setScores(scores);
-          });
-        }
+    getCalculationRequest().then(response => {
+      if (response.ok) {
+        response.json().then(({ name, scores }) => {
+          setName(name);
+          setScores(scores);
+        });
       }
-    );
+    });
   }, []);
 
   const upload = () => {
-    const method = "POST";
-    const body = JSON.stringify({ name: name });
-    const headers = { "Content-Type": "application/json" };
-    fetch("http://localhost:5000/api/calculations", { method, body, headers })
+    saveCalculationRequest(name)
       .then(() => window.location.reload())
       .catch(() => alert("upload error"));
   };
 
-  const onSubmit = e => {
-    if (e.keyCode === 13) {
-      upload();
-    }
-  };
-  const nameOnChange = e => {
-    setName(e.target.value);
-  };
-
-  const fetchUrlInfix = "lastcalculation";
-
   if (name !== null && scores !== null) {
     return (
-      <Card className={props.className ? props.className : ""}>
+      <Card className={className ? className : ""}>
         <Card.Header>
           <InputGroup>
             <FormControl
-              defaultValue={name}
-              onChange={nameOnChange}
-              onKeyDown={onSubmit}
+              value={name}
+              onChange={e => setName(e.target.value)}
+              onKeyDown={e => e.keyCode === 13 && upload()}
             />
             <InputGroup.Append>
               <Button onClick={upload}>
@@ -65,7 +48,7 @@ function Result(props) {
         <Card.Body className="mx-2">
           <CalculationInfo
             scores={scores}
-            fetchUrlInfix={fetchUrlInfix}
+            fetchUrlInfix="lastcalculation"
             computeDirect={true}
           />
         </Card.Body>
@@ -74,6 +57,6 @@ function Result(props) {
   } else {
     return null;
   }
-}
+};
 
 export default Result;

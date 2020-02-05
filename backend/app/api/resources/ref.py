@@ -1,5 +1,5 @@
 from flask import current_app, request
-from flask_restful import Resource
+from flask_restx import Resource
 from marshmallow import Schema, fields
 
 
@@ -13,7 +13,8 @@ class RefResource(Resource):
         try:
             refs = current_app.REF_DOCS.choices()
             return refs, 200
-        except:
+        except Exception as e:
+            current_app.logger.warn(e)
             return '', 400
 
     def post(self):
@@ -23,12 +24,14 @@ class RefResource(Resource):
             filename, filecontent = ref["filename"], ref["filecontent"]
             current_app.REF_DOCS[filename] = filecontent.splitlines()
             return '', 200
-        except:
+        except Exception as e:
+            current_app.logger.warn(e)
             return '', 400
 
     def delete(self):
         try:
             current_app.REF_DOCS.clear()
             return '', 200
-        except:
+        except Exception as e:
+            current_app.logger.warn(e)
             return '', 400

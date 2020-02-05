@@ -4,31 +4,34 @@ import ButtonGroup from "react-bootstrap/ButtonGroup";
 import Button from "react-bootstrap/Button";
 import { FaCogs } from "react-icons/fa";
 
-function Settings(prop) {
+import { getSettingsRequest, setSettingRequest } from "../common/api";
+
+const Settings = ({ className }) => {
   const [settings, setSettings] = useState({});
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/setting", { method: "GET" })
+    getSettingsRequest()
       .then(response => response.json())
       .then(result => setSettings(result));
   }, []);
 
-  const onClick = metric => {
-    const newsettings = Object.assign({}, settings);
+  const setSetting = metric => {
     const is_set = !settings[metric].is_set;
-    const method = "PATCH";
-    const body = JSON.stringify({ metric, is_set });
-    const headers = { "Content-Type": "application/json" };
-    fetch("http://localhost:5000/api/setting", { method, body, headers })
-      .then(() => {
-        newsettings[metric].is_set = is_set;
-        setSettings(newsettings);
+    setSettingRequest(metric, is_set)
+      .then(response => {
+        if (response.ok) {
+          const newsettings = Object.assign({}, settings);
+          newsettings[metric].is_set = is_set;
+          setSettings(newsettings);
+        } else {
+          alert("error setting Settings");
+        }
       })
       .catch(error => alert(error));
   };
 
   return (
-    <Card className={prop.className ? prop.className : ""}>
+    <Card className={className ? className : ""}>
       <Card.Header>
         <FaCogs /> Choose metrics
       </Card.Header>
@@ -41,7 +44,7 @@ function Settings(prop) {
                 className="border-dark"
                 key={metric}
                 variant={is_set ? "primary" : "default"}
-                onClick={() => onClick(metric)}
+                onClick={() => setSetting(metric)}
               >
                 {" "}
                 {readable}{" "}
@@ -52,6 +55,6 @@ function Settings(prop) {
       </Card.Body>
     </Card>
   );
-}
+};
 
 export default Settings;

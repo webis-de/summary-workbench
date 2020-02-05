@@ -1,10 +1,11 @@
-import React, { Component } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Card from "react-bootstrap/Card";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
 import InputGroup from "react-bootstrap/InputGroup";
 import FormControl from "react-bootstrap/FormControl";
+import Spinner from "react-bootstrap/Spinner";
 import {
   FaRegFile,
   FaUpload,
@@ -12,139 +13,185 @@ import {
   FaArrowAltCircleDown
 } from "react-icons/fa";
 
-class ChooseFile extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      files: []
-    };
-  }
-  fileUploadOnClick = () => {
-    const fileinput = this.refs.fileinput;
-    fileinput.click();
-  };
-  fileSelectOnChange = () => {
-    const files = this.refs.fileinput.files;
+import {
+  deleteHypsRequest,
+  deleteRefsRequest,
+  calculateRequest,
+  getHypFilesRequest,
+  getRefFilesRequest,
+  uploadHypFileRequest,
+  uploadRefFileRequest
+} from "../common/api";
+
+const UploadButton = ({ getFilesRequest, uploadFileRequest, setFiles }) => {
+  const fileinputRef = useRef();
+
+  const fileSelectOnChange = () => {
+    const files = fileinputRef.current.files;
     if (files.length > 0) {
       const file = files[0];
       file.text().then(text => {
         const filename = file.name;
         const filecontent = text;
-        const method = "POST";
-        const body = JSON.stringify({ filename, filecontent });
-        fetch("http://localhost:5000/api/" + this.props.endpoint, {
-          method,
-          body,
-          headers: { "Content-Type": "application/json" }
-        }).then(() => {
-          const method = "GET";
-          fetch("http://localhost:5000/api/" + this.props.endpoint, { method })
+        uploadFileRequest(filename, filecontent).then(() => {
+          getFilesRequest()
             .then(response => response.json())
             .then(files => {
-              this.setState({ files });
-              if (files.length > 0) {
-                this.props.setFilename(files[0]);
-              }
+              setFiles(files);
             });
         });
       });
     }
   };
-  selectOnChange = e => {
-    this.props.setFilename(e.target.value);
-  };
-  componentDidMount() {
-    const method = "GET";
-    fetch("http://localhost:5000/api/" + this.props.endpoint, { method })
+  return (
+    <>
+      <input
+        ref={fileinputRef}
+        type="file"
+        onChange={fileSelectOnChange}
+        style={{ display: "none" }}
+      />
+      <Button variant="primary" onClick={() => fileinputRef.current.click()}>
+        <FaUpload />
+      </Button>
+    </>
+  );
+};
+
+const ChooseFile = ({
+  selectRef,
+  getFilesRequest,
+  uploadFileRequest,
+  name
+}) => {
+  const [files, setFiles] = useState([]);
+
+  useEffect(() => {
+    getFilesRequest()
       .then(response => response.json())
       .then(files => {
-        this.setState({ files });
-        if (files.length > 0) {
-          this.props.setFilename(files[0]);
-        }
+        setFiles(files);
       });
-  }
-  render() {
-    return (
-      <InputGroup>
-        <InputGroup.Prepend>
-          <InputGroup.Text>{this.props.name}:</InputGroup.Text>
-        </InputGroup.Prepend>
-        <FormControl
-          className="custom-select"
-          as="select"
-          onChange={this.selectOnChange}
-        >
-          {this.state.files.map(filename => (
-            <option key={filename}>{filename}</option>
-          ))}
-        </FormControl>
-        <input
-          ref="fileinput"
-          type="file"
-          onChange={this.fileSelectOnChange}
-          style={{ display: "none" }}
-        />
-        <Button variant="primary" onClick={this.fileUploadOnClick}>
-          <FaUpload />
-        </Button>
-      </InputGroup>
-    );
-  }
-}
-
-function Upload(props) {
-  const deleteButtonOnClick = () => {
-    const method = "DELETE";
-    const hypDelRequest = fetch("http://localhost:5000/api/hyp", { method });
-    const refDelRequest = fetch("http://localhost:5000/api/ref", { method });
-    hypDelRequest.then(hypDelResponse => {
-      refDelRequest.then(refDelResponse => {
-        if (!hypDelResponse.ok || !refDelResponse.ok) {
-          alert("delete error");
-        }
-        window.location.reload();
-      });
-    });
-  };
+  }, [getFilesRequest]);
   return (
-    <Card className={props.className ? props.className : ""}>
+    <InputGroup>
+      <InputGroup.Prepend>
+        <InputGroup.Text>{name}:</InputGroup.Text>
+      </InputGroup.Prepend>
+      <FormControl ref={selectRef} className="custom-select" as="select">
+        {files.map((filename, i) => (
+          <option key={i}>{filename}</option>
+        ))}
+      </FormControl>
+      <UploadButton
+        getFilesRequest={getFilesRequest}
+        uploadFileRequest={uploadFileRequest}
+        setFiles={setFiles}
+      />
+    </InputGroup>
+  );
+};
+
+const Upload = ({ className, reloadResult }) => {
+  const hypfileSelectRef = useRef();
+  const reffileSelectRef = useRef();
+
+  const [fileDeleteToggle, setFileDeleteToggle] = useState(false);
+  const [isComputing, setIsComputing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const compute = () => {
+    const hypfile = hypfileSelectRef.current.value;
+    const reffile = reffileSelectRef.current.value;
+    console.log(hypfile);
+    console.log(reffile);
+    if (hypfile !== "" && reffile !== "") {
+      setIsComputing(true);
+      calculateRequest(hypfile, reffile)
+        .then(response => {
+          if (response.ok) {
+            reloadResult();
+          } else {
+            alert("error calculation Request");
+          }
+        })
+        .finally(() => setIsComputing(false));
+    } else {
+      alert("choose file");
+    }
+  };
+
+  const deleteFiles = () => {
+    setIsDeleting(true);
+    const hypDelRequest = deleteHypsRequest();
+    const refDelRequest = deleteRefsRequest();
+    hypDelRequest
+      .then(hypDelResponse => {
+        refDelRequest.then(refDelResponse => {
+          if (!hypDelResponse.ok || !refDelResponse.ok) {
+            alert("delete error");
+          }
+          setFileDeleteToggle(!fileDeleteToggle);
+        });
+      })
+      .finally(() => setIsDeleting(false));
+  };
+
+  return (
+    <Card className={className ? className : ""}>
       <Card.Header>
         <FaRegFile /> Choose File
       </Card.Header>
       <Card.Body className="p-3">
-        <Row>
+        <Row key={fileDeleteToggle}>
           <Col className="mb-3" md={6}>
             <ChooseFile
-              endpoint="hyp"
+              selectRef={hypfileSelectRef}
+              getFilesRequest={getHypFilesRequest}
+              uploadFileRequest={uploadHypFileRequest}
               name="HypFile"
-              setFilename={props.setHypfilename}
             />
           </Col>
           <Col className="mb-3" lg={6}>
             <ChooseFile
-              endpoint="ref"
+              selectRef={reffileSelectRef}
+              getFilesRequest={getRefFilesRequest}
+              uploadFileRequest={uploadRefFileRequest}
               name="RefFile"
-              setFilename={props.setReffilename}
             />
           </Col>
         </Row>
         <div className="d-flex flex-sm-row flex-column justify-content-between">
           <Button
-            className="mb-2 m-sm-0"
+            className="mb-2 m-sm-0 d-flex justify-content-center align-items-center"
             variant="success"
             size="lg"
-            onClick={props.computeOnClick}
+            onClick={compute}
           >
-            <FaArrowAltCircleDown /> Compute
+            {isComputing ? (
+              <Spinner className="mr-2" animation="border" size="sm" />
+            ) : (
+              <FaArrowAltCircleDown className="mr-2" />
+            )}{" "}
+            Compute
           </Button>
-          <Button variant="danger" size="lg" onClick={deleteButtonOnClick}>
-            <FaTrash /> Delete Files
+          <Button
+            className="mb-2 m-sm-0 d-flex justify-content-center align-items-center"
+            variant="danger"
+            size="lg"
+            onClick={deleteFiles}
+          >
+            {isDeleting ? (
+              <Spinner className="mr-2" animation="border" size="sm" />
+            ) : (
+              <FaTrash className="mr-2" />
+            )}{" "}
+            Delete Files
           </Button>
         </div>
       </Card.Body>
     </Card>
   );
-}
+};
 
 export default Upload;

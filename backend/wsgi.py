@@ -47,3 +47,6 @@ def testcompute():
 @app.shell_context_processor
 def make_shell_context():
     return {"a": testcompute, "m": Metrics(), "pprint": pprint}
+
+if __name__ == "__main__":
+    app.run("0.0.0.0", 5000, debug=True)

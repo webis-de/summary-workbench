@@ -1,5 +1,5 @@
 from flask import current_app, request
-from flask_restful import Resource
+from flask_restx import Resource
 from marshmallow import Schema, fields
 
 from app.common.calculation import Calculation
@@ -28,7 +28,8 @@ class LastCalculationResource(Resource):
                     "name": name,
                     "scores": calculation.scores,
                 }, 200
-        except:
+        except Exception as e:
+            current_app.logger.warn(e)
             return '', 404
 
     def put(self):
@@ -49,6 +50,6 @@ class LastCalculationResource(Resource):
             )
             return '', 200
         except Exception as e:
-            current_app.logger.info(e)
+            current_app.logger.warn(e)
             return '', 400
 
