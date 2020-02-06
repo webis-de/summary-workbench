@@ -3,9 +3,11 @@ import Card from "react-bootstrap/Card";
 import Tabs from "react-bootstrap/Tabs";
 import Tab from "react-bootstrap/Tab";
 import Table from "react-bootstrap/Table";
+import Spinner from "react-bootstrap/Spinner";
 
 import markup from "../common/fragcolors";
 import Markup from "./Markup";
+import { getCompareDataRequest } from "../common/api";
 
 function scoreInfoToArray(scoreInfo) {
   const scoreValues = Object.values(scoreInfo);
@@ -82,23 +84,17 @@ function CompareTable(props) {
 }
 
 const CalculationInfo = ({ scores, fetchUrlInfix, computeDirect }) => {
-  const [compare, setCompare] = useState(null);
-  const [hasLoaded, setHasLoaded] useState(false);
-  const [isLoading, setIsLoading] useState(false);
+  const [compareData, setCompareData] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const scoreEntries = Object.entries(scores);
   const hasScores = scoreEntries.length > 0;
   const start = 0;
   const end = 100;
 
-  const fetchCompareData = useCallback(
-    (start, end) => {
-      const method = "GET";
-      fetch(
-        "http://localhost:5000/api/" +
-          encodeURIComponent(fetchUrlInfix) +
-          `?start=${start}&end=${end}`,
-        { method }
-      ).then(response => {
+  const fetchCompareData = useCallback(() => {
+    setIsLoading(true);
+    getCompareDataRequest(fetchUrlInfix, start, end)
+      .then(response => {
         if (response.ok) {
           response.json().then(data => {
             const hyps = data.hyps;
@@ -113,25 +109,24 @@ const CalculationInfo = ({ scores, fetchUrlInfix, computeDirect }) => {
               comp.push([pos, hyps[i], refs[i]]);
               pos += 1;
             }
-            setCompare(comp);
+            setCompareData(comp);
           });
         } else {
           alert("server error");
         }
-      });
-    },
-    [fetchUrlInfix]
-  );
+      })
+      .finally(() => setIsLoading(false));
+  }, [fetchUrlInfix]);
 
   useEffect(() => {
     if (!hasScores && computeDirect) {
-      fetchCompareData(start, end);
+      fetchCompareData();
     }
   }, [hasScores, computeDirect, fetchCompareData]);
 
   const onSelect = a => {
-    if (a === "compare" && compare === null) {
-      fetchCompareData(start, end);
+    if (a === "compare" && compareData === null) {
+      fetchCompareData();
     }
   };
 
@@ -161,8 +156,10 @@ const CalculationInfo = ({ scores, fetchUrlInfix, computeDirect }) => {
         ))}
       </Tab>
       <Tab className="p-3" eventKey="compare" title="Compare">
-        {compare !== null ? (
-          <CompareTable compare={compare} />
+        {isLoading ? (
+          <Spinner className="mr-2" animation="border" size="sm" />
+        ) : compareData !== null ? (
+          <CompareTable compare={compareData} />
         ) : (
           <>{'Click "Compare" to load data'}</>
         )}

@@ -97,3 +97,15 @@ const setSettingRequest = (metric, is_set) => {
 };
 
 export { setSettingRequest };
+
+const getCompareDataRequest = (fetchUrlInfix, start, end) => {
+  const method = "GET";
+  return fetch(
+    "http://localhost:5000/api/" +
+      encodeURIComponent(fetchUrlInfix) +
+      `?start=${start}&end=${end}`,
+    { method }
+  );
+};
+
+export { getCompareDataRequest };

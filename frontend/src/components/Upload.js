@@ -103,8 +103,6 @@ const Upload = ({ className, reloadResult }) => {
   const compute = () => {
     const hypfile = hypfileSelectRef.current.value;
     const reffile = reffileSelectRef.current.value;
-    console.log(hypfile);
-    console.log(reffile);
     if (hypfile !== "" && reffile !== "") {
       setIsComputing(true);
       calculateRequest(hypfile, reffile)
