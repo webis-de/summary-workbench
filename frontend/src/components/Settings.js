@@ -1,34 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useContext } from "react";
 import Card from "react-bootstrap/Card";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 import Button from "react-bootstrap/Button";
 import { FaCogs } from "react-icons/fa";
 
-import { getSettingsRequest, setSettingRequest } from "../common/api";
+import { SettingsContext } from "../contexts/SettingsContext";
 
 const Settings = ({ className }) => {
-  const [settings, setSettings] = useState({});
-
-  useEffect(() => {
-    getSettingsRequest()
-      .then(response => response.json())
-      .then(result => setSettings(result));
-  }, []);
-
-  const setSetting = metric => {
-    const is_set = !settings[metric].is_set;
-    setSettingRequest(metric, is_set)
-      .then(response => {
-        if (response.ok) {
-          const newsettings = Object.assign({}, settings);
-          newsettings[metric].is_set = is_set;
-          setSettings(newsettings);
-        } else {
-          alert("error setting Settings");
-        }
-      })
-      .catch(error => alert(error));
-  };
+  const {settings, toggleSetting} = useContext(SettingsContext);
 
   return (
     <Card className={className ? className : ""}>
@@ -44,7 +23,7 @@ const Settings = ({ className }) => {
                 className="border-dark"
                 key={metric}
                 variant={is_set ? "primary" : "default"}
-                onClick={() => setSetting(metric)}
+                onClick={() => toggleSetting(metric)}
               >
                 {" "}
                 {readable}{" "}

@@ -6,8 +6,9 @@ from app.common.calculation import Calculation
 
 
 class LastCalculationSchema(Schema):
-    hypname = fields.String()
-    refname = fields.String()
+    hypname = fields.String(required=True)
+    refname = fields.String(required=True)
+    metrics = fields.List(fields.String(), required=True)
 
 
 class LastCalculationResource(Resource):
@@ -35,15 +36,13 @@ class LastCalculationResource(Resource):
     def put(self):
         try:
             calculation_loader = LastCalculationSchema()
-            file_names = calculation_loader.load(request.json)
-            hypname, refname = file_names["hypname"], file_names["refname"]
+            calculationArgs = calculation_loader.load(request.json)
+            hypname = calculationArgs["hypname"]
+            refname = calculationArgs["refname"]
+            metrics = calculationArgs["metrics"]
             hyps = current_app.HYP_DOCS[hypname]
             refs = current_app.REF_DOCS[refname]
-            scores = current_app.METRICS.compute(
-                current_app.SETTINGS.chosen_metrics(),
-                hyps,
-                refs
-            )
+            scores = current_app.METRICS.compute(metrics, hyps, refs)
             current_app.LAST_CALCULATION = (
                 hypname+"-"+refname,
                 Calculation(hyps, refs, scores),

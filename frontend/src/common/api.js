@@ -19,9 +19,10 @@ const getCalculationRequest = () => {
 
 export { getCalculationRequest };
 
-const calculateRequest = (hypname, refname) => {
+const calculateRequest = (metrics, hypname, refname) => {
   const method = "PUT";
-  const body = JSON.stringify({ hypname, refname });
+  const body = JSON.stringify({ metrics, hypname, refname });
+  console.log(body)
   return fetch("http://localhost:5000/api/lastcalculation", {
     method,
     body,
@@ -81,22 +82,6 @@ const saveCalculationRequest = name => {
 };
 
 export { saveCalculationRequest };
-
-const getSettingsRequest = () => {
-  const method = "GET";
-  return fetch("http://localhost:5000/api/setting", { method });
-};
-
-export { getSettingsRequest };
-
-const setSettingRequest = (metric, is_set) => {
-  const body = JSON.stringify({ metric, is_set });
-  const method = "PATCH";
-  const headers = { "Content-Type": "application/json" };
-  return fetch("http://localhost:5000/api/setting", { method, body, headers });
-};
-
-export { setSettingRequest };
 
 const getCompareDataRequest = (fetchUrlInfix, start, end) => {
   const method = "GET";

@@ -3,7 +3,6 @@ td {
     text-justify: inter-word;
 }
 body {
-  background-color: grey;
   font-family: monospace;
 }
 .label-default { color: lightgrey; }

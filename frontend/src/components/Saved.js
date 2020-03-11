@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
 import Collapse from "react-bootstrap/Collapse";
@@ -7,21 +7,19 @@ import Badge from "react-bootstrap/Badge";
 import { FaTrash, FaCloud } from "react-icons/fa";
 
 import CalculationInfo from "./CalculationInfo";
+import { SettingsContext } from "../contexts/SettingsContext";
+
 
 function Saved(prop) {
   const [open, setOpen] = useState(true);
   const [calculations, setCalculations] = useState([]);
-  const [availSettings, setAvailSettings] = useState([]);
+  const { settings } = useContext(SettingsContext);
 
   useEffect(() => {
     const method = "GET";
     fetch("http://localhost:5000/api/calculations", { method })
       .then(response => response.json())
       .then(data => setCalculations(data));
-
-    fetch("http://localhost:5000/api/setting", { method })
-      .then(response => response.json())
-      .then(result => setAvailSettings(Object.keys(result)));
   }, []);
 
   const delCalculation = name => {
@@ -62,18 +60,18 @@ function Saved(prop) {
                         {name}
                       </Accordion.Toggle>
                       <div>
-                        {availSettings.map(setting => (
+                        {Object.entries(settings).map(([metric, metricInfo]) => (
                           <Badge
-                            key={setting}
+                            key={metric}
                             className="mx-1 my-2 mb-1"
                             variant={
-                              Object.keys(scores).includes(setting)
+                              Object.keys(scores).includes(metric)
                                 ? "primary"
                                 : "secondary"
                             }
                             pill
                           >
-                            {setting}
+                            {metricInfo.readable}
                           </Badge>
                         ))}
                       </div>

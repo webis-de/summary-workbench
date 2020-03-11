@@ -1,14 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef, useContext } from "react";
 import Card from "react-bootstrap/Card";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
-import InputGroup from "react-bootstrap/InputGroup";
-import FormControl from "react-bootstrap/FormControl";
 import Spinner from "react-bootstrap/Spinner";
 import {
   FaRegFile,
-  FaUpload,
   FaTrash,
   FaArrowAltCircleDown
 } from "react-icons/fa";
@@ -23,79 +20,15 @@ import {
   uploadRefFileRequest
 } from "../common/api";
 
-const UploadButton = ({ getFilesRequest, uploadFileRequest, setFiles }) => {
-  const fileinputRef = useRef();
+import { SettingsContext } from "../contexts/SettingsContext";
+import { ChooseFile } from "./Upload/ChooseFile";
 
-  const fileSelectOnChange = () => {
-    const files = fileinputRef.current.files;
-    if (files.length > 0) {
-      const file = files[0];
-      file.text().then(text => {
-        const filename = file.name;
-        const filecontent = text;
-        uploadFileRequest(filename, filecontent).then(() => {
-          getFilesRequest()
-            .then(response => response.json())
-            .then(files => {
-              setFiles(files);
-            });
-        });
-      });
-    }
-  };
-  return (
-    <>
-      <input
-        ref={fileinputRef}
-        type="file"
-        onChange={fileSelectOnChange}
-        style={{ display: "none" }}
-      />
-      <Button variant="primary" onClick={() => fileinputRef.current.click()}>
-        <FaUpload />
-      </Button>
-    </>
-  );
-};
-
-const ChooseFile = ({
-  selectRef,
-  getFilesRequest,
-  uploadFileRequest,
-  name
-}) => {
-  const [files, setFiles] = useState([]);
-
-  useEffect(() => {
-    getFilesRequest()
-      .then(response => response.json())
-      .then(files => {
-        setFiles(files);
-      });
-  }, [getFilesRequest]);
-  return (
-    <InputGroup>
-      <InputGroup.Prepend>
-        <InputGroup.Text>{name}:</InputGroup.Text>
-      </InputGroup.Prepend>
-      <FormControl ref={selectRef} className="custom-select" as="select">
-        {files.map((filename, i) => (
-          <option key={i}>{filename}</option>
-        ))}
-      </FormControl>
-      <UploadButton
-        getFilesRequest={getFilesRequest}
-        uploadFileRequest={uploadFileRequest}
-        setFiles={setFiles}
-      />
-    </InputGroup>
-  );
-};
 
 const Upload = ({ className, reloadResult }) => {
   const hypfileSelectRef = useRef();
   const reffileSelectRef = useRef();
 
+  const { settings } = useContext(SettingsContext);
   const [fileDeleteToggle, setFileDeleteToggle] = useState(false);
   const [isComputing, setIsComputing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -105,7 +38,13 @@ const Upload = ({ className, reloadResult }) => {
     const reffile = reffileSelectRef.current.value;
     if (hypfile !== "" && reffile !== "") {
       setIsComputing(true);
-      calculateRequest(hypfile, reffile)
+      const chosenMetrics = [];
+      for (const [metric, metricInfo] of Object.entries(settings)) {
+        if (metricInfo.is_set) {
+          chosenMetrics.push(metric);
+        }
+      }
+      calculateRequest(chosenMetrics, hypfile, reffile)
         .then(response => {
           if (response.ok) {
             reloadResult();
