@@ -1,34 +1,21 @@
-import React, { useRef } from "react";
+import React from "react";
 import Button from "react-bootstrap/Button";
 import { FaUpload } from "react-icons/fa";
 
-const UploadButton = ({ getFilesRequest, uploadFileRequest, setFiles }) => {
-  const fileinputRef = useRef();
-
+const UploadButton = ({ setFileName, fileInputRef }) => {
   const fileSelectOnChange = () => {
-    const files = fileinputRef.current.files;
-    if (files.length > 0) {
-      const file = files[0];
-      file.text().then(text => {
-        const filename = file.name;
-        const filecontent = text;
-        uploadFileRequest(filename, filecontent).then(() => {
-          getFilesRequest()
-            .then(response => response.json())
-            .then(files => {
-              setFiles(files);
-            });
-        });
-      });
-    }
+    const files = fileInputRef.current.files;
+    const file = files[0];
+    setFileName(file.name)
   };
+
   return (
     <>
-      <Button variant="primary" onClick={() => fileinputRef.current.click()}>
+      <Button variant="primary" onClick={() => fileInputRef.current.click()}>
         <FaUpload />
       </Button>
       <input
-        ref={fileinputRef}
+        ref={fileInputRef}
         type="file"
         onChange={fileSelectOnChange}
         style={{ display: "none" }}

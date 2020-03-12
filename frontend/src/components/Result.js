@@ -1,41 +1,36 @@
-import React, { useState, useEffect } from "react";
+import React, { useRef, useContext } from "react";
 import Card from "react-bootstrap/Card";
 import FormControl from "react-bootstrap/FormControl";
 import InputGroup from "react-bootstrap/InputGroup";
 import Button from "react-bootstrap/Button";
 import { FaUpload } from "react-icons/fa";
 
-import CalculationInfo from "./CalculationInfo";
-import { getCalculationRequest, saveCalculationRequest } from "../common/api";
+import ResultInfo from "./ResultInfo";
+import { CalculateContext } from "../contexts/CalculateContext";
+import { saveCalculationRequest } from "../common/api";
 
 const Result = ({ className }) => {
-  const [name, setName] = useState(null);
-  const [scores, setScores] = useState(null);
-  useEffect(() => {
-    getCalculationRequest().then(response => {
-      if (response.ok) {
-        response.json().then(({ name, scores }) => {
-          setName(name);
-          setScores(scores);
-        });
-      }
-    });
-  }, []);
+  const { calculateResult } = useContext(CalculateContext)
+  const nameRef = useRef()
 
   const upload = () => {
-    saveCalculationRequest(name)
+    const name = nameRef.current.value
+    const scores = calculateResult.scores
+    const comparisons = calculateResult.comparisons
+    saveCalculationRequest(name, scores, comparisons)
       .then(() => window.location.reload())
       .catch(() => alert("upload error"));
   };
 
-  if (name !== null && scores !== null) {
+  if (calculateResult !== null) {
     return (
       <Card className={className ? className : ""}>
         <Card.Header>
           <InputGroup>
             <FormControl
-              value={name}
-              onChange={e => setName(e.target.value)}
+              ref={nameRef}
+              key={calculateResult.name}
+              defaultValue={calculateResult.name}
               onKeyDown={e => e.keyCode === 13 && upload()}
             />
             <InputGroup.Append>
@@ -46,10 +41,9 @@ const Result = ({ className }) => {
           </InputGroup>
         </Card.Header>
         <Card.Body className="mx-2">
-          <CalculationInfo
-            scores={scores}
-            fetchUrlInfix="lastcalculation"
-            computeDirect={true}
+          <ResultInfo
+            scores={calculateResult.scores}
+            comparisons={calculateResult.comparisons}
           />
         </Card.Body>
       </Card>

@@ -1,6 +1,7 @@
 from flask import current_app, request
 from flask_restx import Resource
 from marshmallow import Schema, fields
+from app.common.calculation import Calculation
 
 class SavedCalculationResource(Resource):
     def get(self, name):
@@ -12,8 +13,7 @@ class SavedCalculationResource(Resource):
                 assert start >= 0
                 assert end >= 0
                 return {
-                    "hyps": calculation.hyps[start:end],
-                    "refs": calculation.refs[start:end],
+                    "comparisons": calculation.comparisons[start:end],
                 }, 200
             except:
                 return {
@@ -32,7 +32,6 @@ class SavedCalculationResource(Resource):
             current_app.logger.warn(e)
             return '', 404
 
-
 class SavedCalculationsResource(Resource):
     def get(self):
         try:
@@ -44,8 +43,12 @@ class SavedCalculationsResource(Resource):
     def post(self):
         try:
             name = request.json["name"]
-            current_app.SAVED_CALCULATIONS[name] = current_app.LAST_CALCULATION[1]
-            current_app.LAST_CALCULATION = None
+            scores = request.json["scores"]
+            comparisons = request.json["comparisons"]
+            current_app.SAVED_CALCULATIONS[name] = Calculation(
+                scores=scores,
+                comparisons=comparisons
+            )
             return '', 200
         except Exception as e:
             current_app.logger.warn(e)

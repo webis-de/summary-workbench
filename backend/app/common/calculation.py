@@ -2,10 +2,9 @@ from collections import OrderedDict
 
 
 class Calculation():
-    def __init__(self, hyps, refs, scores):
+    def __init__(self, scores, comparisons):
         self.scores = scores
-        self.hyps = hyps
-        self.refs = refs
+        self.comparisons = comparisons
 
 
 class SavedCalculations(OrderedDict):
