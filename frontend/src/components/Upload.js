@@ -14,7 +14,7 @@ import { ChooseFile } from "./Upload/ChooseFile";
 
 import markup from "../common/fragcolors";
 
-const Upload = ({ className }) => {
+const Upload = ({ className, reloadResult }) => {
   const hypFileInputRef = useRef();
   const refFileInputRef = useRef();
 
@@ -68,14 +68,21 @@ const Upload = ({ className }) => {
             chosenMetrics,
             hypdata,
             refdata
-          ).then(response => response.json()
-          ).then(scores => scores);
+          ).then(async response => {
+            if (response.ok) {
+              return await response.json().then(scores => scores)
+            } else {
+              alert("server error")
+              return {}
+            }
+          });
           [comparisons, scores] = await Promise.all([compPromise, calculatePromise]);
         } else {
           comparisons = await compPromise;
         }
         const name = hypfile.name + "-" + reffile.name;
         setCalculateResult({ name, scores, comparisons });
+        reloadResult()
       } else {
         alert("files have to have equal number of lines");
       }

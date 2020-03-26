@@ -9,16 +9,23 @@ import ResultInfo from "./ResultInfo";
 import { CalculateContext } from "../contexts/CalculateContext";
 import { saveCalculationRequest } from "../common/api";
 
-const Result = ({ className }) => {
-  const { calculateResult } = useContext(CalculateContext)
-  const nameRef = useRef()
+const Result = ({ className, reloadSaved }) => {
+  const { calculateResult, setCalculateResult } = useContext(CalculateContext);
+  const nameRef = useRef();
 
   const upload = () => {
-    const name = nameRef.current.value
-    const scores = calculateResult.scores
-    const comparisons = calculateResult.comparisons
+    const name = nameRef.current.value;
+    const scores = calculateResult.scores;
+    const comparisons = calculateResult.comparisons;
     saveCalculationRequest(name, scores, comparisons)
-      .then(() => window.location.reload())
+      .then(response => {
+        if (response.ok) {
+          setCalculateResult(null);
+          reloadSaved();
+        } else {
+          alert("upload error");
+        }
+      })
       .catch(() => alert("upload error"));
   };
 
@@ -29,7 +36,6 @@ const Result = ({ className }) => {
           <InputGroup>
             <FormControl
               ref={nameRef}
-              key={calculateResult.name}
               defaultValue={calculateResult.name}
               onKeyDown={e => e.keyCode === 13 && upload()}
             />
