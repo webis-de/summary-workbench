@@ -50,10 +50,8 @@ class CiderScorer():
 
 class Embedding():
     def __init__(self):
-        data_path = current_app.config["DATA_PATH"]
-        glove_bin = current_app.config["GLOVE_BIN"]
-        glove_path = os.path.join(data_path, glove_bin)
-        self.m = KeyedVectors.load(glove_path, mmap='r')
+        glove_bin = os.path.expanduser("~/.cache/glove/glove.6B.300d.model.bin")
+        self.m = KeyedVectors.load(glove_bin, mmap='r')
         self.unk = self.m.vectors.mean(axis=0)
 
     def vec(self, key):
