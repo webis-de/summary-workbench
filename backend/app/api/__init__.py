@@ -5,7 +5,7 @@ bp = Blueprint("api", __name__)
 api = Api(bp)
 
 from app.common.metrics import Metrics
-from app.common.calculation import Calculation, SavedCalculations
+from app.common.calculation import SavedCalculations
 
 
 def load_resources():
@@ -17,7 +17,9 @@ bp.before_app_first_request(load_resources)
 
 from .resources.savedcalculations import SavedCalculationResource, SavedCalculationsResource
 from .resources.calculate import CalculateResource
+from .resources.second import SecondResource
 
 api.add_resource(CalculateResource, "/calculate", endpoint="calculate")
 api.add_resource(SavedCalculationsResource, "/calculations", endpoint="calculations")
 api.add_resource(SavedCalculationResource, "/calculation/<string:name>", endpoint="calculation")
+api.add_resource(SecondResource, "/second", endpoint="second")

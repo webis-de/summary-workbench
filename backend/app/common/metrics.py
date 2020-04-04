@@ -1,39 +1,16 @@
-from .scorer.bleuscorer import BleuScorer
-from .scorer.ciderscorer import CiderScorer
-from .scorer.greedymatchingscorer import GreedyMatchingScorer
-from .scorer.meteorscorer import MeteorScorer
-from .scorer.rougescorer import RougeScorer
+from app.common.scorer import BleuScorer, CiderScorer, GreedyMatchingScorer, MeteorScorer, RougeScorer, MoverScoreScorer
 
 
 class Metrics():
     def __init__(self):
         self.metrics = {
-            'bleu': {
-                'scorer': BleuScorer(),
-                'readable': 'Bleu',
-            },
-            'cider': {
-                'scorer': CiderScorer(),
-                'readable': 'Cider',
-            },
-            'greedy_matching': {
-                'scorer': GreedyMatchingScorer(),
-                'readable': 'Greedy Matching',
-            },
-#             'meteor': {
-#                 'scorer': MeteorScorer(),
-#                 'readable': 'Meteor'
-#             },
-            'rouge': {
-                'scorer': RougeScorer(),
-                'readable': 'Rouge',
-            }
+            'bleu': BleuScorer(),
+            'cider': CiderScorer(),
+            'greedy_matching': GreedyMatchingScorer(),
+#             'meteor': MeteorScorer(),
+            'rouge': RougeScorer(),
+            'moverscore': MoverScoreScorer()
         }
-
-    @property
-    def metrics_info(self):
-        return sorted([(name, info["readable"])
-                       for name, info in self.metrics.items()])
 
     def compute(self, request_metrics, hyp_list, ref_list):
         request_metrics = set(request_metrics)
@@ -48,7 +25,7 @@ class Metrics():
         results = {}
 
         for metric in scorable_metrics:
-            scorer = self.metrics[metric]["scorer"]
+            scorer = self.metrics[metric]
             results[metric] = scorer.score(hyp_list, ref_list)
 
         return results

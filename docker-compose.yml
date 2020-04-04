@@ -9,7 +9,7 @@ services:
     volumes:
       - ./backend/:/app
       - pip:/root/.local/share/virtualenvs
-      - cache:/root/.cache/compfile
+      - cache:/root/.cache
       - nltk_data:/root/nltk_data
     command: bash boot.sh
 

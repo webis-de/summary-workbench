@@ -1,4 +1,5 @@
 #!/bin/sh
 
-pipenv install
-pipenv run sh -c "flask setup && python wsgi.py"
+pipenv install --skip-lock    # install packages
+pipenv run python setup.py    # download models
+pipenv run python wsgi.py     # run server
