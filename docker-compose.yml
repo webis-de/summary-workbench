@@ -8,9 +8,10 @@ services:
       - "5000:5000"
     volumes:
       - ./backend/:/app
-      - pip:/root/.local/share/virtualenvs
+      - allennlp:/root/.allennlp
       - cache:/root/.cache
       - nltk_data:/root/nltk_data
+      - virtualenvs:/root/.local/share/virtualenvs
     command: bash boot.sh
 
   frontend:
@@ -25,7 +26,8 @@ services:
     command: bash -c "npm install && npm start"
 
 volumes:
-  pip:
-  nltk_data:
+  allennlp:
   cache:
+  nltk_data:
   node_modules:
+  virtualenvs:

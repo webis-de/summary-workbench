@@ -43,6 +43,7 @@ model = DistilBertModel.from_pretrained(model_name, config=config)
 model.eval()
 model.to(device)
 
+
 def process(a):
     a = ["[CLS]"]+tokenizer.tokenize(a)+["[SEP]"]
     a = tokenizer.convert_tokens_to_ids(a)
