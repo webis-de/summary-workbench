@@ -102,7 +102,7 @@ const Upload = ({ className, reloadResult }) => {
           <Col className="mb-3" md={6}>
             <ChooseFile fileInputRef={hypFileInputRef} name="HypFile" />
           </Col>
-          <Col className="mb-3" lg={6}>
+          <Col className="mb-3" md={6}>
             <ChooseFile fileInputRef={refFileInputRef} name="RefFile" />
           </Col>
         </Row>

@@ -21,22 +21,22 @@
 # SOFTWARE.
 
 from __future__ import absolute_import, division, print_function
+
+import string
+from collections import Counter, defaultdict
+from functools import partial
+from itertools import chain
+from math import log
+from multiprocessing import Pool
+
 import numpy as np
 import torch
-import string
 from pyemd import emd, emd_with_flow
 from torch import nn
-from math import log
-from itertools import chain
+from transformers import DistilBertConfig, DistilBertModel, DistilBertTokenizer
 
-from collections import defaultdict, Counter
-from multiprocessing import Pool
-from functools import partial
-
-
-from transformers import DistilBertConfig, DistilBertTokenizer, DistilBertModel
 model_name = 'distilbert-base-uncased'
-device = 'cpu'
+device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 config = DistilBertConfig.from_pretrained(model_name, output_hidden_states=True, output_attentions=True)
 tokenizer = DistilBertTokenizer.from_pretrained(model_name, do_lower_case=False)
 model = DistilBertModel.from_pretrained(model_name, config=config)

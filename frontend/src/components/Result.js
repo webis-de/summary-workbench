@@ -48,7 +48,7 @@ const Result = ({ className, reloadSaved }) => {
         </Card.Header>
         <Card.Body className="mx-2">
           <ResultInfo
-            scores={calculateResult.scores}
+            scoreInfo={calculateResult.scores}
             comparisons={calculateResult.comparisons}
           />
         </Card.Body>

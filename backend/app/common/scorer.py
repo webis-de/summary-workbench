@@ -1,14 +1,14 @@
-import os
+from os import path
 
 import numpy as np
 from flask import current_app
+from gensim.models import KeyedVectors
 from nltk.tokenize import word_tokenize
 from rouge import Rouge
 from sklearn.metrics.pairwise import cosine_similarity
 
-from app.common.moverscore import get_idf_dict, word_mover_score
-from gensim.models import KeyedVectors
-from app.common.nlgeval import Bleu, Cider, Meteor
+from .moverscore import get_idf_dict, word_mover_score
+from .nlgeval import Bleu, Cider, Meteor
 
 
 class RougeScorer():
@@ -50,7 +50,7 @@ class CiderScorer():
 
 class Embedding():
     def __init__(self):
-        glove_bin = os.path.expanduser("~/.cache/glove/glove.6B.300d.model.bin")
+        glove_bin = path.expanduser("~/.cache/glove/glove.6B.300d.model.bin")
         self.m = KeyedVectors.load(glove_bin, mmap='r')
         self.unk = self.m.vectors.mean(axis=0)
 

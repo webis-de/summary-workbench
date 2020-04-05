@@ -1,49 +1,74 @@
 import React from "react";
 import Table from "react-bootstrap/Table";
 
-const scoreInfoToArray = scoreInfo => {
-  const scoreValues = Object.values(scoreInfo);
-  if (scoreValues.every(v => typeof v === "number")) {
-    return [Object.keys(scoreInfo), [scoreValues]];
-  } else {
-    const xkeys = Object.keys(scoreInfo);
-    const ykeys = Object.keys(scoreInfo[xkeys[0]]);
-    const head = [""].concat(xkeys);
-    const body = [];
-    for (const ykey of ykeys) {
-      const row = [ykey];
-      for (const xkey of xkeys) {
-        row.push(scoreInfo[xkey][ykey]);
-      }
-      body.push(row);
-    }
-    return [head, body];
-  }
-};
 
-const ScoreTable = ({ scoreInfo }) => {
-  const [head, body] = scoreInfoToArray(scoreInfo);
+const ScoreRow = ({ name, score }) => (
+  <tr>
+    <td>{name}</td>
+    <td>{score.toFixed(3)}</td>
+  </tr>
+);
+
+
+const RougeTable = ({ rouge }) => {
+  const subnames = ["f", "p", "r"];
   return (
     <Table>
       <thead>
         <tr>
-          {head.map((cell, i) => (
-            <th key={i}>{typeof cell === "number" ? cell.toFixed(4) : cell}</th>
+          <th></th>
+          {subnames.map((subname) => (
+            <th>{subname}</th>
           ))}
         </tr>
       </thead>
       <tbody>
-        {body.map((row, rownum) => (
-          <tr key={rownum}>
-            {row.map((cell, colnum) => (
-              <td key={colnum}>
-                {typeof cell === "number" ? cell.toFixed(4) : cell}
-              </td>
-            ))}
-          </tr>
-        ))}
+        {Object.entries(rouge)
+          .sort()
+          .map(([name, info]) => (
+            <tr>
+              <td>{name}</td>
+              {subnames.map((subname) => (
+                <td>{info[subname].toFixed(3)}</td>
+              ))}
+            </tr>
+          ))}
       </tbody>
     </Table>
+  );
+};
+
+
+const BleuTable = ({ bleu }) =>
+  Object.entries(bleu)
+    .sort()
+    .map(([name, score]) => <ScoreRow key={name} name={name} score={score} />);
+
+
+
+const ScoreTable = ({ scoreInfo }) => {
+  const { cider, meteor, greedy_matching, bleu, rouge } = scoreInfo;
+
+  return (
+    <>
+      <Table>
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Score</th>
+          </tr>
+        </thead>
+        <tbody>
+          {cider !== undefined && <ScoreRow name={"cider"} score={cider} />}
+          {meteor !== undefined && <ScoreRow name={"meteor"} score={meteor} />}
+          {greedy_matching !== undefined && (
+            <ScoreRow name={"greedy_matching"} score={greedy_matching} />
+          )}
+          {bleu !== undefined && <BleuTable bleu={bleu} />}
+        </tbody>
+      </Table>
+      {rouge !== undefined && <RougeTable rouge={rouge} />}
+    </>
   );
 };
 
