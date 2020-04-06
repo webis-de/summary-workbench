@@ -1,9 +1,9 @@
 import React, { useReducer } from "react";
-import NavBar from "./components/NavBar";
-import Settings from "./components/Settings";
-import Upload from "./components/Upload"
-import Result from "./components/Result"
-import Saved from "./components/Saved";
+import { NavBar } from "./components/NavBar";
+import { Settings } from "./components/Settings";
+import { Upload } from "./components/Upload"
+import { Result } from "./components/Result"
+import { Saved } from "./components/Saved";
 import Container from "react-bootstrap/Container";
 import { SettingsProvider } from "./contexts/SettingsContext";
 import { CalculateProvider } from "./contexts/CalculateContext";

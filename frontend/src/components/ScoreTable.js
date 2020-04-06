@@ -1,14 +1,12 @@
 import React from "react";
 import Table from "react-bootstrap/Table";
 
-
 const ScoreRow = ({ name, score }) => (
   <tr>
     <td>{name}</td>
     <td>{score.toFixed(3)}</td>
   </tr>
 );
-
 
 const RougeTable = ({ rouge }) => {
   const subnames = ["f", "p", "r"];
@@ -18,7 +16,7 @@ const RougeTable = ({ rouge }) => {
         <tr>
           <th></th>
           {subnames.map((subname) => (
-            <th>{subname}</th>
+            <th key={subname}>{subname}</th>
           ))}
         </tr>
       </thead>
@@ -26,10 +24,10 @@ const RougeTable = ({ rouge }) => {
         {Object.entries(rouge)
           .sort()
           .map(([name, info]) => (
-            <tr>
+            <tr key={name}>
               <td>{name}</td>
               {subnames.map((subname) => (
-                <td>{info[subname].toFixed(3)}</td>
+                <td key={subname}>{info[subname].toFixed(3)}</td>
               ))}
             </tr>
           ))}
@@ -38,13 +36,10 @@ const RougeTable = ({ rouge }) => {
   );
 };
 
-
 const BleuTable = ({ bleu }) =>
   Object.entries(bleu)
     .sort()
     .map(([name, score]) => <ScoreRow key={name} name={name} score={score} />);
-
-
 
 const ScoreTable = ({ scoreInfo }) => {
   const { cider, meteor, greedy_matching, bleu, rouge } = scoreInfo;

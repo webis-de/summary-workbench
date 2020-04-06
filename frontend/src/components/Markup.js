@@ -10,4 +10,4 @@ const Markup = ({ markupedText }) => (
   </>
 );
 
-export default Markup;
+export { Markup };

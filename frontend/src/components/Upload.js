@@ -12,7 +12,7 @@ import { SettingsContext } from "../contexts/SettingsContext";
 import { CalculateContext } from "../contexts/CalculateContext";
 import { ChooseFile } from "./Upload/ChooseFile";
 
-import markup from "../common/fragcolors";
+import { markup } from "../common/fragcolors";
 
 const Upload = ({ className, reloadResult }) => {
   const hypFileInputRef = useRef();
@@ -52,8 +52,8 @@ const Upload = ({ className, reloadResult }) => {
       const reffile = reffiles[0];
 
       const [hypdata, refdata] = await Promise.all([
-        hypfile.text().then(text => text.trim()),
-        reffile.text().then(text => text.trim())
+        hypfile.text().then((text) => text.trim()),
+        reffile.text().then((text) => text.trim()),
       ]);
 
       const hyplines = hypdata.split("\n");
@@ -68,21 +68,24 @@ const Upload = ({ className, reloadResult }) => {
             chosenMetrics,
             hypdata,
             refdata
-          ).then(async response => {
+          ).then(async (response) => {
             if (response.ok) {
-              return await response.json().then(scores => scores)
+              return await response.json().then((scores) => scores);
             } else {
-              alert("server error")
-              return {}
+              alert("server error");
+              return {};
             }
           });
-          [comparisons, scores] = await Promise.all([compPromise, calculatePromise]);
+          [comparisons, scores] = await Promise.all([
+            compPromise,
+            calculatePromise,
+          ]);
         } else {
           comparisons = await compPromise;
         }
         const name = hypfile.name + "-" + reffile.name;
         setCalculateResult({ name, scores, comparisons });
-        reloadResult()
+        reloadResult();
       } else {
         alert("files have to have equal number of lines");
       }
@@ -126,4 +129,4 @@ const Upload = ({ className, reloadResult }) => {
   );
 };
 
-export default Upload;
+export { Upload };

@@ -6,11 +6,11 @@ import Accordion from "react-bootstrap/Accordion";
 import Badge from "react-bootstrap/Badge";
 import { FaTrash, FaCloud } from "react-icons/fa";
 
-import SavedInfo from "./SavedInfo";
+import { SavedInfo } from "./SavedInfo";
 import { SettingsContext } from "../contexts/SettingsContext";
 import {
   getSavedCalculationsRequest,
-  deleteCalculationRequest
+  deleteCalculationRequest,
 } from "../common/api";
 
 const Saved = ({ className }) => {
@@ -20,13 +20,13 @@ const Saved = ({ className }) => {
 
   useEffect(() => {
     getSavedCalculationsRequest()
-      .then(response => response.json())
-      .then(data => setCalculations(data));
+      .then((response) => response.json())
+      .then((data) => setCalculations(data));
   }, []);
 
-  const deleteCalculation = name => {
+  const deleteCalculation = (name) => {
     deleteCalculationRequest(name)
-      .then(response => {
+      .then((response) => {
         if (response.status === 404) {
           alert("Resource not found");
         }
@@ -86,10 +86,7 @@ const Saved = ({ className }) => {
                   </Card.Header>
                   <Accordion.Collapse eventKey={name}>
                     <Card.Body>
-                      <SavedInfo
-                        name={name}
-                        scores={scores}
-                      />
+                      <SavedInfo name={name} scores={scores} />
                     </Card.Body>
                   </Accordion.Collapse>
                 </Card>
@@ -104,4 +101,4 @@ const Saved = ({ className }) => {
   }
 };
 
-export default Saved;
+export { Saved };

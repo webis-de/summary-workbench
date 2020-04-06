@@ -19,9 +19,9 @@ const SavedInfo = ({ name, scores }) => {
   const fetchComparisons = () => {
     setIsLoading(true);
     getCompareDataRequest(name, start, end)
-      .then(response => {
+      .then((response) => {
         if (response.ok) {
-          response.json().then(data => {
+          response.json().then((data) => {
             setComparisons(data.comparisons);
           });
         } else {
@@ -31,7 +31,7 @@ const SavedInfo = ({ name, scores }) => {
       .finally(() => setIsLoading(false));
   };
 
-  const tabSelect = tabName => {
+  const tabSelect = (tabName) => {
     if (tabName === "compare" && comparisons === null) {
       fetchComparisons();
     }
@@ -66,4 +66,4 @@ const SavedInfo = ({ name, scores }) => {
   );
 };
 
-export default SavedInfo;
+export { SavedInfo };

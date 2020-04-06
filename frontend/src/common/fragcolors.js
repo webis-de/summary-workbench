@@ -169,7 +169,7 @@ class textblock {
     this.markups = [[0, this.words.length - 1, []]];
   }
 
-  _cut_before = pos => {
+  _cut_before = (pos) => {
     const markups = this.markups;
 
     /* Find the range that contains pos. */
@@ -311,4 +311,4 @@ const markup = (hyp, ref) => {
   return [hypTextblock.markup(), refTextblock.markup()];
 };
 
-export default markup;
+export { markup };

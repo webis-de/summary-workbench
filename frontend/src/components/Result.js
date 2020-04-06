@@ -5,7 +5,7 @@ import InputGroup from "react-bootstrap/InputGroup";
 import Button from "react-bootstrap/Button";
 import { FaUpload } from "react-icons/fa";
 
-import ResultInfo from "./ResultInfo";
+import { ResultInfo } from "./ResultInfo";
 import { CalculateContext } from "../contexts/CalculateContext";
 import { saveCalculationRequest } from "../common/api";
 
@@ -59,4 +59,4 @@ const Result = ({ className, reloadSaved }) => {
   }
 };
 
-export default Result;
+export { Result };

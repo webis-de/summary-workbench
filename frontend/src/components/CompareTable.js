@@ -1,7 +1,7 @@
 import React from "react";
 import Table from "react-bootstrap/Table";
 
-import Markup from "./Markup";
+import { Markup } from "./Markup";
 
 const CompareTable = ({ comparisons }) => {
   const thead = ["number", "hypothesis", "reference"];

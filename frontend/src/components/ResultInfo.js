@@ -4,6 +4,7 @@ import Tab from "react-bootstrap/Tab";
 
 import { ScoreTable } from "./ScoreTable";
 import { CompareTable } from "./CompareTable";
+import { Export } from "./Export";
 
 const ResultInfo = ({ scoreInfo, comparisons }) => {
   const hasScores = Object.keys(scoreInfo).length > 0;
@@ -21,8 +22,11 @@ const ResultInfo = ({ scoreInfo, comparisons }) => {
       <Tab className="p-3" eventKey="compare" title="Compare">
         <CompareTable comparisons={comparisons} />
       </Tab>
+      <Tab className="p-3" eventKey="export" title="Export">
+        <Export scoreInfo={scoreInfo}/>
+      </Tab>
     </Tabs>
   );
 };
 
-export default ResultInfo;
+export { ResultInfo };
