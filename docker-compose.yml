@@ -12,6 +12,8 @@ services:
       - cache:/root/.cache
       - nltk_data:/root/nltk_data
       - virtualenvs:/root/.local/share/virtualenvs
+    environment:
+      - INSTALL_ONLY_ONCE
     command: bash boot.sh
 
   frontend:

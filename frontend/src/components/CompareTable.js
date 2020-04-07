@@ -4,7 +4,7 @@ import Table from "react-bootstrap/Table";
 import { Markup } from "./Markup";
 
 const CompareTable = ({ comparisons }) => {
-  const thead = ["number", "hypothesis", "reference"];
+  const thead = ["", "hypothesis", "reference"];
 
   return (
     <Table>

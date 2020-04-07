@@ -12,19 +12,21 @@ const ResultInfo = ({ scoreInfo, comparisons }) => {
   return (
     <Tabs className="mb-2" defaultActiveKey={hasScores ? "metrics" : "compare"}>
       <Tab
-        className="p-3"
+        className="pt-3"
         eventKey="metrics"
         title="Metrics"
         disabled={hasScores ? false : true}
       >
         <ScoreTable scoreInfo={scoreInfo} />
       </Tab>
-      <Tab className="p-3" eventKey="compare" title="Compare">
+      <Tab className="pt-3" eventKey="compare" title="Compare">
         <CompareTable comparisons={comparisons} />
       </Tab>
-      <Tab className="p-3" eventKey="export" title="Export">
-        <Export scoreInfo={scoreInfo}/>
-      </Tab>
+      {hasScores && (
+        <Tab className="pt-3" eventKey="export" title="Export">
+          <Export scoreInfo={scoreInfo} />
+        </Tab>
+      )}
     </Tabs>
   );
 };

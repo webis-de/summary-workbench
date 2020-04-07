@@ -11,7 +11,7 @@ const ChooseFile = ({ name, fileInputRef }) => {
       <InputGroup.Prepend>
         <InputGroup.Text>{name}:</InputGroup.Text>
       </InputGroup.Prepend>
-      <FormControl value={fileName} readOnly style={{backgroundColor: "white"}} />
+      <FormControl value={fileName} readOnly />
       <InputGroup.Append>
         <UploadButton setFileName={setFileName} fileInputRef={fileInputRef} />
       </InputGroup.Append>
@@ -19,4 +19,4 @@ const ChooseFile = ({ name, fileInputRef }) => {
   );
 };
 
-export { ChooseFile }
+export { ChooseFile };

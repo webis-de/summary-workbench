@@ -53,3 +53,13 @@ const getCompareDataRequest = (name, start, end) => {
 };
 
 export { getCompareDataRequest };
+
+const getExportRequest = (scores, format, transpose, precision) => {
+  const method = "POST"
+  const body = JSON.stringify({scores, format, transpose, precision})
+  return fetch("http://localhost:5000/api/export", {method, body,
+    headers: { "Content-Type": "application/json" }
+  })
+}
+
+export { getExportRequest }
