@@ -15,7 +15,7 @@ const Settings = ({ className }) => {
         <FaCogs /> Choose metrics
       </Card.Header>
       <Card.Body>
-        <ButtonGroup className="d-flex flex-column flex-sm-row">
+        <ButtonGroup className="d-flex flex-md-row flex-column">
           {Object.keys(settings).map((metric) => {
             const { is_set, readable } = settings[metric];
             return (

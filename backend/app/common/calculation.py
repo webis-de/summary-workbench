@@ -9,7 +9,8 @@ class Calculation():
 
 class SavedCalculations(OrderedDict):
     def __setitem__(self, name, calculation):
-        assert isinstance(calculation, Calculation)
+        if not isinstance(calculation, Calculation):
+            raise ValueError(f"wrong datatype {type(calculation)} for calculation")
         oldname = name
         i = 1
 

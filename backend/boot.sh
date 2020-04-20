@@ -1,14 +1,14 @@
 #!/bin/sh
 
-if ! [ INSTALL_ONLY_ONCE == "yes" ]; then
+if ! [ "$INSTALL_ONLY_ONCE" = "yes" ]; then
     INSTALL_PACKAGES="yes"
-elif ! pipenv --venv > /dev/null 2>&1 ; then
+elif ! pipenv --venv > /dev/null 2>&1; then
     INSTALL_PACKAGES="yes"
 else
     INSTALL_PACKAGES="no"
 fi
 
-if [ INSTALL_PACKAGES == "yes" ]; then
+if [ "$INSTALL_PACKAGES" == "yes" ]; then
     pipenv install --skip-lock --verbose   # install packages
 fi
 

@@ -2,26 +2,21 @@ import contextlib
 import logging
 import os
 import shutil
-import sys
 from math import ceil
 from threading import Thread
 from zipfile import ZipFile
 
-import click
 import nltk
 import requests
-import tensorflow as tf
-import tensorflow_hub as hub
-from allennlp.common.file_utils import cached_path as allennlp_cached_path
 from gensim.models import KeyedVectors
 from gensim.scripts.glove2word2vec import glove2word2vec
 from sentence_transformers import __DOWNLOAD_SERVER__
 from transformers import DistilBertConfig, DistilBertModel, DistilBertTokenizer
 from transformers.file_utils import cached_path as transformers_cached_path
 
-format = '{asctime} {levelname} [{name}] {message}'
-datefmt = "%H:%M:%S"
-logging.basicConfig(format=format, datefmt=datefmt, style='{')
+FORMAT = '{asctime} {levelname} [{name}] {message}'
+DATEFMT = "%H:%M:%S"
+logging.basicConfig(format=FORMAT, datefmt=DATEFMT, style='{')
 
 
 def download_file(url, save_path, logger=None):
@@ -34,9 +29,9 @@ def download_file(url, save_path, logger=None):
     total = ceil(int(length)/chunk_size) if length is not None else None
     chunks = req.iter_content(chunk_size=chunk_size)
 
-    with open(save_path, 'wb') as f:
+    with open(save_path, 'wb') as file:
         for i, chunk in enumerate(chunks, start=1):
-            f.write(chunk)
+            file.write(chunk)
             if logger is not None:
                 logger.info(f"{i}/{total}")
 
@@ -73,19 +68,19 @@ def setup_glove():
         zip_path = os.path.join(data_path, zip_file)
 
         # download zip
-        logger.info(f"source url: {model_url}")
-        logger.info(f"output path: {zip_path}")
+        logger.info("source url: %s", model_url)
+        logger.info("output path: %s", zip_path)
         try:
             download_file(model_url, zip_path, logger)
-        except Exception as e:
-            logger.exception(f"Error downloading file: {e}")
+        except Exception as ex:
+            logger.exception("Error downloading file: %s", ex)
             shutil.rmtree(data_path)
             return
 
         # extract the relevant file
-        logger.info(f"extracting...")
-        with ZipFile(zip_path, "r") as zip:
-            zip.extract(extract_file, data_path)
+        logger.info("extracting...")
+        with ZipFile(zip_path, "r") as zip_file:
+            zip_file.extract(extract_file, data_path)
 
         glove_raw_path = os.path.join(data_path, extract_file)
         glove_converted_path = os.path.join(data_path, converted_file)
@@ -96,10 +91,10 @@ def setup_glove():
 
         # convert to binary for fast loading
         logger.info("converting to binary...")
-        m = KeyedVectors.load_word2vec_format(glove_converted_path)
+        model = KeyedVectors.load_word2vec_format(glove_converted_path)
 
         logger.info("saving binary...")
-        m.save(glove_path)
+        model.save(glove_path)
 
         cached_files = [
             zip_path,
@@ -111,7 +106,7 @@ def setup_glove():
         logger.info("deleting cached files")
         for file in cached_files:
             if os.path.exists(file):
-                logger.info(f"removing {file}")
+                logger.info("removing %s", file)
                 os.remove(file)
     else:
         logger.info("model in cache")
@@ -133,24 +128,30 @@ def setup_distilbert():
 
     try:
         logger.info("download config file...")
-        transformers_cached_path(config_url, resume_download=True)
+        with open(os.devnull, "w") as devnull:
+            with contextlib.redirect_stderr(devnull):
+                transformers_cached_path(config_url, resume_download=True)
         logger.info("download config file done")
-    except Exception as e:
-        logger.exception(f"problem downloading config file: {e}")
+    except Exception as ex:
+        logger.exception("problem downloading config file: %s", ex)
 
     try:
         logger.info("download tokenizer file...")
-        transformers_cached_path(tokenizer_url, resume_download=True)
+        with open(os.devnull, "w") as devnull:
+            with contextlib.redirect_stderr(devnull):
+                transformers_cached_path(tokenizer_url, resume_download=True)
         logger.info("download tokenizer file done")
-    except Exception as e:
-        logger.exception(f"problem downloading tokenizer file: {e}")
+    except Exception as ex:
+        logger.exception("problem downloading tokenizer file: %s", ex)
 
     try:
         logger.info("download model file...")
-        transformers_cached_path(model_url, resume_download=True)
+        with open(os.devnull, "w") as devnull:
+            with contextlib.redirect_stderr(devnull):
+                transformers_cached_path(model_url, resume_download=True)
         logger.info("download model file done")
-    except Exception as e:
-        logger.exception(f"problem downloading model file: {e}")
+    except Exception as ex:
+        logger.exception("problem downloading model file: %s", ex)
     logger.info("done")
 
 
@@ -174,52 +175,20 @@ def setup_bert():
         logger.info("fetch bert model")
         os.makedirs(model_path, exist_ok=True)
 
-        logger.info(f"source url: {model_url}")
-        logger.info(f"output path: {zip_path}")
+        logger.info("source url: %s", model_url)
+        logger.info("output path: %s", zip_path)
         try:
             download_file(model_url, zip_path, logger)
-        except Exception as e:
-            logger.exception(f"Error downloading file: {e}")
+        except Exception as ex:
+            logger.exception("Error downloading file: %s", ex)
             shutil.rmtree(model_path)
             return
 
-        logger.info(f"extracting...")
-        with ZipFile(zip_path, "r") as zip:
-            zip.extractall(model_path)
+        logger.info("extracting...")
+        with ZipFile(zip_path, "r") as zip_file:
+            zip_file.extractall(model_path)
     else:
         logger.info("model in cache")
-    logger.info("done")
-
-
-def setup_elmo():
-    options_file = "https://allennlp.s3.amazonaws.com/models/elmo/2x4096_512_2048cnn_2xhighway/elmo_2x4096_512_2048cnn_2xhighway_options.json"
-    weight_file = "https://allennlp.s3.amazonaws.com/models/elmo/2x4096_512_2048cnn_2xhighway/elmo_2x4096_512_2048cnn_2xhighway_weights.hdf5"
-
-    logger = logging.getLogger("elmo")
-    logger.setLevel(logging.INFO)
-
-    logger.info("begin")
-    logger.info("download options file...")
-    with open(os.devnull, "w") as devnull:
-        with contextlib.redirect_stderr(devnull):
-            allennlp_cached_path(options_file)
-    logger.info("download options file done")
-    logger.info("download weight file...")
-    with open(os.devnull, "w") as devnull:
-        with contextlib.redirect_stderr(devnull):
-            allennlp_cached_path(weight_file)
-    logger.info("download weight file done")
-    logger.info("done")
-
-
-def setup_use():
-    module_url = "https://tfhub.dev/google/universal-sentence-encoder/4"
-    logger = logging.getLogger("use")
-    logger.setLevel(logging.INFO)
-
-    logger.info("begin")
-    os.environ["TFHUB_CACHE_DIR"] = os.path.expanduser("~/.cache/tensorflow")
-    hub.resolve(module_url)
     logger.info("done")
 
 
@@ -241,14 +210,6 @@ def setup():
     bert_thread = Thread(target=setup_bert, daemon=True)
     bert_thread.start()
 
-    # elmo -> sentencesimilarity
-    elmo_thread = Thread(target=setup_elmo, daemon=True)
-    elmo_thread.start()
-
-    # use -> sentencesimilarity
-    use_thread = Thread(target=setup_use, daemon=True)
-    use_thread.start()
-
     # distel bert -> moverscore model
     distilbert_thread = Thread(target=setup_distilbert, daemon=True)
     distilbert_thread.start()
@@ -256,8 +217,6 @@ def setup():
     nltk_thread.join()
     glove_thread.join()
     bert_thread.join()
-    elmo_thread.join()
-    use_thread.join()
     distilbert_thread.join()
 
     logger.info("done")

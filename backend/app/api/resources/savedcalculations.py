@@ -7,19 +7,9 @@ class SavedCalculationResource(Resource):
     def get(self, name):
         try:
             calculation = current_app.SAVED_CALCULATIONS[name]
-            try:
-                start = int(request.args["start"])
-                end = int(request.args["end"])
-                assert start >= 0
-                assert end >= 0
-                return {
-                    "comparisons": calculation.comparisons[start:end],
-                }, 200
-            except:
-                return {
-                    "name": name,
-                    "scores": calculation.scores,
-                }, 200
+            return {
+                "comparisons": calculation.comparisons,
+            }, 200
         except Exception as e:
             current_app.logger.warn(e)
             return '', 404

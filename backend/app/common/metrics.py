@@ -1,15 +1,18 @@
-from app.common.scorer import BleuScorer, CiderScorer, GreedyMatchingScorer, MeteorScorer, RougeScorer, MoverScoreScorer
+from app.common.scorer import (BERTScorer, BleuScorer, CiderScorer,
+                               GreedyMatchingScorer, MeteorScorer,
+                               MoverScoreScorer, RougeScorer)
 
 
-class Metrics():
+class Metrics:
     def __init__(self):
         self.metrics = {
-            'bleu': BleuScorer(),
-            'cider': CiderScorer(),
-            'greedy_matching': GreedyMatchingScorer(),
-#             'meteor': MeteorScorer(),
-            'rouge': RougeScorer(),
-            'moverscore': MoverScoreScorer()
+            "bert": BERTScorer(),
+            "bleu": BleuScorer(),
+            "cider": CiderScorer(),
+            "greedy_matching": GreedyMatchingScorer(),
+            "meteor": MeteorScorer(),
+            "moverscore": MoverScoreScorer(),
+            "rouge": RougeScorer(),
         }
 
     def compute(self, request_metrics, hyp_list, ref_list):

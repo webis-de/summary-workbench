@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import Card from "react-bootstrap/Card";
 import Tabs from "react-bootstrap/Tabs";
 import Tab from "react-bootstrap/Tab";
 import Spinner from "react-bootstrap/Spinner";
@@ -7,18 +6,16 @@ import Spinner from "react-bootstrap/Spinner";
 import { getCompareDataRequest } from "../common/api";
 import { CompareTable } from "./CompareTable";
 import { ScoreTable } from "./ScoreTable";
+import { Export } from "./Export";
 
-const SavedInfo = ({ name, scores }) => {
+const SavedInfo = ({ name, scoreInfo }) => {
   const [comparisons, setComparisons] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const scoreEntries = Object.entries(scores);
-  const hasScores = scoreEntries.length > 0;
-  const start = 0;
-  const end = 100;
+  const hasScores = Object.keys(scoreInfo).length > 0;
 
   const fetchComparisons = () => {
     setIsLoading(true);
-    getCompareDataRequest(name, start, end)
+    getCompareDataRequest(name)
       .then((response) => {
         if (response.ok) {
           response.json().then((data) => {
@@ -40,20 +37,11 @@ const SavedInfo = ({ name, scores }) => {
   return (
     <Tabs onSelect={tabSelect} className="mb-2" defaultActiveKey="metrics">
       <Tab className="p-3" eventKey="metrics" title="Metrics">
-        {hasScores
-          ? scoreEntries.map(([scoreName, scoreInfo]) => (
-              <Card className="m-2" key={scoreName} border="dark">
-                <Card.Header>{scoreName}</Card.Header>
-                <Card.Body>
-                  {typeof scoreInfo === "number" ? (
-                    scoreInfo.toFixed(4)
-                  ) : (
-                    <ScoreTable scoreInfo={scoreInfo} />
-                  )}
-                </Card.Body>
-              </Card>
-            ))
-          : "no scores were computed"}
+        {hasScores ? (
+          <ScoreTable scoreInfo={scoreInfo} />
+        ) : (
+          "no scores were computed"
+        )}
       </Tab>
       <Tab className="p-3" eventKey="compare" title="Compare">
         {isLoading ? (
@@ -62,6 +50,11 @@ const SavedInfo = ({ name, scores }) => {
           comparisons !== null && <CompareTable comparisons={comparisons} />
         )}
       </Tab>
+      {hasScores && (
+        <Tab className="pt-3" eventKey="export" title="Export">
+          <Export scoreInfo={scoreInfo} />
+        </Tab>
+      )}
     </Tabs>
   );
 };

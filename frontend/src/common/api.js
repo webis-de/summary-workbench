@@ -4,7 +4,7 @@ const calculateRequest = (metrics, hypdata, refdata) => {
   return fetch("http://localhost:5000/api/calculate", {
     method,
     body,
-    headers: { "Content-Type": "application/json" }
+    headers: { "Content-Type": "application/json" },
   });
 };
 
@@ -17,7 +17,7 @@ const saveCalculationRequest = (name, scores, comparisons) => {
   return fetch("http://localhost:5000/api/calculations", {
     method,
     body,
-    headers
+    headers,
   });
 };
 
@@ -30,24 +30,22 @@ const getSavedCalculationsRequest = () => {
 
 export { getSavedCalculationsRequest };
 
-const deleteCalculationRequest = name => {
+const deleteCalculationRequest = (name) => {
   const method = "DELETE";
   return fetch(
     "http://localhost:5000/api/calculation/" + encodeURIComponent(name),
     {
-      method
+      method,
     }
   );
 };
 
 export { deleteCalculationRequest };
 
-const getCompareDataRequest = (name, start, end) => {
+const getCompareDataRequest = (name) => {
   const method = "GET";
   return fetch(
-    "http://localhost:5000/api/calculation/" +
-      encodeURIComponent(name) +
-      `?start=${start}&end=${end}`,
+    "http://localhost:5000/api/calculation/" + encodeURIComponent(name),
     { method }
   );
 };
@@ -55,11 +53,13 @@ const getCompareDataRequest = (name, start, end) => {
 export { getCompareDataRequest };
 
 const getExportRequest = (scores, format, transpose, precision) => {
-  const method = "POST"
-  const body = JSON.stringify({scores, format, transpose, precision})
-  return fetch("http://localhost:5000/api/export", {method, body,
-    headers: { "Content-Type": "application/json" }
-  })
-}
+  const method = "POST";
+  const body = JSON.stringify({ scores, format, transpose, precision });
+  return fetch("http://localhost:5000/api/export", {
+    method,
+    body,
+    headers: { "Content-Type": "application/json" },
+  });
+};
 
-export { getExportRequest }
+export { getExportRequest };

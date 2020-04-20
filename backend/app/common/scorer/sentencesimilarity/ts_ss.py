@@ -1,7 +1,7 @@
 import math
 import numpy as np
 from numpy.linalg import norm
-from basic import euclidean_dist, cosine_sim
+from .basic import euclidean_dist, cosine_sim
 
 
 def theta(src, tgt):

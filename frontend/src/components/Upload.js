@@ -33,7 +33,7 @@ const Upload = ({ className, reloadResult }) => {
     return chosenMetrics;
   };
 
-  const getComparisons = async (hypdata, refdata) => {
+  const getComparisons = (hypdata, refdata) => {
     const hyplines = hypdata.split("\n");
     const reflines = refdata.split("\n");
     const comparisons = hyplines.map((hypline, i) => {
@@ -43,7 +43,7 @@ const Upload = ({ className, reloadResult }) => {
     return comparisons;
   };
 
-  const compute = async () => {
+  const compute = () => {
     const hypfiles = hypFileInputRef.current.files;
     const reffiles = refFileInputRef.current.files;
     if (hypfiles.length !== 0 && reffiles.length !== 0) {
@@ -51,45 +51,49 @@ const Upload = ({ className, reloadResult }) => {
       const hypfile = hypfiles[0];
       const reffile = reffiles[0];
 
-      const [hypdata, refdata] = await Promise.all([
+      Promise.all([
         hypfile.text().then((text) => text.trim()),
         reffile.text().then((text) => text.trim()),
-      ]);
-
-      const hyplines = hypdata.split("\n");
-      const reflines = refdata.split("\n");
-
-      if (hyplines.length === reflines.length) {
-        const compPromise = getComparisons(hypdata, refdata);
-        const chosenMetrics = getChosenMetrics();
-        let [comparisons, scores] = [null, {}];
-        if (chosenMetrics.length > 0) {
-          const calculatePromise = calculateRequest(
-            chosenMetrics,
-            hypdata,
-            refdata
-          ).then(async (response) => {
-            if (response.ok) {
-              return await response.json().then((scores) => scores);
-            } else {
-              alert("server error");
-              return {};
-            }
-          });
-          [comparisons, scores] = await Promise.all([
-            compPromise,
-            calculatePromise,
-          ]);
-        } else {
-          comparisons = await compPromise;
-        }
+      ]).then(([hypdata, refdata]) => {
+        const hyplines = hypdata.split("\n");
+        const reflines = refdata.split("\n");
         const name = hypfile.name + "-" + reffile.name;
-        setCalculateResult({ name, scores, comparisons });
-        reloadResult();
-      } else {
-        alert("files have to have equal number of lines");
-      }
-      setIsComputing(false);
+        const chosenMetrics = getChosenMetrics();
+
+        if (hyplines.length === reflines.length) {
+          if (chosenMetrics.length > 0) {
+            calculateRequest(chosenMetrics, hypdata, refdata)
+              .then((response) => {
+                if (response.ok) {
+                  return response.json();
+                } else {
+                  throw new Error("response not ok");
+                }
+              })
+              .then((scores) => {
+                const comparisons = getComparisons(hypdata, refdata);
+                setCalculateResult({ name, scores, comparisons });
+                reloadResult();
+              })
+              .catch((error) => {
+                if (error instanceof TypeError) {
+                  alert("server not available");
+                } else {
+                  alert("internal server error");
+                }
+              })
+              .finally(() => setIsComputing(false));
+          } else {
+            const comparisons = getComparisons(hypdata, refdata);
+            setCalculateResult({ name, scores: {}, comparisons });
+            reloadResult();
+            setIsComputing(false);
+          }
+        } else {
+          setIsComputing(false);
+          alert("files have to have equal number of lines");
+        }
+      });
     } else {
       alert("choose file");
     }
@@ -110,19 +114,18 @@ const Upload = ({ className, reloadResult }) => {
           </Col>
         </Row>
         <div className="d-flex flex-sm-row flex-column justify-content-between">
+          {isComputing ? ( <Spinner className="m-2" animation="border" size="lg" />
+            ) : (
           <Button
             className="mb-2 m-sm-0 d-flex justify-content-center align-items-center"
             variant="success"
             size="lg"
             onClick={compute}
           >
-            {isComputing ? (
-              <Spinner className="mr-2" animation="border" size="sm" />
-            ) : (
               <FaArrowAltCircleDown className="mr-2" />
-            )}{" "}
             Compute
           </Button>
+          )}
         </div>
       </Card.Body>
     </Card>

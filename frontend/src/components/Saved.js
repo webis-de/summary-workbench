@@ -86,7 +86,7 @@ const Saved = ({ className }) => {
                   </Card.Header>
                   <Accordion.Collapse eventKey={name}>
                     <Card.Body>
-                      <SavedInfo name={name} scores={scores} />
+                      <SavedInfo name={name} scoreInfo={scores} />
                     </Card.Body>
                   </Accordion.Collapse>
                 </Card>

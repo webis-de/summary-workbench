@@ -1,4 +1,4 @@
-import React, { useState, useReducer, useContext, useRef } from "react";
+import React, { useState, useReducer, useContext } from "react";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 import Button from "react-bootstrap/Button";
 import Spinner from "react-bootstrap/Spinner";
@@ -11,10 +11,10 @@ const Export = ({ scoreInfo }) => {
   const { settings } = useContext(SettingsContext);
   const [exportText, setExportText] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [transpose, toggleTranspose] = useReducer((state) => !state, false);
+  const [transpose, toggleTranspose] = useReducer((state) => !state, true);
   const [precision, setPrecision] = useReducer(
     (state, newValue) => newValue.replace(/\D/g, ""),
-    "4"
+    "3"
   );
 
   const [chosenMetrics, toggleMetric] = useReducer(
@@ -22,7 +22,7 @@ const Export = ({ scoreInfo }) => {
     (state, metric) => ({ ...state, [metric]: !state[metric] }),
     // map all metrics to false
     Object.keys(scoreInfo).reduce(
-      (obj, metric) => ({ ...obj, [metric]: false }),
+      (obj, metric) => ({ ...obj, [metric]: true }),
       {}
     )
   );
@@ -52,7 +52,7 @@ const Export = ({ scoreInfo }) => {
 
   return (
     <>
-      <ButtonGroup className="my-2 d-flex flex-column flex-sm-row">
+      <ButtonGroup className="my-2 d-flex flex-md-row flex-column">
         {Object.entries(chosenMetrics).map(([metric, is_chosen]) => {
           return (
             <Button
@@ -78,12 +78,16 @@ const Export = ({ scoreInfo }) => {
             >
               CSV
             </Button>
-            <Button className="flex-fill" variant="primary" onClick={() => exportAs("latex")}>
+            <Button
+              className="flex-fill"
+              variant="primary"
+              onClick={() => exportAs("latex")}
+            >
               LaTeX
             </Button>
           </div>
           <div className="my-3 d-flex">
-            <InputGroup className="mr-4">
+            <InputGroup className="ml-md-4 mr-4">
               <InputGroup.Prepend>
                 <InputGroup.Text>precision</InputGroup.Text>
               </InputGroup.Prepend>
@@ -95,7 +99,7 @@ const Export = ({ scoreInfo }) => {
               />
             </InputGroup>
             <Button
-              variant={transpose ? "primary" : "default"}
+              variant={transpose ? "default" : "primary"}
               onClick={() => toggleTranspose()}
             >
               transpose

@@ -1,24 +1,25 @@
 const settings = {
+  bert: {
+    readable: "BERT",
+  },
   bleu: {
-    is_set: false,
-    readable: "Bleu"
+    readable: "Bleu",
   },
   cider: {
-    is_set: false,
-    readable: "Cider"
+    readable: "Cider",
   },
   greedy_matching: {
-    is_set: false,
-    readable: "Greedy Matching"
+    readable: "Greedy Matching",
   },
   meteor: {
-    is_set: false,
-    readable: "Meteor"
+    readable: "Meteor",
+  },
+  moverscore: {
+    readable: "MoverScore",
   },
   rouge: {
-    is_set: false,
-    readable: "Rouge"
-  }
+    readable: "Rouge",
+  },
 };
 
-export { settings }
+export { settings };

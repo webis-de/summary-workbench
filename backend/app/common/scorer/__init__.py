@@ -1,14 +1,14 @@
 from os import path
 
 import numpy as np
-from flask import current_app
 from gensim.models import KeyedVectors
 from nltk.tokenize import word_tokenize
 from rouge import Rouge
 from sklearn.metrics.pairwise import cosine_similarity
 
-from .moverscore import get_idf_dict, word_mover_score
+from .moverscore import MoverScore
 from .nlgeval import Bleu, Cider, Meteor
+from .sentencesimilarity import Bert
 
 
 class RougeScorer():
@@ -16,7 +16,8 @@ class RougeScorer():
         self.rouge = Rouge()
 
     def score(self, hypotheses, references):
-        return self.rouge.get_scores(hypotheses, references, avg=True)
+        scores = self.rouge.get_scores(hypotheses, references, avg=True)
+        return {score: info["f"] for score, info in scores.items()}
 
 
 class BleuScorer():
@@ -45,7 +46,7 @@ class CiderScorer():
         hyps = dict(enumerate(hyp_list_zip))
         refs = dict(enumerate(ref_list_zip))
 
-        return self.cider.compute_score(refs, hyps)[0]
+        return {"cider": self.cider.compute_score(refs, hyps)[0]}
 
 
 class Embedding():
@@ -92,7 +93,7 @@ class GreedyMatchingScorer():
             scores.append(score_source)
         scores = np.max(scores, axis=0).mean()
 
-        return scores
+        return {"greedy_matching": scores}
 
 
 class MeteorScorer():
@@ -106,21 +107,22 @@ class MeteorScorer():
         hyps = dict(enumerate(hyp_list_zip))
         refs = dict(enumerate(ref_list_zip))
 
-        return self.meteor.compute_score(refs, hyps)[0]
+        return {"meteor": self.meteor.compute_score(refs, hyps)[0]}
+
+
+class BERTScorer():
+    def __init__(self):
+        self.bert = Bert()
+
+    def score(self, hypotheses, references):
+        score = self.bert.score("cosine", hypotheses, references)
+        return {"bert": score}
 
 
 class MoverScoreScorer():
     def __init__(self):
-        pass
+        self.mover_score = MoverScore()
 
     def score(self, hypotheses, references):
-        idf_dict_hyp = get_idf_dict(hypotheses)
-        idf_dict_ref = get_idf_dict(references)
-
-        return word_mover_score(references,
-                                hypotheses,
-                                idf_dict_ref,
-                                idf_dict_hyp,
-                                stop_words=[],
-                                n_gram=1,
-                                remove_subwords=True)
+        score = self.mover_score.score(hypotheses, references)
+        return {"moverscore": score}
