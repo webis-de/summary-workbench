@@ -1,9 +1,12 @@
 import pandas as pd
 import logging
+from collections import OrderedDict
+from operator import itemgetter
 
 
 def export_scores(scores, export_format, precision=4, transpose=False):
     export_format = export_format.lower()
+    scores = OrderedDict(sorted(scores.items(), key=itemgetter(0)))
 
     if export_format == "csv":
         return to_csv(scores, precision=precision, transpose=transpose)

@@ -30,8 +30,9 @@ const Saved = ({ className }) => {
         if (response.status === 404) {
           alert("Resource not found");
         }
+        window.location.reload();
       })
-      .finally(() => window.location.reload());
+      .catch(() => alert("server not available"));
   };
 
   if (calculations.length > 0) {

@@ -41,6 +41,7 @@ const Export = ({ scoreInfo }) => {
         getExportRequest(scores, format, transpose, parsedPrecision)
           .then((response) => response.json())
           .then((json) => setExportText(json["text"]))
+          .catch(() => alert("server not available"))
           .finally(() => setIsLoading(false));
       } else {
         alert("choose valid precision");
@@ -53,7 +54,7 @@ const Export = ({ scoreInfo }) => {
   return (
     <>
       <ButtonGroup className="my-2 d-flex flex-md-row flex-column">
-        {Object.entries(chosenMetrics).map(([metric, is_chosen]) => {
+        {Object.entries(chosenMetrics).sort().map(([metric, is_chosen]) => {
           return (
             <Button
               className="border-dark"

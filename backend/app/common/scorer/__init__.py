@@ -17,10 +17,10 @@ class RougeScorer():
 
     def score(self, hypotheses, references):
         scores = self.rouge.get_scores(hypotheses, references, avg=True)
-        return {score: info["f"] for score, info in scores.items()}
+        return {score.replace("-", " "): info["f"] for score, info in scores.items()}
 
 
-class BleuScorer():
+class BLEUScorer():
     def __init__(self):
         self.bleu = Bleu(4)
 
@@ -32,10 +32,10 @@ class BleuScorer():
         refs = dict(enumerate(ref_list_zip))
 
         score = self.bleu.compute_score(refs, hyps)[0]
-        return dict(zip(["Bleu_1", "Bleu_2", "Bleu_3", "Bleu_4"], score))
+        return dict(zip(["BLEU 1", "BLEU 2", "BLEU 3", "BLEU 4"], score))
 
 
-class CiderScorer():
+class CIDErScorer():
     def __init__(self):
         self.cider = Cider()
 
@@ -46,7 +46,7 @@ class CiderScorer():
         hyps = dict(enumerate(hyp_list_zip))
         refs = dict(enumerate(ref_list_zip))
 
-        return {"cider": self.cider.compute_score(refs, hyps)[0]}
+        return {"CIDEr": self.cider.compute_score(refs, hyps)[0]}
 
 
 class Embedding():
@@ -93,10 +93,10 @@ class GreedyMatchingScorer():
             scores.append(score_source)
         scores = np.max(scores, axis=0).mean()
 
-        return {"greedy_matching": scores}
+        return {"greedy matching": scores}
 
 
-class MeteorScorer():
+class METEORScorer():
     def __init__(self):
         self.meteor = Meteor()
 
@@ -107,7 +107,7 @@ class MeteorScorer():
         hyps = dict(enumerate(hyp_list_zip))
         refs = dict(enumerate(ref_list_zip))
 
-        return {"meteor": self.meteor.compute_score(refs, hyps)[0]}
+        return {"METEOR": self.meteor.compute_score(refs, hyps)[0]}
 
 
 class BERTScorer():
@@ -116,7 +116,7 @@ class BERTScorer():
 
     def score(self, hypotheses, references):
         score = self.bert.score("cosine", hypotheses, references)
-        return {"bert": score}
+        return {"BERT": score}
 
 
 class MoverScoreScorer():
@@ -125,4 +125,4 @@ class MoverScoreScorer():
 
     def score(self, hypotheses, references):
         score = self.mover_score.score(hypotheses, references)
-        return {"moverscore": score}
+        return {"MoverScore": score}

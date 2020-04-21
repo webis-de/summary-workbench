@@ -26,7 +26,7 @@ const Result = ({ className, reloadSaved }) => {
           alert("upload error");
         }
       })
-      .catch(() => alert("upload error"));
+      .catch(() => alert("server not available"));
   };
 
   if (calculateResult !== null) {

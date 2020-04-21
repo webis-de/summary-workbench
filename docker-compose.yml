@@ -12,7 +12,7 @@ services:
       - nltk_data:/root/nltk_data
       - virtualenvs:/root/.local/share/virtualenvs
     environment:
-      - INSTALL_ONLY_ONCE
+      - INSTALL_ALWAYS
     command: bash boot.sh
 
   frontend:

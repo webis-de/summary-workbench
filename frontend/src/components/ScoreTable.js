@@ -10,7 +10,7 @@ const ScoreTable = ({ scoreInfo }) => (
       </tr>
     </thead>
     <tbody>
-      {Object.values(scoreInfo).map((info) =>
+      {Object.entries(scoreInfo).sort().map(([sortkey, info]) =>
         Object.entries(info).map(([metric, score]) => (
           <tr key={metric}>
             <td>{metric}</td>

@@ -3,22 +3,22 @@ const settings = {
     readable: "BERT",
   },
   bleu: {
-    readable: "Bleu",
+    readable: "BLEU",
   },
   cider: {
-    readable: "Cider",
+    readable: "CIDEr",
   },
   greedy_matching: {
-    readable: "Greedy Matching",
+    readable: "greedy matching",
   },
   meteor: {
-    readable: "Meteor",
+    readable: "METEOR",
   },
   moverscore: {
     readable: "MoverScore",
   },
   rouge: {
-    readable: "Rouge",
+    readable: "rouge",
   },
 };
 
