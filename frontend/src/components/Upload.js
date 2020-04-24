@@ -13,6 +13,7 @@ import { CalculateContext } from "../contexts/CalculateContext";
 import { ChooseFile } from "./Upload/ChooseFile";
 
 import { markup } from "../common/fragcolors";
+import { readFile } from "../common/readFile";
 
 const Upload = ({ className, reloadResult }) => {
   const hypFileInputRef = useRef();
@@ -52,8 +53,8 @@ const Upload = ({ className, reloadResult }) => {
       const reffile = reffiles[0];
 
       Promise.all([
-        hypfile.text().then((text) => text.trim()),
-        reffile.text().then((text) => text.trim()),
+        readFile(hypfile).then((text) => text.trim()),
+        readFile(reffile).then((text) => text.trim()),
       ]).then(([hypdata, refdata]) => {
         const hyplines = hypdata.split("\n");
         const reflines = refdata.split("\n");
