@@ -1,0 +1,1 @@
+from summarizers.bertsum.ModelProcessor import BertSummarizer
