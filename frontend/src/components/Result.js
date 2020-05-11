@@ -1,13 +1,13 @@
-import React, { useRef, useContext } from "react";
+import React, { useContext, useRef } from "react";
+import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
 import FormControl from "react-bootstrap/FormControl";
 import InputGroup from "react-bootstrap/InputGroup";
-import Button from "react-bootstrap/Button";
 import { FaUpload } from "react-icons/fa";
 
-import { ResultInfo } from "./ResultInfo";
-import { CalculateContext } from "../contexts/CalculateContext";
 import { saveCalculationRequest } from "../common/api";
+import { CalculateContext } from "../contexts/CalculateContext";
+import { ResultInfo } from "./ResultInfo";
 
 const Result = ({ className, reloadSaved }) => {
   const { calculateResult, setCalculateResult } = useContext(CalculateContext);
@@ -18,7 +18,7 @@ const Result = ({ className, reloadSaved }) => {
     const scores = calculateResult.scores;
     const comparisons = calculateResult.comparisons;
     saveCalculationRequest(name, scores, comparisons)
-      .then(response => {
+      .then((response) => {
         if (response.ok) {
           setCalculateResult(null);
           reloadSaved();
@@ -37,7 +37,7 @@ const Result = ({ className, reloadSaved }) => {
             <FormControl
               ref={nameRef}
               defaultValue={calculateResult.name}
-              onKeyDown={e => e.keyCode === 13 && upload()}
+              onKeyDown={(e) => e.keyCode === 13 && upload()}
             />
             <InputGroup.Append>
               <Button onClick={upload}>

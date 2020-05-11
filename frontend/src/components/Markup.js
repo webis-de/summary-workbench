@@ -1,8 +1,8 @@
 import React from "react";
 
-const Markup = ({ markupedText }) => (
+const Markup = (props) => (
   <>
-    {markupedText.map(([text, classNames], i) => (
+    {props.markupedText.map(([text, classNames], i) => (
       <span key={i} className={classNames.join(" ")}>
         {text}
       </span>

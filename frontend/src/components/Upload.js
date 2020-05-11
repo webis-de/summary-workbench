@@ -1,19 +1,17 @@
-import React, { useState, useRef, useContext } from "react";
-import Card from "react-bootstrap/Card";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
+import React, { useContext, useRef, useState } from "react";
 import Button from "react-bootstrap/Button";
+import Card from "react-bootstrap/Card";
+import Col from "react-bootstrap/Col";
+import Row from "react-bootstrap/Row";
 import Spinner from "react-bootstrap/Spinner";
-import { FaRegFile, FaArrowAltCircleDown } from "react-icons/fa";
+import { FaArrowAltCircleDown, FaRegFile } from "react-icons/fa";
 
 import { calculateRequest } from "../common/api";
-
-import { SettingsContext } from "../contexts/SettingsContext";
-import { CalculateContext } from "../contexts/CalculateContext";
-import { ChooseFile } from "./Upload/ChooseFile";
-
 import { markup } from "../common/fragcolors";
 import { readFile } from "../common/readFile";
+import { CalculateContext } from "../contexts/CalculateContext";
+import { SettingsContext } from "../contexts/SettingsContext";
+import { ChooseFile } from "./Upload/ChooseFile";
 
 const Upload = ({ className, reloadResult }) => {
   const hypFileInputRef = useRef();
@@ -63,7 +61,7 @@ const Upload = ({ className, reloadResult }) => {
 
         if (hyplines.length === reflines.length) {
           if (chosenMetrics.length > 0) {
-            calculateRequest(chosenMetrics, hypdata, refdata)
+            calculateRequest(chosenMetrics, hyplines, reflines)
               .then((response) => {
                 if (response.ok) {
                   return response.json();
@@ -103,7 +101,7 @@ const Upload = ({ className, reloadResult }) => {
   return (
     <Card className={className ? className : ""}>
       <Card.Header>
-        <FaRegFile /> Choose File
+        <FaRegFile /> Choose file
       </Card.Header>
       <Card.Body className="p-3">
         <Row>
@@ -115,17 +113,18 @@ const Upload = ({ className, reloadResult }) => {
           </Col>
         </Row>
         <div className="d-flex flex-sm-row flex-column justify-content-between">
-          {isComputing ? ( <Spinner className="m-2" animation="border" size="lg" />
-            ) : (
-          <Button
-            className="mb-2 m-sm-0 d-flex justify-content-center align-items-center"
-            variant="success"
-            size="lg"
-            onClick={compute}
-          >
+          {isComputing ? (
+            <Spinner className="m-2" animation="border" size="lg" />
+          ) : (
+            <Button
+              className="mb-2 m-sm-0 d-flex justify-content-center align-items-center"
+              variant="success"
+              size="lg"
+              onClick={compute}
+            >
               <FaArrowAltCircleDown className="mr-2" />
-            Compute
-          </Button>
+              Compute
+            </Button>
           )}
         </div>
       </Card.Body>
