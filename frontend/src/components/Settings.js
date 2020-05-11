@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
-import Card from "react-bootstrap/Card";
-import ButtonGroup from "react-bootstrap/ButtonGroup";
 import Button from "react-bootstrap/Button";
+import ButtonGroup from "react-bootstrap/ButtonGroup";
+import Card from "react-bootstrap/Card";
 import { FaCogs } from "react-icons/fa";
 
 import { SettingsContext } from "../contexts/SettingsContext";

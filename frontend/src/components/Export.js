@@ -1,11 +1,12 @@
-import React, { useState, useReducer, useContext } from "react";
-import ButtonGroup from "react-bootstrap/ButtonGroup";
+import React, { useContext, useReducer, useState } from "react";
 import Button from "react-bootstrap/Button";
-import Spinner from "react-bootstrap/Spinner";
-import InputGroup from "react-bootstrap/InputGroup";
+import ButtonGroup from "react-bootstrap/ButtonGroup";
 import FormControl from "react-bootstrap/FormControl";
-import { SettingsContext } from "../contexts/SettingsContext";
+import InputGroup from "react-bootstrap/InputGroup";
+import Spinner from "react-bootstrap/Spinner";
+
 import { getExportRequest } from "../common/api";
+import { SettingsContext } from "../contexts/SettingsContext";
 
 const Export = ({ scoreInfo }) => {
   const { settings } = useContext(SettingsContext);
@@ -54,18 +55,20 @@ const Export = ({ scoreInfo }) => {
   return (
     <>
       <ButtonGroup className="my-2 d-flex flex-md-row flex-column">
-        {Object.entries(chosenMetrics).sort().map(([metric, is_chosen]) => {
-          return (
-            <Button
-              className="border-dark"
-              key={metric}
-              variant={is_chosen ? "primary" : "default"}
-              onClick={() => toggleMetric(metric)}
-            >
-              {settings[metric]["readable"]}
-            </Button>
-          );
-        })}
+        {Object.entries(chosenMetrics)
+          .sort()
+          .map(([metric, is_chosen]) => {
+            return (
+              <Button
+                className="border-dark"
+                key={metric}
+                variant={is_chosen ? "primary" : "default"}
+                onClick={() => toggleMetric(metric)}
+              >
+                {settings[metric]["readable"]}
+              </Button>
+            );
+          })}
       </ButtonGroup>
       {isLoading ? (
         <Spinner className="my-3" animation="border" size="sm" />

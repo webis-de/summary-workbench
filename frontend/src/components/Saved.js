@@ -1,17 +1,17 @@
-import React, { useState, useEffect, useContext } from "react";
-import Card from "react-bootstrap/Card";
-import Button from "react-bootstrap/Button";
-import Collapse from "react-bootstrap/Collapse";
+import React, { useContext, useEffect, useState } from "react";
 import Accordion from "react-bootstrap/Accordion";
 import Badge from "react-bootstrap/Badge";
-import { FaTrash, FaCloud } from "react-icons/fa";
+import Button from "react-bootstrap/Button";
+import Card from "react-bootstrap/Card";
+import Collapse from "react-bootstrap/Collapse";
+import { FaCloud, FaTrash } from "react-icons/fa";
 
-import { SavedInfo } from "./SavedInfo";
-import { SettingsContext } from "../contexts/SettingsContext";
 import {
-  getSavedCalculationsRequest,
   deleteCalculationRequest,
+  getSavedCalculationsRequest,
 } from "../common/api";
+import { SettingsContext } from "../contexts/SettingsContext";
+import { SavedInfo } from "./SavedInfo";
 
 const Saved = ({ className }) => {
   const [open, setOpen] = useState(true);

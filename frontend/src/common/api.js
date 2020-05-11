@@ -63,3 +63,15 @@ const getExportRequest = (scores, format, transpose, precision) => {
 };
 
 export { getExportRequest };
+
+const generateRequest = (text) => {
+  const method = "POST";
+  const body = JSON.stringify({ text });
+  return fetch("http://localhost:5000/api/generate", {
+    method,
+    body,
+    headers: { "Content-Type": "application/json" },
+  });
+};
+
+export { generateRequest };

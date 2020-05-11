@@ -1,9 +1,9 @@
-import React, { useState, useReducer, useMemo } from "react";
-import Table from "react-bootstrap/Table";
-import InputGroup from "react-bootstrap/InputGroup";
-import FormControl from "react-bootstrap/FormControl";
+import React, { useMemo, useReducer, useState } from "react";
 import Button from "react-bootstrap/Button";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
+import FormControl from "react-bootstrap/FormControl";
+import InputGroup from "react-bootstrap/InputGroup";
+import Table from "react-bootstrap/Table";
 
 import { Markup } from "./Markup";
 
@@ -22,11 +22,11 @@ const CompareTable = ({ comparisons }) => {
 
   const updateComparisons = () => {
     if (!isNaN(start)) {
-      const s = Math.max(1, Math.min(comparisonsLength, parseInt(start)))
-      setStart(s.toString())
+      const s = Math.max(1, Math.min(comparisonsLength, parseInt(start)));
+      setStart(s.toString());
       if (!isNaN(pageSize)) {
-        const p = Math.max(1, pageSize)
-        setPageSize(p.toString())
+        const p = Math.max(1, pageSize);
+        setPageSize(p.toString());
         setCurrentStart(s);
         setCurrentPageSize(p);
       } else {
@@ -65,7 +65,7 @@ const CompareTable = ({ comparisons }) => {
             onChange={(e) => {
               setStart(e.target.value);
             }}
-            onKeyDown={e => e.keyCode === 13 && updateComparisons()}
+            onKeyDown={(e) => e.keyCode === 13 && updateComparisons()}
             value={start}
           />
           <InputGroup.Append>
@@ -80,7 +80,7 @@ const CompareTable = ({ comparisons }) => {
             onChange={(e) => {
               setPageSize(e.target.value);
             }}
-            onKeyDown={e => e.keyCode === 13 && updateComparisons()}
+            onKeyDown={(e) => e.keyCode === 13 && updateComparisons()}
             value={pageSize}
           />
         </InputGroup>
