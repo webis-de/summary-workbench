@@ -3,7 +3,7 @@ import Button from "react-bootstrap/Button";
 import Container from "react-bootstrap/Container";
 import FormControl from "react-bootstrap/FormControl";
 import Spinner from "react-bootstrap/Spinner";
-import { FaArrowAltCircleDown, FaRegFile } from "react-icons/fa";
+import { FaArrowAltCircleDown } from "react-icons/fa";
 
 import { generateRequest } from "../common/api";
 
@@ -17,8 +17,8 @@ const Generate = () => {
     generateRequest(inputRef.current.value)
       .then((response) => response.json())
       .then(({ text }) => setGeneratedText(text))
-      .catch((e) => alert(e))
-      .finally(() => setIsComputing(false));
+      .finally(() => setIsComputing(false))
+      .catch((e) => alert(e));
   };
 
   return (
@@ -41,7 +41,7 @@ const Generate = () => {
         </div>
       )}
       {generatedText !== null && (
-        <pre className="p-4 border">{generatedText}</pre>
+        <pre className="mt-3 p-4 border">{generatedText}</pre>
       )}
     </Container>
   );

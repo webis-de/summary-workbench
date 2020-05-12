@@ -12,9 +12,7 @@ class CalculateSchema(Schema):
 class CalculateResource(Resource):
     def post(self):
         try:
-            calculate_loader = CalculateSchema()
-            current_app.logger.warn(request.json["refdata"])
-            calculation_args = calculate_loader.load(request.json)
+            calculation_args = CalculateSchema().load(request.json)
             hypdata = calculation_args["hypdata"]
             refdata = calculation_args["refdata"]
             metrics = calculation_args["metrics"]

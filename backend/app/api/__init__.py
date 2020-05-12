@@ -6,6 +6,7 @@ from flask_restx import Api
 
 from .resources.calculate import CalculateResource
 from .resources.export import ExportResource
+from .resources.generate import GenerateResource
 from .resources.savedcalculations import (SavedCalculationResource,
                                           SavedCalculationsResource)
 
@@ -24,3 +25,4 @@ api.add_resource(CalculateResource, "/calculate", endpoint="calculate")
 api.add_resource(SavedCalculationsResource, "/calculations", endpoint="calculations")
 api.add_resource(SavedCalculationResource, "/calculation/<string:name>", endpoint="calculation")
 api.add_resource(ExportResource, "/export", endpoint="export")
+api.add_resource(GenerateResource, "/generate", endpoint="generate")

@@ -91,29 +91,27 @@ const OneHypRef = ({ className }) => {
             {isComputing ? (
               <Spinner className="m-2" animation="border" size="lg" />
             ) : (
-              <>
-                <Button
-                  className="d-flex justify-content-center align-items-center"
-                  variant="success"
-                  size="lg"
-                  onClick={compute}
-                >
-                  <FaArrowAltCircleDown className="mr-2" />
-                  Compute
-                </Button>
-                <Button
-                  className="d-flex justify-content-center align-items-center"
-                  variant="primary"
-                  size="lg"
-                  onClick={() => {
-                    hypRef.current.value = "";
-                    refRef.current.value = "";
-                  }}
-                >
-                  Clear
-                </Button>
-              </>
+              <Button
+                className="d-flex justify-content-center align-items-center"
+                variant="success"
+                size="lg"
+                onClick={compute}
+              >
+                <FaArrowAltCircleDown className="mr-2" />
+                Compute
+              </Button>
             )}
+            <Button
+              className="d-flex justify-content-center align-items-center"
+              variant="primary"
+              size="lg"
+              onClick={() => {
+                hypRef.current.value = "";
+                refRef.current.value = "";
+              }}
+            >
+              Clear
+            </Button>
           </div>
           {calculateResult !== null && (
             <OneHypRefResult

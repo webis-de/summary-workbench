@@ -1,5 +1,5 @@
 import { createBrowserHistory } from "history";
-import React, { useReducer } from "react";
+import React from "react";
 import { Redirect, Route, Switch } from "react-router";
 import { Router } from "react-router-dom";
 

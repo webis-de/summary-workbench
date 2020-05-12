@@ -19,6 +19,7 @@ services:
     image: frontend:latest
     build: docker/frontend
     working_dir: /app
+    stdin_open: true
     ports:
       - "3000:3000"
     volumes:
