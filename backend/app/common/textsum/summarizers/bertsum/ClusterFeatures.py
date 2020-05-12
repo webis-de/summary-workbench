@@ -1,19 +1,19 @@
+from typing import List
+
 import numpy as np
 from numpy import ndarray
 from sklearn.cluster import KMeans
-from sklearn.mixture import GaussianMixture
 from sklearn.decomposition import PCA
-from typing import List
+from sklearn.mixture import GaussianMixture
 
 
 class ClusterFeatures(object):
-
     def __init__(
         self,
         features: ndarray,
-        algorithm: str = 'kmeans',
+        algorithm: str = "kmeans",
         pca_k: int = None,
-        random_state: int = 12345
+        random_state: int = 12345,
     ):
 
         if pca_k:
@@ -26,12 +26,12 @@ class ClusterFeatures(object):
         self.random_state = random_state
 
     def __get_model(self, k: int):
-        if self.algorithm == 'gmm':
+        if self.algorithm == "gmm":
             return GaussianMixture(n_components=k, random_state=self.random_state)
         return KMeans(n_clusters=k, random_state=self.random_state)
 
     def __get_centroids(self, model):
-        if self.algorithm == 'gmm':
+        if self.algorithm == "gmm":
             return model.means_
         return model.cluster_centers_
 

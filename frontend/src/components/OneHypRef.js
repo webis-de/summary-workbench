@@ -84,8 +84,8 @@ const OneHypRef = ({ className }) => {
         </Card.Header>
         <Card.Body>
           <InputGroup className="mb-3">
-            <FormControl ref={hypRef} as="textarea" rows="5" />
-            <FormControl ref={refRef} as="textarea" rows="5" />
+            <FormControl ref={hypRef} as="textarea" rows="5" placeholder="Hypophesis"/>
+            <FormControl ref={refRef} as="textarea" rows="5" placeholder="Refererence"/>
           </InputGroup>
           <div className="d-flex flex-sm-row flex-column justify-content-between">
             {isComputing ? (

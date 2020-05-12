@@ -23,6 +23,9 @@ rouge = "*"
 scikit-learn = "*"
 sentence_transformers = "*"
 torch = "*"
+networkx = "*"
+syntok = "*"
+neuralcoref = "*"
 
 [requires]
 python_version = "3.8"
