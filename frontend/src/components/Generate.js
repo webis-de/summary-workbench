@@ -23,7 +23,7 @@ const Generate = () => {
 
   return (
     <Container>
-      <FormControl className="mb-3" ref={inputRef} as="textarea" rows="5" />
+      <FormControl className="mb-3" ref={inputRef} as="textarea" rows="12" />
 
       {isComputing ? (
         <Spinner className="m-2" animation="border" size="lg" />
@@ -41,7 +41,7 @@ const Generate = () => {
         </div>
       )}
       {generatedText !== null && (
-        <pre className="mt-3 p-4 border">{generatedText}</pre>
+        <FormControl as="textarea" rows="5" disabled className="mt-3 p-4 border" value={generatedText}></FormControl>
       )}
     </Container>
   );

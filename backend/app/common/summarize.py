@@ -1,4 +1,4 @@
-from textsum import TextRank, BertSummarizer as BertSum
+from .textsum.summarizers import TextRank, BertSummarizer as BertSum
 
 class TextRankSummarizer:
     def __init__(self):

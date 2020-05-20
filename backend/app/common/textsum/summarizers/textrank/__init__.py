@@ -3,8 +3,9 @@ from typing import Dict, List, Set, Tuple
 
 import networkx as nx
 from networkx import Graph
-from textsum.preprocessing import PreProcessor
-from textsum.scoring import Scorer
+from ...preprocessing import PreProcessor
+from ...scoring import Scorer
+import scipy.stats
 
 
 class TextRank(object):

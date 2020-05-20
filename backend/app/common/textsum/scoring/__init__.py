@@ -1,7 +1,7 @@
 from math import log10
 from typing import List, Set, Tuple
 
-from textsum.preprocessing import PreProcessor
+from ..preprocessing import PreProcessor
 
 
 class Scorer(object):
