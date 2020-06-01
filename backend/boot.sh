@@ -1,11 +1,11 @@
 #!/bin/sh
 
-if [ "$INSTALL_ALWAYS" = "yes" ]; then
+if ! pipenv --venv > /dev/null 2>&1; then
     INSTALL_PACKAGES="yes"
-elif ! pipenv --venv > /dev/null 2>&1; then
-    INSTALL_PACKAGES="yes"
-else
+elif [ "$INSTALL_ALWAYS" = "no" ]; then
     INSTALL_PACKAGES="no"
+else
+    INSTALL_PACKAGES="yes"
 fi
 
 if [ "$INSTALL_PACKAGES" = "yes" ]; then

@@ -24,10 +24,9 @@ the application can be accessed via `localhost:3000`
 
 # Configuration and Updates
 
-When pulling a new version it might be necessary to delete the `comparefile_virtualenvs` volume (`docker volume rm comparefile_virtualenvs`),
-so new Packages get installed. By default packages get only installed if the virtualenv doesn't already exist to speed up the startup process.
-Alternatively, the installation on every startup of the docker container can be forced by setting the environment variable `INSTALL_ALWAYS="yes"`.
-This can be configured by `echo INSTALL_ALWAYS="yes" > ~/comparefile/.env`
+Packages get checked and updated on every startup of the backend container. This takes some time and is useless, when you know that nothing has changed.
+You can disable this behavior by setting the environment variable `INSTALL_ALWAYS="no"`. This can be configured by `echo INSTALL_ALWAYS="no" > ~/comparefile/.env`
+Sometimes a quick fix might be to delete the `comparefile_virtualenvs` volume (`docker volume rm comparefile_virtualenvs`).
 
 # Used Metrics and Implementations
 - rouge: [pltrdy/rouge](https://github.com/pltrdy/rouge)
