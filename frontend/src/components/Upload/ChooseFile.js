@@ -28,14 +28,13 @@ const ChooseFile = ({ name, file, setFile }) => {
       }}
       onDragLeave={(e) => setIsDragged(false)}
       onDrop={(e) => dropHandler(e)}
-      readOnly
       style={isDragged ? { borderStyle: "solid", borderWidth: "1px" } : {}}
     >
       <InputGroup>
         <InputGroup.Prepend>
           <InputGroup.Text>{name}:</InputGroup.Text>
         </InputGroup.Prepend>
-        <FormControl value={file !== null ? file.name : ""} />
+        <FormControl readOnly value={file !== null ? file.name : ""} />
         <InputGroup.Append>
           <UploadButton setFile={setFile} />
         </InputGroup.Append>

@@ -41,7 +41,7 @@ const Generate = () => {
         </div>
       )}
       {generatedText !== null && (
-        <FormControl as="textarea" rows="5" disabled className="mt-3 p-4 border" value={generatedText}></FormControl>
+        <FormControl as="textarea" rows="5" readOnly className="mt-3 p-4 border" value={generatedText}></FormControl>
       )}
     </Container>
   );
