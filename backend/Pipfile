@@ -6,12 +6,14 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
+bert-score = "*"
 flask = "*"
 flask-cors = "*"
 flask-restx = "*"
 gensim = "*"
 gunicorn = "*"
 marshmallow = "*"
+networkx = "*"
 nltk = "*"
 numpy = "*"
 pandas = "*"
@@ -22,10 +24,8 @@ requests = "*"
 rouge = "*"
 scikit-learn = "*"
 sentence_transformers = "*"
-torch = "*"
-networkx = "*"
 syntok = "*"
-neuralcoref = "*"
+torch = "*"
 
 [requires]
 python_version = "3.8"

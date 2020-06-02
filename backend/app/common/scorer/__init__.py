@@ -1,6 +1,7 @@
 from os import path
 
 import numpy as np
+from bert_score import BERTScorer as Bert
 from gensim.models import KeyedVectors
 from nltk.tokenize import word_tokenize
 from rouge import Rouge
@@ -8,10 +9,9 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 from .moverscore import MoverScore
 from .nlgeval import Bleu, Cider, Meteor
-from .sentencesimilarity import Bert
 
 
-class RougeScorer():
+class RougeScorer:
     def __init__(self):
         self.rouge = Rouge()
 
@@ -20,7 +20,7 @@ class RougeScorer():
         return {score.replace("-", " "): info["f"] for score, info in scores.items()}
 
 
-class BLEUScorer():
+class BLEUScorer:
     def __init__(self):
         self.bleu = Bleu(4)
 
@@ -35,7 +35,7 @@ class BLEUScorer():
         return dict(zip(["BLEU 1", "BLEU 2", "BLEU 3", "BLEU 4"], score))
 
 
-class CIDErScorer():
+class CIDErScorer:
     def __init__(self):
         self.cider = Cider()
 
@@ -49,10 +49,10 @@ class CIDErScorer():
         return {"CIDEr": self.cider.compute_score(refs, hyps)[0]}
 
 
-class Embedding():
+class Embedding:
     def __init__(self):
         glove_bin = path.expanduser("~/.cache/glove/glove.6B.300d.model.bin")
-        self.m = KeyedVectors.load(glove_bin, mmap='r')
+        self.m = KeyedVectors.load(glove_bin, mmap="r")
         self.unk = self.m.vectors.mean(axis=0)
 
     def vec(self, key):
@@ -62,7 +62,7 @@ class Embedding():
             return self.unk
 
 
-class GreedyMatchingScorer():
+class GreedyMatchingScorer:
     def __init__(self):
         self.emb = Embedding()
 
@@ -96,7 +96,7 @@ class GreedyMatchingScorer():
         return {"greedy matching": scores}
 
 
-class METEORScorer():
+class METEORScorer:
     def __init__(self):
         self.meteor = Meteor()
 
@@ -110,16 +110,17 @@ class METEORScorer():
         return {"METEOR": self.meteor.compute_score(refs, hyps)[0]}
 
 
-class BERTScorer():
+class BERTScorer:
     def __init__(self):
-        self.bert = Bert()
+        self.bert = Bert(model_type="roberta-large-mnli")
 
     def score(self, hypotheses, references):
-        score = self.bert.score("cosine", hypotheses, references)
+        score = self.bert.score(hypotheses, references)
+        score = float(np.average(score[0]))
         return {"BERT": score}
 
 
-class MoverScoreScorer():
+class MoverScoreScorer:
     def __init__(self):
         self.mover_score = MoverScore()
 

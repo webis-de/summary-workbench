@@ -12,7 +12,6 @@ class GenerateScheme(Schema):
 class GenerateResource(Resource):
     def post(self):
         try:
-            current_app.logger.warn(request.json)
             generate_args = GenerateScheme().load(request.json)
             text = generate_args["text"]
             return {"text": current_app.TEXTRANK_SUM.summarize(text)}, 200
