@@ -1,6 +1,5 @@
 from abc import abstractmethod
 from typing import List
-
 import numpy as np
 from spacy.lang.en import English
 from transformers import PreTrainedModel, PreTrainedTokenizer
@@ -18,10 +17,9 @@ class ModelProcessor(object):
         custom_model: PreTrainedModel = None,
         custom_tokenizer: PreTrainedTokenizer = None,
         hidden: int = -2,
-        reduce_option: str = "mean",
-        greedyness: float = 0.45,
-        language=English,
-        random_state: int = 12345,
+        reduce_option: str = 'mean',
+        language = English,
+        random_state: int = 12345
     ):
         """
         This is the parent Bert Summarizer model. New methods should implement this class
@@ -31,7 +29,6 @@ class ModelProcessor(object):
         :param custom_tokenizer: If you have a custom tokenizer, you can add the tokenizer here.
         :param hidden: This signifies which layer of the BERT model you would like to use as embeddings.
         :param reduce_option: Given the output of the bert model, this param determines how you want to reduce results.
-        :param greedyness: associated with the neuralcoref library. Determines how greedy coref should be.
         :param language: Which language to use for training.
         :param random_state: The random state to reproduce summarizations.
         """
@@ -42,8 +39,7 @@ class ModelProcessor(object):
         self.reduce_option = reduce_option
         self.nlp = language()
         self.random_state = random_state
-        self.nlp.add_pipe(self.nlp.create_pipe("sentencizer"))
-        neuralcoref.add_to_pipe(self.nlp, greedyness=greedyness)
+        self.nlp.add_pipe(self.nlp.create_pipe('sentencizer'))
 
     def process_content_sentences(
         self, body: str, min_length: int = 40, max_length: int = 600
@@ -56,13 +52,8 @@ class ModelProcessor(object):
         :return: Returns a list of sentences with coreference applied.
         """
 
-        doc = self.nlp(body)._.coref_resolved
-        doc = self.nlp(doc)
-        return [
-            c.string.strip()
-            for c in doc.sents
-            if max_length > len(c.string.strip()) > min_length
-        ]
+        doc = self.nlp(body)
+        return [c.string.strip() for c in doc.sents if max_length > len(c.string.strip()) > min_length]
 
     @abstractmethod
     def run_clusters(
@@ -91,7 +82,7 @@ class ModelProcessor(object):
         if sentences:
             sentences = self.run_clusters(sentences, ratio, algorithm, use_first)
 
-        return "|".join([s.strip(".") for s in sentences])
+        return '. '.join([s.strip('.') for s in sentences])
 
     def __call__(
         self,
@@ -119,8 +110,7 @@ class BertSummarizer(ModelProcessor):
         custom_model: PreTrainedModel = None,
         custom_tokenizer: PreTrainedTokenizer = None,
         hidden: int = -2,
-        reduce_option: str = "mean",
-        greedyness: float = 0.45,
+        reduce_option: str = 'mean',
         language=English,
         random_state: int = 12345,
     ):
@@ -132,19 +122,11 @@ class BertSummarizer(ModelProcessor):
         :param custom_tokenizer: If you have a custom tokenizer, you can add the tokenizer here.
         :param hidden: This signifies which layer of the BERT model you would like to use as embeddings.
         :param reduce_option: Given the output of the bert model, this param determines how you want to reduce results.
-        :param greedyness: associated with the neuralcoref library. Determines how greedy coref should be.
         :param language: Which language to use for training.
         :param random_state: The random state to reproduce summarizations.
         """
         super(BertSummarizer, self).__init__(
-            model,
-            custom_model,
-            custom_tokenizer,
-            hidden,
-            reduce_option,
-            greedyness,
-            language,
-            random_state,
+            model, custom_model, custom_tokenizer, hidden, reduce_option, language, random_state
         )
 
     def run_clusters(
