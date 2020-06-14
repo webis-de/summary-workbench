@@ -7,18 +7,21 @@ import Table from "react-bootstrap/Table";
 
 import { Markup } from "./Markup";
 
+const defaultStart = 1
+const defaultPageSize = 1
+
 const CompareTable = ({ comparisons }) => {
   const comparisonsLength = useMemo(() => comparisons.length, [comparisons]);
   const [start, setStart] = useReducer(
     (state, newValue) => newValue.replace(/\D/g, ""),
-    "1"
+    defaultStart.toString()
   );
   const [pageSize, setPageSize] = useReducer(
     (state, newValue) => newValue.replace(/\D/g, ""),
-    "3"
+    defaultPageSize.toString()
   );
-  const [currentStart, setCurrentStart] = useState(1);
-  const [currentPageSize, setCurrentPageSize] = useState(3);
+  const [currentStart, setCurrentStart] = useState(defaultStart);
+  const [currentPageSize, setCurrentPageSize] = useState(defaultPageSize);
 
   const updateComparisons = () => {
     if (!isNaN(start)) {

@@ -25,8 +25,8 @@ the application can be accessed via `localhost:3000`
 # Configuration and Updates
 
 Packages get checked and updated on every startup of the backend container. This takes some time and is useless, when you know that nothing has changed.
-You can disable this behavior by setting the environment variable `INSTALL_ALWAYS="no"`. This can be configured by `echo INSTALL_ALWAYS="no" > ~/comparefile/.env`
-Sometimes a quick fix might be to delete the `comparefile_virtualenvs` volume (`docker volume rm comparefile_virtualenvs`).
+You can disable this behavior by setting the environment variable `INSTALL_ALWAYS="no"`. This can be configured by `echo INSTALL_ALWAYS="no" > ~/comparefile/.env`  
+Sometimes a quick fix for a Problem might be to delete the `comparefile_virtualenvs` volume (`docker volume rm comparefile_virtualenvs`) and restart the application.
 
 # Used Metrics and Implementations
 - BERT: [Tiiiger/bert_score](https://github.com/Tiiiger/bert_score) (**model**: roberta-large-mnli)

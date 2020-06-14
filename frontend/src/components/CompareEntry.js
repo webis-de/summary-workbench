@@ -13,23 +13,17 @@ const CompareEntry = () => {
   const [resultKey, reloadResult] = useReducer((oldKey) => !oldKey, true);
   const [savedKey, reloadSaved] = useReducer((oldKey) => !oldKey, true);
   return (
-    <>
-      <Container className="mt-3">
-        <SettingsProvider>
-          <Settings className="mb-3" />
-          <CalculateProvider>
-            <OneHypRef className="mb-3" />
-            <Upload className="mb-3" reloadResult={reloadResult} />
-            <Result
-              className="mb-3"
-              key={resultKey}
-              reloadSaved={reloadSaved}
-            />
-          </CalculateProvider>
-          <Saved className="mb-3" key={savedKey} />
-        </SettingsProvider>
-      </Container>
-    </>
+    <Container>
+      <SettingsProvider>
+        <Settings className="mb-3" />
+        <CalculateProvider>
+          <OneHypRef className="mb-3" />
+          <Upload className="mb-3" reloadResult={reloadResult} />
+          <Result className="mb-3" key={resultKey} reloadSaved={reloadSaved} />
+        </CalculateProvider>
+        <Saved className="mb-3" key={savedKey} />
+      </SettingsProvider>
+    </Container>
   );
 };
 

@@ -64,14 +64,26 @@ const getExportRequest = (scores, format, transpose, precision) => {
 
 export { getExportRequest };
 
-const generateRequest = (text) => {
+const textRankRequest = (text) => {
   const method = "POST";
   const body = JSON.stringify({ text });
-  return fetch("http://localhost:5000/api/generate", {
+  return fetch("http://localhost:5000/api/summarize/textrank", {
     method,
     body,
     headers: { "Content-Type": "application/json" },
   });
 };
 
-export { generateRequest };
+export { textRankRequest };
+
+const bertSummarizerRequest = (text) => {
+  const method = "POST";
+  const body = JSON.stringify({ text });
+  return fetch("http://localhost:5000/api/summarize/bert", {
+    method,
+    body,
+    headers: { "Content-Type": "application/json" },
+  });
+};
+
+export { bertSummarizerRequest };
