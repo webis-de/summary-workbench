@@ -35,7 +35,7 @@ Sometimes a quick fix for a Problem might be to delete the `comparefile_virtuale
 - METEOR: [Maluuba/nlg-eval](https://github.com/Maluuba/nlg-eval)
 - MoverScore: [AIPHES/emnlp19-moverscore](https://github.com/AIPHES/emnlp19-moverscore) (**model**: distilbert-base-uncased)
 - greedy matching: [Maluuba/nlg-eval](https://github.com/Maluuba/nlg-eval) (**model**: glove.6B.300d)
-- rouge: [pltrdy/rouge](https://github.com/pltrdy/rouge)
+- ROUGE: [pltrdy/rouge](https://github.com/pltrdy/rouge)
 
 # Similar Projects
 - [vizseq](https://github.com/facebookresearch/vizseq)

@@ -1,6 +1,6 @@
 const settings = {
   bert: {
-    readable: "BERT",
+    readable: "BERTScore",
   },
   bleu: {
     readable: "BLEU",
@@ -18,7 +18,7 @@ const settings = {
     readable: "MoverScore",
   },
   rouge: {
-    readable: "rouge",
+    readable: "ROUGE",
   },
 };
 

@@ -2,7 +2,7 @@ import React from "react";
 import Container from "react-bootstrap/Container";
 
 const About = () => (
-  <Container>
+  <Container className="mb-5">
     <h4>Description</h4>
     <p className="px-4">
       Compute various NLP-metrics between pairs of sentences, highlight simmilar
@@ -22,7 +22,7 @@ const About = () => (
     <p>
       <ul>
         <li>
-          BERT:{" "}
+          BERTScore:{" "}
           <a href="https://github.com/Tiiiger/bert_score">Tiiiger/bert_score</a>{" "}
           (<strong>model</strong>: roberta-large-mnli)
         </li>
@@ -51,7 +51,7 @@ const About = () => (
           <strong>model</strong>: glove.6B.300d)
         </li>
         <li>
-          rouge: <a href="https://github.com/pltrdy/rouge">pltrdy/rouge</a>
+          ROUGE: <a href="https://github.com/pltrdy/rouge">pltrdy/rouge</a>
         </li>
       </ul>
     </p>
