@@ -10,9 +10,8 @@ import nltk
 import requests
 from gensim.models import KeyedVectors
 from gensim.scripts.glove2word2vec import glove2word2vec
-from sentence_transformers import __DOWNLOAD_SERVER__
-from transformers import DistilBertConfig, DistilBertModel, DistilBertTokenizer
-from transformers.file_utils import cached_path as transformers_cached_path
+from transformers import DistilBertConfig, DistilBertModel, DistilBertTokenizer, RobertaModel
+from transformers.file_utils import cached_path
 
 FORMAT = '{asctime} {levelname} [{name}] {message}'
 DATEFMT = "%H:%M:%S"
@@ -44,6 +43,11 @@ def setup_nltk():
     nltk.download('punkt', quiet=True)
     logger.info("done")
 
+def setup_spacy():
+    model = "en_core_web_md"
+    logger = logging.getLogger(model)
+    logger.setLevel(logging.INFO)
+    spacy.load()
 
 def setup_glove():
     data_path = os.path.expanduser("~/.cache/glove")
@@ -117,7 +121,7 @@ def setup_glove():
 def setup_distilbert():
     model_name = 'distilbert-base-uncased'
 
-    logger = logging.getLogger("distilbert")
+    logger = logging.getLogger(model_name)
     logger.setLevel(logging.INFO)
 
     logger.info("begin")
@@ -130,7 +134,7 @@ def setup_distilbert():
         logger.info("download config file...")
         with open(os.devnull, "w") as devnull:
             with contextlib.redirect_stderr(devnull):
-                transformers_cached_path(config_url, resume_download=True)
+                cached_path(config_url, resume_download=True)
         logger.info("download config file done")
     except Exception as ex:
         logger.exception("problem downloading config file: %s", ex)
@@ -139,7 +143,7 @@ def setup_distilbert():
         logger.info("download tokenizer file...")
         with open(os.devnull, "w") as devnull:
             with contextlib.redirect_stderr(devnull):
-                transformers_cached_path(tokenizer_url, resume_download=True)
+                cached_path(tokenizer_url, resume_download=True)
         logger.info("download tokenizer file done")
     except Exception as ex:
         logger.exception("problem downloading tokenizer file: %s", ex)
@@ -148,47 +152,30 @@ def setup_distilbert():
         logger.info("download model file...")
         with open(os.devnull, "w") as devnull:
             with contextlib.redirect_stderr(devnull):
-                transformers_cached_path(model_url, resume_download=True)
+                cached_path(model_url, resume_download=True)
         logger.info("download model file done")
     except Exception as ex:
         logger.exception("problem downloading model file: %s", ex)
     logger.info("done")
 
 
-def setup_bert():
-    model_name = 'bert-base-nli-mean-tokens'
-    model_url = __DOWNLOAD_SERVER__ + model_name + '.zip'
-    data_path = os.path.expanduser('~/.cache/torch/sentence_transformers')
-    folder_name = model_url.replace("https://", "").replace("http://", "").replace("/", "_")[:250]
-    model_path = os.path.join(data_path, folder_name)
-    zip_path = os.path.join(model_path, 'model.zip')
+def setup_roberta():
+    model_name = 'roberta-large-mnli'
 
-    logger = logging.getLogger("bert")
+    logger = logging.getLogger(model_name)
     logger.setLevel(logging.INFO)
 
     logger.info("begin")
+    model_url = RobertaModel.pretrained_model_archive_map[model_name]
 
-    # if less then 2 files in folder then there is no file
-    # or only the zip (could be corrupted because of a former
-    # interrupt) -> redownload to be save
-    if not os.path.exists(model_path) or len(os.listdir(model_path)) < 2:
-        logger.info("fetch bert model")
-        os.makedirs(model_path, exist_ok=True)
-
-        logger.info("source url: %s", model_url)
-        logger.info("output path: %s", zip_path)
-        try:
-            download_file(model_url, zip_path, logger)
-        except Exception as ex:
-            logger.exception("Error downloading file: %s", ex)
-            shutil.rmtree(model_path)
-            return
-
-        logger.info("extracting...")
-        with ZipFile(zip_path, "r") as zip_file:
-            zip_file.extractall(model_path)
-    else:
-        logger.info("model in cache")
+    try:
+        logger.info("download model file...")
+        with open(os.devnull, "w") as devnull:
+            with contextlib.redirect_stderr(devnull):
+                cached_path(model_url, resume_download=True)
+        logger.info("download model file done")
+    except Exception as ex:
+        logger.exception("problem downloading model file: %s", ex)
     logger.info("done")
 
 
@@ -206,18 +193,18 @@ def setup():
     glove_thread = Thread(target=setup_glove, daemon=True)
     glove_thread.start()
 
-    # bert -> sentencesimilarity
-    bert_thread = Thread(target=setup_bert, daemon=True)
-    bert_thread.start()
-
-    # distel bert -> moverscore model
+    # distil bert -> moverscore model
     distilbert_thread = Thread(target=setup_distilbert, daemon=True)
     distilbert_thread.start()
+    distilbert_thread.join()
+
+    # roberta -> bert metric
+    roberta_thread = Thread(target=setup_roberta, daemon=True)
+    roberta_thread.start()
 
     nltk_thread.join()
     glove_thread.join()
-    bert_thread.join()
-    distilbert_thread.join()
+    roberta_thread.join()
 
     logger.info("done")
 

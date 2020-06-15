@@ -1,33 +1,32 @@
-import sys
-sys.path.insert(1, '.')
-import torch
-from transformers import *
-import logging
-import numpy as np
-from numpy import ndarray
 from typing import List
 
-logging.basicConfig(level=logging.WARNING)
+import numpy as np
+import torch
+from numpy import ndarray
+from transformers import (AlbertModel, AlbertTokenizer, BertModel,
+                          BertTokenizer, DistilBertModel, DistilBertTokenizer,
+                          PreTrainedModel, PreTrainedTokenizer, XLMModel,
+                          XLMTokenizer, XLNetModel, XLNetTokenizer)
 
 
 class BertParent(object):
 
     MODELS = {
-        'bert-base-uncased': (BertModel, BertTokenizer),
-        'bert-large-uncased': (BertModel, BertTokenizer),
-        'xlnet-base-cased': (XLNetModel, XLNetTokenizer),
-        'xlm-mlm-enfr-1024': (XLMModel, XLMTokenizer),
-        'distilbert-base-uncased': (DistilBertModel, DistilBertTokenizer),
-        'albert-base-v1': (AlbertModel, AlbertTokenizer),
-        'albert-large-v1': (AlbertModel, AlbertTokenizer),
-        'albert-large-v2': (AlbertModel, AlbertTokenizer)
+        "bert-base-uncased": (BertModel, BertTokenizer),
+        "bert-large-uncased": (BertModel, BertTokenizer),
+        "xlnet-base-cased": (XLNetModel, XLNetTokenizer),
+        "xlm-mlm-enfr-1024": (XLMModel, XLMTokenizer),
+        "distilbert-base-uncased": (DistilBertModel, DistilBertTokenizer),
+        "albert-base-v1": (AlbertModel, AlbertTokenizer),
+        "albert-large-v1": (AlbertModel, AlbertTokenizer),
+        "albert-large-v2": (AlbertModel, AlbertTokenizer),
     }
 
     def __init__(
         self,
         model: str,
-        custom_model: PreTrainedModel=None,
-        custom_tokenizer: PreTrainedTokenizer=None
+        custom_model: PreTrainedModel = None,
+        custom_tokenizer: PreTrainedTokenizer = None,
     ):
         """
         :param model: Model is the string path for the bert weights. If given a keyword, the s3 path will be used
@@ -58,12 +57,13 @@ class BertParent(object):
         tokenized_text = self.tokenizer.tokenize(text)
         indexed_tokens = self.tokenizer.convert_tokens_to_ids(tokenized_text)
         return torch.tensor([indexed_tokens])
+
     def extract_embeddings(
         self,
         text: str,
-        hidden: int=-2,
-        squeeze: bool=False,
-        reduce_option: str ='mean'
+        hidden: int = -2,
+        squeeze: bool = False,
+        reduce_option: str = "mean",
     ) -> ndarray:
 
         """
@@ -80,10 +80,10 @@ class BertParent(object):
 
         if -1 > hidden > -12:
 
-            if reduce_option == 'max':
+            if reduce_option == "max":
                 pooled = hidden_states[hidden].max(dim=1)[0]
 
-            elif reduce_option == 'median':
+            elif reduce_option == "median":
                 pooled = hidden_states[hidden].median(dim=1)[0]
 
             else:
@@ -106,10 +106,7 @@ class BertParent(object):
     #     ])
 
     def create_matrix(
-        self,
-        content: List[str],
-        hidden: int=-2,
-        reduce_option: str = 'mean'
+        self, content: List[str], hidden: int = -2, reduce_option: str = "mean"
     ) -> ndarray:
         """
         Create matrix from the embeddings
@@ -119,15 +116,18 @@ class BertParent(object):
         :return: A numpy array matrix of the given content.
         """
 
-        return np.asarray([
-            np.squeeze(self.extract_embeddings(t, hidden=hidden, reduce_option=reduce_option).data.numpy())
-            for t in content
-        ])
+        return np.asarray(
+            [
+                np.squeeze(
+                    self.extract_embeddings(
+                        t, hidden=hidden, reduce_option=reduce_option
+                    ).data.numpy()
+                )
+                for t in content
+            ]
+        )
 
     def __call__(
-        self,
-        content: List[str],
-        hidden: int= -2,
-        reduce_option: str = 'mean'
+        self, content: List[str], hidden: int = -2, reduce_option: str = "mean"
     ) -> ndarray:
         return self.create_matrix(content, hidden, reduce_option)

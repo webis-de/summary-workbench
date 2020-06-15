@@ -1,12 +1,14 @@
-import React from "react";
+import React, { useRef } from "react";
 import Button from "react-bootstrap/Button";
 import { FaUpload } from "react-icons/fa";
 
-const UploadButton = ({ setFileName, fileInputRef }) => {
+const UploadButton = ({ setFile }) => {
+  const fileInputRef = useRef()
+
   const fileSelectOnChange = () => {
     const files = fileInputRef.current.files;
     const file = files[0];
-    setFileName(file.name)
+    setFile(file)
   };
 
   return (

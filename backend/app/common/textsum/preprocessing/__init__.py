@@ -1,11 +1,9 @@
-import sys
+import itertools
+from typing import List, Set, Tuple
 
-sys.path.insert(1, ".")
+import spacy
 
 import syntok.segmenter as sentence_segmenter
-import spacy
-import itertools
-from typing import Set, List, Tuple
 
 
 class PreProcessor:
@@ -65,7 +63,6 @@ class PreProcessor:
             List[str]: [description]
         """
         # exclude title
-        doc_sentences = list(itertools.chain.from_iterable(record['paragraphs']))[1:]
-        segments = [d['text'] for d in doc_sentences if d['label'] != 'no-unit']
+        doc_sentences = list(itertools.chain.from_iterable(record["paragraphs"]))[1:]
+        segments = [d["text"] for d in doc_sentences if d["label"] != "no-unit"]
         return segments
-

@@ -24,19 +24,18 @@ the application can be accessed via `localhost:3000`
 
 # Configuration and Updates
 
-When pulling a new version it might be necessary to delete the `comparefile_virtualenvs` volume (`docker volume rm comparefile_virtualenvs`),
-so new Packages get installed. By default packages get only installed if the virtualenv doesn't already exist to speed up the startup process.
-Alternatively, the installation on every startup of the docker container can be forced by setting the environment variable `INSTALL_ALWAYS="yes"`.
-This can be configured by `echo INSTALL_ALWAYS="yes" > ~/comparefile/.env`
+Packages get checked and updated on every startup of the backend container. This takes some time and is useless, when you know that nothing has changed.
+You can disable this behavior by setting the environment variable `INSTALL_ALWAYS="no"`. This can be configured by `echo INSTALL_ALWAYS="no" > ~/comparefile/.env`  
+Sometimes a quick fix for a Problem might be to delete the `comparefile_virtualenvs` volume (`docker volume rm comparefile_virtualenvs`) and restart the application.
 
 # Used Metrics and Implementations
-- rouge: [pltrdy/rouge](https://github.com/pltrdy/rouge)
-- BERT: [Huffon/sentence-similarity](https://github.com/Huffon/sentence-similarity)
+- BERT: [Tiiiger/bert_score](https://github.com/Tiiiger/bert_score) (**model**: roberta-large-mnli)
 - BLEU: [Maluuba/nlg-eval](https://github.com/Maluuba/nlg-eval)
 - CIDEr: [Maluuba/nlg-eval](https://github.com/Maluuba/nlg-eval)
 - METEOR: [Maluuba/nlg-eval](https://github.com/Maluuba/nlg-eval)
-- MoverScore: [AIPHES/emnlp19-moverscore](https://github.com/AIPHES/emnlp19-moverscore)
-- greedy matching: [Maluuba/nlg-eval](https://github.com/Maluuba/nlg-eval)
+- MoverScore: [AIPHES/emnlp19-moverscore](https://github.com/AIPHES/emnlp19-moverscore) (**model**: distilbert-base-uncased)
+- greedy matching: [Maluuba/nlg-eval](https://github.com/Maluuba/nlg-eval) (**model**: glove.6B.300d)
+- ROUGE: [pltrdy/rouge](https://github.com/pltrdy/rouge)
 
 # Similar Projects
 - [vizseq](https://github.com/facebookresearch/vizseq)

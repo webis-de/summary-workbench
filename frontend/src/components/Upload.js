@@ -1,4 +1,4 @@
-import React, { useContext, useRef, useState } from "react";
+import React, { useContext, useState } from "react";
 import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
 import Col from "react-bootstrap/Col";
@@ -14,8 +14,8 @@ import { SettingsContext } from "../contexts/SettingsContext";
 import { ChooseFile } from "./Upload/ChooseFile";
 
 const Upload = ({ className, reloadResult }) => {
-  const hypFileInputRef = useRef();
-  const refFileInputRef = useRef();
+  const [hypFile, setHypFile] = useState(null);
+  const [refFile, setRefFile] = useState(null);
 
   const { settings } = useContext(SettingsContext);
   const { setCalculateResult } = useContext(CalculateContext);
@@ -43,20 +43,16 @@ const Upload = ({ className, reloadResult }) => {
   };
 
   const compute = () => {
-    const hypfiles = hypFileInputRef.current.files;
-    const reffiles = refFileInputRef.current.files;
-    if (hypfiles.length !== 0 && reffiles.length !== 0) {
+    if (hypFile !== null && refFile !== null) {
       setIsComputing(true);
-      const hypfile = hypfiles[0];
-      const reffile = reffiles[0];
 
       Promise.all([
-        readFile(hypfile).then((text) => text.trim()),
-        readFile(reffile).then((text) => text.trim()),
+        readFile(hypFile).then((text) => text.trim()),
+        readFile(refFile).then((text) => text.trim()),
       ]).then(([hypdata, refdata]) => {
         const hyplines = hypdata.split("\n");
         const reflines = refdata.split("\n");
-        const name = hypfile.name + "-" + reffile.name;
+        const name = hypFile.name + "-" + refFile.name;
         const chosenMetrics = getChosenMetrics();
 
         if (hyplines.length === reflines.length) {
@@ -106,10 +102,10 @@ const Upload = ({ className, reloadResult }) => {
       <Card.Body className="p-3">
         <Row>
           <Col className="mb-3" md={6}>
-            <ChooseFile fileInputRef={hypFileInputRef} name="HypFile" />
+            <ChooseFile file={hypFile} setFile={setHypFile} name="HypFile" />
           </Col>
           <Col className="mb-3" md={6}>
-            <ChooseFile fileInputRef={refFileInputRef} name="RefFile" />
+            <ChooseFile file={refFile} setFile={setRefFile} name="RefFile" />
           </Col>
         </Row>
         <div className="d-flex flex-sm-row flex-column justify-content-between">

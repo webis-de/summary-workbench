@@ -8,7 +8,6 @@ const readFile = (file) => {
     };
 
     reader.onload = () => {
-      console.log(reader.result)
       resolve(reader.result);
     };
     reader.readAsText(file);

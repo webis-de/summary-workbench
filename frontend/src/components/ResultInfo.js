@@ -1,10 +1,10 @@
 import React from "react";
-import Tabs from "react-bootstrap/Tabs";
 import Tab from "react-bootstrap/Tab";
+import Tabs from "react-bootstrap/Tabs";
 
-import { ScoreTable } from "./ScoreTable";
 import { CompareTable } from "./CompareTable";
 import { Export } from "./Export";
+import { ScoreTable } from "./ScoreTable";
 
 const ResultInfo = ({ scoreInfo, comparisons }) => {
   const hasScores = Object.keys(scoreInfo).length > 0;

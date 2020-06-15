@@ -6,12 +6,15 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
+bert-score = "*"
 flask = "*"
 flask-cors = "*"
 flask-restx = "*"
 gensim = "*"
 gunicorn = "*"
 marshmallow = "*"
+networkx = "*"
+newspaper3k = "*"
 nltk = "*"
 numpy = "*"
 pandas = "*"
@@ -22,6 +25,7 @@ requests = "*"
 rouge = "*"
 scikit-learn = "*"
 sentence_transformers = "*"
+syntok = "*"
 torch = "*"
 
 [requires]

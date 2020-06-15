@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import Tabs from "react-bootstrap/Tabs";
-import Tab from "react-bootstrap/Tab";
 import Spinner from "react-bootstrap/Spinner";
+import Tab from "react-bootstrap/Tab";
+import Tabs from "react-bootstrap/Tabs";
 
 import { getCompareDataRequest } from "../common/api";
 import { CompareTable } from "./CompareTable";
-import { ScoreTable } from "./ScoreTable";
 import { Export } from "./Export";
+import { ScoreTable } from "./ScoreTable";
 
 const SavedInfo = ({ name, scoreInfo }) => {
   const [comparisons, setComparisons] = useState(null);

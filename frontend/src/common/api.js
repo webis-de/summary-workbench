@@ -63,3 +63,26 @@ const getExportRequest = (scores, format, transpose, precision) => {
 };
 
 export { getExportRequest };
+
+const summarizers = [
+  ["textrank", "TextRank"],
+  ["bert", "BERTSummarizer"],
+  ["newspaper3k", "Newspaper3k"]
+];
+
+const summarizeKinds = [
+  ["raw", "raw text"],
+  ["url", "URL"],
+];
+
+const summarizeRequest = (text, summarizer, kind) => {
+  const method = "POST";
+  const body = JSON.stringify({ text, summarizer, kind });
+  return fetch("http://localhost:5000/api/summarize", {
+    method,
+    body,
+    headers: { "Content-Type": "application/json" },
+  });
+};
+
+export { summarizeRequest, summarizers, summarizeKinds };
