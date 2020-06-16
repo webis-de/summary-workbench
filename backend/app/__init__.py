@@ -1,15 +1,18 @@
+import click
+
 from flask import Flask
 from flask.cli import with_appcontext
 from flask_cors import CORS
-import click
+from flask_mongoengine import MongoEngine
 
 # config
 from config import Config
 
+# services
+mongo = MongoEngine()
+
 # blueprints
 from app.api import bp as api_bp
-
-# services
 
 # commands
 from setup import setup
@@ -25,6 +28,7 @@ def create_app():
 
     # init servies
     CORS(app)
+    mongo.init_app(app)
 
     # register blueprints
     app.register_blueprint(api_bp, url_prefix="/api")

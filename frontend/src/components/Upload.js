@@ -35,11 +35,7 @@ const Upload = ({ className, reloadResult }) => {
   const getComparisons = (hypdata, refdata) => {
     const hyplines = hypdata.split("\n");
     const reflines = refdata.split("\n");
-    const comparisons = hyplines.map((hypline, i) => {
-      const [hyp, ref] = markup(hypline, reflines[i]);
-      return [i + 1, hyp, ref];
-    });
-    return comparisons;
+    return hyplines.map((hypline, i) => markup(hypline, reflines[i]))
   };
 
   const compute = () => {

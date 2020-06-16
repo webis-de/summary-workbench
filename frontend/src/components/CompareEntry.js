@@ -21,7 +21,7 @@ const CompareEntry = () => {
           <Upload className="mb-3" reloadResult={reloadResult} />
           <Result className="mb-3" key={resultKey} reloadSaved={reloadSaved} />
         </CalculateProvider>
-        <Saved className="mb-3" key={savedKey} />
+        <Saved className="mb-3" key={savedKey} reloadSaved={reloadSaved} />
       </SettingsProvider>
     </Container>
   );

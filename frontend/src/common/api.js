@@ -11,6 +11,7 @@ const calculateRequest = (metrics, hypdata, refdata) => {
 export { calculateRequest };
 
 const saveCalculationRequest = (name, scores, comparisons) => {
+  console.log({ name, scores, comparisons });
   const method = "POST";
   const body = JSON.stringify({ name, scores, comparisons });
   const headers = { "Content-Type": "application/json" };

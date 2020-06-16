@@ -13,7 +13,7 @@ import {
 import { SettingsContext } from "../contexts/SettingsContext";
 import { SavedInfo } from "./SavedInfo";
 
-const Saved = ({ className }) => {
+const Saved = ({ className, reloadSaved }) => {
   const [open, setOpen] = useState(true);
   const [calculations, setCalculations] = useState([]);
   const { settings } = useContext(SettingsContext);
@@ -30,12 +30,13 @@ const Saved = ({ className }) => {
         if (response.status === 404) {
           alert("Resource not found");
         }
-        window.location.reload();
+        reloadSaved();
       })
       .catch(() => alert("server not available"));
   };
 
   if (calculations.length > 0) {
+    console.log(calculations);
     return (
       <Card className={className ? className : ""}>
         <Card.Body>
@@ -47,7 +48,7 @@ const Saved = ({ className }) => {
           </Button>
           <Collapse in={open}>
             <Accordion className="mt-4">
-              {calculations.map(([name, scores]) => (
+              {calculations.map(({ name, scores }) => (
                 <Card key={name}>
                   <Card.Header className="d-flex justify-content-between">
                     <div className="d-md-flex flex-grow-1 justify-content-between">

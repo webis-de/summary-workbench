@@ -18,13 +18,12 @@ const SavedInfo = ({ name, scoreInfo }) => {
     getCompareDataRequest(name)
       .then((response) => {
         if (response.ok) {
-          response.json().then((data) => {
-            setComparisons(data.comparisons);
-          });
+          return response.json();
         } else {
           alert("server error");
         }
       })
+      .then(({ comparisons }) => setComparisons(comparisons))
       .finally(() => setIsLoading(false));
   };
 

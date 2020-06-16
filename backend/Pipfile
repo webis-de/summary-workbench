@@ -27,6 +27,7 @@ scikit-learn = "*"
 sentence_transformers = "*"
 syntok = "*"
 torch = "*"
+flask-mongoengine = "*"
 
 [requires]
 python_version = "3.8"

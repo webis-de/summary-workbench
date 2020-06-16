@@ -1,10 +1,9 @@
 from abc import abstractmethod
 from typing import List
+
 import numpy as np
 from spacy.lang.en import English
 from transformers import PreTrainedModel, PreTrainedTokenizer
-
-import neuralcoref
 
 from .BertParent import BertParent
 from .ClusterFeatures import ClusterFeatures
@@ -17,9 +16,9 @@ class ModelProcessor(object):
         custom_model: PreTrainedModel = None,
         custom_tokenizer: PreTrainedTokenizer = None,
         hidden: int = -2,
-        reduce_option: str = 'mean',
-        language = English,
-        random_state: int = 12345
+        reduce_option: str = "mean",
+        language=English,
+        random_state: int = 12345,
     ):
         """
         This is the parent Bert Summarizer model. New methods should implement this class
@@ -39,7 +38,7 @@ class ModelProcessor(object):
         self.reduce_option = reduce_option
         self.nlp = language()
         self.random_state = random_state
-        self.nlp.add_pipe(self.nlp.create_pipe('sentencizer'))
+        self.nlp.add_pipe(self.nlp.create_pipe("sentencizer"))
 
     def process_content_sentences(
         self, body: str, min_length: int = 40, max_length: int = 600
@@ -53,7 +52,11 @@ class ModelProcessor(object):
         """
 
         doc = self.nlp(body)
-        return [c.string.strip() for c in doc.sents if max_length > len(c.string.strip()) > min_length]
+        return [
+            c.string.strip()
+            for c in doc.sents
+            if max_length > len(c.string.strip()) > min_length
+        ]
 
     @abstractmethod
     def run_clusters(
@@ -82,7 +85,7 @@ class ModelProcessor(object):
         if sentences:
             sentences = self.run_clusters(sentences, ratio, algorithm, use_first)
 
-        return '. '.join([s.strip('.') for s in sentences])
+        return ". ".join([s.strip(".") for s in sentences])
 
     def __call__(
         self,
@@ -110,7 +113,7 @@ class BertSummarizer(ModelProcessor):
         custom_model: PreTrainedModel = None,
         custom_tokenizer: PreTrainedTokenizer = None,
         hidden: int = -2,
-        reduce_option: str = 'mean',
+        reduce_option: str = "mean",
         language=English,
         random_state: int = 12345,
     ):
@@ -126,7 +129,13 @@ class BertSummarizer(ModelProcessor):
         :param random_state: The random state to reproduce summarizations.
         """
         super(BertSummarizer, self).__init__(
-            model, custom_model, custom_tokenizer, hidden, reduce_option, language, random_state
+            model,
+            custom_model,
+            custom_tokenizer,
+            hidden,
+            reduce_option,
+            language,
+            random_state,
         )
 
     def run_clusters(

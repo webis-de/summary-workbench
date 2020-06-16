@@ -1,4 +1,4 @@
-import os
+from os import environ
 
 class Config():
-    pass
+    MONGODB_HOST = environ.get("MONGODB_HOST")

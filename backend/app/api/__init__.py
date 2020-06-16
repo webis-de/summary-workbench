@@ -1,7 +1,6 @@
 from flask import Blueprint, current_app
 from flask_restx import Api
 
-from app.common.calculation import SavedCalculations
 from app.common.metrics import Metrics
 from app.common.summarizer import Summarizers
 
@@ -16,7 +15,6 @@ api = Api(bp)
 
 
 def load_resources():
-    current_app.SAVED_CALCULATIONS = SavedCalculations()
     current_app.METRICS = Metrics()
     current_app.SUMMARIZERS = Summarizers()
 

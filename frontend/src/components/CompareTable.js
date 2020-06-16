@@ -106,9 +106,9 @@ const CompareTable = ({ comparisons }) => {
         <tbody key={currentStart + "-" + currentPageSize}>
           {comparisons
             .slice(currentStart - 1, currentStart + currentPageSize - 1)
-            .map(([number, hyp, ref]) => (
-              <tr key={number}>
-                <td>{number}</td>
+            .map(([hyp, ref], i) => (
+              <tr key={i+currentStart}>
+                <td>{i+currentStart}</td>
                 <td>
                   <Markup markupedText={hyp} />
                 </td>
