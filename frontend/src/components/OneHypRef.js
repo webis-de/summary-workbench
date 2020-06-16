@@ -67,7 +67,6 @@ const OneHypRef = ({ className }) => {
     }
     setIsComputing(true);
     calculateRequest(getChosenMetrics(settings), [hypdata], [refdata])
-      .then((response) => response.json())
       .then((scores) => {
         const [hyp, ref] = getComparison(hypdata, refdata);
         setCalculateResult({ scores, hyp, ref });

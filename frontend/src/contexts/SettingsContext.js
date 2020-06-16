@@ -1,31 +1,31 @@
 import React, { useMemo, useReducer } from "react";
 
-import { settings as baseSettingsInfo } from "../common/settings";
+import { settings as baseSettings } from "../common/settings";
 
 const SettingsContext = React.createContext();
+
+const saveSetting = (metric, status) => window.localStorage.setItem(metric, JSON.stringify(status === true));
+const loadSetting = metric => JSON.parse(window.localStorage.getItem(metric)) === true;
 
 const toggleSettingReducer = (settings, metric) => {
   const newSettings = Object.assign({}, settings);
   const is_set = !newSettings[metric].is_set;
-  newSettings[metric].is_set = is_set;
-  window.localStorage.setItem(metric, JSON.stringify(is_set));
+  newSettings[metric].is_set = is_set
+  saveSetting(metric, is_set)
   return newSettings;
 };
 
 const SettingsProvider = ({ children }) => {
-  const settingsInfo = useMemo(() => {
-    const ret = Object.assign({}, baseSettingsInfo);
-    Object.keys(baseSettingsInfo).forEach((metric) => {
-      const is_set = JSON.parse(window.localStorage.getItem(metric));
-      ret[metric].is_set = is_set !== null ? is_set : false;
-    });
-    return ret;
-  }, []);
+  const defaultSettings = useMemo(() =>
+    Object.fromEntries(
+      Object.entries(baseSettings).map(([metric, info]) => {
+        info.is_set = loadSetting(metric);
+        return [metric, info];
+      })
+    )
+  , []);
 
-  const [settings, toggleSetting] = useReducer(
-    toggleSettingReducer,
-    settingsInfo
-  );
+  const [settings, toggleSetting] = useReducer(toggleSettingReducer, defaultSettings);
 
   return (
     <SettingsContext.Provider value={{ settings, toggleSetting }}>

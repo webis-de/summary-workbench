@@ -1,10 +1,8 @@
 import React, { useContext, useState } from "react";
-import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
 import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
-import Spinner from "react-bootstrap/Spinner";
-import { FaArrowAltCircleDown, FaRegFile } from "react-icons/fa";
+import { FaRegFile } from "react-icons/fa";
 
 import { calculateRequest } from "../common/api";
 import { markup } from "../common/fragcolors";
@@ -12,6 +10,7 @@ import { readFile } from "../common/readFile";
 import { CalculateContext } from "../contexts/CalculateContext";
 import { SettingsContext } from "../contexts/SettingsContext";
 import { ChooseFile } from "./Upload/ChooseFile";
+import { ComputeButton } from "./utils/ComputeButton";
 
 const Upload = ({ className, reloadResult }) => {
   const [hypFile, setHypFile] = useState(null);
@@ -22,20 +21,15 @@ const Upload = ({ className, reloadResult }) => {
 
   const [isComputing, setIsComputing] = useState(false);
 
-  const getChosenMetrics = () => {
-    const chosenMetrics = [];
-    for (const [metric, metricInfo] of Object.entries(settings)) {
-      if (metricInfo.is_set) {
-        chosenMetrics.push(metric);
-      }
-    }
-    return chosenMetrics;
-  };
+  const getChosenMetrics = () =>
+    Object.entries(settings)
+      .filter(([metric, { is_set }]) => is_set)
+      .map(([metric, metricInfo]) => metric);
 
   const getComparisons = (hypdata, refdata) => {
     const hyplines = hypdata.split("\n");
     const reflines = refdata.split("\n");
-    return hyplines.map((hypline, i) => markup(hypline, reflines[i]))
+    return hyplines.map((hypline, i) => markup(hypline, reflines[i]));
   };
 
   const compute = () => {
@@ -54,13 +48,6 @@ const Upload = ({ className, reloadResult }) => {
         if (hyplines.length === reflines.length) {
           if (chosenMetrics.length > 0) {
             calculateRequest(chosenMetrics, hyplines, reflines)
-              .then((response) => {
-                if (response.ok) {
-                  return response.json();
-                } else {
-                  throw new Error("response not ok");
-                }
-              })
               .then((scores) => {
                 const comparisons = getComparisons(hypdata, refdata);
                 setCalculateResult({ name, scores, comparisons });
@@ -91,7 +78,7 @@ const Upload = ({ className, reloadResult }) => {
   };
 
   return (
-    <Card className={className ? className : ""}>
+    <Card className={className}>
       <Card.Header>
         <FaRegFile /> Choose file
       </Card.Header>
@@ -104,21 +91,11 @@ const Upload = ({ className, reloadResult }) => {
             <ChooseFile file={refFile} setFile={setRefFile} name="RefFile" />
           </Col>
         </Row>
-        <div className="d-flex flex-sm-row flex-column justify-content-between">
-          {isComputing ? (
-            <Spinner className="m-2" animation="border" size="lg" />
-          ) : (
-            <Button
-              className="mb-2 m-sm-0 d-flex justify-content-center align-items-center"
-              variant="success"
-              size="lg"
-              onClick={compute}
-            >
-              <FaArrowAltCircleDown className="mr-2" />
-              Compute
-            </Button>
-          )}
-        </div>
+        <ComputeButton
+          className="d-flex flex-sm-row flex-column justify-content-between"
+          isComputing={isComputing}
+          onClick={compute}
+        />
       </Card.Body>
     </Card>
   );

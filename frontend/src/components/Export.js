@@ -3,16 +3,45 @@ import Button from "react-bootstrap/Button";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 import FormControl from "react-bootstrap/FormControl";
 import InputGroup from "react-bootstrap/InputGroup";
-import Spinner from "react-bootstrap/Spinner";
 
 import { getExportRequest } from "../common/api";
 import { SettingsContext } from "../contexts/SettingsContext";
+import { Loading } from "./utils/Loading";
+
+const LatexButton = ({ onClick }) => (
+  <Button className="mr-4 flex-fill" variant="success" onClick={onClick}>
+    Latex
+  </Button>
+);
+const CSVButton = ({ onClick }) => (
+  <Button className="mr-4 flex-fill" variant="primary" onClick={onClick}>
+    CSV
+  </Button>
+);
+
+const TransposeButton = ({ isTransposed, onClick }) => (
+  <Button variant={isTransposed ? "default" : "primary"} onClick={onClick}>
+    transpose
+  </Button>
+);
+
+const ExportPreview = ({ text }) =>
+  text !== null && <pre className="p-4 border">{text}</pre>;
+
+const PrecionField = ({ onChange, precision }) => (
+  <InputGroup className="ml-md-4 mr-4">
+    <InputGroup.Prepend>
+      <InputGroup.Text>precision</InputGroup.Text>
+    </InputGroup.Prepend>
+    <FormControl onChange={onChange} value={precision} />
+  </InputGroup>
+);
 
 const Export = ({ scoreInfo }) => {
   const { settings } = useContext(SettingsContext);
   const [exportText, setExportText] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [transpose, toggleTranspose] = useReducer((state) => !state, true);
+  const [isTransposed, toggleTranspose] = useReducer((state) => !state, true);
   const [precision, setPrecision] = useReducer(
     (state, newValue) => newValue.replace(/\D/g, ""),
     "3"
@@ -33,14 +62,13 @@ const Export = ({ scoreInfo }) => {
       const parsedPrecision = parseInt(precision.replace(/\D/g, ""));
       if (!isNaN(parsedPrecision) && parsedPrecision >= 0) {
         const scores = {};
-        for (const [metric, is_chosen] of Object.entries(chosenMetrics)) {
-          if (is_chosen) {
-            scores[metric] = scoreInfo[metric];
-          }
-        }
+        Object.entries(chosenMetrics)
+          .filter(([metric, is_chosen]) => is_chosen)
+          .forEach(
+            ([metric, is_chosen]) => (scores[metric] = scoreInfo[metric])
+          );
         setIsLoading(true);
-        getExportRequest(scores, format, transpose, parsedPrecision)
-          .then((response) => response.json())
+        getExportRequest(scores, format, isTransposed, parsedPrecision)
           .then((json) => setExportText(json["text"]))
           .catch(() => alert("server not available"))
           .finally(() => setIsLoading(false));
@@ -70,48 +98,27 @@ const Export = ({ scoreInfo }) => {
             );
           })}
       </ButtonGroup>
-      {isLoading ? (
-        <Spinner className="my-3" animation="border" size="sm" />
-      ) : (
+      <Loading isLoading={isLoading}>
         <div className="d-flex flex-md-row flex-column justify-content-md-between">
           <div className="my-3 d-flex">
-            <Button
-              className="mr-4 flex-fill"
-              variant="success"
-              onClick={() => exportAs("csv")}
-            >
-              CSV
-            </Button>
-            <Button
-              className="flex-fill"
-              variant="primary"
-              onClick={() => exportAs("latex")}
-            >
-              LaTeX
-            </Button>
+            <CSVButton onClick={() => exportAs("csv")} />
+            <LatexButton onClick={() => exportAs("latex")} />
           </div>
           <div className="my-3 d-flex">
-            <InputGroup className="ml-md-4 mr-4">
-              <InputGroup.Prepend>
-                <InputGroup.Text>precision</InputGroup.Text>
-              </InputGroup.Prepend>
-              <FormControl
-                onChange={(e) => {
-                  setPrecision(e.target.value);
-                }}
-                value={precision}
-              />
-            </InputGroup>
-            <Button
-              variant={transpose ? "default" : "primary"}
+            <PrecionField
+              precision={precision}
+              onChange={(e) => {
+                setPrecision(e.target.value);
+              }}
+            />
+            <TransposeButton
+              isTransposed={isTransposed}
               onClick={() => toggleTranspose()}
-            >
-              transpose
-            </Button>
+            />
           </div>
         </div>
-      )}
-      {exportText !== null && <pre className="p-4 border">{exportText}</pre>}
+      </Loading>
+      <ExportPreview text={exportText} />
     </>
   );
 };

@@ -14,7 +14,7 @@ const NavBar = () => (
           Compare
         </Nav.Link>
         <Nav.Link as={Link} to={{ pathname: "/summarize" }}>
-          Summarize 
+          Summarize
         </Nav.Link>
         <Nav.Link className="ml-auto" as={Link} to={{ pathname: "/about" }}>
           About

@@ -1,10 +1,14 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, {
+  useContext,
+  useEffect,
+  useMemo,
+  useReducer,
+  useState,
+} from "react";
 import Accordion from "react-bootstrap/Accordion";
-import Badge from "react-bootstrap/Badge";
 import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
 import Collapse from "react-bootstrap/Collapse";
-import { FaCloud, FaTrash } from "react-icons/fa";
 
 import {
   deleteCalculationRequest,
@@ -12,40 +16,42 @@ import {
 } from "../common/api";
 import { SettingsContext } from "../contexts/SettingsContext";
 import { SavedInfo } from "./SavedInfo";
+import { DeleteButton } from "./utils/DeleteButton";
+import { MetricBadges } from "./utils/MetricBadges";
+import { ToggleSavedButton } from "./utils/ToggleSavedButton";
 
 const Saved = ({ className, reloadSaved }) => {
-  const [open, setOpen] = useState(true);
+  const [open, toggleOpen] = useReducer((open) => !open, true);
   const [calculations, setCalculations] = useState([]);
   const { settings } = useContext(SettingsContext);
 
   useEffect(() => {
-    getSavedCalculationsRequest()
-      .then((response) => response.json())
-      .then((data) => setCalculations(data));
+    getSavedCalculationsRequest().then((data) => setCalculations(data));
   }, []);
 
   const deleteCalculation = (name) => {
     deleteCalculationRequest(name)
-      .then((response) => {
-        if (response.status === 404) {
-          alert("Resource not found");
-        }
-        reloadSaved();
-      })
-      .catch(() => alert("server not available"));
+      .then(() => reloadSaved())
+      .catch((e) => alert(e));
   };
+  const numberCalculations = useMemo(() => calculations.length, [calculations]);
+  const allMetrics = useMemo(
+    () =>
+      Object.entries(settings).map(([metric, { readable }]) => [
+        metric,
+        readable,
+      ]),
+    [settings]
+  );
 
-  if (calculations.length > 0) {
-    console.log(calculations);
+  if (numberCalculations > 0) {
     return (
-      <Card className={className ? className : ""}>
+      <Card className={className}>
         <Card.Body>
-          <Button variant="info" onClick={() => setOpen(!open)}>
-            <FaCloud /> saved calculations{" "}
-            <Badge variant="light" pill>
-              {calculations.length}
-            </Badge>
-          </Button>
+          <ToggleSavedButton
+            onClick={toggleOpen}
+            numberCalculations={numberCalculations}
+          />
           <Collapse in={open}>
             <Accordion className="mt-4">
               {calculations.map(({ name, scores }) => (
@@ -59,32 +65,12 @@ const Saved = ({ className, reloadSaved }) => {
                       >
                         {name}
                       </Accordion.Toggle>
-                      <div>
-                        {Object.entries(settings).map(
-                          ([metric, metricInfo]) => (
-                            <Badge
-                              key={metric}
-                              className="mx-1 my-2 mb-1"
-                              variant={
-                                Object.keys(scores).includes(metric)
-                                  ? "primary"
-                                  : "secondary"
-                              }
-                              pill
-                            >
-                              {metricInfo.readable}
-                            </Badge>
-                          )
-                        )}
-                      </div>
+                      <MetricBadges
+                        allMetrics={allMetrics}
+                        computedMetrics={Object.keys(scores)}
+                      />
                     </div>
-                    <Button
-                      className="ml-3 align-self-start"
-                      variant="danger"
-                      onClick={() => deleteCalculation(name)}
-                    >
-                      <FaTrash />
-                    </Button>
+                    <DeleteButton onClick={() => deleteCalculation(name)} />
                   </Card.Header>
                   <Accordion.Collapse eventKey={name}>
                     <Card.Body>

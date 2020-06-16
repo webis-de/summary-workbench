@@ -7,8 +7,42 @@ import Table from "react-bootstrap/Table";
 
 import { Markup } from "./Markup";
 
-const defaultStart = 1
-const defaultPageSize = 1
+const defaultStart = 1;
+const defaultPageSize = 1;
+
+const ComparisonDisplay = ({ start, size, comparisons }) => (
+  <Table>
+    <thead>
+      <tr>
+        {["", "hypothesis", "reference"].map((cell, i) => (
+          <th key={i}>{cell}</th>
+        ))}
+      </tr>
+    </thead>
+    <tbody key={start + "-" + size}>
+      {comparisons.slice(start - 1, start + size - 1).map(([hyp, ref], i) => (
+        <tr key={i + start}>
+          <td>{i + start}</td>
+          <td>
+            <Markup markupedText={hyp} />
+          </td>
+          <td>
+            <Markup markupedText={ref} />
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </Table>
+);
+
+const SizeInput = ({ onChange, onKeyDown, pageSize }) => (
+  <InputGroup className="mx-md-2 my-2">
+    <InputGroup.Prepend>
+      <InputGroup.Text>size</InputGroup.Text>
+    </InputGroup.Prepend>
+    <FormControl onChange={onChange} onKeyDown={onKeyDown} value={pageSize} />
+  </InputGroup>
+);
 
 const CompareTable = ({ comparisons }) => {
   const comparisonsLength = useMemo(() => comparisons.length, [comparisons]);
@@ -75,18 +109,13 @@ const CompareTable = ({ comparisons }) => {
             <InputGroup.Text>of {comparisonsLength}</InputGroup.Text>
           </InputGroup.Append>
         </InputGroup>
-        <InputGroup className="mx-md-2 my-2">
-          <InputGroup.Prepend>
-            <InputGroup.Text>size</InputGroup.Text>
-          </InputGroup.Prepend>
-          <FormControl
-            onChange={(e) => {
-              setPageSize(e.target.value);
-            }}
-            onKeyDown={(e) => e.keyCode === 13 && updateComparisons()}
-            value={pageSize}
-          />
-        </InputGroup>
+        <SizeInput
+          onChange={(e) => {
+            setPageSize(e.target.value);
+          }}
+          onKeyDown={(e) => e.keyCode === 13 && updateComparisons()}
+          pageSize={pageSize}
+        />
         <Button className="ml-md-2 my-2" onClick={() => updateComparisons()}>
           apply
         </Button>
@@ -95,30 +124,11 @@ const CompareTable = ({ comparisons }) => {
         <Button onClick={() => prev()}>prev</Button>
         <Button onClick={() => next()}>next</Button>
       </ButtonGroup>
-      <Table>
-        <thead>
-          <tr>
-            {["", "hypothesis", "reference"].map((cell, i) => (
-              <th key={i}>{cell}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody key={currentStart + "-" + currentPageSize}>
-          {comparisons
-            .slice(currentStart - 1, currentStart + currentPageSize - 1)
-            .map(([hyp, ref], i) => (
-              <tr key={i+currentStart}>
-                <td>{i+currentStart}</td>
-                <td>
-                  <Markup markupedText={hyp} />
-                </td>
-                <td>
-                  <Markup markupedText={ref} />
-                </td>
-              </tr>
-            ))}
-        </tbody>
-      </Table>
+      <ComparisonDisplay
+        start={currentStart}
+        size={currentPageSize}
+        comparisons={comparisons}
+      />
     </>
   );
 };

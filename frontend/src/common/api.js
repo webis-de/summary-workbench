@@ -5,13 +5,18 @@ const calculateRequest = (metrics, hypdata, refdata) => {
     method,
     body,
     headers: { "Content-Type": "application/json" },
+  }).then((response) => {
+    if (response.ok) {
+      return response.json();
+    } else {
+      throw new Error("response not ok");
+    }
   });
 };
 
 export { calculateRequest };
 
 const saveCalculationRequest = (name, scores, comparisons) => {
-  console.log({ name, scores, comparisons });
   const method = "POST";
   const body = JSON.stringify({ name, scores, comparisons });
   const headers = { "Content-Type": "application/json" };
@@ -19,6 +24,10 @@ const saveCalculationRequest = (name, scores, comparisons) => {
     method,
     body,
     headers,
+  }).then((response) => {
+    if (!response.ok) {
+      throw new Error("upload error");
+    }
   });
 };
 
@@ -26,7 +35,9 @@ export { saveCalculationRequest };
 
 const getSavedCalculationsRequest = () => {
   const method = "GET";
-  return fetch("http://localhost:5000/api/calculations", { method });
+  return fetch("http://localhost:5000/api/calculations", {
+    method,
+  }).then((response) => response.json());
 };
 
 export { getSavedCalculationsRequest };
@@ -35,10 +46,12 @@ const deleteCalculationRequest = (name) => {
   const method = "DELETE";
   return fetch(
     "http://localhost:5000/api/calculation/" + encodeURIComponent(name),
-    {
-      method,
+    { method }
+  ).then((response) => {
+    if (response.status === 404) {
+      throw new Error("Resource not found");
     }
-  );
+  });
 };
 
 export { deleteCalculationRequest };
@@ -48,7 +61,13 @@ const getCompareDataRequest = (name) => {
   return fetch(
     "http://localhost:5000/api/calculation/" + encodeURIComponent(name),
     { method }
-  );
+  ).then((response) => {
+    if (response.ok) {
+      return response.json();
+    } else {
+      alert("server error");
+    }
+  });
 };
 
 export { getCompareDataRequest };
@@ -60,7 +79,7 @@ const getExportRequest = (scores, format, transpose, precision) => {
     method,
     body,
     headers: { "Content-Type": "application/json" },
-  });
+  }).then((response) => response.json());
 };
 
 export { getExportRequest };
@@ -68,7 +87,7 @@ export { getExportRequest };
 const summarizers = [
   ["textrank", "TextRank"],
   ["bert", "BERTSummarizer"],
-  ["newspaper3k", "Newspaper3k"]
+  ["newspaper3k", "Newspaper3k"],
 ];
 
 const summarizeKinds = [
@@ -83,6 +102,12 @@ const summarizeRequest = (text, summarizer, kind) => {
     method,
     body,
     headers: { "Content-Type": "application/json" },
+  }).then((response) => {
+    if (response.ok) {
+      return response.json();
+    } else {
+      throw new Error("failure with Request");
+    }
   });
 };
 

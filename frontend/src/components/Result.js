@@ -9,6 +9,12 @@ import { saveCalculationRequest } from "../common/api";
 import { CalculateContext } from "../contexts/CalculateContext";
 import { ResultInfo } from "./ResultInfo";
 
+const UploadButton = ({ onClick }) => (
+  <Button onClick={onClick}>
+    <FaUpload />
+  </Button>
+);
+
 const Result = ({ className, reloadSaved }) => {
   const { calculateResult, setCalculateResult } = useContext(CalculateContext);
   const nameRef = useRef();
@@ -18,20 +24,16 @@ const Result = ({ className, reloadSaved }) => {
     const scores = calculateResult.scores;
     const comparisons = calculateResult.comparisons;
     saveCalculationRequest(name, scores, comparisons)
-      .then((response) => {
-        if (response.ok) {
-          setCalculateResult(null);
-          reloadSaved();
-        } else {
-          alert("upload error");
-        }
+      .then(() => {
+        setCalculateResult(null);
+        reloadSaved();
       })
-      .catch(() => alert("server not available"));
+      .catch((e) => alert(e));
   };
 
   if (calculateResult !== null) {
     return (
-      <Card className={className ? className : ""}>
+      <Card className={className}>
         <Card.Header>
           <InputGroup>
             <FormControl
@@ -40,9 +42,7 @@ const Result = ({ className, reloadSaved }) => {
               onKeyDown={(e) => e.keyCode === 13 && upload()}
             />
             <InputGroup.Append>
-              <Button onClick={upload}>
-                <FaUpload />
-              </Button>
+              <UploadButton onClick={upload} />
             </InputGroup.Append>
           </InputGroup>
         </Card.Header>
