@@ -1,7 +1,4 @@
 import React, { useContext, useState } from "react";
-import Card from "react-bootstrap/Card";
-import Col from "react-bootstrap/Col";
-import Row from "react-bootstrap/Row";
 import { FaRegFile } from "react-icons/fa";
 
 import { calculateRequest } from "../common/api";
@@ -11,6 +8,7 @@ import { CalculateContext } from "../contexts/CalculateContext";
 import { SettingsContext } from "../contexts/SettingsContext";
 import { ChooseFile } from "./Upload/ChooseFile";
 import { ComputeButton } from "./utils/ComputeButton";
+import { Section } from "./utils/Section";
 
 const Upload = ({ className, reloadResult }) => {
   const [hypFile, setHypFile] = useState(null);
@@ -78,26 +76,16 @@ const Upload = ({ className, reloadResult }) => {
   };
 
   return (
-    <Card className={className}>
-      <Card.Header>
+    <Section>
+      <h3>
         <FaRegFile /> Choose file
-      </Card.Header>
-      <Card.Body className="p-3">
-        <Row>
-          <Col className="mb-3" md={6}>
-            <ChooseFile file={hypFile} setFile={setHypFile} name="HypFile" />
-          </Col>
-          <Col className="mb-3" md={6}>
-            <ChooseFile file={refFile} setFile={setRefFile} name="RefFile" />
-          </Col>
-        </Row>
-        <ComputeButton
-          className="d-flex flex-sm-row flex-column justify-content-between"
-          isComputing={isComputing}
-          onClick={compute}
-        />
-      </Card.Body>
-    </Card>
+      </h3>
+      <div className="uk-grid uk-grid-small uk-margin-small uk-child-expand uk-child-width-1-2@s">
+        <ChooseFile file={hypFile} setFile={setHypFile} name="HypFile" />
+        <ChooseFile file={refFile} setFile={setRefFile} name="RefFile" />
+      </div>
+      <ComputeButton isComputing={isComputing} onClick={compute} />
+    </Section>
   );
 };
 

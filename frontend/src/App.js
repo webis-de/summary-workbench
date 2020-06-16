@@ -20,6 +20,7 @@ const App = () => (
         <Route render={() => <h1>404</h1>} />
       </Switch>
     </Router>
+    <div className="uk-margin-large-bottom" />
   </>
 );
 

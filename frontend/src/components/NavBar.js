@@ -1,27 +1,34 @@
 import React from "react";
-import Nav from "react-bootstrap/Nav";
-import Navbar from "react-bootstrap/Navbar";
 import { Link } from "react-router-dom";
+import { Container, Navbar } from "uikit-react";
 
 const NavBar = () => (
-  <Navbar className="pb-3">
-    <Navbar.Brand as={Link} to={{ pathname: "/" }}>
-      CompareFile
-    </Navbar.Brand>
-    <Navbar.Collapse>
-      <Nav className="d-flex flex-grow-1">
-        <Nav.Link as={Link} to={{ pathname: "/compare" }}>
-          Compare
-        </Nav.Link>
-        <Nav.Link as={Link} to={{ pathname: "/summarize" }}>
-          Summarize
-        </Nav.Link>
-        <Nav.Link className="ml-auto" as={Link} to={{ pathname: "/about" }}>
-          About
-        </Nav.Link>
-      </Nav>
-    </Navbar.Collapse>
-  </Navbar>
+  <nav className="uk-navbar uk-navbar-container uk-margin">
+    <div className="uk-navbar-left">
+      <div className="uk-navbar-item uk-logo uk-link-muted">
+        <Link to={{ pathname: "/" }} style={{ textDecoration: "none" }}>
+          CompareFile
+        </Link>
+      </div>
+      <ul className="uk-navbar-nav">
+        <li>
+          <Link to={{ pathname: "/compare" }}>Compare</Link>
+        </li>
+        <li>
+          <Link to={{ pathname: "/summarize" }}>Summarize</Link>
+        </li>
+      </ul>
+    </div>
+    <div className="uk-navbar-right">
+      <ul className="uk-navbar-nav">
+        <li>
+          <Link className="ml-auto" to={{ pathname: "/about" }}>
+            About
+          </Link>
+        </li>
+      </ul>
+    </div>
+  </nav>
 );
 
 export { NavBar };

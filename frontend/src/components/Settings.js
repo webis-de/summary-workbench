@@ -1,26 +1,21 @@
 import React, { useContext } from "react";
-import Card from "react-bootstrap/Card";
 import { FaCogs } from "react-icons/fa";
 
 import { SettingsContext } from "../contexts/SettingsContext";
 import { SettingButtons } from "./utils/SettingButtons";
+import { Section } from "./utils/Section";
 
-const Settings = ({ className }) => {
+const Settings = () => {
   const { settings, toggleSetting } = useContext(SettingsContext);
 
   return (
-    <Card className={className}>
-      <Card.Header>
-        <FaCogs /> Choose metrics
-      </Card.Header>
-      <Card.Body>
-        <SettingButtons
-          className="d-flex flex-md-row flex-column"
-          settings={settings}
-          toggleSetting={toggleSetting}
-        />
-      </Card.Body>
-    </Card>
+    <Section>
+      <h3><FaCogs /> Choose metrics</h3>
+      <SettingButtons
+        settings={settings}
+        toggleSetting={toggleSetting}
+      />
+    </Section>
   );
 };
 

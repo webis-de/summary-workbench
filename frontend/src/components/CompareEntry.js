@@ -1,5 +1,4 @@
 import React, { useReducer } from "react";
-import Container from "react-bootstrap/Container";
 
 import { CalculateProvider } from "../contexts/CalculateContext";
 import { SettingsProvider } from "../contexts/SettingsContext";
@@ -13,7 +12,7 @@ const CompareEntry = () => {
   const [resultKey, reloadResult] = useReducer((oldKey) => !oldKey, true);
   const [savedKey, reloadSaved] = useReducer((oldKey) => !oldKey, true);
   return (
-    <Container className="mb-5">
+    <div className="container">
       <SettingsProvider>
         <Settings className="mb-3" />
         <CalculateProvider>
@@ -23,7 +22,7 @@ const CompareEntry = () => {
         </CalculateProvider>
         <Saved className="mb-3" key={savedKey} reloadSaved={reloadSaved} />
       </SettingsProvider>
-    </Container>
+    </div>
   );
 };
 

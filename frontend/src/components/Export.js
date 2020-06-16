@@ -1,6 +1,4 @@
 import React, { useContext, useReducer, useState } from "react";
-import Button from "react-bootstrap/Button";
-import ButtonGroup from "react-bootstrap/ButtonGroup";
 import FormControl from "react-bootstrap/FormControl";
 import InputGroup from "react-bootstrap/InputGroup";
 
@@ -9,20 +7,20 @@ import { SettingsContext } from "../contexts/SettingsContext";
 import { Loading } from "./utils/Loading";
 
 const LatexButton = ({ onClick }) => (
-  <Button className="mr-4 flex-fill" variant="success" onClick={onClick}>
-    Latex
-  </Button>
+  <div className="mr-4 flex-fill" >
+    <div className="uk-button uk-button-primary" onClick={onClick}>Latex</div>
+  </div>
 );
 const CSVButton = ({ onClick }) => (
-  <Button className="mr-4 flex-fill" variant="primary" onClick={onClick}>
-    CSV
-  </Button>
+  <div className="mr-4 flex-fill" >
+    <div className="uk-button uk-button-default" onClick={onClick}>CSV</div>
+  </div>
 );
 
 const TransposeButton = ({ isTransposed, onClick }) => (
-  <Button variant={isTransposed ? "default" : "primary"} onClick={onClick}>
+  <div className={"uk-button uk-button-" +  isTransposed ? "default" : "primary"} onClick={onClick}>
     transpose
-  </Button>
+  </div>
 );
 
 const ExportPreview = ({ text }) =>
@@ -82,22 +80,21 @@ const Export = ({ scoreInfo }) => {
 
   return (
     <>
-      <ButtonGroup className="my-2 d-flex flex-md-row flex-column">
+      <div className="uk-button-group my-2 d-flex flex-md-row flex-column">
         {Object.entries(chosenMetrics)
           .sort()
           .map(([metric, is_chosen]) => {
             return (
-              <Button
-                className="border-dark"
+              <div
+                className={"uk-button uk-button-" + is_chosen ? "primary" : "default"}
                 key={metric}
-                variant={is_chosen ? "primary" : "default"}
                 onClick={() => toggleMetric(metric)}
               >
                 {settings[metric]["readable"]}
-              </Button>
+              </div>
             );
           })}
-      </ButtonGroup>
+      </div>
       <Loading isLoading={isLoading}>
         <div className="d-flex flex-md-row flex-column justify-content-md-between">
           <div className="my-3 d-flex">

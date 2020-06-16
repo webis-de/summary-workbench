@@ -14,7 +14,9 @@
     "react-icons": "^3.8.0",
     "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0",
-    "react-scripts": "^3.4.1"
+    "react-scripts": "^3.4.1",
+    "uikit": "^3.5.4",
+    "uikit-react": "^3.0.20"
   },
   "scripts": {
     "start": "HOST=0.0.0.0 react-scripts start",

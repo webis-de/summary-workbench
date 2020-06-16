@@ -1,20 +1,16 @@
 import React from "react";
-import Button from "react-bootstrap/Button";
-import ButtonGroup from "react-bootstrap/ButtonGroup";
 
 const SettingButton = ({ metric, is_set, readable, onClick }) => (
-  <Button
-    className="border-dark"
-    key={metric}
-    variant={is_set ? "primary" : "default"}
+  <button
+    className={"uk-button uk-button-" + (is_set ? "primary" : "default")}
     onClick={onClick}
   >
     {readable}
-  </Button>
+  </button>
 );
 
 const SettingButtons = ({ className, settings, toggleSetting }) => (
-  <ButtonGroup className={className}>
+  <div className="uk-flex uk-flex-around uk-flex-wrap uk-flex-wrap-stretch uk-flex-top uk-width-expand" style={{gridRowGap: "10px"}}>
     {Object.entries(settings).map(([metric, { is_set, readable }]) => (
       <SettingButton
         key={metric}
@@ -24,7 +20,7 @@ const SettingButtons = ({ className, settings, toggleSetting }) => (
         onClick={() => toggleSetting(metric)}
       />
     ))}
-  </ButtonGroup>
+  </div>
 );
 
-export {SettingButtons}
+export { SettingButtons };
