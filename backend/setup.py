@@ -5,30 +5,32 @@ import shutil
 from math import ceil
 from threading import Thread
 from zipfile import ZipFile
+from bert_score import BERTScorer as Bert
 
 import nltk
 import requests
 from gensim.models import KeyedVectors
 from gensim.scripts.glove2word2vec import glove2word2vec
-from transformers import DistilBertConfig, DistilBertModel, DistilBertTokenizer, RobertaModel
-from transformers.file_utils import cached_path
 
-FORMAT = '{asctime} {levelname} [{name}] {message}'
+import spacy
+from transformers import (DistilBertConfig, DistilBertModel, DistilBertTokenizer)
+
+FORMAT = "{asctime} {levelname} [{name}] {message}"
 DATEFMT = "%H:%M:%S"
-logging.basicConfig(format=FORMAT, datefmt=DATEFMT, style='{')
+logging.basicConfig(format=FORMAT, datefmt=DATEFMT, style="{")
 
 
 def download_file(url, save_path, logger=None):
-    chunk_size = 20 * 1024**2
+    chunk_size = 20 * 1024 ** 2
 
     req = requests.get(url, stream=True)
     req.raise_for_status()
 
-    length = req.headers.get('Content-length')
-    total = ceil(int(length)/chunk_size) if length is not None else None
+    length = req.headers.get("Content-length")
+    total = ceil(int(length) / chunk_size) if length is not None else None
     chunks = req.iter_content(chunk_size=chunk_size)
 
-    with open(save_path, 'wb') as file:
+    with open(save_path, "wb") as file:
         for i, chunk in enumerate(chunks, start=1):
             file.write(chunk)
             if logger is not None:
@@ -40,14 +42,16 @@ def setup_nltk():
     logger.setLevel(logging.INFO)
 
     logger.info("begin")
-    nltk.download('punkt', quiet=True)
+    nltk.download("punkt", quiet=True)
     logger.info("done")
+
 
 def setup_spacy():
     model = "en_core_web_md"
     logger = logging.getLogger(model)
     logger.setLevel(logging.INFO)
-    spacy.load()
+    spacy.load(model)
+
 
 def setup_glove():
     data_path = os.path.expanduser("~/.cache/glove")
@@ -59,7 +63,6 @@ def setup_glove():
     logger.setLevel(logging.INFO)
 
     logger.info("begin")
-
 
     if not os.path.exists(glove_path):
         logging.info("fetch glove model")
@@ -119,22 +122,18 @@ def setup_glove():
 
 
 def setup_distilbert():
-    model_name = 'distilbert-base-uncased'
+    model_name = "distilbert-base-uncased"
 
     logger = logging.getLogger(model_name)
     logger.setLevel(logging.INFO)
 
     logger.info("begin")
 
-    config_url = DistilBertConfig.pretrained_config_archive_map[model_name]
-    tokenizer_url = DistilBertTokenizer.pretrained_vocab_files_map['vocab_file'][model_name]
-    model_url = DistilBertModel.pretrained_model_archive_map[model_name]
-
     try:
         logger.info("download config file...")
         with open(os.devnull, "w") as devnull:
             with contextlib.redirect_stderr(devnull):
-                cached_path(config_url, resume_download=True)
+                DistilBertConfig.from_pretrained(model_name)
         logger.info("download config file done")
     except Exception as ex:
         logger.exception("problem downloading config file: %s", ex)
@@ -143,7 +142,7 @@ def setup_distilbert():
         logger.info("download tokenizer file...")
         with open(os.devnull, "w") as devnull:
             with contextlib.redirect_stderr(devnull):
-                cached_path(tokenizer_url, resume_download=True)
+                DistilBertTokenizer.from_pretrained(model_name)
         logger.info("download tokenizer file done")
     except Exception as ex:
         logger.exception("problem downloading tokenizer file: %s", ex)
@@ -152,7 +151,7 @@ def setup_distilbert():
         logger.info("download model file...")
         with open(os.devnull, "w") as devnull:
             with contextlib.redirect_stderr(devnull):
-                cached_path(model_url, resume_download=True)
+                DistilBertModel.from_pretrained(model_name)
         logger.info("download model file done")
     except Exception as ex:
         logger.exception("problem downloading model file: %s", ex)
@@ -160,19 +159,17 @@ def setup_distilbert():
 
 
 def setup_roberta():
-    model_name = 'roberta-large-mnli'
-
+    model_name = "roberta-large-mnli"
     logger = logging.getLogger(model_name)
     logger.setLevel(logging.INFO)
 
     logger.info("begin")
-    model_url = RobertaModel.pretrained_model_archive_map[model_name]
 
     try:
         logger.info("download model file...")
         with open(os.devnull, "w") as devnull:
             with contextlib.redirect_stderr(devnull):
-                cached_path(model_url, resume_download=True)
+                Bert(model_type=model_name)
         logger.info("download model file done")
     except Exception as ex:
         logger.exception("problem downloading model file: %s", ex)
@@ -196,10 +193,11 @@ def setup():
     # distil bert -> moverscore model
     distilbert_thread = Thread(target=setup_distilbert, daemon=True)
     distilbert_thread.start()
-    distilbert_thread.join()
 
     # roberta -> bert metric
     roberta_thread = Thread(target=setup_roberta, daemon=True)
+    distilbert_thread.join()                                        # join here because else: "ValueError: I/O operation on closed file"
+
     roberta_thread.start()
 
     nltk_thread.join()

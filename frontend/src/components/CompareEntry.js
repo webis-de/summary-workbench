@@ -12,7 +12,7 @@ const CompareEntry = () => {
   const [resultKey, reloadResult] = useReducer((oldKey) => !oldKey, true);
   const [savedKey, reloadSaved] = useReducer((oldKey) => !oldKey, true);
   return (
-    <div className="container">
+    <div className="uk-container">
       <SettingsProvider>
         <Settings className="mb-3" />
         <CalculateProvider>

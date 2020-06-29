@@ -1,62 +1,74 @@
 import React from "react";
-import Container from "react-bootstrap/Container";
+
+const extractGithubUser = (url) => {
+  return url.replace(/^.*\/(\w*\/.*?)$/, "$1");
+};
+
+const Section = ({ children, title }) => (
+  <section className="uk-card uk-card-default uk-card-body">
+    <h4 className="uk-card-title lul">{title}</h4>
+    {children}
+  </section>
+);
+
+const MetricTable = ({ content }) => (
+  <table className="uk-table">
+    <thead>
+      <tr>
+        <th>Metric</th>
+        <th>Source</th>
+        <th>Model</th>
+      </tr>
+    </thead>
+    <tbody>
+      {content.map(([metric, source, model]) => (
+        <tr key={metric}>
+          <td>{metric}</td>
+          <td>
+            <a href={source}>{extractGithubUser(source)}</a>
+          </td>
+          <td>{model}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+);
+
+const metricData = [
+  ["BERTScore", "https://github.com/Tiiiger/bert_score", "roberta-large-mnli"],
+  ["BLEU", "https://github.com/Maluuba/nlg-eval", ""],
+  ["CIDEr", "https://github.com/Maluuba/nlg-eval", ""],
+  ["METEOR", "https://github.com/Maluuba/nlg-eval", ""],
+  [
+    "MoverScore",
+    "https://github.com/AIPHES/emnlp19-moverscore",
+    "distilbert-base-uncased",
+  ],
+  ["ROUGE", "https://github.com/pltrdy/rouge", ""],
+  ["greedy matching", "https://github.com/Maluuba/nlg-eval", "glove.6B.300d"],
+];
 
 const About = () => (
-  <Container className="mb-5">
-    <h4>Description</h4>
-    <p className="px-4">
-      Compute various NLP-metrics between pairs of sentences, highlight simmilar
-      words and phrases and summarize long texts. Results can be saved and
-      exported as LaTeX and CSV.
-    </p>
-    <hr />
-    <h4>Sourcecode</h4>
-    <a
-      className="px-4"
-      href="https://git.informatik.uni-leipzig.de/ds40bamo/comparefile"
-    >
-      https://git.informatik.uni-leipzig.de/ds40bamo/comparefile
-    </a>
-    <hr />
-    <h4>Used Metrics and Implementations</h4>
-    <p>
-      <ul>
-        <li>
-          BERTScore:{" "}
-          <a href="https://github.com/Tiiiger/bert_score">Tiiiger/bert_score</a>{" "}
-          (<strong>model</strong>: roberta-large-mnli)
-        </li>
-        <li>
-          BLEU:{" "}
-          <a href="https://github.com/Maluuba/nlg-eval">Maluuba/nlg-eval</a>
-        </li>
-        <li>
-          CIDEr:{" "}
-          <a href="https://github.com/Maluuba/nlg-eval">Maluuba/nlg-eval</a>
-        </li>
-        <li>
-          METEOR:{" "}
-          <a href="https://github.com/Maluuba/nlg-eval">Maluuba/nlg-eval</a>
-        </li>
-        <li>
-          MoverScore:{" "}
-          <a href="https://github.com/AIPHES/emnlp19-moverscore">
-            AIPHES/emnlp19-moverscore
-          </a>{" "}
-          (<strong>model</strong>: distilbert-base-uncased)
-        </li>
-        <li>
-          greedy matching:{" "}
-          <a href="https://github.com/Maluuba/nlg-eval">Maluuba/nlg-eval</a> (
-          <strong>model</strong>: glove.6B.300d)
-        </li>
-        <li>
-          ROUGE: <a href="https://github.com/pltrdy/rouge">pltrdy/rouge</a>
-        </li>
-      </ul>
-    </p>
-    <hr />
-  </Container>
+  <article className="uk-container">
+    <Section title="Description">
+      <p className="uk-margin-left">
+        Compute various NLP-metrics between pairs of sentences, highlight
+        simmilar words and phrases and summarize long texts. Results can be
+        saved and exported as LaTeX and CSV.
+      </p>
+    </Section>
+    <Section title="Sourcecode">
+      <a
+        className="uk-margin-left"
+        href="https://git.informatik.uni-leipzig.de/ds40bamo/comparefile"
+      >
+        https://git.informatik.uni-leipzig.de/ds40bamo/comparefile
+      </a>
+    </Section>
+    <Section title="Used Metrics and Implementations">
+      <MetricTable content={metricData} />
+    </Section>
+  </article>
 );
 
 export { About };

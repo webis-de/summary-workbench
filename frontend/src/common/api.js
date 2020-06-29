@@ -1,7 +1,11 @@
+const HOST = process.env.REACT_APP_API_HOST
+const PORT = process.env.REACT_APP_API_PORT
+const baseName = `http://${HOST}:${PORT}`
+
 const calculateRequest = (metrics, hypdata, refdata) => {
   const method = "POST";
   const body = JSON.stringify({ metrics, hypdata, refdata });
-  return fetch("http://localhost:5000/api/calculate", {
+  return fetch(`${baseName}/api/calculate`, {
     method,
     body,
     headers: { "Content-Type": "application/json" },
@@ -20,7 +24,7 @@ const saveCalculationRequest = (name, scores, comparisons) => {
   const method = "POST";
   const body = JSON.stringify({ name, scores, comparisons });
   const headers = { "Content-Type": "application/json" };
-  return fetch("http://localhost:5000/api/calculations", {
+  return fetch(`${baseName}/api/calculations`, {
     method,
     body,
     headers,
@@ -35,7 +39,7 @@ export { saveCalculationRequest };
 
 const getSavedCalculationsRequest = () => {
   const method = "GET";
-  return fetch("http://localhost:5000/api/calculations", {
+  return fetch(`${baseName}/api/calculations`, {
     method,
   }).then((response) => response.json());
 };
@@ -45,7 +49,7 @@ export { getSavedCalculationsRequest };
 const deleteCalculationRequest = (name) => {
   const method = "DELETE";
   return fetch(
-    "http://localhost:5000/api/calculation/" + encodeURIComponent(name),
+    `${baseName}/api/calculation/` + encodeURIComponent(name),
     { method }
   ).then((response) => {
     if (response.status === 404) {
@@ -59,7 +63,7 @@ export { deleteCalculationRequest };
 const getCompareDataRequest = (name) => {
   const method = "GET";
   return fetch(
-    "http://localhost:5000/api/calculation/" + encodeURIComponent(name),
+    `${baseName}/api/calculation/` + encodeURIComponent(name),
     { method }
   ).then((response) => {
     if (response.ok) {
@@ -75,7 +79,7 @@ export { getCompareDataRequest };
 const getExportRequest = (scores, format, transpose, precision) => {
   const method = "POST";
   const body = JSON.stringify({ scores, format, transpose, precision });
-  return fetch("http://localhost:5000/api/export", {
+  return fetch(`${baseName}/api/export`, {
     method,
     body,
     headers: { "Content-Type": "application/json" },
@@ -98,7 +102,7 @@ const summarizeKinds = [
 const summarizeRequest = (text, summarizer, kind) => {
   const method = "POST";
   const body = JSON.stringify({ text, summarizer, kind });
-  return fetch("http://localhost:5000/api/summarize", {
+  return fetch(`${baseName}/api/summarize`, {
     method,
     body,
     headers: { "Content-Type": "application/json" },

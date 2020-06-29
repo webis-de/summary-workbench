@@ -1,6 +1,5 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Container, Navbar } from "uikit-react";
 
 const NavBar = () => (
   <nav className="uk-navbar uk-navbar-container uk-margin">
@@ -20,9 +19,9 @@ const NavBar = () => (
       </ul>
     </div>
     <div className="uk-navbar-right">
-      <ul className="uk-navbar-nav">
+      <ul className="uk-navbar-nav uk-margin-right">
         <li>
-          <Link className="ml-auto" to={{ pathname: "/about" }}>
+          <Link to={{ pathname: "/about" }}>
             About
           </Link>
         </li>

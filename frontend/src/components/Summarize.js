@@ -1,13 +1,10 @@
 import React, { useRef, useState } from "react";
-import Container from "react-bootstrap/Container";
-import FormControl from "react-bootstrap/FormControl";
 
 import { summarizeKinds, summarizeRequest, summarizers } from "../common/api";
 import { markup } from "../common/fragcolors";
 import { ComputeButton } from "./utils/ComputeButton";
 import { RadioButtons } from "./utils/RadioButtons";
 import { MarkupDisplayer } from "./utils/MarkupDisplayer";
-
 
 const Summarize = () => {
   const inputRef = useRef();
@@ -27,9 +24,7 @@ const Summarize = () => {
     summarizeRequest(requestText, summarizer, textKind)
       .then(({ summary, original_text }) => {
         if (summary === "") {
-          alert(
-            "No text could be generated. The input is probably too short."
-          );
+          alert("No text could be generated. The input is probably too short.");
         } else {
           const [reqMarkup, genMarkup] = markup(original_text, summary);
           setGeneratedMarkup(genMarkup);
@@ -41,17 +36,15 @@ const Summarize = () => {
   };
 
   return (
-    <Container className="mb-5">
-      <FormControl className="mb-3" ref={inputRef} as="textarea" rows="12" />
+    <div className="uk-container">
+      <textarea className="uk-textarea uk-margin" ref={inputRef} rows="12" />
 
-      <div className="mb-5 d-flex flex-column flex-lg-row justify-content-lg-between">
+      <div className="uk-grid uk-child-width-1-1 uk-child-width-1-3@l">
         <RadioButtons
-          className="mb-2 mb-lg-0"
           buttonList={summarizers}
           onChange={(key) => setSummarizer(key)}
         />
         <RadioButtons
-          className="mb-2 mb-lg-0"
           buttonList={summarizeKinds}
           onChange={(key) => setTextKind(key)}
         />
@@ -59,8 +52,8 @@ const Summarize = () => {
       </div>
 
       <MarkupDisplayer markupedText={generatedMarkup} name="summary" />
-      <MarkupDisplayer markupedText={requestedMarkup} name="original Text" />
-    </Container>
+      <MarkupDisplayer markupedText={requestedMarkup} name="original text" />
+    </div>
   );
 };
 

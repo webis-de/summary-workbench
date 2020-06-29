@@ -9,6 +9,7 @@ verify_ssl = true
 bert-score = "*"
 flask = "*"
 flask-cors = "*"
+flask-mongoengine = "*"
 flask-restx = "*"
 gensim = "*"
 gunicorn = "*"
@@ -25,9 +26,9 @@ requests = "*"
 rouge = "*"
 scikit-learn = "*"
 sentence_transformers = "*"
+spacy = "*"
 syntok = "*"
 torch = "*"
-flask-mongoengine = "*"
 
 [requires]
 python_version = "3.8"
