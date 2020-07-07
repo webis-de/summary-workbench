@@ -1,15 +1,9 @@
 import React from "react";
+import { Section } from "./utils/Section";
 
 const extractGithubUser = (url) => {
   return url.replace(/^.*\/(\w*\/.*?)$/, "$1");
 };
-
-const Section = ({ children, title }) => (
-  <section className="uk-card uk-card-default uk-card-body">
-    <h4 className="uk-card-title lul">{title}</h4>
-    {children}
-  </section>
-);
 
 const MetricTable = ({ content }) => (
   <table className="uk-table">
@@ -50,14 +44,14 @@ const metricData = [
 
 const About = () => (
   <article className="uk-container">
-    <Section title="Description">
+    <Section className="uk-margin" title="Description">
       <p className="uk-margin-left">
         Compute various NLP-metrics between pairs of sentences, highlight
         simmilar words and phrases and summarize long texts. Results can be
         saved and exported as LaTeX and CSV.
       </p>
     </Section>
-    <Section title="Sourcecode">
+    <Section className="uk-margin" title="Sourcecode">
       <a
         className="uk-margin-left"
         href="https://git.informatik.uni-leipzig.de/ds40bamo/comparefile"
@@ -65,7 +59,7 @@ const About = () => (
         https://git.informatik.uni-leipzig.de/ds40bamo/comparefile
       </a>
     </Section>
-    <Section title="Used Metrics and Implementations">
+    <Section className="uk-margin" title="Used Metrics and Implementations">
       <MetricTable content={metricData} />
     </Section>
   </article>

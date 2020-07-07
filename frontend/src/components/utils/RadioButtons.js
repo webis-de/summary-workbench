@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from "react";
+import { Button } from "./Button";
 
 const RadioButton = ({ radioKey, activeKey, readable, setActiveKey }) => {
   const isActive = radioKey === activeKey;
   return (
-    <button
-      className={
-        "uk-button uk-button-large uk-button-" +
-        (isActive ? "primary" : "default")
-      }
+    <Button
+      variant={(isActive ? "primary" : "default")}
       onClick={() => !isActive && setActiveKey(radioKey)}
     >
       {readable}
-    </button>
+    </Button>
   );
 };
 

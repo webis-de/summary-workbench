@@ -1,8 +1,7 @@
 import React from "react";
-import Table from "react-bootstrap/Table";
 
 const ScoreTable = ({ scoreInfo }) => (
-  <Table>
+  <table className="uk-table uk-table-divider uk-table-small uk-table-middle">
     <thead>
       <tr>
         <th>Metric</th>
@@ -21,7 +20,7 @@ const ScoreTable = ({ scoreInfo }) => (
           ))
         )}
     </tbody>
-  </Table>
+  </table>
 );
 
 export { ScoreTable };

@@ -6,7 +6,7 @@ import { markup } from "../common/fragcolors";
 import { readFile } from "../common/readFile";
 import { CalculateContext } from "../contexts/CalculateContext";
 import { SettingsContext } from "../contexts/SettingsContext";
-import { ChooseFile } from "./Upload/ChooseFile";
+import { ChooseFile } from "./utils/ChooseFile";
 import { ComputeButton } from "./utils/ComputeButton";
 import { Section } from "./utils/Section";
 
@@ -76,11 +76,10 @@ const Upload = ({ className, reloadResult }) => {
   };
 
   return (
-    <Section>
-      <h3>
-        <FaRegFile /> Choose file
-      </h3>
-      <div className="uk-grid uk-grid-small uk-margin-small uk-child-expand uk-child-width-1-2@s">
+    <Section
+      title={<><FaRegFile /> Choose file</>}
+    >
+      <div className="uk-margin uk-grid uk-grid-small uk-child-width-1-2@s" style={{gridRowGap: "10px"}}>
         <ChooseFile file={hypFile} setFile={setHypFile} name="HypFile" />
         <ChooseFile file={refFile} setFile={setRefFile} name="RefFile" />
       </div>

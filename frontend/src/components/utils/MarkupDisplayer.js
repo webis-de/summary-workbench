@@ -4,8 +4,8 @@ import { Markup } from "../Markup";
 
 const MarkupDisplayer = ({ className, markupedText, name }) =>
   markupedText !== null && (
-    <div className="mb-3 p-3 border">
-      <h5 className="d-flex flex-row justify-content-center">{name}</h5>
+  <div className="uk-card uk-card-default uk-card-body uk-margin">
+    <h1 className="uk-card-title">{name}</h1>
       <Markup markupedText={markupedText} />
     </div>
   );

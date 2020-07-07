@@ -9,8 +9,9 @@ const Settings = () => {
   const { settings, toggleSetting } = useContext(SettingsContext);
 
   return (
-    <Section>
-      <h3><FaCogs /> Choose metrics</h3>
+    <Section
+      title={<><FaCogs /> Choose metrics</>}
+    >
       <SettingButtons
         settings={settings}
         toggleSetting={toggleSetting}

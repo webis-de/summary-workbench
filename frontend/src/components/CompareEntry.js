@@ -14,13 +14,13 @@ const CompareEntry = () => {
   return (
     <div className="uk-container">
       <SettingsProvider>
-        <Settings className="mb-3" />
+        <Settings className="uk-margin" />
         <CalculateProvider>
-          <OneHypRef className="mb-3" />
-          <Upload className="mb-3" reloadResult={reloadResult} />
-          <Result className="mb-3" key={resultKey} reloadSaved={reloadSaved} />
+          <OneHypRef className="uk-margin" />
+          <Upload className="uk-margin" reloadResult={reloadResult} />
+          <Result className="uk-margin" key={resultKey} reloadSaved={reloadSaved} />
         </CalculateProvider>
-        <Saved className="mb-3" key={savedKey} reloadSaved={reloadSaved} />
+        <Saved className="uk-margin" key={savedKey} reloadSaved={reloadSaved} />
       </SettingsProvider>
     </div>
   );

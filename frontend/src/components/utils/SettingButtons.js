@@ -10,7 +10,7 @@ const SettingButton = ({ metric, is_set, readable, onClick }) => (
 );
 
 const SettingButtons = ({ className, settings, toggleSetting }) => (
-  <div className="uk-flex uk-flex-around uk-flex-wrap uk-flex-wrap-stretch uk-flex-top uk-width-expand" style={{gridRowGap: "10px"}}>
+  <div className="uk-flex uk-flex-around uk-flex-wrap" style={{gridRowGap: "10px"}}>
     {Object.entries(settings).map(([metric, { is_set, readable }]) => (
       <SettingButton
         key={metric}

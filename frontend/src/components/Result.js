@@ -1,5 +1,4 @@
 import React, { useContext, useRef } from "react";
-import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
 import FormControl from "react-bootstrap/FormControl";
 import InputGroup from "react-bootstrap/InputGroup";
@@ -8,11 +7,12 @@ import { FaUpload } from "react-icons/fa";
 import { saveCalculationRequest } from "../common/api";
 import { CalculateContext } from "../contexts/CalculateContext";
 import { ResultInfo } from "./ResultInfo";
+import { Section } from "./utils/Section";
 
-const UploadButton = ({ onClick }) => (
-  <Button onClick={onClick}>
+const UploadButton = ({ className, onClick }) => (
+  <button className={"uk-button uk-button-primary" + (className !== null ? "" : " " + className)} onClick={onClick}>
     <FaUpload />
-  </Button>
+  </button>
 );
 
 const Result = ({ className, reloadSaved }) => {
@@ -33,26 +33,26 @@ const Result = ({ className, reloadSaved }) => {
 
   if (calculateResult !== null) {
     return (
-      <Card className={className}>
-        <Card.Header>
-          <InputGroup>
-            <FormControl
+      <Section
+        title={
+          <div className="uk-flex">
+            <input
+              className="uk-input"
               ref={nameRef}
               defaultValue={calculateResult.name}
               onKeyDown={(e) => e.keyCode === 13 && upload()}
             />
-            <InputGroup.Append>
-              <UploadButton onClick={upload} />
-            </InputGroup.Append>
-          </InputGroup>
-        </Card.Header>
-        <Card.Body className="mx-2">
-          <ResultInfo
-            scoreInfo={calculateResult.scores}
-            comparisons={calculateResult.comparisons}
-          />
-        </Card.Body>
-      </Card>
+            <UploadButton
+              onClick={upload} />
+          </div>
+        }
+        className={className}
+      >
+        <ResultInfo
+          scoreInfo={calculateResult.scores}
+          comparisons={calculateResult.comparisons}
+        />
+      </Section>
     );
   } else {
     return null;

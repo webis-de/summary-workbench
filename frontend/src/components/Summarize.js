@@ -39,7 +39,7 @@ const Summarize = () => {
     <div className="uk-container">
       <textarea className="uk-textarea uk-margin" ref={inputRef} rows="12" />
 
-      <div className="uk-grid uk-child-width-1-1 uk-child-width-1-3@l">
+      <div className="uk-flex uk-flex-between uk-flex-wrap" style={{gridRowGap: "15px"}}>
         <RadioButtons
           buttonList={summarizers}
           onChange={(key) => setSummarizer(key)}
@@ -48,7 +48,10 @@ const Summarize = () => {
           buttonList={summarizeKinds}
           onChange={(key) => setTextKind(key)}
         />
-        <ComputeButton isComputing={isComputing} onClick={compute} />
+        <ComputeButton
+          isComputing={isComputing}
+          onClick={compute}
+        />
       </div>
 
       <MarkupDisplayer markupedText={generatedMarkup} name="summary" />

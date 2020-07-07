@@ -1,17 +1,15 @@
 import React from "react";
 import { FaArrowAltCircleDown } from "react-icons/fa";
 
+import { Button } from "./Button";
 import { Loading } from "./Loading";
 
 const ComputeButton = ({ className, isComputing, onClick }) => (
   <Loading className={className} isLoading={isComputing}>
-    <button
-      className="uk-button uk-button-secondary uk-button-large"
-      onClick={onClick}
-    >
-      <FaArrowAltCircleDown className="mr-2" />
+    <Button variant="secondary" onClick={onClick}>
+      <FaArrowAltCircleDown className="uk-margin-right" />
       Compute
-    </button>
+    </Button>
   </Loading>
 );
 
