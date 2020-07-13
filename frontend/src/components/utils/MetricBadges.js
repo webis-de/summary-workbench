@@ -1,19 +1,16 @@
 import React from "react";
-import Badge from "react-bootstrap/Badge";
 
 const MetricBadge = ({ metric, isComputed }) => (
-  <Badge
+  <span
     key={metric}
-    className="mx-1 my-2 mb-1"
-    variant={isComputed ? "primary" : "secondary"}
-    pill
+    className={"uk-badge uk-text-bold uk-text-muted uk-padding-small uk-margin-small-left " + (isComputed ? "uk-background-primary uk-text-emphasis" : "uk-background-default uk-text-muted")}
   >
     {metric}
-  </Badge>
+  </span>
 );
 
 const MetricBadges = ({ allMetrics, computedMetrics }) => (
-  <div>
+  <div className="uk-flex uk-flex-wrap" style={{gridRowGap: "10px"}}>
     {allMetrics.map(([metric, readable]) => (
       <MetricBadge
         key={metric}

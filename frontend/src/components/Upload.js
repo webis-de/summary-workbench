@@ -77,11 +77,28 @@ const Upload = ({ className, reloadResult }) => {
 
   return (
     <Section
-      title={<><FaRegFile /> Choose file</>}
+      title={
+        <>
+          <FaRegFile /> Choose file
+        </>
+      }
     >
-      <div className="uk-margin uk-grid uk-grid-small uk-child-width-1-2@s" style={{gridRowGap: "10px"}}>
-        <ChooseFile file={hypFile} setFile={setHypFile} name="HypFile" />
-        <ChooseFile file={refFile} setFile={setRefFile} name="RefFile" />
+      <div
+        className="uk-margin uk-grid uk-grid-small uk-child-width-1-2@s"
+        style={{ gridRowGap: "10px" }}
+      >
+        <ChooseFile
+          kind="hypothesis"
+          file={hypFile}
+          setFile={setHypFile}
+          name="HypFile"
+        />
+        <ChooseFile
+          kind="reference"
+          file={refFile}
+          setFile={setRefFile}
+          name="RefFile"
+        />
       </div>
       <ComputeButton isComputing={isComputing} onClick={compute} />
     </Section>

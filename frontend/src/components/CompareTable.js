@@ -1,9 +1,5 @@
-import React, { useMemo, useReducer, useState } from "react";
-import Button from "react-bootstrap/Button";
-import ButtonGroup from "react-bootstrap/ButtonGroup";
-import FormControl from "react-bootstrap/FormControl";
-import InputGroup from "react-bootstrap/InputGroup";
-import Table from "react-bootstrap/Table";
+import React, { useMemo, useReducer, useState, useRef } from "react";
+import { Button } from "./utils/Button";
 
 import { Markup } from "./Markup";
 
@@ -11,7 +7,7 @@ const defaultStart = 1;
 const defaultPageSize = 1;
 
 const ComparisonDisplay = ({ start, size, comparisons }) => (
-  <Table>
+  <table className="uk-table uk-table-divider uk-table-small uk-table-middle">
     <thead>
       <tr>
         {["", "hypothesis", "reference"].map((cell, i) => (
@@ -32,101 +28,90 @@ const ComparisonDisplay = ({ start, size, comparisons }) => (
         </tr>
       ))}
     </tbody>
-  </Table>
+  </table>
 );
 
-const SizeInput = ({ onChange, onKeyDown, pageSize }) => (
-  <InputGroup className="mx-md-2 my-2">
-    <InputGroup.Prepend>
-      <InputGroup.Text>size</InputGroup.Text>
-    </InputGroup.Prepend>
-    <FormControl onChange={onChange} onKeyDown={onKeyDown} value={pageSize} />
-  </InputGroup>
-);
 
 const CompareTable = ({ comparisons }) => {
   const comparisonsLength = useMemo(() => comparisons.length, [comparisons]);
-  const [start, setStart] = useReducer(
-    (state, newValue) => newValue.replace(/\D/g, ""),
-    defaultStart.toString()
-  );
-  const [pageSize, setPageSize] = useReducer(
-    (state, newValue) => newValue.replace(/\D/g, ""),
-    defaultPageSize.toString()
-  );
-  const [currentStart, setCurrentStart] = useState(defaultStart);
-  const [currentPageSize, setCurrentPageSize] = useState(defaultPageSize);
+  const [pageStart, setPageStart] = useState(defaultStart);
+  const [pageSize, setPageSize] = useState(defaultPageSize);
+  const pageRef = useRef()
+  const sizeRef = useRef()
 
   const updateComparisons = () => {
-    if (!isNaN(start)) {
-      const s = Math.max(1, Math.min(comparisonsLength, parseInt(start)));
-      setStart(s.toString());
-      if (!isNaN(pageSize)) {
-        const p = Math.max(1, pageSize);
-        setPageSize(p.toString());
-        setCurrentStart(s);
-        setCurrentPageSize(p);
-      } else {
-        alert("choose valid pageSize");
-      }
-    } else {
-      alert("choose valid start");
+    const size = sizeRef.current.value.replace(/\D/g, "")
+    const page = pageRef.current.value.replace(/\D/g, "")
+    console.log(size)
+    console.log(page)
+    if (size !== "") {
+        const s = Math.max(1, Math.min(comparisonsLength, parseInt(size)));
+        setPageSize(s);
+    }
+    if (page !== "") {
+        const p = Math.max(1, parseInt(page));
+        setPageStart(p);
     }
   };
 
   const prev = () => {
-    const nextStart = Math.max(1, currentStart - currentPageSize);
-    setPageSize(currentPageSize.toString());
-    setCurrentStart(nextStart);
-    setStart(nextStart.toString());
+    const nextStart = Math.max(1, pageStart - pageSize);
+    setPageStart(nextStart);
   };
 
   const next = () => {
     const nextStart = Math.min(
       comparisonsLength,
-      currentStart + currentPageSize
+      pageStart + pageSize
     );
-    setPageSize(currentPageSize.toString());
-    setCurrentStart(nextStart);
-    setStart(nextStart.toString());
+    setPageStart(nextStart);
   };
 
   return (
     <>
-      <div className="d-flex flex-md-row flex-column">
-        <InputGroup className="mr-md-2 my-2">
-          <InputGroup.Prepend>
-            <InputGroup.Text>start</InputGroup.Text>
-          </InputGroup.Prepend>
-          <FormControl
-            onChange={(e) => {
-              setStart(e.target.value);
-            }}
+      <div
+        className="uk-margin uk-grid uk-grid-small uk-child-width-1-2@s"
+        style={{ gridRowGap: "10px" }}
+      >
+        <div>
+          <input
+            ref={pageRef}
+            className="uk-input"
+            type="text"
+            placeholder="page"
             onKeyDown={(e) => e.keyCode === 13 && updateComparisons()}
-            value={start}
           />
-          <InputGroup.Append>
-            <InputGroup.Text>of {comparisonsLength}</InputGroup.Text>
-          </InputGroup.Append>
-        </InputGroup>
-        <SizeInput
-          onChange={(e) => {
-            setPageSize(e.target.value);
-          }}
-          onKeyDown={(e) => e.keyCode === 13 && updateComparisons()}
-          pageSize={pageSize}
-        />
-        <Button className="ml-md-2 my-2" onClick={() => updateComparisons()}>
+        </div>
+        <div>
+          <input
+            ref={sizeRef}
+            className="uk-input"
+            type="text"
+            placeholder="size"
+            onKeyDown={(e) => e.keyCode === 13 && updateComparisons()}
+          />
+        </div>
+      </div>
+      <div className="uk-flex uk-margin">
+        <Button
+          size="small"
+          variant="primary"
+          onClick={() => updateComparisons()}
+        >
           apply
         </Button>
+        <div class="uk-button-group uk-margin-left">
+          <Button variant="primary" size="small" onClick={() => prev()}>
+            prev
+          </Button>
+          <Button variant="primary" size="small" onClick={() => next()}>
+            next
+          </Button>
+        </div>
       </div>
-      <ButtonGroup className="mb-4 mt-2 d-md-block d-flex">
-        <Button onClick={() => prev()}>prev</Button>
-        <Button onClick={() => next()}>next</Button>
-      </ButtonGroup>
       <ComparisonDisplay
-        start={currentStart}
-        size={currentPageSize}
+        start={pageStart}
+        size={pageSize}
         comparisons={comparisons}
       />
     </>

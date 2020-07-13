@@ -1,14 +1,4 @@
-import React, {
-  useContext,
-  useEffect,
-  useMemo,
-  useReducer,
-  useState,
-} from "react";
-import Accordion from "react-bootstrap/Accordion";
-import Button from "react-bootstrap/Button";
-import Card from "react-bootstrap/Card";
-import Collapse from "react-bootstrap/Collapse";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 
 import {
   deleteCalculationRequest,
@@ -16,12 +6,9 @@ import {
 } from "../common/api";
 import { SettingsContext } from "../contexts/SettingsContext";
 import { SavedInfo } from "./SavedInfo";
-import { DeleteButton } from "./utils/DeleteButton";
 import { MetricBadges } from "./utils/MetricBadges";
-import { ToggleSavedButton } from "./utils/ToggleSavedButton";
 
 const Saved = ({ className, reloadSaved }) => {
-  const [open, toggleOpen] = useReducer((open) => !open, true);
   const [calculations, setCalculations] = useState([]);
   const { settings } = useContext(SettingsContext);
 
@@ -46,43 +33,61 @@ const Saved = ({ className, reloadSaved }) => {
 
   if (numberCalculations > 0) {
     return (
-      <Card className={className}>
-        <Card.Body>
-          <ToggleSavedButton
-            onClick={toggleOpen}
-            numberCalculations={numberCalculations}
-          />
-          <Collapse in={open}>
-            <Accordion className="mt-4">
+      <ul
+        className="uk-padding-small"
+        data-uk-accordion
+        style={{ border: "1px", borderColor: "grey", borderStyle: "solid" }}
+      >
+        <li className="uk-open">
+          <a className="uk-accordion-title" href="/#">
+            Saved Calculations
+          </a>
+          <div className="uk-accordion-content">
+            <ul
+              data-uk-accordion
+            >
               {calculations.map(({ name, scores }) => (
-                <Card key={name}>
-                  <Card.Header className="d-flex justify-content-between">
-                    <div className="d-md-flex flex-grow-1 justify-content-between">
-                      <Accordion.Toggle
-                        as={Button}
-                        variant="link"
-                        eventKey={name}
-                      >
-                        {name}
-                      </Accordion.Toggle>
-                      <MetricBadges
-                        allMetrics={allMetrics}
-                        computedMetrics={Object.keys(scores)}
-                      />
-                    </div>
-                    <DeleteButton onClick={() => deleteCalculation(name)} />
-                  </Card.Header>
-                  <Accordion.Collapse eventKey={name}>
-                    <Card.Body>
-                      <SavedInfo name={name} scoreInfo={scores} />
-                    </Card.Body>
-                  </Accordion.Collapse>
-                </Card>
+                <li
+                  className="uk-padding-small"
+                  key={name}
+                  style={{
+                    border: "1px",
+                    borderColor: "grey",
+                    borderStyle: "solid",
+                  }}
+                >
+                  <a
+                    title={name}
+                    className="uk-accordion-title uk-flex uk-flex-between uk-text-small uk-width-expand"
+                    href="/#"
+                  >
+                    <span
+                      style={{
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      {name}
+                    </span>
+                    <MetricBadges
+                      allMetrics={allMetrics}
+                      computedMetrics={Object.keys(scores)}
+                    />
+                  </a>
+                  <div className="uk-accordion-content">
+                    <SavedInfo
+                      name={name}
+                      scoreInfo={scores}
+                      deleteCalculation={deleteCalculation}
+                    />
+                  </div>
+                </li>
               ))}
-            </Accordion>
-          </Collapse>
-        </Card.Body>
-      </Card>
+            </ul>
+          </div>
+        </li>
+      </ul>
     );
   } else {
     return null;

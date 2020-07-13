@@ -1,64 +1,71 @@
-import React, { useEffect, useMemo, useState } from "react";
-import Tab from "react-bootstrap/Tab";
-import Tabs from "react-bootstrap/Tabs";
+import React, { useMemo, useState } from "react";
 
 import { getCompareDataRequest } from "../common/api";
 import { CompareTable } from "./CompareTable";
 import { Export } from "./Export";
 import { ScoreTable } from "./ScoreTable";
 import { Loading } from "./utils/Loading";
+import { DeleteButton } from "./utils/DeleteButton";
 
-const objectLength = (o) => Object.keys(o).length;
-
-const Metrics = ({ hasScores, scoreInfo }) =>
-  hasScores ? <ScoreTable scoreInfo={scoreInfo} /> : "no scores were computed";
-
-const Comparisons = ({ isLoading, comparisons }) => (
-  <Loading isLoading={isLoading}>
-    {comparisons !== null && <CompareTable comparisons={comparisons} />}
-  </Loading>
-);
-
-const SavedInfo = ({ name, scoreInfo }) => {
-  const metricKey = "metrics";
-  const compareKey = "compare";
-  const exportKey = "export";
-  const defaultActiveKey = metricKey;
-
-  const [activeKey, setActiveKey] = useState(defaultActiveKey);
+const SavedInfo = ({ name, scoreInfo, deleteCalculation }) => {
   const [comparisons, setComparisons] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const hasScores = useMemo(() => objectLength(scoreInfo) > 0, [scoreInfo]);
+  const hasScores = useMemo(() => Object.keys(scoreInfo).length > 0, [
+    scoreInfo,
+  ]);
 
-  useEffect(() => {
-    if (activeKey === compareKey && comparisons === null) {
+  const loadComparisons = (key) => {
+    if (comparisons === null) {
       setIsLoading(true);
       getCompareDataRequest(name)
         .then(({ comparisons }) => setComparisons(comparisons))
         .finally(() => setIsLoading(false));
     }
-  }, [compareKey, activeKey, name, comparisons]);
-
-  const tabSelect = (key) => {
-    setActiveKey(key);
   };
+  const toggleId = "toggle-" + name;
   return (
-    <Tabs
-      onSelect={tabSelect}
-      className="mb-2"
-      defaultActiveKey={defaultActiveKey}
-    >
-      <Tab className="p-3" eventKey={metricKey} title="Metrics">
-        <Metrics hasScores={hasScores} scoreInfo={scoreInfo} />
-      </Tab>
-      <Tab className="p-3" eventKey={compareKey} title="Compare">
-        <Comparisons isLoading={isLoading} comparisons={comparisons} />
-      </Tab>
-      <Tab className="pt-3" eventKey={exportKey} title="Export">
-        <Export scoreInfo={scoreInfo} />
-      </Tab>
-    </Tabs>
+    <div>
+      <div className="uk-flex uk-flex-middle">
+        <ul
+          className="uk-tab uk-width-expand uk-margin uk-margin-right"
+          data-uk-tab
+          uk-tab={"connect: #" + toggleId + ";"}
+        >
+          <li className="uk-active">
+            <a href="/#">Metrics</a>
+          </li>
+          <li>
+            <a href="/#" onClick={loadComparisons}>
+              Compare
+            </a>
+          </li>
+          {hasScores && (
+            <li>
+              <a href="/#">Export</a>
+            </li>
+          )}
+        </ul>
+        <DeleteButton onClick={(e) => deleteCalculation(name)} />
+      </div>
+      <ul id={toggleId} className="uk-switcher">
+        <li>
+          {hasScores ? (
+            <ScoreTable scoreInfo={scoreInfo} />
+          ) : (
+            "no scores were computed"
+          )}
+        </li>
+        <li>
+          <Loading isLoading={isLoading}>
+            {comparisons !== null && <CompareTable comparisons={comparisons} />}
+          </Loading>
+        </li>
+        <li>
+          <Export scoreInfo={scoreInfo} />
+        </li>
+      </ul>
+    </div>
   );
 };
 

@@ -1,38 +1,32 @@
 import React, { useContext, useReducer, useState } from "react";
-import FormControl from "react-bootstrap/FormControl";
-import InputGroup from "react-bootstrap/InputGroup";
 
+import { Button } from "./utils/Button";
 import { getExportRequest } from "../common/api";
 import { SettingsContext } from "../contexts/SettingsContext";
 import { Loading } from "./utils/Loading";
 
-const LatexButton = ({ onClick }) => (
-  <div className="mr-4 flex-fill" >
-    <div className="uk-button uk-button-primary" onClick={onClick}>Latex</div>
-  </div>
-);
-const CSVButton = ({ onClick }) => (
-  <div className="mr-4 flex-fill" >
-    <div className="uk-button uk-button-default" onClick={onClick}>CSV</div>
-  </div>
-);
+const LatexButton = ({ onClick }) => <Button onClick={onClick}>Latex</Button>;
+const CSVButton = ({ onClick }) => <Button onClick={onClick}>CSV</Button>;
 
 const TransposeButton = ({ isTransposed, onClick }) => (
-  <div className={"uk-button uk-button-" +  isTransposed ? "default" : "primary"} onClick={onClick}>
+  <Button
+    size="small"
+    variant={isTransposed ? "default" : "primary"}
+    onClick={onClick}
+  >
     transpose
-  </div>
+  </Button>
 );
 
 const ExportPreview = ({ text }) =>
-  text !== null && <pre className="p-4 border">{text}</pre>;
+  text !== null && (
+    <pre className="uk-padding-small" style={{ border: "solid 1px grey" }}>
+      {text}
+    </pre>
+  );
 
-const PrecionField = ({ onChange, precision }) => (
-  <InputGroup className="ml-md-4 mr-4">
-    <InputGroup.Prepend>
-      <InputGroup.Text>precision</InputGroup.Text>
-    </InputGroup.Prepend>
-    <FormControl onChange={onChange} value={precision} />
-  </InputGroup>
+const PrecionField = ({ onChange }) => (
+  <input className="uk-input" placeholder="precision" onChange={onChange} />
 );
 
 const Export = ({ scoreInfo }) => {
@@ -80,42 +74,47 @@ const Export = ({ scoreInfo }) => {
 
   return (
     <>
-      <div className="uk-button-group my-2 d-flex flex-md-row flex-column">
+      <div
+        className="uk-flex uk-flex-between uk-flex-wrap"
+        style={{ gridRowGap: "10px" }}
+      >
         {Object.entries(chosenMetrics)
           .sort()
-          .map(([metric, is_chosen]) => {
-            return (
-              <div
-                className={"uk-button uk-button-" + is_chosen ? "primary" : "default"}
-                key={metric}
-                onClick={() => toggleMetric(metric)}
-              >
-                {settings[metric]["readable"]}
-              </div>
-            );
-          })}
+          .map(([metric, is_chosen]) => (
+            <Button
+              variant={is_chosen ? "primary" : "default"}
+              size="medium"
+              key={metric}
+              onClick={() => toggleMetric(metric)}
+            >
+              {settings[metric]["readable"]}
+            </Button>
+          ))}
+      </div>
+      <div className="uk-flex uk-flex-between uk-flex-middle uk-flex-wrap-reverse uk-margin"
+        style={{ gridRowGap: "20px" }}
+      >
+        <div className="uk-flex">
+          <CSVButton onClick={() => exportAs("csv")} />
+          <LatexButton onClick={() => exportAs("latex")} />
+        </div>
+
+        <div className="uk-flex">
+          <PrecionField
+            precision={precision}
+            onChange={(e) => {
+              setPrecision(e.target.value);
+            }}
+          />
+          <TransposeButton
+            isTransposed={isTransposed}
+            onClick={() => toggleTranspose()}
+          />
+        </div>
       </div>
       <Loading isLoading={isLoading}>
-        <div className="d-flex flex-md-row flex-column justify-content-md-between">
-          <div className="my-3 d-flex">
-            <CSVButton onClick={() => exportAs("csv")} />
-            <LatexButton onClick={() => exportAs("latex")} />
-          </div>
-          <div className="my-3 d-flex">
-            <PrecionField
-              precision={precision}
-              onChange={(e) => {
-                setPrecision(e.target.value);
-              }}
-            />
-            <TransposeButton
-              isTransposed={isTransposed}
-              onClick={() => toggleTranspose()}
-            />
-          </div>
-        </div>
+        <ExportPreview text={exportText} />
       </Loading>
-      <ExportPreview text={exportText} />
     </>
   );
 };

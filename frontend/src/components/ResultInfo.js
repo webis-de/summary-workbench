@@ -1,6 +1,4 @@
 import React from "react";
-import Tab from "react-bootstrap/Tab";
-import Tabs from "react-bootstrap/Tabs";
 
 import { CompareTable } from "./CompareTable";
 import { Export } from "./Export";
@@ -10,24 +8,29 @@ const ResultInfo = ({ scoreInfo, comparisons }) => {
   const hasScores = Object.keys(scoreInfo).length > 0;
 
   return (
-    <Tabs className="mb-2" defaultActiveKey={hasScores ? "metrics" : "compare"}>
-      <Tab
-        className="pt-3"
-        eventKey="metrics"
-        title="Metrics"
-        disabled={hasScores ? false : true}
-      >
-        <ScoreTable scoreInfo={scoreInfo} />
-      </Tab>
-      <Tab className="pt-3" eventKey="compare" title="Compare">
-        <CompareTable comparisons={comparisons} />
-      </Tab>
+  <div>
+    <ul className="uk-tab uk-margin" data-uk-tab uk-tab="connect: #result-display;">
+      <li className="uk-active"><a href="/#">Metrics</a>
+      </li>
+      <li><a href="/#">Compare</a>
+      </li>
       {hasScores && (
-        <Tab className="pt-3" eventKey="export" title="Export">
-          <Export scoreInfo={scoreInfo} />
-        </Tab>
+      <li><a href="/#">Export</a>
+          </li>
       )}
-    </Tabs>
+    </ul>
+    <ul id="result-display" className="uk-switcher">
+      <li>
+        <ScoreTable scoreInfo={scoreInfo} />
+      </li>
+      <li>
+        <CompareTable comparisons={comparisons} />
+      </li>
+      <li>
+          <Export scoreInfo={scoreInfo} />
+      </li>
+      </ul>
+  </div>
   );
 };
 

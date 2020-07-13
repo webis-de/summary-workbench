@@ -1,10 +1,7 @@
 import React, { useState, useRef } from "react";
-import FormControl from "react-bootstrap/FormControl";
-import InputGroup from "react-bootstrap/InputGroup";
 
-const ChooseFile = ({ className, name, file, setFile }) => {
+const ChooseFile = ({ kind, className, name, file, setFile }) => {
   const uploadRef = useRef()
-  console.log(file === null ? "no file": file.name)
   const [isDragged, setIsDragged] = useState(false);
   const dropHandler = (e) => {
     e.preventDefault();
@@ -12,7 +9,7 @@ const ChooseFile = ({ className, name, file, setFile }) => {
     if (e.dataTransfer.items) {
       for (const item of e.dataTransfer.items) {
         const entry = item.webkitGetAsEntry();
-        if (entry.isFile) {
+        if (entry !== null && entry.isFile) {
           setFile(item.getAsFile());
         }
       }
@@ -36,11 +33,11 @@ const ChooseFile = ({ className, name, file, setFile }) => {
         style={isDragged ? { borderStyle: "solid", borderWidth: "1px" } : {}}
       >
         <input
-          class="uk-input"
+          className="uk-input"
           type="text"
           value={file === null ? "" : file.name}
           onClick={() => uploadRef.current.click()}
-          placeholder="Select file"
+          placeholder={"Select " + kind + " file"}
           readOnly
           style={{"borderColor": "lightgrey"}}
         />

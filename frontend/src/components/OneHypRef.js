@@ -1,11 +1,6 @@
 import React, { useContext, useRef, useState } from "react";
 import { Button } from "./utils/Button";
-import Card from "react-bootstrap/Card";
-import FormControl from "react-bootstrap/FormControl";
-import InputGroup from "react-bootstrap/InputGroup";
-import Spinner from "react-bootstrap/Spinner";
 import { FaKeyboard } from "react-icons/fa";
-import { FaArrowAltCircleDown } from "react-icons/fa";
 import { Section } from "./utils/Section";
 import { ComputeButton } from "./utils/ComputeButton";
 

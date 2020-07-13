@@ -1,12 +1,14 @@
 import React from "react";
+import {Button} from "./Button"
 
 const SettingButton = ({ metric, is_set, readable, onClick }) => (
-  <button
-    className={"uk-button uk-button-" + (is_set ? "primary" : "default")}
+  <Button
+    variant={is_set ? "primary" : "default"}
+    size="medium"
     onClick={onClick}
   >
     {readable}
-  </button>
+  </Button>
 );
 
 const SettingButtons = ({ className, settings, toggleSetting }) => (

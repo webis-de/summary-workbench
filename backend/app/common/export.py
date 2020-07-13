@@ -5,6 +5,8 @@ from operator import itemgetter
 
 
 def export_scores(scores, export_format, precision=4, transpose=False):
+    if precision > 100:
+        precision = 100
     export_format = export_format.lower()
     scores = OrderedDict(sorted(scores.items(), key=itemgetter(0)))
 
@@ -17,6 +19,8 @@ def export_scores(scores, export_format, precision=4, transpose=False):
 
 
 def to_csv(scores, precision=4, transpose=False):
+    if precision > 100:
+        precision = 100
     series = []
     for score_info in scores.values():
         series.append(pd.Series(score_info, name="score"))

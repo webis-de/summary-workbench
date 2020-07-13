@@ -1,9 +1,14 @@
 import React from "react";
-import Button from "react-bootstrap/Button";
+import { Button } from "./Button";
 import { FaTrash } from "react-icons/fa";
 
 const DeleteButton = ({ onClick }) => (
-  <Button className="ml-3 align-self-start" variant="danger" onClick={onClick}>
+  <Button
+    size="small"
+    variant="danger"
+    onClick={onClick}
+    style={{ minWidth: "50px" }}
+  >
     <FaTrash />
   </Button>
 );

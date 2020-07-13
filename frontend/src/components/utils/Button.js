@@ -1,14 +1,17 @@
 import React from "react";
 
-const Button = ({ variant, onClick, children }) => {
+const Button = ({ onClick, children, style, size="large", variant="default" }) => {
   return (
     <button
-      className={"uk-button uk-button-large" + (variant == "" ? "" : " uk-button-" + variant)}
+      className={
+        "uk-button uk-button-" + size + " uk-button-" + variant
+      }
       onClick={onClick}
+      style={style}
     >
       {children}
     </button>
   );
 };
 
-export {Button}
+export { Button };

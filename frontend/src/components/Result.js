@@ -1,7 +1,4 @@
 import React, { useContext, useRef } from "react";
-import Card from "react-bootstrap/Card";
-import FormControl from "react-bootstrap/FormControl";
-import InputGroup from "react-bootstrap/InputGroup";
 import { FaUpload } from "react-icons/fa";
 
 import { saveCalculationRequest } from "../common/api";

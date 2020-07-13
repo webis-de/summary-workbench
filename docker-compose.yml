@@ -34,7 +34,7 @@ services:
   mongo:
     image: mongo:latest
     volumes:
-      - mongodata:/data
+      - mongodata:/data/db
 
 volumes:
   cache:
