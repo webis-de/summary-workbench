@@ -1,4 +1,4 @@
-import React, { useMemo, useReducer, useState, useRef } from "react";
+import React, { useMemo, useState, useRef } from "react";
 import { Button } from "./utils/Button";
 
 import { Markup } from "./Markup";

@@ -94,11 +94,6 @@ const summarizers = [
   ["newspaper3k", "Newspaper3k"],
 ];
 
-const summarizeKinds = [
-  ["raw", "raw text"],
-  ["url", "URL"],
-];
-
 const summarizeRequest = (text, summarizer, kind) => {
   const method = "POST";
   const body = JSON.stringify({ text, summarizer, kind });
@@ -115,4 +110,4 @@ const summarizeRequest = (text, summarizer, kind) => {
   });
 };
 
-export { summarizeRequest, summarizers, summarizeKinds };
+export { summarizeRequest, summarizers };
