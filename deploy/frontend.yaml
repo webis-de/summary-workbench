@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comparefile-frontend
+  labels:
+    app: comparefile
+    tier: frontend
+spec:
+  selector:
+    matchLabels:
+      app: comparefile
+      tier: frontend
+  template:
+    metadata:
+      labels:
+        app: comparefile
+        tier: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: docker.io/dominikschwabe/comparefile-frontend:latest
+          ports:
+            - name: frontend-port
+              containerPort: 80
+              protocol: TCP
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: comparefile-frontend
+spec:
+  selector:
+    app: comparefile
+    tier: frontend
+  ports:
+    - port: 80
+      targetPort: frontend-port

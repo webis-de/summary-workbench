@@ -1,0 +1,60 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: comparefile-mongodb-data
+  labels:
+    app: comparefile
+    tier: mongodb
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: ceph-rbd
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comparefile-mongodb
+  labels:
+    app: comparefile
+    tier: mongodb
+spec:
+  selector:
+    matchLabels:
+      app: comparefile
+      tier: mongodb
+  template:
+    metadata:
+      labels:
+        app: comparefile
+        tier: mongodb
+    spec:
+      volumes:
+        - name: mongodata
+          persistentVolumeClaim:
+            claimName: comparefile-mongodb-data
+      containers:
+        - name: mongodb
+          image: mongo:latest
+          ports:
+            - name: mongodb-port
+              containerPort: 27017
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /data/db
+              name: mongodata
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: comparefile-mongodb
+spec:
+  selector:
+    app: comparefile
+    tier: mongodb
+  ports:
+    - port: 27017
+      targetPort: mongodb-port

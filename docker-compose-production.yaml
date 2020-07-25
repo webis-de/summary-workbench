@@ -6,8 +6,7 @@ services:
     working_dir: /app
     volumes:
       - ./backend/:/app
-      - cache:/root/.cache
-      - nltk_data:/root/nltk_data
+      - root:/root
     environment:
       - INSTALL_ALWAYS
       - MONGODB_HOST=mongodb://mongo/app
@@ -31,6 +30,5 @@ services:
       - mongodata:/data/db
 
 volumes:
-  cache:
-  nltk_data:
+  root:
   mongodata:
