@@ -1,0 +1,36 @@
+version: "3"
+services:
+  backend:
+    image: backend-prod:latest
+    build: backend/
+    working_dir: /app
+    volumes:
+      - ./backend/:/app
+      - cache:/root/.cache
+      - nltk_data:/root/nltk_data
+    environment:
+      - INSTALL_ALWAYS
+      - MONGODB_HOST=mongodb://mongo/app
+    command: bash -c "python setup.py && gunicorn --bind 0.0.0.0:5000 --timeout 90 --log-level=DEBUG wsgi:app"
+
+  frontend:
+    image: frontend-prod:latest
+    build: frontend/
+    working_dir: /app
+
+  proxy:
+    image: nginx:alpine
+    volumes:
+      - ./proxy/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "80:80"
+
+  mongo:
+    image: mongo:latest
+    volumes:
+      - mongodata:/data/db
+
+volumes:
+  cache:
+  nltk_data:
+  mongodata:

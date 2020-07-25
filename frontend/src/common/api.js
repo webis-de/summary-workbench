@@ -1,6 +1,10 @@
-const HOST = process.env.REACT_APP_API_HOST
-const PORT = process.env.REACT_APP_API_PORT
-const baseName = `http://${HOST}:${PORT}`
+const DEVELOP = process.env.REACT_APP_DEVELOP
+let baseName = ""
+if (DEVELOP === true) {
+  const HOST = process.env.REACT_APP_API_HOST
+  const PORT = process.env.REACT_APP_API_PORT
+  baseName = `http://${HOST}:${PORT}`
+}
 
 const calculateRequest = (metrics, hypdata, refdata) => {
   const method = "POST";
