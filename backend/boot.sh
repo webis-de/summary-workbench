@@ -9,7 +9,7 @@ else
 fi
 
 if [ "$INSTALL_PACKAGES" = "yes" ]; then
-    pipenv install --skip-lock         # install packages
+    pipenv sync                        # install packages
 fi
 
 pipenv run python setup.py             # download models

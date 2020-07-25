@@ -1,6 +1,6 @@
 const DEVELOP = process.env.REACT_APP_DEVELOP
 let baseName = ""
-if (DEVELOP === true) {
+if (DEVELOP === "true") {
   const HOST = process.env.REACT_APP_API_HOST
   const PORT = process.env.REACT_APP_API_PORT
   baseName = `http://${HOST}:${PORT}`

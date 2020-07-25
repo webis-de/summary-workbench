@@ -1,6 +1,4 @@
 experiments.py
-package.lock
-package-lock.json
 # Created by https://www.gitignore.io/api/flask,python,vim,dotenv,node,react
 # Edit at https://www.gitignore.io/?templates=flask,python,vim,dotenv,node,react
 
@@ -87,7 +85,7 @@ target/
 #   However, in case of collaboration, if having platform-specific dependencies or dependencies
 #   having no cross-platform support, pipenv may install dependencies that don't work, or not
 #   install all needed dependencies.
-Pipfile.lock
+#Pipfile.lock
 
 # celery beat schedule file
 celerybeat-schedule
