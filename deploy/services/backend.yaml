@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: comparefile-backend
+  labels:
+    app: comparefile
+    tier: backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: comparefile
+      tier: backend
+  serviceName: comparefile-backend
+  template:
+    metadata:
+      labels:
+        app: comparefile
+        tier: backend
+    spec:
+      initContainers:
+        - name: init-setup-models
+          image: docker.io/ds40bamo/comparefile-backend:0.0.1
+          command: ["python", "setup.py"]
+          volumeMounts:
+            - mountPath: /root
+              name: comparefile-backend-models
+        - name: init-wait-for-mongodb
+          image: ds40bamo/wait-for-it
+          command: ["./wait-for-it.sh", "-h", "comparefile-mongodb", "-p", "27017"]
+      containers:
+        - name: backend
+          image: docker.io/ds40bamo/comparefile-backend:0.0.1
+          command: ["bash", "-c", "gunicorn --bind 0.0.0.0:5000 --timeout 90 --log-level=DEBUG wsgi:app"]
+          env:
+            - name: MONGODB_HOST
+              value: "mongodb://comparefile-mongodb/app"
+          ports:
+            - name: backend-port
+              containerPort: 5000
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /root
+              name: comparefile-backend-models
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: backend-port
+            periodSeconds: 15
+            timeoutSeconds: 10
+      restartPolicy: Always
+  volumeClaimTemplates:
+    - metadata:
+        name: comparefile-backend-models
+        labels:
+          app: comparefile
+          tier: backend
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: ceph-rbd
+        resources:
+          requests:
+            storage: 7Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: comparefile-backend
+spec:
+  selector:
+    app: comparefile
+    tier: backend
+  ports:
+    - port: 5000
+      targetPort: backend-port

@@ -1,6 +1,6 @@
 import click
 
-from flask import Flask
+from flask import Flask, make_response
 from flask.cli import with_appcontext
 from flask_cors import CORS
 from flask_mongoengine import MongoEngine
@@ -35,5 +35,9 @@ def create_app():
 
     # register commands
     app.cli.add_command(_setup)
+
+    @app.route("/health")
+    def health():
+        return make_response("", 200)
 
     return app

@@ -8,9 +8,7 @@ services:
       - "5000:5000"
     volumes:
       - ./backend/:/app
-      - cache:/root/.cache
-      - nltk_data:/root/nltk_data
-      - virtualenvs:/root/.local/share/virtualenvs
+      - root:/root
     environment:
       - INSTALL_ALWAYS
       - MONGODB_HOST=mongodb://mongo/app
@@ -38,8 +36,6 @@ services:
       - mongodata:/data/db
 
 volumes:
-  cache:
-  nltk_data:
+  root:
   node_modules:
-  virtualenvs:
   mongodata:

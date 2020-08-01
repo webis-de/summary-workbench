@@ -27,30 +27,33 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: comparefile-frontend
+  name: comparefile-proxy
   labels:
     app: comparefile
-    tier: frontend
+    tier: proxy
 spec:
   selector:
     matchLabels:
       app: comparefile
-      tier: frontend
+      tier: proxy
   template:
     metadata:
       labels:
         app: comparefile
-        tier: frontend
+        tier: proxy
     spec:
       volumes:
         - name: configs
           configMap:
             name: comparefile-proxy
+      initContainers:
+        - name: init-wait-for-backend
+          image: ds40bamo/wait-for-it
+          command: ["bash", "-c", "./wait-for-it.sh -t 120 -h comparefile-backend -p 5000 && curl --head comparefile-backend:5000"]
+        - name: init-wait-for-frontend
+          image: ds40bamo/wait-for-it
+          command: ["bash", "-c", "./wait-for-it.sh -t 120 -h comparefile-frontend -p 80 && curl --head comparefile-frontend:80"]
       containers:
-        - name: backend
-          image: docker.io/dominikschwabe/comparefile-backend:latest
-        - name: frontend
-          image: docker.io/dominikschwabe/comparefile-frontend:latest
         - name: proxy
           image: nginx:alpine
           ports:
@@ -62,6 +65,10 @@ spec:
               subPath: nginx.conf
               mountPath: "/etc/nginx/nginx.conf"
               readOnly: true
+          readinessProbe:
+            httpGet:
+              path: /
+              port: proxy-port
       restartPolicy: Always
 ---
 apiVersion: v1

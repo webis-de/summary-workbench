@@ -18,11 +18,16 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: docker.io/dominikschwabe/comparefile-frontend:latest
+          image: docker.io/ds40bamo/comparefile-frontend:0.0.1
           ports:
             - name: frontend-port
               containerPort: 80
               protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /
+              port: frontend-port
+            periodSeconds: 15
       restartPolicy: Always
 ---
 apiVersion: v1
