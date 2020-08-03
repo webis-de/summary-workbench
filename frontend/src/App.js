@@ -1,25 +1,51 @@
-import { createBrowserHistory } from "history";
 import React from "react";
-import { Redirect, Route, Switch } from "react-router";
-import { Router } from "react-router-dom";
 
+import { About } from "./components/About";
 import { CompareEntry } from "./components/CompareEntry";
 import { Summarize } from "./components/Summarize";
-import { NavBar } from "./components/NavBar";
-import { About } from "./components/About";
 
 const App = () => (
   <>
-    <Router history={createBrowserHistory()}>
-      <NavBar />
-      <Switch>
-        <Redirect from="/" to="/compare" exact />
-        <Route path="/compare" component={CompareEntry} exact />
-        <Route path="/summarize" component={Summarize} exact />
-        <Route path="/about" component={About} exact />
-        <Route render={() => <h1>404</h1>} />
-      </Switch>
-    </Router>
+    <nav className="uk-navbar uk-navbar-container uk-margin">
+      <div className="uk-navbar-item uk-logo uk-link-muted">
+        <a href="/">Comparefile</a>
+      </div>
+      <div className="uk-navbar-left">
+        <ul className="uk-navbar-nav" data-uk-switcher="connect: #main-switcher">
+          <li>
+            <a href="/#">Compare</a>
+          </li>
+          <li>
+            <a href="/#">Summarize</a>
+          </li>
+        </ul>
+      </div>
+      <div className="uk-navbar-right">
+        <ul className="uk-navbar-nav" data-uk-switcher="connect: #main-switcher">
+          <li style={{ display: "none" }}>
+            <a href="/#"> </a>
+          </li>
+          <li style={{ display: "none" }}>
+            <a href="/#"> </a>
+          </li>
+          <li>
+            <a href="/#">About</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <ul id="main-switcher" className="uk-switcher uk-margin">
+      <li>
+        <CompareEntry />
+      </li>
+      <li>
+        <Summarize />
+      </li>
+      <li>
+        <About />
+      </li>
+    </ul>
     <div className="uk-margin-large-bottom" />
   </>
 );
