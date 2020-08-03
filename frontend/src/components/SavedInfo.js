@@ -1,8 +1,7 @@
 import React, { useMemo, useState } from "react";
 
-import { getCompareDataRequest } from "../common/api";
+import { getCompareDataRequest } from "../api";
 import { CompareTable } from "./CompareTable";
-import { Export } from "./Export";
 import { ScoreTable } from "./ScoreTable";
 import { Loading } from "./utils/Loading";
 import { DeleteButton } from "./utils/DeleteButton";
@@ -40,11 +39,6 @@ const SavedInfo = ({ name, scoreInfo, deleteCalculation }) => {
               Compare
             </a>
           </li>
-          {hasScores && (
-            <li>
-              <a href="/#">Export</a>
-            </li>
-          )}
         </ul>
         <DeleteButton onClick={(e) => deleteCalculation(name)} />
       </div>
@@ -60,9 +54,6 @@ const SavedInfo = ({ name, scoreInfo, deleteCalculation }) => {
           <Loading isLoading={isLoading}>
             {comparisons !== null && <CompareTable comparisons={comparisons} />}
           </Loading>
-        </li>
-        <li>
-          <Export scoreInfo={scoreInfo} />
         </li>
       </ul>
     </div>

@@ -80,18 +80,6 @@ const getCompareDataRequest = (name) => {
 
 export { getCompareDataRequest };
 
-const getExportRequest = (scores, format, transpose, precision) => {
-  const method = "POST";
-  const body = JSON.stringify({ scores, format, transpose, precision });
-  return fetch(`${baseName}/api/export`, {
-    method,
-    body,
-    headers: { "Content-Type": "application/json" },
-  }).then((response) => response.json());
-};
-
-export { getExportRequest };
-
 const summarizers = [
   ["textrank", "TextRank"],
   ["bert", "BERTSummarizer"],

@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 
-import { summarizeRequest, summarizers } from "../common/api";
-import { markup } from "../common/fragcolors";
+import { summarizeRequest, summarizers } from "../api";
+import { markup } from "../utils/fragcolors";
 import { ComputeButton } from "./utils/ComputeButton";
 import { RadioButtons } from "./utils/RadioButtons";
 import { MarkupDisplayer } from "./utils/MarkupDisplayer";

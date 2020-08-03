@@ -46,8 +46,8 @@ spec:
             httpGet:
               path: /health
               port: backend-port
-            periodSeconds: 15
-            timeoutSeconds: 10
+            periodSeconds: 60
+            timeoutSeconds: 60
       restartPolicy: Always
   volumeClaimTemplates:
     - metadata:

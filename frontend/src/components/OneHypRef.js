@@ -4,8 +4,8 @@ import { FaKeyboard } from "react-icons/fa";
 import { Section } from "./utils/Section";
 import { ComputeButton } from "./utils/ComputeButton";
 
-import { calculateRequest } from "../common/api";
-import { markup } from "../common/fragcolors";
+import { calculateRequest } from "../api";
+import { markup } from "../utils/fragcolors";
 import { SettingsContext } from "../contexts/SettingsContext";
 import { Markup } from "./Markup";
 import { ScoreTable } from "./ScoreTable";

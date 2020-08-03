@@ -1,4 +1,5 @@
 import React from "react";
+
 import { Section } from "./utils/Section";
 
 const extractGithubUser = (url) => {
@@ -33,11 +34,7 @@ const metricData = [
   ["BLEU", "https://github.com/Maluuba/nlg-eval", ""],
   ["CIDEr", "https://github.com/Maluuba/nlg-eval", ""],
   ["METEOR", "https://github.com/Maluuba/nlg-eval", ""],
-  [
-    "MoverScore",
-    "https://github.com/AIPHES/emnlp19-moverscore",
-    "distilbert-base-uncased",
-  ],
+  ["MoverScore", "https://github.com/AIPHES/emnlp19-moverscore", "distilbert-base-uncased"],
   ["ROUGE", "https://github.com/pltrdy/rouge", ""],
   ["greedy matching", "https://github.com/Maluuba/nlg-eval", "glove.6B.300d"],
 ];
@@ -46,9 +43,8 @@ const About = () => (
   <article className="uk-container">
     <Section className="uk-margin" title="Description">
       <p className="uk-margin-left">
-        Compute various NLP-metrics between pairs of sentences, highlight
-        simmilar words and phrases and summarize long texts. Results can be
-        saved and exported as LaTeX and CSV.
+        Compute various NLP-metrics between pairs of sentences, highlight simmilar words and phrases
+        and summarize long texts. Results can be saved and exported as LaTeX and CSV.
       </p>
     </Section>
     <Section className="uk-margin" title="Sourcecode">

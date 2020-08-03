@@ -1,6 +1,6 @@
 import React, { useMemo, useReducer } from "react";
 
-import { settings as baseSettings } from "../common/settings";
+import { settings as baseSettings } from "../utils/settings";
 
 const SettingsContext = React.createContext();
 

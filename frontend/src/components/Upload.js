@@ -1,9 +1,9 @@
 import React, { useContext, useState } from "react";
 import { FaRegFile } from "react-icons/fa";
 
-import { calculateRequest } from "../common/api";
-import { markup } from "../common/fragcolors";
-import { readFile } from "../common/readFile";
+import { calculateRequest } from "../api";
+import { markup } from "../utils/fragcolors";
+import { readFile } from "../utils/readFile";
 import { CalculateContext } from "../contexts/CalculateContext";
 import { SettingsContext } from "../contexts/SettingsContext";
 import { ChooseFile } from "./utils/ChooseFile";

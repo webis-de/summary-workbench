@@ -5,7 +5,6 @@ from app.common.metrics import Metrics
 from app.common.summarizer import Summarizers
 
 from .resources.calculate import CalculateResource
-from .resources.export import ExportResource
 from .resources.savedcalculations import (SavedCalculationResource,
                                           SavedCalculationsResource)
 from .resources.summarize import SummarizeResource
@@ -27,5 +26,4 @@ api.add_resource(SavedCalculationsResource, "/calculations", endpoint="calculati
 api.add_resource(
     SavedCalculationResource, "/calculation/<string:name>", endpoint="calculation"
 )
-api.add_resource(ExportResource, "/export", endpoint="export")
 api.add_resource(SummarizeResource, "/summarize", endpoint="summarize")

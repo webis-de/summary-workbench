@@ -1,7 +1,7 @@
 import React, { useContext, useRef } from "react";
 import { FaUpload } from "react-icons/fa";
 
-import { saveCalculationRequest } from "../common/api";
+import { saveCalculationRequest } from "../api";
 import { CalculateContext } from "../contexts/CalculateContext";
 import { ResultInfo } from "./ResultInfo";
 import { Section } from "./utils/Section";

@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
   deleteCalculationRequest,
   getSavedCalculationsRequest,
-} from "../common/api";
+} from "../api";
 import { SettingsContext } from "../contexts/SettingsContext";
 import { SavedInfo } from "./SavedInfo";
 import { MetricBadges } from "./utils/MetricBadges";
