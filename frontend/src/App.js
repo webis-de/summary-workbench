@@ -13,7 +13,7 @@ const App = () => (
       <div className="uk-navbar-left">
         <ul className="uk-navbar-nav" data-uk-switcher="connect: #main-switcher">
           <li>
-            <a href="/#">Compare</a>
+            <a href="/#">Evaluate</a>
           </li>
           <li>
             <a href="/#">Summarize</a>

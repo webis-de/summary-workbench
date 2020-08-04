@@ -3,19 +3,19 @@ from flask_restx import Resource
 from marshmallow import Schema, fields
 
 
-class CalculateSchema(Schema):
+class EvaluateSchema(Schema):
     hypdata = fields.List(fields.String(), required=True)
     refdata = fields.List(fields.String(), required=True)
     metrics = fields.List(fields.String(), required=True)
 
 
-class CalculateResource(Resource):
+class EvaluateResource(Resource):
     def post(self):
         try:
-            calculation_args = CalculateSchema().load(request.json)
-            hypdata = calculation_args["hypdata"]
-            refdata = calculation_args["refdata"]
-            metrics = calculation_args["metrics"]
+            evaluation_args = EvaluateSchema().load(request.json)
+            hypdata = evaluation_args["hypdata"]
+            refdata = evaluation_args["refdata"]
+            metrics = evaluation_args["metrics"]
             scores = current_app.METRICS.compute(metrics, hypdata, refdata)
             return scores, 200
         except Exception as error:

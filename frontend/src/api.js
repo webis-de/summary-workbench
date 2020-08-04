@@ -6,10 +6,10 @@ if (DEVELOP === "true") {
   baseName = `http://${HOST}:${PORT}`
 }
 
-const calculateRequest = (metrics, hypdata, refdata) => {
+const evaluateRequest = (metrics, hypdata, refdata) => {
   const method = "POST";
   const body = JSON.stringify({ metrics, hypdata, refdata });
-  return fetch(`${baseName}/api/calculate`, {
+  return fetch(`${baseName}/api/evaluate`, {
     method,
     body,
     headers: { "Content-Type": "application/json" },
@@ -22,7 +22,7 @@ const calculateRequest = (metrics, hypdata, refdata) => {
   });
 };
 
-export { calculateRequest };
+export { evaluateRequest };
 
 const saveCalculationRequest = (name, scores, comparisons) => {
   const method = "POST";
@@ -64,7 +64,7 @@ const deleteCalculationRequest = (name) => {
 
 export { deleteCalculationRequest };
 
-const getCompareDataRequest = (name) => {
+const getCalculationDataRequest = (name) => {
   const method = "GET";
   return fetch(
     `${baseName}/api/calculation/` + encodeURIComponent(name),
@@ -78,7 +78,7 @@ const getCompareDataRequest = (name) => {
   });
 };
 
-export { getCompareDataRequest };
+export { getCalculationDataRequest };
 
 const summarizers = [
   ["textrank", "TextRank"],

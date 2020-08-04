@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 
-import { getCompareDataRequest } from "../api";
+import { getCalculationDataRequest } from "../api";
 import { CompareTable } from "./CompareTable";
 import { ScoreTable } from "./ScoreTable";
 import { Loading } from "./utils/Loading";
@@ -17,7 +17,7 @@ const SavedInfo = ({ name, scoreInfo, deleteCalculation }) => {
   const loadComparisons = (key) => {
     if (comparisons === null) {
       setIsLoading(true);
-      getCompareDataRequest(name)
+      getCalculationDataRequest(name)
         .then(({ comparisons }) => setComparisons(comparisons))
         .finally(() => setIsLoading(false));
     }

@@ -4,7 +4,7 @@ import { FaKeyboard } from "react-icons/fa";
 import { Section } from "./utils/Section";
 import { ComputeButton } from "./utils/ComputeButton";
 
-import { calculateRequest } from "../api";
+import { evaluateRequest } from "../api";
 import { markup } from "../utils/fragcolors";
 import { SettingsContext } from "../contexts/SettingsContext";
 import { Markup } from "./Markup";
@@ -35,7 +35,7 @@ const OneHypRefResult = ({ className, scoreInfo, hypothesis, reference }) => {
 const OneHypRef = ({ className }) => {
   const hypRef = useRef();
   const refRef = useRef();
-  const [calculateResult, setCalculateResult] = useState(null);
+  const [evaluateResult, setEvaluateResult] = useState(null);
   const [isComputing, setIsComputing] = useState(false);
   const { settings } = useContext(SettingsContext);
 
@@ -62,10 +62,10 @@ const OneHypRef = ({ className }) => {
       return;
     }
     setIsComputing(true);
-    calculateRequest(getChosenMetrics(settings), [hypdata], [refdata])
+    evaluateRequest(getChosenMetrics(settings), [hypdata], [refdata])
       .then((scores) => {
         const [hyp, ref] = getComparison(hypdata, refdata);
-        setCalculateResult({ scores, hyp, ref });
+        setEvaluateResult({ scores, hyp, ref });
       })
       .finally(() => setIsComputing(false))
       .catch((e) => alert(e));
@@ -109,12 +109,12 @@ const OneHypRef = ({ className }) => {
             Clear
           </Button>
         </div>
-        {calculateResult !== null && (
+        {evaluateResult !== null && (
           <OneHypRefResult
             className="uk-margin"
-            scoreInfo={calculateResult.scores}
-            hypothesis={calculateResult.hyp}
-            reference={calculateResult.ref}
+            scoreInfo={evaluateResult.scores}
+            hypothesis={evaluateResult.hyp}
+            reference={evaluateResult.ref}
           />
         )}
       </Section>

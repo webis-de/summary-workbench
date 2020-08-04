@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
 import { FaRegFile } from "react-icons/fa";
 
-import { calculateRequest } from "../api";
+import { evaluateRequest } from "../api";
 import { markup } from "../utils/fragcolors";
 import { readFile } from "../utils/readFile";
 import { CalculateContext } from "../contexts/CalculateContext";
@@ -45,7 +45,7 @@ const Upload = ({ className, reloadResult }) => {
 
         if (hyplines.length === reflines.length) {
           if (chosenMetrics.length > 0) {
-            calculateRequest(chosenMetrics, hyplines, reflines)
+            evaluateRequest(chosenMetrics, hyplines, reflines)
               .then((scores) => {
                 const comparisons = getComparisons(hypdata, refdata);
                 setCalculateResult({ name, scores, comparisons });

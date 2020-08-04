@@ -4,9 +4,9 @@ from flask_restx import Api
 from app.common.metrics import Metrics
 from app.common.summarizer import Summarizers
 
-from .resources.calculate import CalculateResource
+from .resources.evaluate import EvaluateResource
 from .resources.savedcalculations import (SavedCalculationResource,
-                                          SavedCalculationsResource)
+                                         SavedCalculationsResource)
 from .resources.summarize import SummarizeResource
 
 bp = Blueprint("api", __name__)
@@ -21,7 +21,7 @@ def load_resources():
 bp.before_app_first_request(load_resources)
 
 
-api.add_resource(CalculateResource, "/calculate", endpoint="calculate")
+api.add_resource(EvaluateResource, "/evaluate", endpoint="evaluate")
 api.add_resource(SavedCalculationsResource, "/calculations", endpoint="calculations")
 api.add_resource(
     SavedCalculationResource, "/calculation/<string:name>", endpoint="calculation"

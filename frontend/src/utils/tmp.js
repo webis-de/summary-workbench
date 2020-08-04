@@ -26,22 +26,20 @@ const binarySearch = (list, find, comparator) => {
 
 /* Text comparison.  */
 const cmp_text = (documents, min_run_length) => {
-  const no_self_similarities = true;
-
   /* documents is an array of token lists.  Each token list is an array of tokens.
-       tokens are strings that must not contain the special "\x01" character.
+     tokens are strings that must not contain the special "\x01" character.
 
-       The return is a list of matches in the form:
+     The return is a list of matches in the form:
 
-       [ doc_1, start_1, doc_2, start_token_2, length ]
+     [ doc_1, start_1, doc_2, start_token_2, length ]
 
-       where doc_X are indices into the documents array, and start_X
-       are indices into the respective token list of the documents.
+     where doc_X are indices into the documents array, and start_X
+     are indices into the respective token list of the documents.
     */
   const final_match_list = [];
 
   /* For each min_length token run in each document, we store [ doc, start ]. */
-  const match_table = {};
+  const match_table = new Map();
 
   const docs = documents.length;
   const documents_len = [];
@@ -49,8 +47,8 @@ const cmp_text = (documents, min_run_length) => {
   for (let doc_idx = 0; doc_idx < docs; doc_idx++) {
     const doc = documents[doc_idx];
 
-    const tokens = doc.length - min_run_length + 1;
     const doc_len = doc.length;
+    const tokens = doc_len - min_run_length + 1;
 
     /* Record the length of each document.  */
     documents_len[doc_idx] = doc_len;
@@ -74,26 +72,16 @@ const cmp_text = (documents, min_run_length) => {
           /* If there are matches, find the best and record it.  */
           const best_match = [doc_idx, token_idx, null, 0, 0];
           const matches = match_table[match_tag];
-          const nr_matches = matches.length;
 
-          for (let idx = 0; idx < nr_matches; idx++) {
-            const match_peer = matches[idx];
-            const peer_doc_idx = match_peer[0];
-            const peer_doc = documents[peer_doc_idx];
-            let peer_token_idx = match_peer[1] + min_run_length;
-            const peer_len = documents_len[peer_doc_idx];
-            let our_token_idx = token_idx + min_run_length;
-
-            if (no_self_similarities && peer_doc_idx === doc_idx) {
-              /* Self similarity, skip for now.  FIXME:
-			       Make this an option.  Note: If we allow
-			       self-similarities, there can be
-			       overlapping matches like in: "a b c d a
-			       b c d a b c d" which has matches "[1: a
-			       b c d [2: a b c d :1] a b c d :2],
-			       which is a coloring problem.  */
+          for (const [peer_doc_idx, peer_token_idx_start] of matches) {
+            if (peer_doc_idx === doc_idx) {
               continue;
             }
+
+            const peer_doc = documents[peer_doc_idx];
+            const peer_len = documents_len[peer_doc_idx];
+            let peer_token_idx = peer_token_idx_start + min_run_length;
+            let our_token_idx = token_idx + min_run_length;
 
             while (
               peer_token_idx < peer_len &&
@@ -106,19 +94,19 @@ const cmp_text = (documents, min_run_length) => {
             const len = our_token_idx - token_idx;
             if (len > best_match[4]) {
               /* We found a better match.  */
-              best_match[2] = match_peer[0];
-              best_match[3] = match_peer[1];
+              best_match[2] = peer_doc_idx
+              best_match[3] = peer_token_idx_start;
               best_match[4] = len;
             }
           }
-          /* Any good match found?  Record it. */
+          /* Any good match found? Record it. */
           if (best_match[2] !== null) {
             final_match_list.push(best_match);
             min_token_idx = token_idx + best_match[4];
           }
         }
 
-        /* In any case, we keep this location as a possible future
+       /* In any case, we keep this location as a possible future
 		   match.  */
         match_table[match_tag].push(match_loc);
       } else {
@@ -129,6 +117,13 @@ const cmp_text = (documents, min_run_length) => {
   return final_match_list;
 };
 
+/* tokenize text
+ * examples:
+ *   wordspaceTokens("hello world   world hello")
+ *     => [["hello", " "], ["world", "  "], ["world", " "], ["hello", null]]
+ *   wordspaceTokens("   hello world   world hello")
+ *     => [[null, "   "], ["hello", " "], ["world", "  "], ["world", " "], ["hello", null]]
+ * */
 const wordspaceTokens = (text) => {
   const words = [];
   const tokens = text
@@ -142,10 +137,12 @@ const wordspaceTokens = (text) => {
       words.push([null, tokens[0]]);
       i = 1;
     }
-    for (let len = tokens.length - 1; i < len; i += 2) {
+    const len = tokens.length - 1
+    while (i < len) {
       words.push([tokens[i], tokens[i + 1]]);
+      i += 2
     }
-    if (i === tokens.length - 1) {
+    if (i === len) {
       words.push([tokens[i], null]);
     }
   }
@@ -158,14 +155,14 @@ class textblock {
 
     /* words is an array of [word, position] where position is a
          scalar.  word may be null (indicating a leading whitespace)!  */
-    this.words = this.wstokens.map((wordspace, i) => [wordspace[0], i]);
+    this.words = this.wstokens.map(([word, space], i) => [word, i]);
 
-    /* Each element in markups is [start, end, classlist], where start
-         and end are inclusive positions and classlist is an array of
+    /* Each element in markups is [start, end, classes], where start
+         and end are inclusive positions and classesis an array of
          class names to apply.  To make the clipping a lot easier, we
-         keep the list sorted and free of gaps (classlist is empty for
+         keep the list sorted and free of gaps (classesis empty for
          an unused range).  */
-    this.markups = [[0, this.words.length - 1, []]];
+    this.markups = [[0, this.words.length - 1, new Set()]];
   }
 
   _cut_before = (pos) => {
@@ -178,16 +175,16 @@ class textblock {
       else return 0;
     });
 
-    if (loc < 0)
-      /* Should never happen. */
-      return;
+    if (loc < 0) {
+      return
+    }
 
-    const markup = markups[loc];
-    if (pos === markup[0]) return;
+    let [mstart, mend, classes] = markups[loc];
+    if (pos === mstart) return;
 
-    const end = markup[1];
-    markup[1] = pos - 1;
-    markups.splice(loc + 1, 0, [pos, end, markup[2].slice()]);
+    const end = mend;
+    mend = pos - 1;
+    markups.splice(loc + 1, 0, [pos, end, new Set(classes)]);
   };
 
   apply_class = (cssclass, startpos, endpos) => {
@@ -217,14 +214,9 @@ class textblock {
 
     /* Now we can copy the existing ranges into the new list,
            adding missing classes as we encounter them.  */
-    const markups = this.markups;
-    for (let i = 0, ilen = markups.length; i < ilen; ++i) {
-      const markup = markups[i];
-      const mstart = markup[0];
-      const mend = markup[1];
+    for (const [mstart, mend, classes] of this.markups) {
       if (startpos <= mstart && mend <= endpos) {
-        /* Add the cssclass if it is missing.  */
-        if (markup[2].indexOf(cssclass) < 0) markup[2].push(cssclass);
+        classes.add(cssclass);
       }
     }
   };
@@ -233,16 +225,15 @@ class textblock {
     const wstokens = this.wstokens;
     const markupedText = [];
 
-    for (const mark of this.markups) {
-      const [jstart, jend, classlist] = mark;
+    for (const [jstart, jend, classes] of this.markups) {
       let substr = "";
       for (let j = jstart; j <= jend; j++) {
         let [word, whitespace] = wstokens[j];
         if (word !== null) substr += word;
         if (j !== jend) substr += whitespace;
       }
-      markupedText.push([substr, classlist]);
-      /* Add last whitespace.  */
+      markupedText.push([substr, Array.from(classes.keys())]);
+      /* Add last whitespace. */
       const lastWhitespace = wstokens[jend][1];
       if (lastWhitespace !== null) markupedText.push([lastWhitespace, []]);
     }
@@ -255,9 +246,7 @@ const clean_list = (tokenidlist) => {
   const tokens = [];
   const ids = [];
 
-  for (const tokenid of tokenidlist) {
-    let [token, id] = tokenid;
-
+  for (let [token, id] of tokenidlist) {
     if (token === null) {
       continue;
     }
@@ -288,6 +277,7 @@ const markup = (hyp, ref) => {
 
   const len = 3;
   const sims = cmp_text(docs, len);
+  console.log(sims)
 
   const nr_col = 9;
   let col = 0;
@@ -310,4 +300,5 @@ const markup = (hyp, ref) => {
   return [hypTextblock.markup(), refTextblock.markup()];
 };
 
+//export { markup };
 exports.markup = markup

@@ -23,7 +23,7 @@ const PrecionField = ({ onChange }) => (
   <input className="uk-input" placeholder="precision" onChange={onChange} />
 );
 
-const ScoreTable = ({ scoreInfo }) => {
+const ScoreTableDummy = ({ scoreInfo }) => {
   const flatScores = Object.values(scoreInfo).reduce(
     (acc, value) => acc.concat(Object.entries(value)),
     []
@@ -34,11 +34,15 @@ const ScoreTable = ({ scoreInfo }) => {
     flatScores.map(() => true)
   );
   const [exportText, setExportText] = useState(null);
+  const [currFormat, setCurrFormat] = useState({});
   const [transpose, toggleTranspose] = useReducer((state) => !state, true);
-  const [precision, setPrecision] = useReducer(
-    (state, newValue) => newValue.replace(/\D/g, ""),
-    "3"
-  );
+  const [precision, setPrecision] = useReducer((state, newValue) => {
+    let value = newValue.replace(/\D/g, "");
+    if (value === "") {
+      value = "3";
+    }
+    return value;
+  }, "3");
   const allOnClick = (e) => {
     const checked = e.target.checked;
     isChecked.forEach((value, i) => {
@@ -47,6 +51,17 @@ const ScoreTable = ({ scoreInfo }) => {
       }
     });
   };
+  useEffect(() => {
+    const chosenScores = flatScores.filter((score, i) => isChecked[i]);
+    const format = currFormat["format"];
+    try {
+      if (format == "csv") {
+        setExportText(toCSV(chosenScores, transpose, precision));
+      } else if (format == "latex") {
+        setExportText(toLatex(chosenScores, transpose, precision));
+      }
+    } catch (e) {}
+  }, [currFormat, transpose, precision]);
   useEffect(() => {
     if (isChecked.every((a) => a)) {
       setAllChecked(true);
@@ -95,28 +110,8 @@ const ScoreTable = ({ scoreInfo }) => {
         style={{ gridRowGap: "20px" }}
       >
         <div className="uk-flex">
-          <CSVButton
-            onClick={() =>
-              setExportText(
-                toCSV(
-                  flatScores.filter((score, i) => isChecked[i]),
-                  transpose,
-                  precision
-                )
-              )
-            }
-          />
-          <LatexButton
-            onClick={() =>
-              setExportText(
-                toLatex(
-                  flatScores.filter((score, i) => isChecked[i]),
-                  transpose,
-                  precision
-                )
-              )
-            }
-          />
+          <CSVButton onClick={() => setCurrFormat({ format: "csv" })} />
+          <LatexButton onClick={() => setCurrFormat({ format: "latex" })} />
         </div>
 
         <div className="uk-flex">
@@ -129,9 +124,15 @@ const ScoreTable = ({ scoreInfo }) => {
           <TransposeButton transpose={transpose} onClick={() => toggleTranspose()} />
         </div>
       </div>
-        <ExportPreview text={exportText} />
+      <ExportPreview text={exportText} />
     </>
   );
+};
+
+const ScoreTable = ({ scoreInfo }) => {
+  const [key, reload] = useReducer((state) => !state, true);
+  useEffect(reload, [scoreInfo]);
+  return <ScoreTableDummy key={key} scoreInfo={scoreInfo} />;
 };
 
 export { ScoreTable };
