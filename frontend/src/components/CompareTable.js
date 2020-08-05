@@ -42,8 +42,6 @@ const CompareTable = ({ comparisons }) => {
   const updateComparisons = () => {
     const size = sizeRef.current.value.replace(/\D/g, "")
     const page = pageRef.current.value.replace(/\D/g, "")
-    console.log(size)
-    console.log(page)
     if (size !== "") {
         const s = Math.max(1, Math.min(comparisonsLength, parseInt(size)));
         setPageSize(s);
@@ -100,7 +98,7 @@ const CompareTable = ({ comparisons }) => {
         >
           apply
         </Button>
-        <div class="uk-button-group uk-margin-left">
+        <div className="uk-button-group uk-margin-left">
           <Button variant="primary" size="small" onClick={() => prev()}>
             prev
           </Button>

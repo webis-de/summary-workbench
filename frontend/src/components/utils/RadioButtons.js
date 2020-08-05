@@ -13,8 +13,8 @@ const RadioButton = ({ radioKey, activeKey, readable, setActiveKey }) => {
   );
 };
 
-const RadioButtons = ({ className, buttonList, onChange }) => {
-  const [activeKey, setActiveKey] = useState(buttonList[0][0]);
+const RadioButtons = ({ className, buttonList, onChange, defaultIndex=0 }) => {
+  const [activeKey, setActiveKey] = useState(defaultIndex === null ? null : buttonList[defaultIndex][0]);
   useEffect(() => onChange(() => activeKey), [onChange, activeKey]);
   return (
     <div className={className}>

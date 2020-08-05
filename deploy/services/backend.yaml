@@ -20,17 +20,17 @@ spec:
     spec:
       initContainers:
         - name: init-setup-models
-          image: docker.io/ds40bamo/comparefile-backend:0.0.1
+          image: docker.io/ds40bamo/summarizer-backend:0.0.2
           command: ["python", "setup.py"]
           volumeMounts:
             - mountPath: /root
               name: comparefile-backend-models
         - name: init-wait-for-mongodb
-          image: ds40bamo/wait-for-it
+          image: docker.io/ds40bamo/wait-for-it
           command: ["./wait-for-it.sh", "-h", "comparefile-mongodb", "-p", "27017"]
       containers:
         - name: backend
-          image: docker.io/ds40bamo/comparefile-backend:0.0.1
+          image: docker.io/ds40bamo/summarizer-backend:0.0.2
           command: ["bash", "-c", "gunicorn --bind 0.0.0.0:5000 --timeout 90 --log-level=DEBUG wsgi:app"]
           env:
             - name: MONGODB_HOST

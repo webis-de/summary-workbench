@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useState } from "react";
+import React, { useEffect, useReducer, useState, useMemo } from "react";
 
 import { toCSV, toLatex } from "../utils/export";
 import { Button } from "./utils/Button";
@@ -24,16 +24,15 @@ const PrecionField = ({ onChange }) => (
 );
 
 const ScoreTableDummy = ({ scoreInfo }) => {
-  const flatScores = Object.values(scoreInfo).reduce(
+  const flatScores = useMemo(() => Object.values(scoreInfo).reduce(
     (acc, value) => acc.concat(Object.entries(value)),
     []
-  );
+  ), [scoreInfo]);
   const [allChecked, setAllChecked] = useState(true);
   const [isChecked, toggleChecked] = useReducer(
     (state, i) => [...state.slice(0, i), !state[i], ...state.slice(i + 1)],
     flatScores.map(() => true)
   );
-  const [exportText, setExportText] = useState(null);
   const [currFormat, setCurrFormat] = useState({});
   const [transpose, toggleTranspose] = useReducer((state) => !state, true);
   const [precision, setPrecision] = useReducer((state, newValue) => {
@@ -43,6 +42,28 @@ const ScoreTableDummy = ({ scoreInfo }) => {
     }
     return value;
   }, "3");
+  const [exportText, updateExportText] = useReducer((oldstate) => {
+    const chosenScores = flatScores.filter((score, i) => isChecked[i]);
+    const format = currFormat["format"];
+    try {
+      if (format === "csv") {
+        return toCSV(chosenScores, transpose, precision);
+      } else if (format === "latex") {
+        return toLatex(chosenScores, transpose, precision);
+      }
+    } catch (e) {if (! (e instanceof(RangeError))) {
+      throw e
+    }}
+    return oldstate
+  }, null);
+  useEffect(() => updateExportText(), [currFormat, transpose, precision]);
+  useEffect(() => {
+    if (isChecked.every((a) => a)) {
+      setAllChecked(true);
+    } else {
+      setAllChecked(false);
+    }
+  }, [isChecked]);
   const allOnClick = (e) => {
     const checked = e.target.checked;
     isChecked.forEach((value, i) => {
@@ -51,24 +72,6 @@ const ScoreTableDummy = ({ scoreInfo }) => {
       }
     });
   };
-  useEffect(() => {
-    const chosenScores = flatScores.filter((score, i) => isChecked[i]);
-    const format = currFormat["format"];
-    try {
-      if (format == "csv") {
-        setExportText(toCSV(chosenScores, transpose, precision));
-      } else if (format == "latex") {
-        setExportText(toLatex(chosenScores, transpose, precision));
-      }
-    } catch (e) {}
-  }, [currFormat, transpose, precision]);
-  useEffect(() => {
-    if (isChecked.every((a) => a)) {
-      setAllChecked(true);
-    } else {
-      setAllChecked(false);
-    }
-  }, [isChecked]);
   return (
     <>
       <table className="uk-table uk-table-divider uk-table-small uk-table-middle">

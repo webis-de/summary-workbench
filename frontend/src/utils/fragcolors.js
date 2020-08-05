@@ -150,7 +150,7 @@ const wordspaceTokens = (text) => {
     }
   }
   return words;
-}
+};
 
 class textblock {
   constructor(text) {
@@ -273,7 +273,7 @@ const clean_list = (tokenidlist) => {
   }
 
   return [tokens, ids];
-}
+};
 
 const markup = (hyp, ref) => {
   const refTextblock = new textblock(ref);
@@ -310,4 +310,4 @@ const markup = (hyp, ref) => {
   return [hypTextblock.markup(), refTextblock.markup()];
 };
 
-exports.markup = markup
+export { markup };

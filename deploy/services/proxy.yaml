@@ -48,10 +48,10 @@ spec:
             name: comparefile-proxy
       initContainers:
         - name: init-wait-for-backend
-          image: ds40bamo/wait-for-it
+          image: docker.io/ds40bamo/wait-for-it
           command: ["bash", "-c", "./wait-for-it.sh -t 120 -h comparefile-backend -p 5000 && curl --head comparefile-backend:5000"]
         - name: init-wait-for-frontend
-          image: ds40bamo/wait-for-it
+          image: docker.io/ds40bamo/wait-for-it
           command: ["bash", "-c", "./wait-for-it.sh -t 120 -h comparefile-frontend -p 80 && curl --head comparefile-frontend:80"]
       containers:
         - name: proxy

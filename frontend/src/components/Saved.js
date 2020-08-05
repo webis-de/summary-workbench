@@ -13,7 +13,7 @@ const Saved = ({ className, reloadSaved }) => {
   const { settings } = useContext(SettingsContext);
 
   useEffect(() => {
-    getSavedCalculationsRequest().then((data) => {console.log(data); setCalculations(data)});
+    getSavedCalculationsRequest().then((data) => setCalculations(data));
   }, []);
 
   const deleteCalculation = (name) => {

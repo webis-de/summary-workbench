@@ -1,7 +1,8 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useReducer } from "react";
 
 import { summarizeRequest, summarizers } from "../api";
 import { markup } from "../utils/fragcolors";
+import { Button } from "./utils/Button";
 import { ComputeButton } from "./utils/ComputeButton";
 import { RadioButtons } from "./utils/RadioButtons";
 import { MarkupDisplayer } from "./utils/MarkupDisplayer";
@@ -10,6 +11,7 @@ import isURL from "is-url";
 const Summarize = () => {
   const inputRef = useRef();
   const [isComputing, setIsComputing] = useState(false);
+  const [showHighlighting, toggleShowHighlighting] = useReducer((state) => !state, true)
   const [generatedMarkup, setGeneratedMarkup] = useState(null);
   const [requestedMarkup, setRequestedMarkup] = useState(null);
   const [summarizer, setSummarizer] = useState(null);
@@ -21,12 +23,16 @@ const Summarize = () => {
       alert("Please enter some text.");
       return;
     }
-    setIsComputing(true);
     let textKind = "raw";
     if (isURL(requestText)) {
       textKind = "url";
     }
     const currSummarizer = summarizer;
+    if (currSummarizer === null) {
+      alert("no summarizer selected")
+      return
+    }
+    setIsComputing(true);
     summarizeRequest(requestText, currSummarizer, textKind)
       .then(({ summary, original_text }) => {
         if (summary === "") {
@@ -50,6 +56,7 @@ const Summarize = () => {
         <RadioButtons
           buttonList={summarizers}
           onChange={(key) => setSummarizer(key)}
+          defaultIndex={null}
         />
         <ComputeButton
           isComputing={isComputing}
@@ -57,8 +64,11 @@ const Summarize = () => {
         />
       </div>
 
-      <MarkupDisplayer markupedText={generatedMarkup} name={"summary - " + usedSummarizer} />
-      <MarkupDisplayer markupedText={requestedMarkup} name="original text" />
+      <MarkupDisplayer markupedText={generatedMarkup} name={"summary - " + usedSummarizer} showMarkup={showHighlighting} />
+      <MarkupDisplayer markupedText={requestedMarkup} name="original text" showMarkup={showHighlighting}/>
+      <Button variant={showHighlighting ? "primary" : "default"} onClick={() => toggleShowHighlighting()} style={{position: "fixed", bottom: 20, right: 20}}>
+        highlight
+      </Button>
     </div>
   );
 };

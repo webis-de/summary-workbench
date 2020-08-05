@@ -277,7 +277,6 @@ const markup = (hyp, ref) => {
 
   const len = 3;
   const sims = cmp_text(docs, len);
-  console.log(sims)
 
   const nr_col = 9;
   let col = 0;
@@ -300,5 +299,4 @@ const markup = (hyp, ref) => {
   return [hypTextblock.markup(), refTextblock.markup()];
 };
 
-//export { markup };
-exports.markup = markup
+export { markup };
