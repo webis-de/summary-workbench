@@ -1,34 +1,5 @@
-td {
-    text-align: justify;
-    text-justify: inter-word;
-}
-body {
-  font-family: monospace;
-}
-.label-default { color: lightgrey; }
-.page-header { color: white; }
-.fileUpload {
-    position: relative;
-    overflow: hidden;
-}
-.fileUpload input.upload {
-    position: absolute;
-    top: 0;
-    right: 0;
-    margin: 0;
-    padding: 0;
-    opacity: 0;
-    filter: alpha(opacity=0);
-}
-.panel-heading h3 {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: normal;
-    width: 75%;
-    padding-top: 8px;
-}
-#save-code { background: None; }
+body { font-family: monospace; }
+
 .fragmark1 { background-color: #c2f598; }
 .fragmark2 { background-color: #a7c6f2; }
 .fragmark3 { background-color: #f29f9f; }
@@ -37,9 +8,4 @@ body {
 .fragmark6 { background-color: #e6e181; }
 .fragmark7 { background-color: #b8b8ff; }
 .fragmark8 { background-color: #f5cf9f; }
-.fragmark9 {
-    background-color: #a5e6ed;
-}
-.code-reference {
-    font-size: x-small; color: gray;
-}
+.fragmark9 { background-color: #a5e6ed; }

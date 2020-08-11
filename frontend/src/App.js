@@ -6,9 +6,10 @@ import { Summarize } from "./components/Summarize";
 
 const App = () => (
   <>
-    <nav className="uk-navbar uk-navbar-container uk-margin">
+  <div class="uk-background-secondary global-nav" data-uk-sticky>
+    <nav class="uk-navbar-container uk-navbar-transparent uk-container uk-light" data-uk-navbar="mode: click">
       <div className="uk-navbar-item uk-logo uk-link-muted">
-        <a href="/">Comparefile</a>
+        <a href="/">Summarizer</a>
       </div>
       <div className="uk-navbar-left">
         <ul className="uk-navbar-nav" data-uk-switcher="connect: #main-switcher">
@@ -34,6 +35,7 @@ const App = () => (
         </ul>
       </div>
     </nav>
+</div>
 
     <ul id="main-switcher" className="uk-switcher uk-margin">
       <li>
