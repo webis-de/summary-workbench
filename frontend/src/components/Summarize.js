@@ -17,6 +17,27 @@ const Summarize = () => {
   const [summarizer, setSummarizer] = useState(null);
   const [usedSummarizer, setUsedSummarizer] = useState(null);
 
+  const generateParagraphs = (markupedText) => {
+    const paragraphedText = []
+    let currParagraph = []
+    for (const [text, classes] of markupedText) {
+      const splits = text.split("\n\n")
+      while (true) {
+        currParagraph.push([splits.shift(), classes])
+        if (splits.length > 0) {
+          paragraphedText.push(currParagraph)
+          currParagraph = []
+        } else {
+          break
+        }
+      }
+    }
+    if (currParagraph.length > 0) {
+      paragraphedText.push(currParagraph)
+    }
+    return paragraphedText
+  }
+
   const compute = () => {
     const requestText = inputRef.current.value.trim();
     if (requestText === "") {
@@ -40,8 +61,8 @@ const Summarize = () => {
         } else {
           const [reqMarkup, genMarkup] = markup(original_text, summary);
           setUsedSummarizer(currSummarizer);
-          setGeneratedMarkup(genMarkup);
-          setRequestedMarkup(reqMarkup);
+          setGeneratedMarkup(generateParagraphs(genMarkup));
+          setRequestedMarkup(generateParagraphs(reqMarkup));
         }
       })
       .finally(() => setIsComputing(false))
@@ -64,8 +85,8 @@ const Summarize = () => {
         />
       </div>
 
-      <MarkupDisplayer markupedText={generatedMarkup} name={"summary - " + usedSummarizer} showMarkup={showHighlighting} />
-      <MarkupDisplayer markupedText={requestedMarkup} name="original text" showMarkup={showHighlighting}/>
+      <MarkupDisplayer paragraphedText={generatedMarkup} name={"summary - " + usedSummarizer} showMarkup={showHighlighting} />
+      <MarkupDisplayer paragraphedText={requestedMarkup} name="original text" showMarkup={showHighlighting}/>
       <Button variant={showHighlighting ? "primary" : "default"} onClick={() => toggleShowHighlighting()} style={{position: "fixed", bottom: 20, right: 20}}>
         highlight
       </Button>
