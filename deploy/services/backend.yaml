@@ -31,7 +31,7 @@ spec:
       containers:
         - name: backend
           image: docker.io/ds40bamo/summarizer-backend:0.0.2
-          command: ["bash", "-c", "gunicorn --bind 0.0.0.0:5000 --timeout 90 --log-level=DEBUG wsgi:app"]
+          command: ["bash", "-c", "gunicorn --bind 0.0.0.0:5000 -w 1 --threads 12 --timeout 3000 --log-level=DEBUG wsgi:app"]
           env:
             - name: MONGODB_HOST
               value: "mongodb://comparefile-mongodb/app"

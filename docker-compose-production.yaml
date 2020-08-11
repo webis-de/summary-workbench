@@ -10,7 +10,7 @@ services:
     environment:
       - INSTALL_ALWAYS
       - MONGODB_HOST=mongodb://mongo/app
-    command: bash -c "python setup.py && gunicorn --bind 0.0.0.0:5000 --timeout 90 --log-level=DEBUG wsgi:app"
+    command: bash -c "python setup.py && gunicorn --bind 0.0.0.0:5000 -w 1 --threads 12 --timeout 3000 --log-level=DEBUG wsgi:app"
 
   frontend:
     image: frontend-prod:latest
