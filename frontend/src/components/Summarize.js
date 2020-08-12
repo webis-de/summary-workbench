@@ -50,7 +50,7 @@ const Summarize = () => {
     }
     const currSummarizer = summarizer;
     if (currSummarizer === null) {
-      alert("no summarizer selected")
+      alert("No summarizer selected")
       return
     }
     setIsComputing(true);
@@ -71,7 +71,7 @@ const Summarize = () => {
 
   return (
     <div className="uk-container">
-      <textarea className="uk-textarea uk-margin" ref={inputRef} rows="8" placeholder="text or URL (https://...)" />
+      <textarea className="uk-textarea uk-margin" ref={inputRef} rows="8" placeholder="Enter some long text or a URL (https://...)" />
 
       <div className="uk-flex uk-flex-between uk-flex-wrap" style={{gridRowGap: "15px"}}>
         <RadioButtons
@@ -82,6 +82,7 @@ const Summarize = () => {
         <ComputeButton
           isComputing={isComputing}
           onClick={compute}
+          methodCalled={"Summarize"}
         />
       </div>
 

@@ -79,7 +79,7 @@ const Upload = ({ className, reloadResult }) => {
     <Section
       title={
         <>
-          <FaRegFile /> Choose file
+          <FaRegFile /> Upload files
         </>
       }
     >
@@ -100,7 +100,7 @@ const Upload = ({ className, reloadResult }) => {
           name="RefFile"
         />
       </div>
-      <ComputeButton isComputing={isComputing} onClick={compute} />
+      <ComputeButton isComputing={isComputing} onClick={compute} methodCalled={"Evaluate"} />
     </Section>
   );
 };

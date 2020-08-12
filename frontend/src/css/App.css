@@ -1,4 +1,10 @@
 body { font-family: monospace; }
+.uk-background-secondary {
+    background-color: #323232 !important;
+}
+
+
+
 
 .fragmark1 { background-color: #c2f598; }
 .fragmark2 { background-color: #a7c6f2; }

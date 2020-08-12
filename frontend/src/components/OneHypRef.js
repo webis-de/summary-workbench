@@ -76,7 +76,7 @@ const OneHypRef = ({ className }) => {
       <Section
         title={
           <>
-            <FaKeyboard /> Compute one example
+            <FaKeyboard /> Single Example
           </>
         }
         className={className ? className : ""}
@@ -87,18 +87,18 @@ const OneHypRef = ({ className }) => {
             ref={hypRef}
             as="textarea"
             rows="5"
-            placeholder="Hypophesis"
+            placeholder="Enter the generated hypothesis"
           />
           <textarea
             className="uk-textarea"
             ref={refRef}
             as="textarea"
             rows="5"
-            placeholder="Refererence"
+            placeholder="Enter the reference text"
           />
         </div>
         <div className="uk-flex uk-flex-between">
-          <ComputeButton isComputing={isComputing} onClick={compute} />
+          <ComputeButton isComputing={isComputing} onClick={compute} methodCalled={"Evaluate"} />
           <Button
             variant="primary"
             onClick={() => {
