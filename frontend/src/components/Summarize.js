@@ -57,7 +57,7 @@ const Summarize = () => {
     summarizeRequest(requestText, currSummarizer, textKind)
       .then(({ summary, original_text }) => {
         if (summary === "") {
-          alert("No text could be generated. The input is probably too short.");
+          alert("No summary could be generated. The input is probably too short.");
         } else {
           const [reqMarkup, genMarkup] = markup(original_text, summary);
           setUsedSummarizer(currSummarizer);
