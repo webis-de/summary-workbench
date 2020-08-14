@@ -11,14 +11,15 @@ const MetricTable = ({ content }) => (
     <thead>
       <tr>
         <th>Metric</th>
-        <th>Source</th>
+        <th>Code</th>
         <th>Embedding Model</th>
       </tr>
     </thead>
     <tbody>
-      {content.map(([metric, source, model]) => (
+      {content.map(([metric, paper, source, model]) => (
         <tr key={metric}>
-          <td>{metric}</td>
+          <td>
+            <a href={paper}>{metric}</a></td>
           <td>
             <a href={source}>{extractGithubUser(source)}</a>
           </td>
@@ -30,13 +31,13 @@ const MetricTable = ({ content }) => (
 );
 
 const metricData = [
-  ["BERTScore", "https://github.com/Tiiiger/bert_score", "roberta-large-mnli"],
-  ["BLEU", "https://github.com/Maluuba/nlg-eval", ""],
-  ["CIDEr", "https://github.com/Maluuba/nlg-eval", ""],
-  ["METEOR", "https://github.com/Maluuba/nlg-eval", ""],
-  ["MoverScore", "https://github.com/AIPHES/emnlp19-moverscore", "distilbert-base-uncased"],
-  ["ROUGE", "https://github.com/pltrdy/rouge", ""],
-  ["greedy matching", "https://github.com/Maluuba/nlg-eval", "glove.6B.300d"],
+  ["BERTScore", "https://arxiv.org/pdf/1904.09675.pdf", "https://github.com/Tiiiger/bert_score", "roberta-large-mnli"],
+  ["BLEU", "https://www.aclweb.org/anthology/P02-1040.pdf", "https://github.com/Maluuba/nlg-eval", ""],
+  ["CIDEr", "https://arxiv.org/pdf/1411.5726.pdf", "https://github.com/Maluuba/nlg-eval", ""],
+  ["METEOR", "https://www.aclweb.org/anthology/W05-0909.pdf", "https://github.com/Maluuba/nlg-eval", ""],
+  ["MoverScore","https://arxiv.org/pdf/1909.02622.pdf", "https://github.com/AIPHES/emnlp19-moverscore", "distilbert-base-uncased"],
+  ["ROUGE", "https://www.aclweb.org/anthology/W04-1013.pdf", "https://github.com/pltrdy/rouge", ""],
+  ["Greedy matching", "https://www.aclweb.org/anthology/W12-2018.pdf", "https://github.com/Maluuba/nlg-eval", "glove.6B.300d"],
 ];
 
 const About = () => (
