@@ -7,7 +7,7 @@ const extractGithubUser = (url) => {
 };
 
 const MetricTable = ({ content }) => (
-  <table className="uk-table uk-table-divider uk-table-striped">
+  <table className="uk-table uk-table-striped">
     <thead>
       <tr>
         <th>Metric</th>
