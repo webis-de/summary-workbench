@@ -52,20 +52,23 @@ const About = () => (
         </ul>
     </p>
     </div>
-        <h4>Evaluate</h4>
+    <div>
+    <h4>Evaluate</h4>
         <p className="uk-margin-left">
         <MetricTable content={metricData} />
         <p className="uk-text-meta">Evaluate a single hypothesis against the reference or upload hypothesis and reference files. Results can be saved and exported as LaTeX and CSV.</p> 
       </p>
-
-    <Section className="uk-margin" title="Sourcecode">
+    </div>
+    <div>
+      <h4>Code</h4>
+    <p className="uk-margin-left"></p>
       <a
         className="uk-margin-left"
         href="https://git.informatik.uni-leipzig.de/ds40bamo/comparefile"
       >
         https://git.informatik.uni-leipzig.de/ds40bamo/comparefile
       </a>
-    </Section>
+      </div>
   </article>
 );
 
