@@ -86,7 +86,7 @@ const Summarize = () => {
         />
       </div>
 
-      <MarkupDisplayer paragraphedText={generatedMarkup} name={"Summary - " + usedSummarizer} showMarkup={showHighlighting} />
+      <MarkupDisplayer paragraphedText={generatedMarkup} name={"Summary : " + usedSummarizer} showMarkup={showHighlighting} />
       <MarkupDisplayer paragraphedText={requestedMarkup} name="Long text" showMarkup={showHighlighting}/>
       <Button variant={showHighlighting ? "primary" : "default"} onClick={() => toggleShowHighlighting()} style={{position: "fixed", bottom: 20, right: 20}}>
         highlight

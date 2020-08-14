@@ -8,7 +8,7 @@ const MarkupDisplayer = ({ className, paragraphedText, name, showMarkup }) =>
       className="uk-card uk-card-default uk-card-body uk-margin left-border"
       
     >
-      <h1 className="uk-card-title">{name}</h1>
+      <h1 className="uk-card-title uk-text-capitalize">{name}</h1>
       {paragraphedText.map((markupedText, i) => (
         <p key={i}>
           <Markup markupedText={markupedText} showMarkup={showMarkup} />
