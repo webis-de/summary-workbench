@@ -3,6 +3,9 @@ body { font-family: monospace; }
     background-color: #323232 !important;
 }
 
+.left-border {
+    border-left: 4px solid #B02F2C;
+}
 
 
 
