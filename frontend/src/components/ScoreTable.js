@@ -72,6 +72,7 @@ const ScoreTableDummy = ({ scoreInfo }) => {
       }
     });
   };
+  console.log(flatScores)
   return (
     <>
       <table className="uk-table uk-table-divider uk-table-small uk-table-middle">

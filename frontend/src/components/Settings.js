@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { FaCogs } from "react-icons/fa";
 
 import { SettingsContext } from "../contexts/SettingsContext";
-import { SettingButtons } from "./utils/SettingButtons";
+import { SettingCheckboxes } from "./utils/SettingCheckboxes";
 import { Section } from "./utils/Section";
 
 const Settings = () => {
@@ -12,7 +12,7 @@ const Settings = () => {
     <Section
       title={<><FaCogs /> Choose metrics</>}
     >
-      <SettingButtons
+      <SettingCheckboxes
         settings={settings}
         toggleSetting={toggleSetting}
       />

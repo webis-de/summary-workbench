@@ -5,6 +5,9 @@ const settings = {
   bleu: {
     readable: "BLEU",
   },
+  bleurt: {
+    readable: "BLEURT",
+  },
   cider: {
     readable: "CIDEr",
   },

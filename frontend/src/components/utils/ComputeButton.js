@@ -1,5 +1,4 @@
 import React from "react";
-import { FaArrowAltCircleDown } from "react-icons/fa";
 
 import { Button } from "./Button";
 import { Loading } from "./Loading";

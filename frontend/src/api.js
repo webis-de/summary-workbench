@@ -86,9 +86,9 @@ const summarizers = [
   ["newspaper3k", "Newspaper3k"],
 ];
 
-const summarizeRequest = (text, summarizer, kind) => {
+const summarizeRequest = (text, summarizers, kind) => {
   const method = "POST";
-  const body = JSON.stringify({ text, summarizer, kind });
+  const body = JSON.stringify({ text, summarizers, kind });
   return fetch(`${baseName}/api/summarize`, {
     method,
     body,

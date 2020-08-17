@@ -6,6 +6,9 @@ from math import ceil
 from threading import Thread
 from zipfile import ZipFile
 from bert_score import BERTScorer as Bert
+import inspect
+from hashlib import md5
+import json
 
 import nltk
 import requests
@@ -13,6 +16,7 @@ from gensim.models import KeyedVectors
 from gensim.scripts.glove2word2vec import glove2word2vec
 
 import spacy
+from pathlib import Path
 from transformers import (DistilBertConfig, DistilBertModel, DistilBertTokenizer)
 
 FORMAT = "{asctime} {levelname} [{name}] {message}"
@@ -23,6 +27,7 @@ logging.basicConfig(format=FORMAT, datefmt=DATEFMT, style="{")
 def download_file(url, save_path, logger=None):
     chunk_size = 20 * 1024 ** 2
 
+    Path(save_path).parent.mkdir(exist_ok=True, parents=True)
     req = requests.get(url, stream=True)
     req.raise_for_status()
 
@@ -38,7 +43,7 @@ def download_file(url, save_path, logger=None):
 
 
 def setup_nltk():
-    logger = logging.getLogger("nltk data")
+    logger = logging.getLogger(inspect.currentframe().f_code.co_name)
     logger.setLevel(logging.INFO)
 
     logger.info("begin")
@@ -48,7 +53,7 @@ def setup_nltk():
 
 def setup_spacy():
     model = "en_core_web_md"
-    logger = logging.getLogger(model)
+    logger = logging.getLogger(inspect.currentframe().f_code.co_name)
     logger.setLevel(logging.INFO)
     spacy.load(model)
 
@@ -59,7 +64,7 @@ def setup_glove():
     glove_bin = "glove.6B.300d.model.bin"
     glove_path = os.path.join(data_path, glove_bin)
 
-    logger = logging.getLogger(model_name)
+    logger = logging.getLogger(inspect.currentframe().f_code.co_name)
     logger.setLevel(logging.INFO)
 
     logger.info("begin")
@@ -120,11 +125,59 @@ def setup_glove():
 
     logger.info("done")
 
+def _gen_md5_hash(files):
+    hasher = md5()
+    for file in files:
+        with open(file, "rb") as binary:
+            hasher.update(binary.read())
+    return hasher.digest().hex()
+
+
+def _hash_is_valid(hash_path, files):
+    try:
+        with open(hash_path, "r") as file:
+            validate_hash = json.load(file)["hash"]
+            return _gen_md5_hash(files) == validate_hash
+    except FileNotFoundError:
+        return False
+
+
+def _gen_file_hash(hash_path, files):
+    file_hash = _gen_md5_hash(files)
+    with open(hash_path, "w") as file:
+        json.dump({"hash": file_hash}, file)
+
+def _recursive_files(path):
+    return [p for p in Path(path).rglob("*") if p.is_file()]
+
+def setup_bleurt():
+    file_name = "bleurt-base-128"
+    zip_file = file_name + ".zip"
+    model_url = "https://storage.googleapis.com/bleurt-oss/" + zip_file
+    data_path = os.path.expanduser("~/.cache/bleurt/")
+    zip_path = os.path.join(data_path, zip_file)
+    logger = logging.getLogger(inspect.currentframe().f_code.co_name)
+    logger.setLevel(logging.INFO)
+    logger.info("begin")
+    hash_path = os.path.join(data_path, "hash.json")
+    bleurt_folder = os.path.join(data_path, file_name)
+
+    logger.info("checking hash")
+    if not Path(hash_path).exists() or not _hash_is_valid(hash_path, _recursive_files(bleurt_folder)):
+        logger.info("downloading")
+        download_file(model_url, zip_path, logger)
+        logger.info("extracting...")
+        with ZipFile(zip_path, "r") as zip_file:
+            zip_file.extractall(data_path)
+        logger.info("generating hash")
+        _gen_file_hash(hash_path, _recursive_files(bleurt_folder))
+    logger.info("done")
+
 
 def setup_distilbert():
     model_name = "distilbert-base-uncased"
 
-    logger = logging.getLogger(model_name)
+    logger = logging.getLogger(inspect.currentframe().f_code.co_name)
     logger.setLevel(logging.INFO)
 
     logger.info("begin")
@@ -160,7 +213,7 @@ def setup_distilbert():
 
 def setup_roberta():
     model_name = "roberta-large-mnli"
-    logger = logging.getLogger(model_name)
+    logger = logging.getLogger(inspect.currentframe().f_code.co_name)
     logger.setLevel(logging.INFO)
 
     logger.info("begin")
@@ -177,7 +230,7 @@ def setup_roberta():
 
 
 def setup():
-    logger = logging.getLogger("setup")
+    logger = logging.getLogger(inspect.currentframe().f_code.co_name)
     logger.setLevel(logging.INFO)
 
     logger.info("begin")
@@ -189,6 +242,9 @@ def setup():
     # glove -> nlgeval (greedy matching)
     glove_thread = Thread(target=setup_glove, daemon=True)
     glove_thread.start()
+
+    bleurt_thread = Thread(target=setup_bleurt, daemon=True)
+    bleurt_thread.start()
 
     # distil bert -> moverscore model
     distilbert_thread = Thread(target=setup_distilbert, daemon=True)
@@ -202,6 +258,7 @@ def setup():
 
     nltk_thread.join()
     glove_thread.join()
+    bleurt_thread.join()
     roberta_thread.join()
 
     logger.info("done")

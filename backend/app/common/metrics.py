@@ -1,5 +1,5 @@
 from .scorer import (BERTScorer, BLEUScorer, CIDErScorer, GreedyMatchingScorer,
-                     METEORScorer, MoverScoreScorer, RougeScorer)
+                     METEORScorer, MoverScoreScorer, RougeScorer, BleurtScorer)
 
 
 class Metrics:
@@ -12,6 +12,7 @@ class Metrics:
             "meteor": METEORScorer(),
             "moverscore": MoverScoreScorer(),
             "rouge": RougeScorer(),
+            "bleurt": BleurtScorer(),
         }
 
     def compute(self, request_metrics, hyp_list, ref_list):

@@ -9,6 +9,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 from .moverscore import MoverScore
 from .nlgeval import Bleu, Cider, Meteor
+import bleurt.score
 
 
 class RougeScorer:
@@ -127,3 +128,12 @@ class MoverScoreScorer:
     def score(self, hypotheses, references):
         score = self.mover_score.score(hypotheses, references)
         return {"MoverScore": score}
+
+class BleurtScorer:
+    MODEL_PATH = path.expanduser("~/.cache/bleurt/bleurt-base-128")
+    def __init__(self):
+        self.bleurt = bleurt.score.BleurtScorer(self.MODEL_PATH)
+
+    def score(self, hypotheses, references):
+        score = self.bleurt.score(references, hypotheses)
+        return {"BLEURT": float(np.average(score))}
