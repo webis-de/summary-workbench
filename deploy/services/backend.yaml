@@ -31,10 +31,12 @@ spec:
       containers:
         - name: backend
           image: docker.io/ds40bamo/summarizer-backend:1.0.0-1
-          command: ["bash", "-c", "gunicorn --bind 0.0.0.0:5000 -w 1 --threads 12 --timeout 3000 --log-level=DEBUG wsgi:app"]
+          command: ["bash", "-c", "gunicorn wsgi:app"]
           env:
             - name: MONGODB_HOST
               value: "mongodb://comparefile-mongodb/app"
+            - name: GUNICORN_CMD_ARGS
+              value: "-cgunicorn.conf.py"
           ports:
             - name: backend-port
               containerPort: 5000
