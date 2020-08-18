@@ -68,7 +68,6 @@ const Summarize = () => {
             ]);
           }
           newMarkups.sort();
-          console.log(newMarkups);
           setMarkups(newMarkups);
         }
       })

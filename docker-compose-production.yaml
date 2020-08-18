@@ -1,7 +1,7 @@
 version: "3"
 services:
   backend:
-    image: backend-prod:latest
+    image: summarization-backend:latest
     build: backend/
     working_dir: /app
     volumes:
@@ -10,10 +10,11 @@ services:
     environment:
       - INSTALL_ALWAYS
       - MONGODB_HOST=mongodb://mongo/app
-    command: bash -c "python setup.py && gunicorn --bind 0.0.0.0:5000 -w 1 --threads 12 --timeout 3000 --log-level=DEBUG wsgi:app"
+      - GUNICORN_CMD_ARGS="-cgunicorn.conf.py"
+    command: bash -c "python setup.py && gunicorn wsgi:app"
 
   frontend:
-    image: frontend-prod:latest
+    image: summarization-frontend:latest
     build: frontend/
     working_dir: /app
 
