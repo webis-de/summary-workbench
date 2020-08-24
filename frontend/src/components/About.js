@@ -43,7 +43,7 @@ const metricData = [
 const About = () => (
   <article className="uk-container">
     <div>
-    <h4>Summarize</h4>
+    <h4>Summarization</h4>
     <p className="uk-margin-left">
         Available models:
         <ul>
@@ -54,7 +54,7 @@ const About = () => (
     </p>
     </div>
     <div>
-    <h4>Evaluate</h4>
+    <h4>Evaluation</h4>
         <p className="uk-margin-left">
         <MetricTable content={metricData} />
         <p className="uk-text-meta">Evaluate a single hypothesis against the reference or upload hypothesis and reference files. Results can be saved and exported as LaTeX and CSV.</p> 
