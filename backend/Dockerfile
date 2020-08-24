@@ -4,7 +4,7 @@ FROM ${image} as lock-stage
 WORKDIR /app
 COPY . .
 RUN pip install pipenv
-RUN pipenv lock --requirements > requirements.txt
+RUN pipenv lock --requirements | tee requirements.txt
 
 FROM ${image}
 WORKDIR /app

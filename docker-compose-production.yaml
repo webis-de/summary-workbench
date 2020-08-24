@@ -1,7 +1,7 @@
 version: "3"
 services:
   backend:
-    image: summarization-backend:latest
+    image: summarizer-backend:latest
     build: backend/
     working_dir: /app
     volumes:
@@ -14,7 +14,7 @@ services:
     command: bash -c "python setup.py && gunicorn wsgi:app"
 
   frontend:
-    image: summarization-frontend:latest
+    image: summarizer-frontend:latest
     build: frontend/
     working_dir: /app
 
