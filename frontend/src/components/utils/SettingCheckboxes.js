@@ -1,14 +1,20 @@
 import React from "react";
 
 const SettingCheckbox = ({ metric, is_set, readable, onClick }) => (
-    <label className="uk-padding-small">
-      <input className="uk-checkbox uk-margin-small-right" checked={is_set} onClick={onClick} type="checkbox" />
-      {readable}
-    </label>
+  <label className="uk-padding-small">
+    <input
+      className="uk-checkbox uk-margin-small-right"
+      checked={is_set}
+      readOnly={true}
+      onClick={onClick}
+      type="checkbox"
+    />
+    {readable}
+  </label>
 );
 
 const SettingCheckboxes = ({ className, settings, toggleSetting }) => (
-  <div className="uk-flex uk-flex-around uk-flex-wrap" style={{ gridRowGap: "10px" }}>
+  <div className="uk-flex uk-flex-around uk-flex-wrap">
     {Object.entries(settings).map(([metric, { is_set, readable }]) => (
       <SettingCheckbox
         key={metric}

@@ -8,6 +8,8 @@
 }
 
 
+.uk-tab > li.uk-active > a {color: #B02F2C !important;}
+
 
 .fragmark1 { background-color: #c2f598; }
 .fragmark2 { background-color: #a7c6f2; }

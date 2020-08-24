@@ -7,8 +7,9 @@ class Summarizers(object):
         "bert": BertSummarizer,
         "newspaper3k": Newspaper3kSummarizer
     }
+
     def __init__(self):
         self.summarizers = {name: summarizer() for name, summarizer in self.SUMMARIZERS.items()}
 
-    def summarize(self, summarizer, text):
-        return self.summarizers[summarizer].summarize(text)
+    def summarize(self, summarizer, text, ratio=0.2):
+        return self.summarizers[summarizer].summarize(text, ratio=ratio)

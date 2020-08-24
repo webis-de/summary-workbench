@@ -28,7 +28,7 @@ sentence_transformers = "*"
 spacy = "*"
 syntok = "*"
 torch = "*"
-bleurt = {git = "https://github.com/google-research/bleurt.git"}
+bleurt = {editable = true,git = "https://github.com/google-research/bleurt.git"}
 
 [requires]
 python_version = "3.8"

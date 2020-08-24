@@ -1,9 +1,9 @@
-const DEVELOP = process.env.REACT_APP_DEVELOP
-let baseName = ""
+const DEVELOP = process.env.REACT_APP_DEVELOP;
+let baseName = "";
 if (DEVELOP === "true") {
-  const HOST = process.env.REACT_APP_API_HOST
-  const PORT = process.env.REACT_APP_API_PORT
-  baseName = `http://${HOST}:${PORT}`
+  const HOST = process.env.REACT_APP_API_HOST;
+  const PORT = process.env.REACT_APP_API_PORT;
+  baseName = `http://${HOST}:${PORT}`;
 }
 
 const evaluateRequest = (metrics, hypdata, refdata) => {
@@ -52,30 +52,28 @@ export { getSavedCalculationsRequest };
 
 const deleteCalculationRequest = (name) => {
   const method = "DELETE";
-  return fetch(
-    `${baseName}/api/calculation/` + encodeURIComponent(name),
-    { method }
-  ).then((response) => {
-    if (response.status === 404) {
-      throw new Error("Resource not found");
+  return fetch(`${baseName}/api/calculation/` + encodeURIComponent(name), { method }).then(
+    (response) => {
+      if (response.status === 404) {
+        throw new Error("Resource not found");
+      }
     }
-  });
+  );
 };
 
 export { deleteCalculationRequest };
 
 const getCalculationDataRequest = (name) => {
   const method = "GET";
-  return fetch(
-    `${baseName}/api/calculation/` + encodeURIComponent(name),
-    { method }
-  ).then((response) => {
-    if (response.ok) {
-      return response.json();
-    } else {
-      alert("server error");
+  return fetch(`${baseName}/api/calculation/` + encodeURIComponent(name), { method }).then(
+    (response) => {
+      if (response.ok) {
+        return response.json();
+      } else {
+        alert("server error");
+      }
     }
-  });
+  );
 };
 
 export { getCalculationDataRequest };
@@ -86,9 +84,9 @@ const summarizers = [
   ["newspaper3k", "Newspaper3k"],
 ];
 
-const summarizeRequest = (text, summarizers, kind) => {
+const summarizeRequest = (text, summarizers, ratio, kind) => {
   const method = "POST";
-  const body = JSON.stringify({ text, summarizers, kind });
+  const body = JSON.stringify({ text, summarizers, ratio, kind });
   return fetch(`${baseName}/api/summarize`, {
     method,
     body,

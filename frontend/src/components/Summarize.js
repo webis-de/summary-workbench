@@ -13,6 +13,7 @@ const Summarize = () => {
   const [isComputing, setIsComputing] = useState(false);
   const [showHighlighting, toggleShowHighlighting] = useReducer((state) => !state, false);
   const [markups, setMarkups] = useState(null);
+  const [percentage, setPercentage] = useState("20");
 
   const generateParagraphs = (markupedText) => {
     const paragraphedText = [];
@@ -53,7 +54,7 @@ const Summarize = () => {
       return;
     }
     setIsComputing(true);
-    summarizeRequest(requestText, selectedSummarizers, textKind)
+    summarizeRequest(requestText, selectedSummarizers, parseInt(percentage) / 100, textKind)
       .then(({ summary, original_text }) => {
         if (Object.values(summary).every((summaryText) => summaryText === "")) {
           alert("No summary could be generated. The input is probably too short.");
@@ -85,22 +86,51 @@ const Summarize = () => {
       />
 
       <div
-        className="uk-flex uk-flex-between uk-flex-top uk-flex-wrap"
+        className="uk-flex uk-flex-between uk-flex-bottom uk-flex-wrap"
         style={{ gridRowGap: "15px" }}
       >
-        <select ref={selectRef} class="uk-select" multiple style={{ width: "400px" }} size={3}>
-          {summarizers.map(([name, readable]) => (
-            <option>{readable}</option>
-          ))}
-        </select>
-        <ComputeButton isComputing={isComputing} onClick={compute} methodCalled={"Summarize"} />
-        <Button
-          disabled={markups === null}
-          variant={showHighlighting ? "primary" : "default"}
-          onClick={() => toggleShowHighlighting()}
-        >
-          highlight
-        </Button>
+        <div className="uk-flex">
+          <select ref={selectRef} className="uk-select" multiple style={{ width: "12em" }} size={3}>
+            {summarizers.map(([name, readable]) => (
+              <option key={name}>{readable}</option>
+            ))}
+          </select>
+          <div
+            className="uk-margin-left uk-card uk-card-default uk-card-small uk-card-body"
+            style={{ padding: "0.5em", border: "1px solid #CCC" }}
+          >
+            <h5 style={{ marginBottom: "0.5em" }}>
+              summary size
+              <span
+                className="uk-margin-left uk-label"
+                style={{ width: "2.5em", fontFamily: "monospace", textAlign: "right" }}
+              >
+                {percentage + "%"}
+              </span>
+            </h5>
+            <div className="uk-flex">
+              <input
+                className="uk-range"
+                type="range"
+                min="5"
+                max="25"
+                defaultValue={percentage}
+                onChange={(e) => setPercentage(e.currentTarget.value)}
+              />
+            </div>
+          </div>
+        </div>
+        <div>
+          <ComputeButton isComputing={isComputing} onClick={compute} methodCalled={"Summarize"} />
+          <span className="uk-margin-left"></span>
+          <Button
+            disabled={markups === null}
+            variant={showHighlighting ? "primary" : "default"}
+            onClick={() => toggleShowHighlighting()}
+          >
+            highlight
+          </Button>
+        </div>
       </div>
 
       {markups !== null && (
@@ -108,7 +138,7 @@ const Summarize = () => {
           <ul className="uk-tab uk-margin" data-uk-tab uk-tab="connect: #summary-display;">
             {markups.map((m) => (
               <li>
-                <a href="/#">{m[0]}</a>
+                <a style={{fontSize: "1.5em"}} href="/#">{m[0]}</a>
               </li>
             ))}
           </ul>
@@ -119,12 +149,14 @@ const Summarize = () => {
                   paragraphedText={summaryText}
                   name="summary"
                   showMarkup={showHighlighting}
+                  maxHeight="300px"
+                  minHeight="300px"
                 />
                 <MarkupDisplayer
                   paragraphedText={requestText}
                   name="original text"
                   showMarkup={showHighlighting}
-                  scroll={true}
+                  maxHeight="1000px"
                 />
               </li>
             ))}
