@@ -7,6 +7,10 @@
     border-left: 4px solid #B02F2C;
 }
 
+.left-border-thin {
+    border-left: 2px solid #B02F2C;
+}
+
 
 .uk-tab > li.uk-active > a {color: #B02F2C !important;}
 

@@ -13,7 +13,7 @@ const Summarize = () => {
   const [isComputing, setIsComputing] = useState(false);
   const [showHighlighting, toggleShowHighlighting] = useReducer((state) => !state, false);
   const [markups, setMarkups] = useState(null);
-  const [percentage, setPercentage] = useState("20");
+  const [percentage, setPercentage] = useState("15");
 
   const generateParagraphs = (markupedText) => {
     const paragraphedText = [];
@@ -84,43 +84,32 @@ const Summarize = () => {
         rows="8"
         placeholder="Enter some long text or a URL (https://...)"
       />
-
-      <div
-        className="uk-flex uk-flex-between uk-flex-bottom uk-flex-wrap"
-        style={{ gridRowGap: "15px" }}
-      >
-        <div className="uk-flex">
-          <select ref={selectRef} className="uk-select" multiple style={{ width: "12em" }} size={3}>
-            {summarizers.map(([name, readable]) => (
-              <option key={name}>{readable}</option>
-            ))}
-          </select>
-          <div
-            className="uk-margin-left uk-card uk-card-default uk-card-small uk-card-body"
-            style={{ padding: "0.5em", border: "1px solid #CCC" }}
+      <div className="uk-flex">
+        <div className="left-border-thin"
           >
-            <h5 style={{ marginBottom: "0.5em" }}>
-              summary size
-              <span
-                className="uk-margin-left uk-label"
-                style={{ width: "2.5em", fontFamily: "monospace", textAlign: "right" }}
-              >
-                {percentage + "%"}
-              </span>
-            </h5>
-            <div className="uk-flex">
-              <input
-                className="uk-range"
+            <h5 className="uk-text-small uk-margin-left">Select models</h5>
+            <select ref={selectRef} className="uk-select uk-margin-left" multiple style={{ width: "12em" }} size={3}>
+              {summarizers.map(([name, readable]) => (
+                <option key={name}>{readable}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="left-border-thin uk-width-small uk-margin-left">
+          <h5 className="uk-text-small uk-margin-left">Summary length
+          <span className="uk-label">{percentage + "%"}</span> 
+          </h5>
+          <input
+                className="uk-margin-left"
                 type="range"
                 min="5"
                 max="25"
                 defaultValue={percentage}
                 onChange={(e) => setPercentage(e.currentTarget.value)}
-              />
-            </div>
-          </div>
+            />
         </div>
-        <div>
+        </div>
+        <div className="uk-float-right">
           <ComputeButton isComputing={isComputing} onClick={compute} methodCalled={"Summarize"} />
           <span className="uk-margin-left"></span>
           <Button
@@ -131,14 +120,13 @@ const Summarize = () => {
             highlight
           </Button>
         </div>
-      </div>
 
       {markups !== null && (
         <>
           <ul className="uk-tab uk-margin" data-uk-tab uk-tab="connect: #summary-display;">
             {markups.map((m) => (
               <li>
-                <a style={{fontSize: "1.5em"}} href="/#">{m[0]}</a>
+                <a style={{ fontSize: "1.5em" }} href="/#">{m[0]}</a>
               </li>
             ))}
           </ul>
