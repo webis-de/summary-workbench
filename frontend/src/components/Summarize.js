@@ -126,7 +126,7 @@ const Summarize = () => {
           <ul className="uk-tab uk-margin" data-uk-tab uk-tab="connect: #summary-display;">
             {markups.map((m) => (
               <li>
-                <a style={{ fontSize: "1.5em" }} href="/#">{m[0]}</a>
+                <a style={{ fontSize: "1em" }} href="/#">{m[0]}</a>
               </li>
             ))}
           </ul>
