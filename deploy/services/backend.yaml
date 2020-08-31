@@ -21,6 +21,7 @@ spec:
       initContainers:
         - name: init-setup-models
           image: docker.io/ds40bamo/summarizer-backend:1.0.1
+          imagePullPolicy: Always
           command: ["python", "setup.py"]
           volumeMounts:
             - mountPath: /root
@@ -31,6 +32,7 @@ spec:
       containers:
         - name: backend
           image: docker.io/ds40bamo/summarizer-backend:1.0.1
+          imagePullPolicy: Always
           command: ["bash", "-c", "gunicorn wsgi:app"]
           env:
             - name: MONGODB_HOST

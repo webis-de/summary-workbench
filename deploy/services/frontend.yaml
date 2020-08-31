@@ -19,6 +19,7 @@ spec:
       containers:
         - name: frontend
           image: docker.io/ds40bamo/summarizer-frontend:1.0.1
+          imagePullPolicy: Always
           ports:
             - name: frontend-port
               containerPort: 80

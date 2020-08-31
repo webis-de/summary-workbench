@@ -1,0 +1,26 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+flask = "*"
+flask-cors = "*"
+flask-mongoengine = "*"
+flask-restx = "*"
+marshmallow = "*"
+gunicorn = "*"
+networkx = "*"
+newspaper3k = "*"
+numpy = "*"
+grequests = "*"
+scikit-learn = "*"
+sentence_transformers = "*"
+spacy = "*"
+syntok = "*"
+torch = "*"
+
+[requires]
+python_version = "3.8"
