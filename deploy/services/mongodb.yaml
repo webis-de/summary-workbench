@@ -1,25 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: comparefile-mongodb
+  name: summarizer-mongodb
   labels:
-    app: comparefile
+    app: summarizer
     tier: mongodb
 spec:
   selector:
     matchLabels:
-      app: comparefile
+      app: summarizer
       tier: mongodb
   template:
     metadata:
       labels:
-        app: comparefile
+        app: summarizer
         tier: mongodb
     spec:
       volumes:
         - name: mongodata
           persistentVolumeClaim:
-            claimName: comparefile-mongodb-data
+            claimName: summarizer-mongodb-data
       containers:
         - name: mongodb
           image: mongo:latest
@@ -40,10 +40,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: comparefile-mongodb
+  name: summarizer-mongodb
 spec:
   selector:
-    app: comparefile
+    app: summarizer
     tier: mongodb
   ports:
     - port: 27017

@@ -22,34 +22,6 @@ services:
       - SIMPLE_SUMMARIZERS_URL=http://simple_summarizers:5000
     command: bash -c "pipenv sync && pipenv run python wsgi.py"
 
-  greedy_matching:
-    image: greedy_matching:latest
-    build: docker/backend/slim
-    working_dir: /app
-    volumes:
-      - ./backend/metrics/greedy_matching/:/app
-      - greedy_matching_root:/root
-    command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run
-      python wsgi.py"
-
-  meteor:
-    image: meteor:latest
-    build: docker/backend/meteor
-    working_dir: /app
-    volumes:
-      - ./backend/metrics/meteor/:/app
-    command: bash -c "pipenv sync && pipenv run python wsgi.py"
-
-  moverscore:
-    image: moverscore:latest
-    build: docker/backend/slim
-    working_dir: /app
-    volumes:
-      - ./backend/metrics/moverscore/:/app
-      - moverscore_root:/root
-    command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run
-      python wsgi.py"
-
   simple_metrics:
     image: simple:latest
     build: docker/backend/slim
@@ -58,26 +30,6 @@ services:
       - ./backend/metrics/simple/:/app
       - simple_metrics_root:/root
     command: bash -c "pipenv sync && pipenv run python wsgi.py"
-
-  bertsum:
-    image: simple:latest
-    build: docker/backend/slim
-    working_dir: /app
-    volumes:
-      - ./backend/summarizer/bertsum/:/app
-      - bertsum_root:/root
-    command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run
-      python wsgi.py"
-
-  simple_summarizers:
-    image: simple:latest
-    build: docker/backend/slim
-    working_dir: /app
-    volumes:
-      - ./backend/summarizer/simple/:/app
-      - simple_summarizers_root:/root
-    command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run
-      python wsgi.py"
 
   frontend:
     image: frontend:latest

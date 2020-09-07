@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: summarizer-api
+  labels:
+    app: summarizer
+    tier: api
+spec:
+  selector:
+    matchLabels:
+      app: summarizer
+      tier: api
+  template:
+    metadata:
+      labels:
+        app: summarizer
+        tier: api
+    spec:
+      initContainers:
+        - name: init-wait-for-mongodb
+          image: docker.io/ds40bamo/wait-for-it
+          command: ["./wait-for-it.sh", "-h", "summarizer-mongodb", "-p", "27017"]
+      containers:
+        - name: api
+          image: docker.io/ds40bamo/summarizer-api:1.0.2
+          imagePullPolicy: Always
+          command: ["bash", "-c", "gunicorn wsgi:app"]
+          env:
+            - name: GUNICORN_CMD_ARGS
+              value: "-cgunicorn.conf.py"
+            - name: MONGODB_HOST
+              value: "mongodb://summarizer-mongodb/app"
+            - name: BERT_URL
+              value: "http://summarizer-bert:5000"
+            - name: BLEURT_URL
+              value: "http://summarizer-bleurt:5000"
+            - name: GREEDY_MATCHING_URL
+              value: "http://summarizer-greedy-matching:5000"
+            - name: METEOR_URL
+              value: "http://summarizer-meteor:5000"
+            - name: MOVER_SCORE_URL
+              value: "http://summarizer-moverscore:5000"
+            - name: SIMPLE_METRICS_URL
+              value: "http://summarizer-simple-metrics:5000"
+            - name: BERTSUM_URL
+              value: "http://summarizer-bertsum:5000"
+            - name: SIMPLE_SUMMARIZERS_URL
+              value: "http://summarizer-simple-summarizers:5000"
+            - name: SIMPLE_METRICS_URL
+              value: "http://summarizer-simple-metrics:5000"
+          ports:
+            - name: api-port
+              containerPort: 5000
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: api-port
+            periodSeconds: 60
+            timeoutSeconds: 60
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: summarizer-api
+spec:
+  selector:
+    app: summarizer
+    tier: api
+  ports:
+    - port: 5000
+      targetPort: api-port

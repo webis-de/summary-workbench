@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: summarizer-meteor
+  labels:
+    app: summarizer
+    tier: meteor
+spec:
+  selector:
+    matchLabels:
+      app: summarizer
+      tier: meteor
+  template:
+    metadata:
+      labels:
+        app: summarizer
+        tier: meteor
+    spec:
+      containers:
+        - name: meteor
+          image: docker.io/ds40bamo/meteor:1.0
+          imagePullPolicy: Always
+          command: ["bash", "-c", "gunicorn wsgi:app"]
+          env:
+            - name: GUNICORN_CMD_ARGS
+              value: "-cgunicorn.conf.py"
+          ports:
+            - name: meteor-port
+              containerPort: 5000
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: meteor-port
+            periodSeconds: 60
+            timeoutSeconds: 60
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: summarizer-meteor
+spec:
+  selector:
+    app: summarizer
+    tier: meteor
+  ports:
+    - port: 5000
+      targetPort: meteor-port

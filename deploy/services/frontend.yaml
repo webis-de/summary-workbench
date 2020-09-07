@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: comparefile-frontend
+  name: summarizer-frontend
   labels:
-    app: comparefile
+    app: summarizer
     tier: frontend
 spec:
   selector:
     matchLabels:
-      app: comparefile
+      app: summarizer
       tier: frontend
   template:
     metadata:
       labels:
-        app: comparefile
+        app: summarizer
         tier: frontend
     spec:
       containers:
         - name: frontend
-          image: docker.io/ds40bamo/summarizer-frontend:1.0.1
+          image: docker.io/ds40bamo/summarizer-frontend:1.0.2
           imagePullPolicy: Always
           ports:
             - name: frontend-port
@@ -34,10 +34,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: comparefile-frontend
+  name: summarizer-frontend
 spec:
   selector:
-    app: comparefile
+    app: summarizer
     tier: frontend
   ports:
     - port: 80

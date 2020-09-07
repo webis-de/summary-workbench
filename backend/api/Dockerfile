@@ -11,5 +11,4 @@ WORKDIR /app
 COPY . .
 COPY --from=lock-stage /app/requirements.txt .
 
-RUN apt update && apt --yes install default-jre-headless
 RUN pip install --no-cache-dir -r requirements.txt

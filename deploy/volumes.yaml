@@ -1,9 +1,9 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: comparefile-mongodb-data
+  name: summarizer-mongodb-data
   labels:
-    app: comparefile
+    app: summarizer
     tier: mongodb
 spec:
   accessModes:
