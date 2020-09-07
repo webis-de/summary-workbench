@@ -2,10 +2,11 @@ import itertools
 from typing import Dict, List, Set, Tuple
 
 import networkx as nx
-from networkx import Graph
-from ...preprocessing import PreProcessor
-from ...scoring import Scorer
 import scipy.stats
+from networkx import Graph
+
+from .preprocessing import PreProcessor
+from .scoring import Scorer
 
 
 class TextRank(object):

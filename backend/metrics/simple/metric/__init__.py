@@ -66,6 +66,6 @@ class Metrics:
 
         for metric in scorable_metrics:
             scorer = self.metrics[metric]
-            results.update(scorer.score(hyp_list, ref_list))
+            results[metric] = scorer.score(hyp_list, ref_list)
 
         return results

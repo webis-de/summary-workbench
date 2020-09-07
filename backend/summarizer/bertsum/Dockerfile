@@ -12,6 +12,7 @@ COPY . .
 COPY --from=lock-stage /app/requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
+RUN python model_setup.py
 
 EXPOSE 5000
 ENV GUNICORN_CMD_ARGS -cgunicorn.conf.py

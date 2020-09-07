@@ -62,4 +62,4 @@ class GreedyMatchingScorer:
                 score_source.append((dir1 + dir2) / 2)
             scores.append(score_source)
 
-        return np.max(scores, axis=0).mean()
+        return {"greedy_matching": np.max(scores, axis=0).mean()}

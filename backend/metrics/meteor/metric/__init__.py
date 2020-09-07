@@ -14,4 +14,4 @@ class METEORScorer:
         hyps = dict(enumerate(hyp_list_zip))
         refs = dict(enumerate(ref_list_zip))
 
-        return self.meteor.compute_score(refs, hyps)[0]
+        return {"meteor": self.meteor.compute_score(refs, hyps)[0]}

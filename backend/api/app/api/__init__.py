@@ -1,8 +1,7 @@
 from flask import Blueprint, current_app
 from flask_restx import Api
 
-from app.common.metrics import Metrics
-from app.common.summarizer import Summarizers
+from app.common import Metrics, Summarizers
 
 from .resources.evaluate import EvaluateResource
 from .resources.savedcalculations import (SavedCalculationResource,

@@ -1,1 +1,0 @@
-from .ModelProcessor import BertSummarizer

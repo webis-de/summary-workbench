@@ -55,12 +55,12 @@ const Summarize = () => {
     }
     setIsComputing(true);
     summarizeRequest(requestText, selectedSummarizers, parseInt(percentage) / 100, textKind)
-      .then(({ summary, original_text }) => {
-        if (Object.values(summary).every((summaryText) => summaryText === "")) {
-          alert("No summary could be generated. The input is probably too short.");
+      .then(({ summaries, original_text }) => {
+        if (Object.values(summaries).every((summaryText) => summaryText === "")) {
+          alert("No summaries could be generated. The input is probably too short.");
         } else {
           const newMarkups = [];
-          for (const [name, summaryText] of Object.entries(summary)) {
+          for (const [name, summaryText] of Object.entries(summaries)) {
             const [requestMarkup, summaryMarkup] = markup(original_text, summaryText);
             newMarkups.push([
               name,

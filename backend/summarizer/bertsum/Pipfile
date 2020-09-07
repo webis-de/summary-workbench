@@ -7,13 +7,11 @@ verify_ssl = true
 
 [packages]
 flask = "*"
-flask-cors = "*"
-flask-mongoengine = "*"
-flask-restx = "*"
-marshmallow = "*"
 gunicorn = "*"
-newspaper3k = "*"
-grequests = "*"
+torch = "*"
+sentence_transformers = "*"
+scikit-learn = "*"
+spacy = "*"
 
 [requires]
 python_version = "3.8"

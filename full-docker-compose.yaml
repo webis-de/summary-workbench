@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 services:
   api:
@@ -6,7 +6,7 @@ services:
     build: docker/backend/api
     working_dir: /app
     ports:
-      - 5000:5000
+      - "5000:5000"
     volumes:
       - ./backend/api/:/app
       - api_root:/root
@@ -22,6 +22,24 @@ services:
       - SIMPLE_SUMMARIZERS_URL=http://simple_summarizers:5000
     command: bash -c "pipenv sync && pipenv run python wsgi.py"
 
+  bert:
+    image: bert:latest
+    build: docker/backend/slim
+    working_dir: /app
+    volumes:
+      - ./backend/metrics/bert/:/app
+      - bert_root:/root
+    command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run python wsgi.py"
+
+  bleurt:
+    image: bleurt:latest
+    build: docker/backend/default
+    working_dir: /app
+    volumes:
+      - ./backend//metrics/bleurt/:/app
+      - bleurt_root:/root
+    command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run python wsgi.py"
+
   greedy_matching:
     image: greedy_matching:latest
     build: docker/backend/slim
@@ -29,8 +47,7 @@ services:
     volumes:
       - ./backend/metrics/greedy_matching/:/app
       - greedy_matching_root:/root
-    command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run
-      python wsgi.py"
+    command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run python wsgi.py"
 
   meteor:
     image: meteor:latest
@@ -47,8 +64,7 @@ services:
     volumes:
       - ./backend/metrics/moverscore/:/app
       - moverscore_root:/root
-    command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run
-      python wsgi.py"
+    command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run python wsgi.py"
 
   simple_metrics:
     image: simple:latest
@@ -66,8 +82,7 @@ services:
     volumes:
       - ./backend/summarizer/bertsum/:/app
       - bertsum_root:/root
-    command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run
-      python wsgi.py"
+    command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run python wsgi.py"
 
   simple_summarizers:
     image: simple:latest
@@ -76,8 +91,7 @@ services:
     volumes:
       - ./backend/summarizer/simple/:/app
       - simple_summarizers_root:/root
-    command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run
-      python wsgi.py"
+    command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run python wsgi.py"
 
   frontend:
     image: frontend:latest
@@ -85,7 +99,7 @@ services:
     working_dir: /app
     stdin_open: true
     ports:
-      - 3000:3000
+      - "3000:3000"
     volumes:
       - ./frontend/:/app
       - node_modules:/app/node_modules

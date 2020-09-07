@@ -80,7 +80,7 @@ export { getCalculationDataRequest };
 
 const summarizers = [
   ["textrank", "TextRank"],
-  ["bert", "BERTSummarizer"],
+  ["bertsum", "BERTSummarizer"],
   ["newspaper3k", "Newspaper3k"],
 ];
 

@@ -2,14 +2,14 @@ from flask import current_app, request
 from flask_restx import Resource
 from marshmallow import Schema, fields, validate
 from newspaper import Article
-from app.common.summarizer import Summarizers
+from app.common import Summarizers
 
 
 class SummarizeScheme(Schema):
     text = fields.String(required=True)
     kind = fields.String(validate=validate.OneOf({"raw", "url"}))
     ratio = fields.Float(default=0.2, validate=validate.Range(min=0, max=1, min_inclusive=False, max_inclusive=False))
-    summarizers = fields.List(fields.String(), validate=validate.ContainsOnly(Summarizers.SUMMARIZERS.keys()), required=True)
+    summarizers = fields.List(fields.String(), validate=validate.ContainsOnly(Summarizers.SUMMARIZERS()), required=True)
 
 
 class SummarizeResource(Resource):
@@ -25,8 +25,8 @@ class SummarizeResource(Resource):
                 article.download()
                 article.parse()
                 text = article.text
-            summary = {summarizer: current_app.SUMMARIZERS.summarize(summarizer, text, ratio) for summarizer in summarizers}
-            return {"summary": summary, "original_text": text}, 200
+            summaries = current_app.SUMMARIZERS.summarize(summarizers, text, ratio)
+            return {"summaries": summaries, "original_text": text}, 200
         except Exception as error:
             current_app.logger.warn(error)
             return "", 400

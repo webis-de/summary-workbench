@@ -18,4 +18,4 @@ class BLEURTScorer:
         self.bleurt = bleurt.score.BleurtScorer(str(self.MODEL_PATH / self.MODEL))
 
     def score(self, hypotheses, references):
-        return float(np.average(self.bleurt.score(references, hypotheses)))
+        return {"bleurt": float(np.average(self.bleurt.score(references, hypotheses)))}

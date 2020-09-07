@@ -1,0 +1,9 @@
+enabled-services:
+  - simple_metrics
+  - simple_summarizers
+  - meteor
+  - greedy_matching
+  - moverscore
+  - bertsum
+  - bleurt
+  - bert
