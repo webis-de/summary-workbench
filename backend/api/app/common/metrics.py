@@ -1,21 +1,25 @@
-import grequests
+import aiohttp
+import asyncio
 from os import environ
 import logging
+
 
 class SingleMetric():
     def __init__(self, url):
         self.url = url
 
-    def request_score(self, hyps, refs):
-        return grequests.post(self.url, json={"hyps": hyps, "refs": refs})
+    async def request_score(self, session, hyps, refs):
+        async with session.post(self.url, json={"hyps": hyps, "refs": refs}) as response:
+            return await response.json()
 
 class MultipleMetrics:
     def __init__(self, metrics, url):
         self.metrics = list(metrics)
         self.url = url
 
-    def request_scores(self, metrics, hyps, refs):
-        return grequests.post(self.url, json={"metrics": list(metrics), "hyps": hyps, "refs": refs})
+    async def request_scores(self, session, metrics, hyps, refs):
+        async with session.post(self.url, json={"metrics": list(metrics), "hyps": hyps, "refs": refs}) as response:
+            return await response.json()
 
 class Metrics:
     SINGLE_METRICS = {
@@ -39,6 +43,21 @@ class Metrics:
     def METRICS(cls):
         return cls.MULTIPLE_METRICS | set(cls.SINGLE_METRICS.keys())
 
+    async def _retrieve(self, requested_single_metrics, requested_multiple_metrics, hyps, refs):
+        _requests = []
+        async with aiohttp.ClientSession() as session:
+            for metric in requested_single_metrics:
+                _requests.append(self.single_metrics[metric].request_score(session, hyps, refs))
+
+            if requested_multiple_metrics:
+                _requests.append(self.multiple_metrics.request_scores(session, requested_multiple_metrics, hyps, refs))
+
+            logging.warning(_requests)
+            scores = {}
+            for score in await asyncio.gather(*_requests):
+                scores.update(score)
+            return scores
+
     def compute(self, request_metrics, hyps, refs):
         request_metrics = set(request_metrics)
 
@@ -51,19 +70,4 @@ class Metrics:
 
         requested_single_metrics = available_single_metrics & request_metrics
         requested_multiple_metrics = available_multiple_metrics & request_metrics
-
-        _requests = []
-
-        for metric in requested_single_metrics:
-            _request = self.single_metrics[metric].request_score(hyps, refs)
-            _requests.append(_request)
-
-        if requested_multiple_metrics:
-            _requests.append(self.multiple_metrics.request_scores(requested_multiple_metrics, hyps, refs))
-
-        scores = {}
-        for response in grequests.map(_requests, exception_handler=lambda _, y: logging.warning(y)):
-            if response is None:
-                raise ValueError("Some request didn't work, maybe the endpoint is not available")
-            scores.update(response.json())
-        return scores
+        return asyncio.run(self._retrieve(requested_single_metrics, requested_multiple_metrics, hyps, refs))

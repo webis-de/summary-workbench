@@ -1,5 +1,3 @@
-import grequests  # gevent monkey patch, it has to be the first statement
-
 import logging
 from app import create_app
 

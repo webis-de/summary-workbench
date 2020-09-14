@@ -48,7 +48,7 @@ When you want to update the application you need to run `kubectl apply -f ~/comp
 # Used Metrics and Implementations
 - BERT: [Tiiiger/bert_score](https://github.com/Tiiiger/bert_score) (**model**: roberta-large-mnli)
 - BLEU: [Maluuba/nlg-eval](https://github.com/Maluuba/nlg-eval)
-- BLEURT [google-research/bleurt](https://github.com/google-research/bleurt) (**model**: bleurt-base-128)
+- BLEURT: [google-research/bleurt](https://github.com/google-research/bleurt) (**model**: bleurt-base-128)
 - CIDEr: [Maluuba/nlg-eval](https://github.com/Maluuba/nlg-eval)
 - METEOR: [Maluuba/nlg-eval](https://github.com/Maluuba/nlg-eval)
 - MoverScore: [AIPHES/emnlp19-moverscore](https://github.com/AIPHES/emnlp19-moverscore) (**model**: distilbert-base-uncased)
