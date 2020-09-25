@@ -7,3 +7,4 @@ enabled-services:
   - bertsum
   - bleurt
   - bert
+  - neuralsum

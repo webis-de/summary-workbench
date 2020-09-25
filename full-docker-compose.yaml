@@ -84,6 +84,15 @@ services:
       - bertsum_root:/root
     command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run python wsgi.py"
 
+  neuralsum:
+    image: simple:latest
+    build: docker/backend/slim
+    working_dir: /app
+    volumes:
+      - ./backend/summarizer/neuralsum/:/app
+      - neuralsum_root:/root
+    command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run python wsgi.py"
+
   simple_summarizers:
     image: simple:latest
     build: docker/backend/slim
@@ -122,6 +131,7 @@ volumes:
   moverscore_root:
   simple_metrics_root:
   bertsum_root:
+  neuralsum_root:
   simple_summarizers_root:
   node_modules:
   mongodata:

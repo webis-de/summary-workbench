@@ -22,7 +22,7 @@ spec:
           command: ["./wait-for-it.sh", "-h", "summarizer-mongodb", "-p", "27017"]
       containers:
         - name: api
-          image: docker.io/ds40bamo/summarizer-api:1.0.3
+          image: docker.io/ds40bamo/summarizer-api:1.1
           imagePullPolicy: Always
           command: ["bash", "-c", "gunicorn wsgi:app"]
           env:
@@ -44,6 +44,8 @@ spec:
               value: "http://summarizer-simple-metrics:5000"
             - name: BERTSUM_URL
               value: "http://summarizer-bertsum:5000"
+            - name: NEURALSUM_URL
+              value: "http://summarizer-neuralsum:5000"
             - name: SIMPLE_SUMMARIZERS_URL
               value: "http://summarizer-simple-summarizers:5000"
             - name: SIMPLE_METRICS_URL

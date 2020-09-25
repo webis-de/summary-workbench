@@ -38,7 +38,10 @@ class MultipleSummarizers:
 
 
 class Summarizers(object):
-    SINGLE_SUMMARIZERS = {"bertsum": "BERTSUM_URL"}
+    SINGLE_SUMMARIZERS = {
+        "bertsum": "BERTSUM_URL",
+        "neuralsum": "NEURALSUM_URL"
+    }
     MULTIPLE_SUMMARIZERS = {"textrank", "newspaper3k"}
 
     @classmethod

@@ -81,6 +81,7 @@ export { getCalculationDataRequest };
 const summarizers = [
   ["textrank", "TextRank"],
   ["bertsum", "BERTSummarizer"],
+  ["neuralsum", "NeuralSummarizer"],
   ["newspaper3k", "Newspaper3k"],
 ];
 
