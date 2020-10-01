@@ -24,7 +24,6 @@ const PrecionField = ({ onChange }) => (
 );
 
 const ScoreTableDummy = ({ scoreInfo }) => {
-  console.log(scoreInfo)
   const flatScores = useMemo(() => Object.values(scoreInfo).reduce(
     (acc, value) => acc.concat(Object.entries(value)),
     []

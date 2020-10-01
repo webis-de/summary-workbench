@@ -1,17 +1,19 @@
 import React, { useContext, useRef, useState } from "react";
-import { Button } from "./utils/Button";
 import { FaKeyboard } from "react-icons/fa";
-import { Section } from "./utils/Section";
-import { ComputeButton } from "./utils/ComputeButton";
 
 import { evaluateRequest } from "../api";
-import { markup } from "../utils/fragcolors";
 import { SettingsContext } from "../contexts/SettingsContext";
+import { markup } from "../utils/fragcolors";
 import { Markup } from "./Markup";
 import { ScoreTable } from "./ScoreTable";
+import { SummEvalTable } from "./SummEvalTable";
+import { Button } from "./utils/Button";
+import { Section } from "./utils/Section";
+import { Loading } from "./utils/Loading";
 
 const OneHypRefResult = ({ className, scoreInfo, hypothesis, reference }) => {
-  const hasScores = Object.keys(scoreInfo).length > 0;
+  const {metrics, summ_eval} = scoreInfo
+  const hasScores = Object.keys(metrics).length > 0;
 
   return (
     <div className={className}>
@@ -27,7 +29,8 @@ const OneHypRefResult = ({ className, scoreInfo, hypothesis, reference }) => {
           </tr>
         </tbody>
       </table>
-      {hasScores && <ScoreTable scoreInfo={scoreInfo} />}
+      {hasScores && <ScoreTable scoreInfo={metrics} />}
+      {summ_eval !== undefined && <SummEvalTable scoreInfo={summ_eval} />}
     </div>
   );
 };
@@ -54,7 +57,7 @@ const OneHypRef = ({ className }) => {
     return [hyp, ref];
   };
 
-  const compute = () => {
+  const compute = (summ_eval = false) => {
     const hypdata = hypRef.current.value;
     const refdata = refRef.current.value;
     if (hypdata.trim() === "" || refdata.trim() === "") {
@@ -62,7 +65,7 @@ const OneHypRef = ({ className }) => {
       return;
     }
     setIsComputing(true);
-    evaluateRequest(getChosenMetrics(settings), [hypdata], [refdata])
+    evaluateRequest(getChosenMetrics(settings), [hypdata], [refdata], summ_eval)
       .then((scores) => {
         const [hyp, ref] = getComparison(hypdata, refdata);
         setEvaluateResult({ scores, hyp, ref });
@@ -98,7 +101,17 @@ const OneHypRef = ({ className }) => {
           />
         </div>
         <div className="uk-flex uk-flex-between">
-          <ComputeButton isComputing={isComputing} onClick={compute} methodCalled={"Evaluate"} />
+        <div className="uk-flex uk-flex-left">
+          <Loading isLoading={isComputing}>
+            <Button variant="primary" onClick={() => compute(false)}>
+              {"Evaluate"}
+            </Button>
+            <div style={{ paddingLeft: "10px" }} />
+            <Button variant="primary" onClick={() => compute(true)}>
+              {"Evaluate with Summ_eval"}
+            </Button>
+          </Loading>
+        </div>
           <Button
             variant="primary"
             onClick={() => {

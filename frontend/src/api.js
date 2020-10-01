@@ -6,9 +6,9 @@ if (DEVELOP === "true") {
   baseName = `http://${HOST}:${PORT}`;
 }
 
-const evaluateRequest = (metrics, hypdata, refdata) => {
+const evaluateRequest = (metrics, hypdata, refdata, summ_eval) => {
   const method = "POST";
-  const body = JSON.stringify({ metrics, hypdata, refdata });
+  const body = JSON.stringify({ metrics, hypdata, refdata, summ_eval });
   return fetch(`${baseName}/api/evaluate`, {
     method,
     body,

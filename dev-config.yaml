@@ -8,3 +8,4 @@ enabled-services:
   - bleurt
   - bert
   - neuralsum
+  - summ_eval

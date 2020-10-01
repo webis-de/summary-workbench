@@ -8,7 +8,7 @@ from app.common import Summarizers
 class SummarizeScheme(Schema):
     text = fields.String(required=True)
     kind = fields.String(validate=validate.OneOf({"raw", "url"}))
-    ratio = fields.Float(default=0.2, validate=validate.Range(min=0, max=1, min_inclusive=False, max_inclusive=False))
+    ratio = fields.Float(missing=0.2, validate=validate.Range(min=0, max=1, min_inclusive=False, max_inclusive=False))
     summarizers = fields.List(fields.String(), validate=validate.ContainsOnly(Summarizers.SUMMARIZERS()), required=True)
 
 

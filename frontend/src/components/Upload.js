@@ -2,13 +2,14 @@ import React, { useContext, useState } from "react";
 import { FaRegFile } from "react-icons/fa";
 
 import { evaluateRequest } from "../api";
-import { markup } from "../utils/fragcolors";
-import { readFile } from "../utils/readFile";
 import { CalculateContext } from "../contexts/CalculateContext";
 import { SettingsContext } from "../contexts/SettingsContext";
+import { markup } from "../utils/fragcolors";
+import { readFile } from "../utils/readFile";
 import { ChooseFile } from "./utils/ChooseFile";
-import { ComputeButton } from "./utils/ComputeButton";
 import { Section } from "./utils/Section";
+import { Loading } from "./utils/Loading";
+import { Button } from "./utils/Button";
 
 const Upload = ({ className, reloadResult }) => {
   const [hypFile, setHypFile] = useState(null);
@@ -30,7 +31,7 @@ const Upload = ({ className, reloadResult }) => {
     return hyplines.map((hypline, i) => markup(hypline, reflines[i]));
   };
 
-  const compute = () => {
+  const compute = (summ_eval = false) => {
     if (hypFile !== null && refFile !== null) {
       setIsComputing(true);
 
@@ -45,7 +46,7 @@ const Upload = ({ className, reloadResult }) => {
 
         if (hyplines.length === reflines.length) {
           if (chosenMetrics.length > 0) {
-            evaluateRequest(chosenMetrics, hyplines, reflines)
+            evaluateRequest(chosenMetrics, hyplines, reflines, summ_eval)
               .then((scores) => {
                 const comparisons = getComparisons(hypdata, refdata);
                 setCalculateResult({ name, scores, comparisons });
@@ -60,7 +61,7 @@ const Upload = ({ className, reloadResult }) => {
               })
               .finally(() => setIsComputing(false));
           } else {
-            const comparisons = getComparisons(hypdata, refdata);
+            const comparisons = getComparisons(hypdata, refdata, summ_eval);
             setCalculateResult({ name, scores: {}, comparisons });
             reloadResult();
             setIsComputing(false);
@@ -87,20 +88,20 @@ const Upload = ({ className, reloadResult }) => {
         className="uk-margin uk-grid uk-grid-small uk-child-width-1-2@s"
         style={{ gridRowGap: "10px" }}
       >
-        <ChooseFile
-          kind="hypothesis"
-          file={hypFile}
-          setFile={setHypFile}
-          name="HypFile"
-        />
-        <ChooseFile
-          kind="reference"
-          file={refFile}
-          setFile={setRefFile}
-          name="RefFile"
-        />
+        <ChooseFile kind="hypothesis" file={hypFile} setFile={setHypFile} name="HypFile" />
+        <ChooseFile kind="reference" file={refFile} setFile={setRefFile} name="RefFile" />
       </div>
-      <ComputeButton isComputing={isComputing} onClick={compute} methodCalled={"Evaluate"} />
+      <div className="uk-flex uk-flex-left">
+        <Loading isLoading={isComputing}>
+          <Button variant="primary" onClick={() => compute(false)}>
+            {"Evaluate"}
+          </Button>
+          <div style={{ paddingLeft: "10px" }} />
+          <Button variant="primary" onClick={() => compute(true)}>
+            {"Evaluate with Summ_eval"}
+          </Button>
+        </Loading>
+      </div>
     </Section>
   );
 };

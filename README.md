@@ -57,3 +57,4 @@ When you want to update the application you need to run `kubectl apply -f ~/comp
 
 # Similar Projects
 - [vizseq](https://github.com/facebookresearch/vizseq)
+- [SummEval](https://github.com/Yale-LILY/SummEval)

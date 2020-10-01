@@ -18,7 +18,7 @@ const Result = ({ className, reloadSaved }) => {
 
   const upload = () => {
     const name = nameRef.current.value;
-    const scores = calculateResult.scores;
+    const scores = calculateResult.scores["metrics"];
     const comparisons = calculateResult.comparisons;
     saveCalculationRequest(name, scores, comparisons)
       .then(() => {

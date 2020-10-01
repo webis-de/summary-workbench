@@ -18,7 +18,9 @@ services:
       - METEOR_URL=http://meteor:5000
       - MOVER_SCORE_URL=http://moverscore:5000
       - SIMPLE_METRICS_URL=http://simple_metrics:5000
+      - SUMM_EVAL_URL=http://summ_eval:5000
       - BERTSUM_URL=http://bertsum:5000
+      - NEURALSUM_URL=http://neuralsum:5000
       - SIMPLE_SUMMARIZERS_URL=http://simple_summarizers:5000
     command: bash -c "pipenv sync && pipenv run python wsgi.py"
 
@@ -59,7 +61,7 @@ services:
 
   moverscore:
     image: moverscore:latest
-    build: docker/backend/slim
+    build: docker/backend/default
     working_dir: /app
     volumes:
       - ./backend/metrics/moverscore/:/app
@@ -102,6 +104,15 @@ services:
       - simple_summarizers_root:/root
     command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run python wsgi.py"
 
+  summ_eval:
+    image: simple:latest
+    build: docker/backend/summ_eval
+    working_dir: /app
+    volumes:
+      - ./backend/summ_eval/:/app
+      - summ_eval_root:/root
+    command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run python wsgi.py"
+
   frontend:
     image: frontend:latest
     build: docker/frontend
@@ -133,5 +144,6 @@ volumes:
   bertsum_root:
   neuralsum_root:
   simple_summarizers_root:
+  summ_eval_root:
   node_modules:
   mongodata:

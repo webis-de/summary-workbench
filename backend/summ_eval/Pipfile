@@ -1,0 +1,21 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+flask = "*"
+gunicorn = "*"
+bert-score = "*"
+nltk = "*"
+numpy = "*"
+pyrouge = {git = "https://github.com/bheinzerling/pyrouge.git"}
+pytorch-pretrained-bert = "*"
+sacrebleu = "*"
+transformers = ">=2.2.0"
+moverscore = {git = "https://github.com/dominik-schwabe/emnlp19-moverscore.git"}
+
+[requires]
+python_version = "3.8"
