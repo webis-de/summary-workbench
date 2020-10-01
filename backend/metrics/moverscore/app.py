@@ -1,10 +1,15 @@
 import logging
+import multiprocessing
 
+import numpy as np
 from flask import Flask, jsonify, request
 
-from metric import MoverScoreScorer
+from moverscore import MoverScoreV2
 
-scorer = MoverScoreScorer()
+multiprocessing.set_start_method("spawn")
+
+
+scorer = MoverScoreV2()
 
 app = Flask(__name__)
 
@@ -23,11 +28,10 @@ def score_route():
         if isinstance(refs, str):
             refs = [refs]
 
-        score = scorer.score(hyps, refs)
+        score = float(np.average(scorer.score(refs, hyps)))
 
         headers = {"Content-Type": "application/json"}
-        print(score)
-        return jsonify({"moverscore": score}), 200, headers
+        return jsonify({"moverscore": {"moverscore": score}}), 200, headers
     except Exception as error:
         logging.warning(error)
         return "", 400

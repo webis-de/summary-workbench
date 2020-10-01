@@ -8,10 +8,7 @@ verify_ssl = true
 [packages]
 flask = "*"
 gunicorn = "*"
-sentence_transformers = "*"
-pyemd = "*"
-torch = "*"
-numpy = "*"
+moverscore = {git = "https://github.com/dominik-schwabe/emnlp19-moverscore.git"}
 
 [requires]
 python_version = "3.8"
