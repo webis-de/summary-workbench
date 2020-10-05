@@ -100,7 +100,8 @@ class Metrics:
         compute_summ_eval=False,
     ):
         metric_requests = []
-        async with aiohttp.ClientSession() as session:
+        timeout = aiohttp.ClientTimeout(total=None)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
             for metric in requested_single_metrics:
                 metric_requests.append(
                     self.single_metrics[metric].request_score(session, hyps, refs)
@@ -125,7 +126,6 @@ class Metrics:
                     gather_metric_requests,
                     self.summ_eval_request(used_summ_eval_metrics, hyps, refs, session),
                 )
-                logging.warning(summ_eval_scores)
                 summ_eval_scores = extract_scores(
                     used_summ_eval_metrics, summ_eval_scores
                 )

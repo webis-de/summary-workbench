@@ -61,7 +61,8 @@ class Summarizers(object):
         self, requested_single_summarizers, requested_multiple_summarizers, text, ratio
     ):
         _requests = []
-        async with aiohttp.ClientSession() as session:
+        timeout = aiohttp.ClientTimeout(total=None)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
             for metric in requested_single_summarizers:
                 _requests.append(self.single_summarizers[metric].request_summary(
                         session, text, ratio

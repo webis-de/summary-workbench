@@ -25,7 +25,6 @@ class EvaluateResource(Resource):
                 scores, summ_eval = scores
                 result["summ_eval"] = summ_eval
             result["metrics"] = scores
-            current_app.logger.warning(scores)
             return result, 200
         except Exception as error:
             current_app.logger.warn(error)
