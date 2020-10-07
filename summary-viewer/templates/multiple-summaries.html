@@ -1,0 +1,239 @@
+{%extends "layout.html"%}
+{%block content%}
+<style>
+    .button-compare {
+        float: right;
+    }
+    .model-name{
+        text-transform: capitalize;
+    }
+   
+</style>
+<script src="{{url_for('static', filename='js/pagination.js')}}"></script>
+<script src="{{url_for('static', filename='js/fragcolors.js')}}"></script>
+    <div class="uk-container uk-container-large uk-margin-top ">
+        <div class="uk-position-center" id="loading-text">Loading...</div>
+        <div uk-spinner="ratio:5" class="uk-position-center" id="loading"></div>
+    </div>
+
+    <div class="uk-container uk-container-large uk-margin-large-bottom ">
+        <div id="pagination-controls" class= "uk-margin-bottom" hidden>
+            <span uk-icon="chevron-double-right" class="uk-text-primary">Jump to </span>
+            <input type="number" id="goto-page" class="uk-input uk-width-small" placeholder="1">
+            <p class=" uk-text-danger" id="goto-error-message">Search exceeded the maximum number of records.</p>
+        </div>
+        <!--End of jump to navigation-->
+
+        <div class="uk-container uk-container-large" id="content" hidden>
+            {%for record in processed_records%}
+            <div class="result-item">
+                <div class="uk-container uk-container-large">
+                    <div class=" uk-button-group-large uk-margin-bottom">
+                        <button
+                            class="uk-button uk-button-primary uk-margin-medium-right {{'uk-disabled' if loop.index == 1}}  "
+                            id="previous-page" onclick="pagination.showPage({{loop.index}}-1)"><span
+                                uk-icon="chevron-left">Previous </span></button>
+                        <button
+                            class="uk-button uk-button-primary uk-margin-auto {{'uk-disabled' if loop.index >= loop.length}}  "
+                            id="next-page" onclick="pagination.showPage({{loop.index}}+1)"><span
+                                uk-icon="chevron-right">Next
+                            </span></button>
+                        <button class="uk-button uk-button-link button-compare uk-margin-left " id="remove-highlights">Remove Highlights</button>
+                        <button class="uk-button uk-button-link button-compare" uk-icon="file-text"
+                            id="pred-with-doc">Document Overlap</button>
+                        <button class="uk-button uk-button-link button-compare uk-margin-right" uk-icon="file-text"
+                            id="pred-with-ref">Reference Overlap</button>
+                        
+                    </div>
+                    <!--End of navigation buttons-->
+                </div>
+
+
+                <!-- End of pagination controls-->
+                <div class="uk-flex">
+                    <div class=" uk-width-1-1 uk-card uk-card-default uk-card-body document-border">
+                        <h4 class="uk-card-title">Document</h4>
+                        <p class="uk-text-break document-text">{{record.document}}</p>
+                    </div>
+
+                    <div class="uk-flex uk-flex-column uk-width-1-1 uk-margin-left">
+                        {%for summary in record.summaries%}
+                        <div class="uk-card uk-card-default uk-card-small uk-card-body uk-margin-small-bottom summary-border summary-card">
+                            <h4 class="uk-card-title model-name"></h4>
+                            <p class="uk-text-break prediction-text">{{summary}}</p>
+                        </div>
+                        {%endfor%}
+                        <!--End of summary card-->
+                    </div>
+                    <!--End of flex for summaries-->
+                </div>
+                <!--End of flex for document and summaries -->
+            </div>
+            <!--End of result item-->
+            {%endfor%}
+        </div>
+    </div>
+
+<script>
+    // Utility to remove highlighting classes
+
+    $.fn.removeClassStartingWith = function (filter) {
+        $(this).removeClass(function (index, className) {
+            return (className.match(new RegExp("\\S*" + filter + "\\S*", 'g')) || []).join(' ')
+        });
+        return this;
+    };
+
+    // Add model headings to summary cards
+    $(document).ready(function () {
+        $('.summary-card').each(function (index, item) {
+            var card_text = $(item).find('p').text()
+            var model_name = card_text.split(" || ")[0]
+            var model_summary = card_text.split(" || ").slice(1, ).join(" ")
+            $(item).find('h4').html(model_name)
+            $(item).find('p').html(model_summary)
+
+            if (model_name === "Reference") {
+                $(item).find('p').removeClass('prediction-text').addClass('reference-text')
+            }
+        })
+
+    });
+
+
+
+    var pagination = new Pagination();
+
+    $(document).ready(function () {
+        $('#goto-error-message').hide();
+        pagination.itemsPerPage = 1;
+        pagination.pagingContainer = $('#content');
+        pagination.items = $('.result-item', pagination.pagingContainer);
+        pagination.showPage(1);
+
+        $('#goto-page').on("keydown", function (e) {
+            if (e.keyCode == 13) {
+                var page_number = $(this).val();
+                if (page_number <= pagination.items.length) {
+                    $('#goto-error-message').hide();
+                    pagination.showPage(page_number);
+                } else {
+                    $('#goto-error-message').show();
+                }
+            }
+
+        })
+
+    });
+
+    // Hide controls until all records are completely loaded
+    $(window).on("load", function () {
+        $('#loading-text').attr("hidden", true);
+        $('#loading').attr("hidden", true);
+        $('#pagination-controls').attr("hidden", false);
+        $('#content').attr("hidden", false);
+        $('#highlight-footer').attr("hidden", false);
+    })
+
+    // Compute text overlaps and highlight them 
+
+    var highlightOverlap = function (element1, element2) {
+        var last_selected = [];
+
+        var element_1 = $(element1);
+        var element_2 = $(element2);
+
+        $(last_selected).each(function (i) {
+            var x = last_selected[i];
+            $(x[0]).html(x[1].orig);
+        });
+
+        var textblocks = [new textblock(element_1), new textblock(element_2)];
+
+        last_selected = [
+            [element_1, textblocks[0]],
+            [element_2, textblocks[1]]
+        ];
+        var list1 = textblocks[0].words;
+        list1 = clean_list(list1);
+        var list2 = textblocks[1].words;
+        list2 = clean_list(list2);
+
+        var docs = [list1[0], list2[0]];
+        var ids = [list1[1], list2[1]];
+
+        function colorize(sims) {
+            /* Colors have css classes "fragmark1" to "fragmark9" */
+            var col = 0;
+            var nr_col = 9;
+            for (var i = 0; i < sims.length; i++) {
+                var res = sims[i];
+
+                textblocks[res[0]].apply_class("fragmark-" + (col + 1), ids[res[0]][res[1]], ids[res[
+                    0]][res[1] + res[4] - 1]);
+                textblocks[res[2]].apply_class("fragmark-" + (col + 1), ids[res[2]][res[3]], ids[res[
+                    2]][res[3] + res[4] - 1]);
+
+                col = (col + 1) % nr_col;
+            }
+            textblocks[0].realize();
+            textblocks[1].realize();
+        }
+        var overlap_size = 1;
+        var sims = cmp_text(docs, overlap_size);
+
+        colorize(sims);
+
+    }
+
+    // Watch for changes to #content div and enable text highlighting
+
+    var removeAllHighlightingClasses = function () {
+        $('.document-text span').removeClassStartingWith('fragmark-');
+        $('.reference-text span').removeClassStartingWith('fragmark-')
+        $('.prediction-text span').removeClassStartingWith('fragmark-')
+    }
+    var observer = new MutationObserver(function (mutations) {
+        mutations.forEach(function (mutation) {
+            if (mutation.addedNodes.length) {
+
+                $('#ref-with-doc').on('click', function () {
+                    removeAllHighlightingClasses();
+                    highlightOverlap('.document-text', '.reference-text');
+                });
+
+                $('#pred-with-doc').on('click', function () {
+                    removeAllHighlightingClasses();
+                    highlightOverlap('.document-text', '.prediction-text');
+                });
+
+                $('#pred-with-ref').on('click', function () {
+                    removeAllHighlightingClasses();
+                    highlightOverlap('.reference-text', '.prediction-text');
+                })
+
+                $('#remove-highlights').on('click', function(){
+                    removeAllHighlightingClasses();
+                })
+
+                if ($('#previous-page').hasClass('uk-disabled')) {
+                    $('#previous-page').prop("disabled", true);
+                };
+
+                if ($('#next-page').hasClass('uk-disabled')) {
+                    $('#next-page').prop("disabled", true);
+                };
+
+
+
+            }
+        })
+    })
+
+    var content_div = document.querySelector('#content');
+    observer.observe(content_div, {
+        childList: true,
+        attributes: true
+    })
+</script>
+{% endblock %}

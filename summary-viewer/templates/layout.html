@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Summary viewer</title>
+    <!-- UIkit CSS -->
+    <link rel="stylesheet" href="{{url_for('static', filename='uikit/css/uikit.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='css/styles.css')}}">
+
+    <!-- Jquery -->
+    <script src="{{url_for('static',filename='js/jquery-3.4.1.min.js')}}"></script>
+    <!-- UIkit JS -->
+    <script src="{{url_for('static', filename='uikit/js/uikit.js')}}"></script>
+    <script src="{{url_for('static', filename='uikit/js/uikit-icons.js')}}"></script>
+</head>
+
+<body>
+    <nav class="uk-navbar-container navbar-background" uk-navbar>
+        <div class="uk-navbar-center">
+            <ul class="uk-navbar-nav">
+                <li class="uk-active"><a href="/" class=" uk-navbar-item" id="app-title">Summary Viewer</a></li>
+            </ul>
+        </div>
+    </nav>
+    {%block content %}
+    {%endblock%}
+</body>
+
+</html>

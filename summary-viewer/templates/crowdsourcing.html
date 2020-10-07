@@ -1,0 +1,248 @@
+{% extends "layout.html"%}
+{% block content%}
+<link rel="stylesheet" href="{{url_for('static', filename='css/annotations.css')}}">
+<script src="{{url_for('static', filename='js/pagination.js')}}"></script>
+
+<div class="uk-section">
+    <div class="uk-container">
+        <div class="uk-position-center" id="loading-text">Loading...</div>
+        <div uk-spinner="ratio:5" class="uk-position-center" id="loading"></div>
+    </div>
+
+    <div class="uk-container-expand">
+        <!-- Content div to hold all records from the corpus -->
+        <div id="content" hidden>
+            {% for record in records %}
+            <!-- Layout for a result item -->
+            <div class="uk-grid uk-margin-auto result-item">
+                <!-- Controls to jump to a document-->
+                <div id="pagination-controls" class=" uk-margin-bottom uk-margin-medium-left" hidden>
+                    <span uk-icon="chevron-double-right" class="uk-text-primary">Jump to </span>
+                    <input type="number" id="goto-page" class="uk-input uk-width-small" placeholder="1">
+                    <p class=" uk-text-danger" id="goto-error-message">Search exceeded the maximum number of records.
+                    </p>
+                    <div class=" uk-float-right uk-margin-large-right">
+                        <button
+                            class="uk-button uk-button-primary uk-margin-medium-right {{'uk-disabled' if loop.index == 1}}  "
+                            id="previous-page" onclick="pagination.showPage({{loop.index}}-1)"><span
+                                uk-icon="chevron-left">Previous </span></button>
+                        <button
+                            class="uk-button uk-button-primary uk-margin-auto {{'uk-disabled' if loop.index >= loop.length}}  "
+                            id="next-page" onclick="pagination.showPage({{loop.index}}+1)"><span
+                                uk-icon="chevron-right">Next </span></button>
+                    </div>
+                </div>
+
+                <!-- End of jump to-->
+                <!-- Buttons to toggle ADUs -->
+                <div class="uk-margin-medium-left">
+                    <button class=" uk-button  toggle-adu" id="toggle-anecdote">Anecdote</button>
+                    <button class=" uk-button  uk-margin-small-left toggle-adu "
+                        id="toggle-assumption">Assumption</button>
+                    <button class=" uk-button  uk-margin-small-left toggle-adu"
+                        id="toggle-common-ground">Common-ground</button>
+                    <button class=" uk-button uk-button-default  uk-margin-small-left toggle-adu"
+                        id="toggle-no-unit">No-unit</button>
+                    <button class=" uk-button  uk-margin-small-left toggle-adu"
+                        id="toggle-statistics">Statistics</button>
+                    <button class=" uk-button  uk-margin-small-left toggle-adu" id="toggle-testimony">Testimony</button>
+                    <button class=" uk-button uk-button-secondary  uk-margin-large-left" id="reset-colors">Reset colors</button>
+                    <button class=" uk-button uk-button-secondary  uk-margin-left" id="remove-colors">Toggle colors</button>
+                </div>
+                <!-- End of buttons -->
+                <!-- Document -->
+                <div class="uk-card uk-card-body">
+                    {% for sentence in record.document%}
+                    <span class="{{sentence.label | lower}} sentence-padding document-sentence">{{sentence.text}}</span>
+                    {%endfor%}
+
+                </div>
+                <!-- End of document card -->
+                <hr>
+                <!-- Summaries -->
+                {%for summary in record.summaries%}
+                <h5 class="uk-margin-medium-left">Summary {{loop.index}}</h5>
+                <div class="uk-card uk-card-body">
+                    {% for sentence in summary%}
+                    <span class="{{sentence.label | lower}} sentence-padding summary-sentence">{{sentence.text}}</span>&nbsp;
+                    {%endfor%}
+                </div>
+                
+                {%endfor%}
+                <!-- End of summary card-->
+            </div>
+            <!-- End of a result item layout-->
+            {%endfor%}
+        </div>
+        <!-- End of content div that holds all the records -->
+    </div>
+    <!-- End of large container-->
+</div>
+<!-- End of main section -->
+<script>
+    // Hide controls until all records are completely loaded
+    $(window).on("load", function () {
+        $('#loading-text').attr("hidden", true);
+        $('#loading').attr("hidden", true);
+        $('#pagination-controls').attr("hidden", false);
+        $('#content').attr("hidden", false);
+    });
+
+    var pagination = new Pagination();
+
+    $(document).ready(function () {
+
+        // Pagination of documents
+        $('#goto-error-message').hide();
+        pagination.itemsPerPage = 1;
+        pagination.pagingContainer = $('#content');
+        pagination.items = $('.result-item', pagination.pagingContainer);
+        pagination.showPage(1);
+
+
+    });
+
+    // Watch for DOM changes and compute values accordingly
+
+    var observer = new MutationObserver(function (mutations) {
+        mutations.forEach(function (mutation) {
+            if (mutation.addedNodes.length) {
+
+                $('#goto-error-message').hide();
+                var documentSentences = $('.document-sentence')
+                var summarySentences = $('.summary-sentence')
+
+                var allAdus = ["anecdote", "assumption", "common-ground", "statistics", "testimony",
+                    "no-unit"
+                ]
+                var existingAdus = []
+
+                // Find existing ADUs in the current document. 
+                documentSentences.each(function () {
+                    var classes = $(this).attr("class").split(/\s+/);
+                    classes.forEach(function (className) {
+                        if (allAdus.includes(className)) {
+                            existingAdus.push(className)
+                        }
+                    })
+
+                });
+
+                // Count the occurrences for each ADU
+                var aduCounts = {}
+                for (var i = 0; i < existingAdus.length; i++) {
+                    var aduType = existingAdus[i]
+                    aduCounts[aduType] = aduCounts[aduType] ? aduCounts[aduType] + 1 : 1;
+                }
+
+                // Disable buttons for which adus don't exist
+                var aduButtons = $('.toggle-adu')
+                aduButtons.each(function () {
+                    var buttonName = $(this).html();
+                    if (existingAdus.includes(buttonName.toLowerCase())) {
+                        var aduTypeCount = aduCounts[buttonName.toLowerCase()]
+                        $(this).html(buttonName + " (" + aduTypeCount + ")")
+                    } else {
+                        $(this).attr("disabled", true)
+                        $(this).addClass("toggle-disabled")
+                    }
+
+                });
+
+                // Toggle ADU spans in text
+                $('.toggle-adu').on("click", function () {
+
+                    var adu = $(this).html().toLowerCase().split(' (')[0];
+
+                    documentSentences.each(function () {
+                        $(this).removeClass("blur-span")
+                    });
+
+                    summarySentences.each(function(){
+                        $(this).removeClass("blur-span")
+                    });
+
+                    documentSentences.each(function () {
+                        var span = $(this)
+                        // Blur all other ADUs except the clicked one and title
+                        if (!span.hasClass(adu) && !span.hasClass("title")) {
+
+                            $(this).addClass("blur-span");
+                        }
+                    });
+
+                    summarySentences.each(function () {
+                        var span = $(this)
+                        // Blur all other ADUs except the clicked one and title
+                        if (!span.hasClass(adu) && !span.hasClass("title")) {
+
+                            $(this).addClass("blur-span");
+                        }
+                    });
+                });
+
+                // Reset colors for spans
+                $('#reset-colors').on("click", function () {
+                    documentSentences.each(function () {
+                        if($(this).hasClass("blur-span")){
+                            $(this).removeClass("blur-span")
+                        }
+                        
+                    });
+
+                    summarySentences.each(function () {
+
+                        if($(this).hasClass("blur-span")){
+                            $(this).removeClass("blur-span")
+                        }
+                    });
+                });
+
+                // Remove all highlighting 
+
+                $('#remove-colors').on("click", function () {
+                    documentSentences.each(function () {
+                        $(this).not($(".title")).toggleClass()
+                    });
+
+                    summarySentences.each(function () {
+                        $(this).toggleClass()
+                    });
+                });
+
+                // Jump to page
+
+                $('#goto-page').on("keydown", function (e) {
+                    if (e.keyCode == 13) {
+                        var page_number = $(this).val();
+                        console.log("Fired from Mutation listener");
+                        if (page_number <= pagination.items.length) {
+                            pagination.showPage(page_number);
+                        } else {
+                            $('#goto-error-message').show();
+                        }
+                    }
+
+                });
+
+                $('#pagination-controls').attr("hidden", false);
+
+                if ($('#previous-page').hasClass('uk-disabled')) {
+                    $('#previous-page').prop("disabled", true);
+                };
+
+                if ($('#next-page').hasClass('uk-disabled')) {
+                    $('#next-page').prop("disabled", true);
+                };
+
+            }
+        })
+    });
+
+    var content_div = document.querySelector('#content');
+    observer.observe(content_div, {
+        childList: true,
+        attributes: true
+    });
+</script>
+{%endblock%}

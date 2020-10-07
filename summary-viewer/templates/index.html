@@ -1,0 +1,230 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="uk-container uk-container-large uk-position-medium uk-margin-large-top">
+<div class="uk-grid-large  uk-flex-center uk-child-width-expand@s uk-margin-top uk-margin-left uk-text-center " uk-grid>
+    <div class="uk-card uk-card-default uk-card-body uk-margin-right top-border ">
+        <h3>Upload File</h3>
+        <form action="" enctype="multipart/form-data" method="post" id="upload_form">
+            <div class="uk-margin" uk-margin>
+                <div uk-form-custom="target:true">
+                    <input type="file" name="file" id="file_uploader">
+                    <input class="uk-input uk-form-width-medium" type="text" placeholder="Select file" disabled>
+                </div>
+                <p class="uk-text-warning" id="file_name">No file chosen</p>
+                <button class="uk-button uk-button-primary">Visualize</button>
+            </div>
+        </form>
+    </div>
+    <!-- End of file uploader card-->
+    <div class="uk-card  uk-card-default uk-card-body uk-margin-right top-border">
+        <h3>View Model Summaries</h3>
+        <table class="uk-table uk-table-divider">
+            <caption class="table-caption">Base Corpus</caption>
+            <tbody>
+                <tr>
+                    <td>Pegasus-XSum</td>
+                    <td>
+                        <form action="/view-summaries" enctype="multipart/form-data" method="POST">
+                        <input type="text" name="model" hidden value="pegasus-xsum">
+                        <input type="submit" class="uk-button uk-button-primary uk-button-small" value="View">
+                        </form>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Pegasus-CNN</td>
+                    <td>
+                        <form action="/view-summaries" enctype="multipart/form-data" method="POST">
+                        <input type="text" name="model" hidden value="pegasus-cnn">
+                        <input type="submit" class="uk-button uk-button-primary uk-button-small" value="View">
+                        </form>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Bart-Large-XSum</td>
+                    <td>
+                        <form action="/view-summaries" enctype="multipart/form-data" method="POST">
+                        <input type="text" name="model" hidden value="bart-large-xsum">
+                        <input type="submit" class="uk-button uk-button-primary uk-button-small" value="View">
+                        </form>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Bart-Large-CNN</td>
+                    <td>
+                        <form action="/view-summaries" enctype="multipart/form-data" method="POST">
+                        <input type="text" name="model" hidden value="bart-large-cnn">
+                        <input type="submit" class="uk-button uk-button-primary uk-button-small" value="View">
+                        </form>
+                    </td>
+                </tr>
+                <tr>
+                    <td>T5-Base</td>
+                    <td>
+                        <form action="/view-summaries" enctype="multipart/form-data" method="POST">
+                        <input type="text" name="model" hidden value="t5-base">
+                        <input type="submit" class="uk-button uk-button-primary uk-button-small" value="View">
+                        </form>
+                    </td>
+                </tr>
+                <tr>
+                    <td>T5-Large</td>
+                    <td>
+                        <form action="/view-summaries" enctype="multipart/form-data" method="POST">
+                        <input type="text" name="model" hidden value="t5-large">
+                        <input type="submit" class="uk-button uk-button-primary uk-button-small" value="View">
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <!--End of table for base corpus-->
+        <table class="uk-table uk-table-divider">
+            <caption class="table-caption">Filtered Corpus</caption>
+            <tbody>
+                <tr>
+                    <td>Pegasus-XSum</td>
+                    <td>
+                        <form action="/view-summaries" enctype="multipart/form-data" method="POST">
+                        <input type="text" name="model" hidden value="pegasus-xsum-filtered">
+                        <input type="submit" class="uk-button uk-button-primary uk-button-small" value="View">
+                        </form>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Pegasus-CNN</td>
+                    <td>
+                        <form action="/view-summaries" enctype="multipart/form-data" method="POST">
+                        <input type="text" name="model" hidden value="pegasus-cnn-filtered">
+                        <input type="submit" class="uk-button uk-button-primary uk-button-small" value="View">
+                        </form>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Bart-Large-XSum</td>
+                    <td>
+                        <form action="/view-summaries" enctype="multipart/form-data" method="POST">
+                        <input type="text" name="model" hidden value="bart-large-xsum-filtered">
+                        <input type="submit" class="uk-button uk-button-primary uk-button-small" value="View">
+                        </form>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Bart-Large-CNN</td>
+                    <td>
+                        <form action="/view-summaries" enctype="multipart/form-data" method="POST">
+                        <input type="text" name="model" hidden value="bart-large-cnn-filtered">
+                        <input type="submit" class="uk-button uk-button-primary uk-button-small" value="View">
+                        </form>
+                    </td>
+                </tr>
+                <tr>
+                    <td>T5-Base</td>
+                    <td>
+                        <form action="/view-summaries" enctype="multipart/form-data" method="POST">
+                        <input type="text" name="model" hidden value="t5-base-filtered">
+                        <input type="submit" class="uk-button uk-button-primary uk-button-small" value="View">
+                        </form>
+                    </td>
+                </tr>
+                <tr>
+                    <td>T5-Large</td>
+                    <td>
+                        <form action="/view-summaries" enctype="multipart/form-data" method="POST">
+                        <input type="text" name="model" hidden value="t5-large-filtered">
+                        <input type="submit" class="uk-button uk-button-primary uk-button-small" value="View">
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <!--End of table for filtered corpus-->
+    </div>
+    <!--End of models list-->
+    
+    <div class="uk-card uk-card-default uk-card-body top-border">
+        <h3>Compare Models</h3>
+        <form action="/compare-summaries" enctype="multipart/form-data" method="POST">
+        <table class="uk-table uk-table-divider">
+            <caption class="table-caption">Base Corpus</caption>
+            <tbody>
+                <tr>
+                    <td>Pegasus-XSum</td>
+                    <td><input class="uk-checkbox" type="checkbox" name="model-comparison" value="pegasus-xsum"></td>
+                </tr>
+                <tr>
+                    <td>Pegasus-CNN</td>
+                    <td><input class="uk-checkbox" type="checkbox" name="model-comparison" value="pegasus-xsum"></td>
+                </tr>
+                <tr>
+                    <td>Bart-Large-XSum</td>
+                    <td><input class="uk-checkbox" type="checkbox" name="model-comparison" value="bart-large-xsum"></td>
+                </tr>
+                <tr>
+                    <td>Bart-Large-CNN</td>
+                    <td><input class="uk-checkbox" type="checkbox" name="model-comparison" value="bart-large-xsum"></td>
+                </tr>
+                <tr>
+                    <td>T5-Base</td>
+                    <td><input class="uk-checkbox" type="checkbox" name="model-comparison" value="t5-base"></td>
+                </tr>
+                <tr>
+                    <td>T5-Large</td>
+                    <td><input class="uk-checkbox" type="checkbox" name="model-comparison" value="t5-large"></td>
+                </tr>
+            </tbody>
+        </table>
+        <input type="submit" class="uk-button uk-button-primary uk-align-center" value="Compare">
+    </form>
+    <!-- End of form for base corpus comparisons-->
+    <form action="/compare-filtered-summaries" enctype="multipart/form-data" method="POST">
+        <table class="uk-table uk-table-divider">
+            <caption class="table-caption">Filtered Corpus</caption>
+            <tbody>
+                <tr>
+                    <td>Pegasus-XSum</td>
+                    <td><input class="uk-checkbox" type="checkbox" name="model-comparison-filtered" value="pegasus-xsum-filtered"></td>
+                </tr>
+                <tr>
+                    <td>Pegasus-CNN</td>
+                    <td><input class="uk-checkbox" type="checkbox" name="model-comparison-filtered" value="pegasus-cnn-filtered"></td>
+                </tr>
+                <tr>
+                    <td>Bart-Large-XSum</td>
+                    <td><input class="uk-checkbox" type="checkbox" name="model-comparison-filtered" value="bart-large-xsum-filtered"></td>
+                </tr>
+                <tr>
+                    <td>Bart-Large-CNN</td>
+                    <td><input class="uk-checkbox" type="checkbox" name="model-comparison-filtered" value="bart-large-cnn-filtered"></td>
+                </tr>
+                <tr>
+                    <td>T5-Base</td>
+                    <td><input class="uk-checkbox" type="checkbox" name="model-comparison-filtered" value="t5-base-filtered"></td>
+                </tr>
+                <tr>
+                    <td>T5-Large</td>
+                    <td><input class="uk-checkbox" type="checkbox" name="model-comparison-filtered" value="t5-large-filtered"></td>
+                </tr>
+            </tbody>
+        </table>
+        <input type="submit" class="uk-button uk-button-primary uk-align-center" value="Compare">
+    </form>
+    <!--End of form for filtered corpus comparisons-->
+    </div>
+    <!--End of model comparison-->
+</div>
+</div>
+<!--End of main container-->
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#file_uploader').change(function () {
+            var name = $.trim($(this).val());
+            var cleaned_name = name.replace(/.*[\/\\]/, '');
+            console.log("File uploaded is", cleaned_name);
+            $('#file_name').removeClass('uk-text-warning').addClass('uk-text-success')
+            $('#file_name').text("Uploaded file : " + cleaned_name);
+
+        })
+    })
+</script>
+{%endblock %}

@@ -1,0 +1,30 @@
+.summary-border{
+    border-left: 4px solid #2B8083;
+}
+
+.document-border{
+    border-left:  4px solid #DA7166;
+}
+
+.navbar-background{
+    background-color: #274383 !important;
+}
+
+#app-title{
+    color: white;
+    font-size: large;
+}
+
+.top-border{
+
+    border-top: 30px solid #DA7166;
+}
+
+p{
+    font-size: 18px;
+}
+
+.table-caption{
+
+    font-weight: bold !important;
+}
