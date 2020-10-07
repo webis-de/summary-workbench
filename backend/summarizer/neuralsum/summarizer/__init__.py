@@ -12,8 +12,10 @@ class NeuralSummarizer(object):
         For our demo, we use the following models denoted as {'model name': 'model code'}
         {
          'T5': 't5-base',
-         'BART': 'facebook/bart-large-cnn',
-         'Pegasus': 'google/pegasus-cnn_dailymail',
+         'BART-CNN': 'facebook/bart-large-cnn',
+         'BART-XSum': 'facebook/bart-large-xsum',
+         'Pegasus-CNN': 'google/pegasus-cnn_dailymail',
+         'Pegasus-XSum': 'google/pegasus-xsum',
          'Longformer2Roberta': 'patrickvonplaten/longformer2roberta-cnn_dailymail-fp16'
         }
 
