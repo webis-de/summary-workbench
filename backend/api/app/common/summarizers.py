@@ -40,7 +40,12 @@ class MultipleSummarizers:
 class Summarizers(object):
     SINGLE_SUMMARIZERS = {
         "bertsum": "BERTSUM_URL",
-        "neuralsum": "NEURALSUM_URL"
+        "t5": "T5_URL",
+        "bartcnn": "BARTCNN_URL",
+        "bartxsum": "BARTXSUM_URL",
+        "pegasuscnn": "PEGASUSCNN_URL",
+        "pegasusxsum": "PEGASUSXSUM_URL",
+        "longformer2roberta": "LONGFORMER2ROBERTA_URL"
     }
     MULTIPLE_SUMMARIZERS = {"textrank", "newspaper3k"}
 

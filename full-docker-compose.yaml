@@ -20,8 +20,13 @@ services:
       - SIMPLE_METRICS_URL=http://simple_metrics:5000
       - SUMM_EVAL_URL=http://summ_eval:5000
       - BERTSUM_URL=http://bertsum:5000
-      - NEURALSUM_URL=http://neuralsum:5000
       - SIMPLE_SUMMARIZERS_URL=http://simple_summarizers:5000
+      - T5_URL=http://t5:5000
+      - BARTCNN_URL=http://bartcnn:5000
+      - BARTXSUM_URL=http://bartxsum:5000
+      - PEGASUSCNN_URL=http://pegasuscnn:5000
+      - PEGASUSXSUM_URL=http://pegasusxsum:5000
+      - LONGFORMER2ROBERTA_URL=http://longformer2roberta:5000
     command: bash -c "pipenv sync && pipenv run python wsgi.py"
 
   bert:
@@ -86,13 +91,70 @@ services:
       - bertsum_root:/root
     command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run python wsgi.py"
 
-  neuralsum:
+  t5:
     image: simple:latest
     build: docker/backend/slim
     working_dir: /app
     volumes:
       - ./backend/summarizer/neuralsum/:/app
-      - neuralsum_root:/root
+      - t5_root:/root
+    environment:
+      - NEURALSUM_MODEL=T5
+    command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run python wsgi.py"
+
+  bartcnn:
+    image: simple:latest
+    build: docker/backend/slim
+    working_dir: /app
+    volumes:
+      - ./backend/summarizer/neuralsum/:/app
+      - bartcnn_root:/root
+    environment:
+      - NEURALSUM_MODEL=BART-CNN
+    command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run python wsgi.py"
+
+  bartxsum:
+    image: simple:latest
+    build: docker/backend/slim
+    working_dir: /app
+    volumes:
+      - ./backend/summarizer/neuralsum/:/app
+      - bartxsum_root:/root
+    environment:
+      - NEURALSUM_MODEL=BART-XSum
+    command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run python wsgi.py"
+
+  pegasuscnn:
+    image: simple:latest
+    build: docker/backend/slim
+    working_dir: /app
+    volumes:
+      - ./backend/summarizer/neuralsum/:/app
+      - pegasuscnn_root:/root
+    environment:
+      - NEURALSUM_MODEL=Pegasus-CNN
+    command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run python wsgi.py"
+
+  pegasusxsum:
+    image: simple:latest
+    build: docker/backend/slim
+    working_dir: /app
+    volumes:
+      - ./backend/summarizer/neuralsum/:/app
+      - pegasusxsum_root:/root
+    environment:
+      - NEURALSUM_MODEL=Pegasus-XSum
+    command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run python wsgi.py"
+
+  longformer2roberta:
+    image: simple:latest
+    build: docker/backend/slim
+    working_dir: /app
+    volumes:
+      - ./backend/summarizer/neuralsum/:/app
+      - longformer2roberta_root:/root
+    environment:
+      - NEURALSUM_MODEL=Longformer2Roberta
     command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run python wsgi.py"
 
   simple_summarizers:
@@ -136,14 +198,19 @@ services:
 
 volumes:
   api_root:
+  mongodata:
+  node_modules:
   bert_root:
   bleurt_root:
   greedy_matching_root:
   moverscore_root:
   simple_metrics_root:
   bertsum_root:
-  neuralsum_root:
   simple_summarizers_root:
   summ_eval_root:
-  node_modules:
-  mongodata:
+  t5_root:
+  bartcnn_root:
+  bartxsum_root:
+  pegasuscnn_root:
+  pegasusxsum_root:
+  longformer2roberta_root:

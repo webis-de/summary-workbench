@@ -78,12 +78,29 @@ const getCalculationDataRequest = (name) => {
 
 export { getCalculationDataRequest };
 
-const summarizers = [
-  ["textrank", "TextRank"],
-  ["bertsum", "BERTSummarizer"],
-  ["neuralsum", "NeuralSummarizer"],
-  ["newspaper3k", "Newspaper3k"],
-];
+const summarizers = {
+  "abstractive": [
+    ["textrank", "TextRank"],
+    ["newspaper3k", "Newspaper3k"],
+  ],
+  "extractive": [
+    ["bertsum", "BERTSummarizer"],
+    ["neuralsum", "NeuralSummarizer"],
+    ["t5", "T5"],
+    ["bartcnn", "BART-CNN"],
+    ["bartxsum", "BART-XSum"],
+    ["pegasuscnn", "Pegasus-CNN"],
+    ["pegasusxsum", "Pegasus-XSum"],
+    ["longformer2roberta", "Longformer2Roberta"],
+  ]
+};
+
+const summarizersDict = {}
+for (const names of Object.values(summarizers)) {
+  for (const [shortName, longName] of names) {
+    summarizersDict[shortName] = longName
+  }
+}
 
 const summarizeRequest = (text, summarizers, ratio, kind) => {
   const method = "POST";
@@ -101,4 +118,4 @@ const summarizeRequest = (text, summarizers, ratio, kind) => {
   });
 };
 
-export { summarizeRequest, summarizers };
+export { summarizeRequest, summarizers, summarizersDict };

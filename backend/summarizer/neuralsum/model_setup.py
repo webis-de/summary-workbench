@@ -1,16 +1,14 @@
 import inspect
 import logging
 
-from summarizer import NeuralSummarizer
+from summarizer import NEURALSUM_MODEL, NeuralSummarizer
 
 
 def setup():
-    model_name = NeuralSummarizer.MODEL
-
     logger = logging.getLogger(inspect.currentframe().f_code.co_name)
 
-    logger.info("downloading %s", model_name)
-    NeuralSummarizer()
+    logger.info("downloading %s", NEURALSUM_MODEL)
+    NeuralSummarizer(NEURALSUM_MODEL)
     logger.info("done")
 
 

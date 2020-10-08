@@ -1,11 +1,16 @@
 enabled-services:
-  - simple_metrics
-  - simple_summarizers
-#  - meteor
-#  - greedy_matching
-#  - moverscore
-#  - bertsum
-#  - bleurt
-#  - bert
-#  - neuralsum
-  - summ_eval
+  - simple_metrics        # metric
+  - simple_summarizers    # summarizer
+#  - meteor                # metric
+#  - greedy_matching       # metric
+#  - moverscore            # metric
+#  - bertsum               # summarizer
+#  - bleurt                # metric
+#  - bert                  # metric
+  - t5                    # summarizer
+#  - bartcnn               # summarizer
+#  - bartxsum              # summarizer
+#  - pegasuscnn            # summarizer
+#  - pegasusxsum           # summarizer
+#  - longformer2roberta    # summarizer
+  - summ_eval             # metric (summ_eval)

@@ -1,10 +1,13 @@
 import logging
+import re
 
 from flask import Flask, jsonify, request
 
-from summarizer import NeuralSummarizer
+from summarizer import NEURALSUM_MODEL, NeuralSummarizer
 
-summarizer = NeuralSummarizer()
+summarizer = NeuralSummarizer(NEURALSUM_MODEL)
+
+MODEL_STRING = re.sub("[^a-z0-9]", "", NEURALSUM_MODEL.lower())
 
 app = Flask(__name__)
 
@@ -20,7 +23,7 @@ def summarize_route():
         summary = summarizer.summarize(text, ratio)
 
         headers = {"Content-Type": "application/json"}
-        return jsonify({"neuralsum": summary}), 200, headers
+        return jsonify({MODEL_STRING: summary}), 200, headers
     except Exception as error:
         logging.warning(error)
         return "", 400

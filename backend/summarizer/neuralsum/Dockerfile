@@ -1,3 +1,5 @@
+# Choose the model you want to have and run: 'docker build --build-arg NEURALSUM_MODEL=<your model> .'
+
 ARG image=python:3.8
 
 FROM ${image} as lock-stage
@@ -7,6 +9,10 @@ RUN pip install pipenv
 RUN pipenv lock --requirements | tee requirements.txt
 
 FROM ${image}
+ARG NEURALSUM_MODEL
+ENV NEURALSUM_MODEL=${NEURALSUM_MODEL}
+RUN echo "$NEURALSUM_MODEL"
+RUN if [ -z "$NEURALSUM_MODEL" ]; then echo "NEURALSUM_MODEL is not set, run 'docker build --build-arg NEURALSUM_MODEL=<your model> .'"; false; fi
 WORKDIR /app
 COPY . .
 COPY --from=lock-stage /app/requirements.txt .
