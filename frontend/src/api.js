@@ -119,3 +119,26 @@ const summarizeRequest = (text, summarizers, ratio, kind) => {
 };
 
 export { summarizeRequest, summarizers, summarizersDict };
+
+
+const feedbackRequest = (summarizer, summary, reference, url, feedback) => {
+  const method = "POST";
+  let body = { summarizer, summary, reference, feedback };
+  if (url !== null) {
+    body = {url, ...body}
+  }
+  body = JSON.stringify(body)
+  return fetch(`${baseName}/api/feedback`, {
+    method,
+    body,
+    headers: { "Content-Type": "application/json" },
+  }).then((response) => {
+    if (response.ok) {
+      return response.json();
+    } else {
+      throw new Error("failure with Request");
+    }
+  });
+};
+
+export { feedbackRequest };

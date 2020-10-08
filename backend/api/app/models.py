@@ -64,3 +64,22 @@ class Calculation(mongo.Document):
     @staticmethod
     def get(name):
         return Calculation.objects.get(name=name)
+
+
+class Feedback(mongo.Document):
+    summarizer = mongo.StringField(required=True)
+    summary = mongo.StringField(required=True)
+    reference = mongo.StringField(required=True)
+    url = mongo.URLField()
+    feedback = mongo.StringField(required=True)
+    date_modified = mongo.DateTimeField(default=datetime.datetime.utcnow)
+
+    @staticmethod
+    def insert_entry(summarizer, summary, reference, feedback, url=None):
+        Feedback(
+            summarizer=summarizer,
+            summary=summary,
+            reference=reference,
+            feedback=feedback,
+            url=url,
+        ).save()

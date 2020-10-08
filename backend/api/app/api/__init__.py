@@ -7,6 +7,7 @@ from .resources.evaluate import EvaluateResource
 from .resources.savedcalculations import (SavedCalculationResource,
                                          SavedCalculationsResource)
 from .resources.summarize import SummarizeResource
+from .resources.feedback import FeedbackResource
 
 bp = Blueprint("api", __name__)
 api = Api(bp)
@@ -26,3 +27,4 @@ api.add_resource(
     SavedCalculationResource, "/calculation/<string:name>", endpoint="calculation"
 )
 api.add_resource(SummarizeResource, "/summarize", endpoint="summarize")
+api.add_resource(FeedbackResource, "/feedback", endpoint="feedback")

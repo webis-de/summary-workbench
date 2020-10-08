@@ -1,7 +1,8 @@
 import isURL from "is-url";
 import React, { useReducer, useRef, useState } from "react";
+import { FaThumbsDown, FaThumbsUp } from "react-icons/fa";
 
-import { summarizeRequest, summarizers, summarizersDict } from "../api";
+import { feedbackRequest, summarizeRequest, summarizers, summarizersDict } from "../api";
 import { markup } from "../utils/fragcolors";
 import { Button } from "./utils/Button";
 import { ComputeButton } from "./utils/ComputeButton";
@@ -10,7 +11,49 @@ import { Section } from "./utils/Section";
 
 const selectToName = (ref, summs) => {
   return Object.values(ref.current.selectedOptions).map((option) => summs[option.index][0]);
-}
+};
+
+const withHover = (WrappedComponent, color) => (props) => {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <WrappedComponent
+      {...props}
+      style={{ color: hovered ? color : "" }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    />
+  );
+};
+
+const ThumbsUp = withHover(FaThumbsUp, "blue");
+const ThumbsDown = withHover(FaThumbsDown, "red");
+
+const Feedback = ({ summarizer, summary, reference, url }) => {
+  const [submitted, setSubmitted] = useState(false);
+  return submitted ? (
+    <>Thanks for the Feedback!</>
+  ) : (
+    <>
+      Good Summary?
+      <ThumbsUp
+        className="uk-margin-left"
+        onClick={() =>
+          feedbackRequest(summarizer, summary, reference, url, "good")
+            .then(() => setSubmitted(true))
+            .catch((e) => alert(e))
+        }
+      />
+      <ThumbsDown
+        className="uk-margin-small-left"
+        onClick={() =>
+          feedbackRequest(summarizer, summary, reference, url, "bad")
+            .then(() => setSubmitted(true))
+            .catch((e) => alert(e))
+        }
+      />
+    </>
+  );
+};
 
 const Summarize = () => {
   const inputRef = useRef();
@@ -52,7 +95,9 @@ const Summarize = () => {
     if (isURL(requestText)) {
       textKind = "url";
     }
-    const selectedSummarizers = selectToName(abstractiveRef, summarizers["abstractive"]).concat(selectToName(extractiveRef, summarizers["extractive"]))
+    const selectedSummarizers = selectToName(abstractiveRef, summarizers["abstractive"]).concat(
+      selectToName(extractiveRef, summarizers["extractive"])
+    );
     if (selectedSummarizers.length === 0) {
       alert("No summarizer selected");
       return;
@@ -66,13 +111,13 @@ const Summarize = () => {
           const newMarkups = [];
           for (const [name, summaryText] of Object.entries(summaries)) {
             const [requestMarkup, summaryMarkup] = markup(original_text, summaryText);
-            newMarkups.push([
-              summarizersDict[name],
-              generateParagraphs(requestMarkup),
-              generateParagraphs(summaryMarkup),
-            ]);
+            const currMarkup = {name, original_text, summaryText}
+            currMarkup["summaryMarkup"] = generateParagraphs(summaryMarkup)
+            currMarkup["requestMarkup"] = generateParagraphs(requestMarkup)
+            currMarkup["url"] = isURL(requestText) ? requestText : null;
+            newMarkups.push(currMarkup);
           }
-          newMarkups.sort();
+          newMarkups.sort((a, b) => a["name"] > b["name"]);
           setMarkups(newMarkups);
         }
       })
@@ -148,26 +193,35 @@ const Summarize = () => {
       {markups !== null && (
         <>
           <ul className="uk-tab uk-margin" data-uk-tab uk-tab="connect: #summary-display;">
-            {markups.map((m) => (
-              <li>
+            {markups.map(({name}) => (
+              <li key={name}>
                 <a style={{ fontSize: "1em" }} href="/#">
-                  {m[0]}
+                  {summarizersDict[name]}
                 </a>
               </li>
             ))}
           </ul>
           <ul id="summary-display" className="uk-switcher">
-            {markups.map(([name, requestText, summaryText]) => (
-              <li>
+            {markups.map(({name, requestMarkup, summaryMarkup, summaryText, original_text, url}) => (
+              <li key={name}>
                 <MarkupDisplayer
-                  paragraphedText={summaryText}
+                  paragraphedText={summaryMarkup}
                   name="summary"
                   showMarkup={showHighlighting}
                   maxHeight="300px"
                   minHeight="300px"
                 />
+                <div className="uk-flex uk-flex-right">
+                  <Feedback
+                    key={summaryText}
+                    summarizer={name}
+                    summary={summaryText}
+                    reference={original_text}
+                    url={url}
+                  />
+                </div>
                 <MarkupDisplayer
-                  paragraphedText={requestText}
+                  paragraphedText={requestMarkup}
                   name="original text"
                   showMarkup={showHighlighting}
                   maxHeight="1000px"
