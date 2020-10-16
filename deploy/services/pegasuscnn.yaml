@@ -1,37 +1,37 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: summarizer-neuralsum
+  name: summarizer-pegasuscnn
   labels:
     app: summarizer
-    tier: neuralsum
+    tier: pegasuscnn
 spec:
   selector:
     matchLabels:
       app: summarizer
-      tier: neuralsum
+      tier: pegasuscnn
   template:
     metadata:
       labels:
         app: summarizer
-        tier: neuralsum
+        tier: pegasuscnn
     spec:
       containers:
-        - name: neuralsum
-          image: docker.io/ds40bamo/neuralsum:1.0
+        - name: pegasuscnn
+          image: docker.io/ds40bamo/neuralsum-pegasuscnn:1.0
           imagePullPolicy: Always
           command: ["bash", "-c", "gunicorn wsgi:app"]
           env:
             - name: GUNICORN_CMD_ARGS
               value: "-cgunicorn.conf.py"
           ports:
-            - name: neuralsum-port
+            - name: pegasuscnn-port
               containerPort: 5000
               protocol: TCP
           readinessProbe:
             httpGet:
               path: /health
-              port: neuralsum-port
+              port: pegasuscnn-port
             periodSeconds: 60
             timeoutSeconds: 60
       restartPolicy: Always
@@ -39,11 +39,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: summarizer-neuralsum
+  name: summarizer-pegasuscnn
 spec:
   selector:
     app: summarizer
-    tier: neuralsum
+    tier: pegasuscnn
   ports:
     - port: 5000
-      targetPort: neuralsum-port
+      targetPort: pegasuscnn-port
+
+

@@ -80,18 +80,17 @@ export { getCalculationDataRequest };
 
 const summarizers = {
   "abstractive": [
-    ["textrank", "TextRank"],
-    ["newspaper3k", "Newspaper3k"],
-  ],
-  "extractive": [
     ["bertsum", "BERTSummarizer"],
-    ["neuralsum", "NeuralSummarizer"],
     ["t5", "T5"],
     ["bartcnn", "BART-CNN"],
     ["bartxsum", "BART-XSum"],
     ["pegasuscnn", "Pegasus-CNN"],
     ["pegasusxsum", "Pegasus-XSum"],
     ["longformer2roberta", "Longformer2Roberta"],
+  ],
+  "extractive": [
+    ["textrank", "TextRank"],
+    ["newspaper3k", "Newspaper3k"],
   ]
 };
 
