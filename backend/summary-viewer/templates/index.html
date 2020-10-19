@@ -24,7 +24,7 @@
                 <tr>
                     <td>Pegasus-XSum</td>
                     <td>
-                        <form action="/view-summaries" enctype="multipart/form-data" method="POST">
+                        <form action="{{url_for('summary_viewer.visualize_summaries')}}" enctype="multipart/form-data" method="POST">
                         <input type="text" name="model" hidden value="pegasus-xsum">
                         <input type="submit" class="uk-button uk-button-primary uk-button-small" value="View">
                         </form>
@@ -33,7 +33,7 @@
                 <tr>
                     <td>Pegasus-CNN</td>
                     <td>
-                        <form action="/view-summaries" enctype="multipart/form-data" method="POST">
+                        <form action="{{url_for('summary_viewer.visualize_summaries')}}" enctype="multipart/form-data" method="POST">
                         <input type="text" name="model" hidden value="pegasus-cnn">
                         <input type="submit" class="uk-button uk-button-primary uk-button-small" value="View">
                         </form>
@@ -42,7 +42,7 @@
                 <tr>
                     <td>Bart-Large-XSum</td>
                     <td>
-                        <form action="/view-summaries" enctype="multipart/form-data" method="POST">
+                        <form action="{{url_for('summary_viewer.visualize_summaries')}}" enctype="multipart/form-data" method="POST">
                         <input type="text" name="model" hidden value="bart-large-xsum">
                         <input type="submit" class="uk-button uk-button-primary uk-button-small" value="View">
                         </form>
@@ -51,7 +51,7 @@
                 <tr>
                     <td>Bart-Large-CNN</td>
                     <td>
-                        <form action="/view-summaries" enctype="multipart/form-data" method="POST">
+                        <form action="{{url_for('summary_viewer.visualize_summaries')}}" enctype="multipart/form-data" method="POST">
                         <input type="text" name="model" hidden value="bart-large-cnn">
                         <input type="submit" class="uk-button uk-button-primary uk-button-small" value="View">
                         </form>
@@ -60,7 +60,7 @@
                 <tr>
                     <td>T5-Base</td>
                     <td>
-                        <form action="/view-summaries" enctype="multipart/form-data" method="POST">
+                        <form action="{{url_for('summary_viewer.visualize_summaries')}}" enctype="multipart/form-data" method="POST">
                         <input type="text" name="model" hidden value="t5-base">
                         <input type="submit" class="uk-button uk-button-primary uk-button-small" value="View">
                         </form>
@@ -69,7 +69,7 @@
                 <tr>
                     <td>T5-Large</td>
                     <td>
-                        <form action="/view-summaries" enctype="multipart/form-data" method="POST">
+                        <form action="{{url_for('summary_viewer.visualize_summaries')}}" enctype="multipart/form-data" method="POST">
                         <input type="text" name="model" hidden value="t5-large">
                         <input type="submit" class="uk-button uk-button-primary uk-button-small" value="View">
                         </form>
@@ -84,7 +84,7 @@
                 <tr>
                     <td>Pegasus-XSum</td>
                     <td>
-                        <form action="/view-summaries" enctype="multipart/form-data" method="POST">
+                        <form action="{{url_for('summary_viewer.visualize_summaries')}}" enctype="multipart/form-data" method="POST">
                         <input type="text" name="model" hidden value="pegasus-xsum-filtered">
                         <input type="submit" class="uk-button uk-button-primary uk-button-small" value="View">
                         </form>
@@ -93,7 +93,7 @@
                 <tr>
                     <td>Pegasus-CNN</td>
                     <td>
-                        <form action="/view-summaries" enctype="multipart/form-data" method="POST">
+                        <form action="{{url_for('summary_viewer.visualize_summaries')}}" enctype="multipart/form-data" method="POST">
                         <input type="text" name="model" hidden value="pegasus-cnn-filtered">
                         <input type="submit" class="uk-button uk-button-primary uk-button-small" value="View">
                         </form>
@@ -102,7 +102,7 @@
                 <tr>
                     <td>Bart-Large-XSum</td>
                     <td>
-                        <form action="/view-summaries" enctype="multipart/form-data" method="POST">
+                        <form action="{{url_for('summary_viewer.visualize_summaries')}}" enctype="multipart/form-data" method="POST">
                         <input type="text" name="model" hidden value="bart-large-xsum-filtered">
                         <input type="submit" class="uk-button uk-button-primary uk-button-small" value="View">
                         </form>
@@ -111,7 +111,7 @@
                 <tr>
                     <td>Bart-Large-CNN</td>
                     <td>
-                        <form action="/view-summaries" enctype="multipart/form-data" method="POST">
+                        <form action="{{url_for('summary_viewer.visualize_summaries')}}" enctype="multipart/form-data" method="POST">
                         <input type="text" name="model" hidden value="bart-large-cnn-filtered">
                         <input type="submit" class="uk-button uk-button-primary uk-button-small" value="View">
                         </form>
@@ -120,7 +120,7 @@
                 <tr>
                     <td>T5-Base</td>
                     <td>
-                        <form action="/view-summaries" enctype="multipart/form-data" method="POST">
+                        <form action="{{url_for('summary_viewer.visualize_summaries')}}" enctype="multipart/form-data" method="POST">
                         <input type="text" name="model" hidden value="t5-base-filtered">
                         <input type="submit" class="uk-button uk-button-primary uk-button-small" value="View">
                         </form>
@@ -129,7 +129,7 @@
                 <tr>
                     <td>T5-Large</td>
                     <td>
-                        <form action="/view-summaries" enctype="multipart/form-data" method="POST">
+                        <form action="{{url_for('summary_viewer.visualize_summaries')}}" enctype="multipart/form-data" method="POST">
                         <input type="text" name="model" hidden value="t5-large-filtered">
                         <input type="submit" class="uk-button uk-button-primary uk-button-small" value="View">
                         </form>
@@ -143,7 +143,7 @@
     
     <div class="uk-card uk-card-default uk-card-body top-border">
         <h3>Compare Models</h3>
-        <form action="/compare-summaries" enctype="multipart/form-data" method="POST">
+        <form action="{{url_for('summary_viewer.compare_summaries')}}" enctype="multipart/form-data" method="POST">
         <table class="uk-table uk-table-divider">
             <caption class="table-caption">Base Corpus</caption>
             <tbody>
@@ -176,7 +176,7 @@
         <input type="submit" class="uk-button uk-button-primary uk-align-center" value="Compare">
     </form>
     <!-- End of form for base corpus comparisons-->
-    <form action="/compare-filtered-summaries" enctype="multipart/form-data" method="POST">
+    <form action="{{url_for('summary_viewer.compare_filtered_summaries')}}" enctype="multipart/form-data" method="POST">
         <table class="uk-table uk-table-divider">
             <caption class="table-caption">Filtered Corpus</caption>
             <tbody>
@@ -223,7 +223,6 @@
             console.log("File uploaded is", cleaned_name);
             $('#file_name').removeClass('uk-text-warning').addClass('uk-text-success')
             $('#file_name').text("Uploaded file : " + cleaned_name);
-
         })
     })
 </script>

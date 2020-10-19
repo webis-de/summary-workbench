@@ -74,7 +74,7 @@ services:
     command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run python wsgi.py"
 
   simple_metrics:
-    image: simple:latest
+    image: simple_metrics:latest
     build: docker/backend/slim
     working_dir: /app
     volumes:
@@ -83,7 +83,7 @@ services:
     command: bash -c "pipenv sync && pipenv run python wsgi.py"
 
   bertsum:
-    image: simple:latest
+    image: bertsum:latest
     build: docker/backend/slim
     working_dir: /app
     volumes:
@@ -92,7 +92,7 @@ services:
     command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run python wsgi.py"
 
   t5:
-    image: simple:latest
+    image: t5:latest
     build: docker/backend/slim
     working_dir: /app
     volumes:
@@ -103,7 +103,7 @@ services:
     command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run python wsgi.py"
 
   bartcnn:
-    image: simple:latest
+    image: bartcnn:latest
     build: docker/backend/slim
     working_dir: /app
     volumes:
@@ -114,7 +114,7 @@ services:
     command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run python wsgi.py"
 
   bartxsum:
-    image: simple:latest
+    image: bartxsum:latest
     build: docker/backend/slim
     working_dir: /app
     volumes:
@@ -125,7 +125,7 @@ services:
     command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run python wsgi.py"
 
   pegasuscnn:
-    image: simple:latest
+    image: pegasuscnn:latest
     build: docker/backend/slim
     working_dir: /app
     volumes:
@@ -136,7 +136,7 @@ services:
     command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run python wsgi.py"
 
   pegasusxsum:
-    image: simple:latest
+    image: pegasusxsum:latest
     build: docker/backend/slim
     working_dir: /app
     volumes:
@@ -147,7 +147,7 @@ services:
     command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run python wsgi.py"
 
   longformer2roberta:
-    image: simple:latest
+    image: longformer2roberta:latest
     build: docker/backend/slim
     working_dir: /app
     volumes:
@@ -158,7 +158,7 @@ services:
     command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run python wsgi.py"
 
   simple_summarizers:
-    image: simple:latest
+    image: simple_summarizers:latest
     build: docker/backend/slim
     working_dir: /app
     volumes:
@@ -167,7 +167,7 @@ services:
     command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run python wsgi.py"
 
   summ_eval:
-    image: simple:latest
+    image: summ_eval:latest
     build: docker/backend/summ_eval
     working_dir: /app
     volumes:
@@ -196,6 +196,18 @@ services:
     volumes:
       - mongodata:/data/db
 
+  summary_viewer:
+    image: summary_viewer:latest
+    build: docker/backend/slim
+    working_dir: /app
+    ports:
+      - "4000:5000"
+    volumes:
+      - ./backend/summary-viewer:/app
+      - summary_viewer_root:/root
+    command: bash -c "pipenv sync && pipenv run python wsgi.py"
+
+
 volumes:
   api_root:
   mongodata:
@@ -214,3 +226,4 @@ volumes:
   pegasuscnn_root:
   pegasusxsum_root:
   longformer2roberta_root:
+  summary_viewer_root:

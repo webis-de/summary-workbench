@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: summ-viewer
+  labels:
+    app: summarizer
+    tier: summ-viewer
+spec:
+  selector:
+    matchLabels:
+      app: summarizer
+      tier: summ-viewer
+  template:
+    metadata:
+      labels:
+        app: summarizer
+        tier: summ-viewer
+    spec:
+      initContainers:
+        - name: init-wait-for-mongodb
+          image: docker.io/ds40bamo/wait-for-it
+          command: ["./wait-for-it.sh", "-h", "summarizer-mongodb", "-p", "27017"]
+      containers:
+        - name: summ-viewer
+          image: docker.io/ds40bamo/summarizer-summary-viewer:1.0
+          imagePullPolicy: Always
+          command: ["bash", "-c", "gunicorn wsgi:app"]
+          env:
+            - name: GUNICORN_CMD_ARGS
+              value: "-cgunicorn.conf.py"
+
+          ports:
+            - name: summ-view-port
+              containerPort: 5000
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: summ-view-port
+            periodSeconds: 60
+            timeoutSeconds: 60
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: summarizer-summary-viewer
+spec:
+  selector:
+    app: summarizer
+    tier: summ-viewer
+  ports:
+    - port: 5000
+      targetPort: summ-view-port
