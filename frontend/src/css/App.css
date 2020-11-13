@@ -24,3 +24,10 @@
 .fragmark7 { background-color: #b8b8ff; }
 .fragmark8 { background-color: #f5cf9f; }
 .fragmark9 { background-color: #a5e6ed; }
+
+textarea::placeholder {
+    line-height: 8em;
+    text-align: center;
+    font-size: 1.3em;
+    margin: 20pt;
+}

@@ -8,7 +8,7 @@ import { Saved } from "./Saved";
 import { Settings } from "./Settings";
 import { Upload } from "./Upload";
 
-const CompareEntry = () => {
+const Evaluate = () => {
   const [resultKey, reloadResult] = useReducer((oldKey) => !oldKey, true);
   const [savedKey, reloadSaved] = useReducer((oldKey) => !oldKey, true);
   return (
@@ -26,4 +26,4 @@ const CompareEntry = () => {
   );
 };
 
-export { CompareEntry };
+export { Evaluate };
