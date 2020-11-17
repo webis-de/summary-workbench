@@ -218,7 +218,7 @@ const OldSummarize = () => {
   );
 };
 
-const Header = ({ text, backgroundColor = "#B02F2C", children, style, ...props }) => (
+const Header = ({ text, fontSize, backgroundColor = "#B02F2C", children, style, ...props }) => (
   <div
     className="uk-flex uk-flex-between uk-flex-middle "
     style={{
@@ -228,11 +228,12 @@ const Header = ({ text, backgroundColor = "#B02F2C", children, style, ...props }
       paddingBottom : "4px",
       backgroundColor: backgroundColor,
       color: "white",
+      fontSize: fontSize,
       ...style,
     }}
     {...props}
   >
-    <div style={{ fontSize: "14pt" }}>{text}</div>
+    <div style={{fontSize:fontSize}}>{text}</div>
     {children}
   </div>
 );
@@ -297,25 +298,26 @@ const InputDocument = ({ summarize, isComputing }) => {
     <div className="uk-container uk-container-expand">
       <div className="uk-flex uk-flex-between">
         <div style={{ flexBasis: "60%" }}>
-          <Header text="Document"></Header>
+          <Header text="Document" fontSize="16pt" ></Header>
           <textarea
             ref={textRef}
             className="uk-textarea"
             rows="8"
             placeholder="Paste URL or long text"
-            style={{ padding: "10pt", height: "30em", border: "1px solid grey", borderTop: null }}
+            style={{ padding: "10pt", height: "30em", border: "1px solid #B02F2C", borderTop: null }}
           />
         </div>
         <div style={{ flexBasis: "37%" }}>
           <div className="uk-flex uk-flex-column uk-flex between" style={{ height: "100%" }}>
             <div style={{ flex: "1" }}>
-              <Header text="Models" />
+              <Header text="Models" fontSize="16pt" />
               <div className="uk-margin"></div>
               <div className="uk-flex uk-flex-between">
                 <div style={{ flexBasis: "48%" }}>
                   <Header
                     text="Abstractive"
                     backgroundColor="green"
+                    fontSize="14pt"
                     style={{ fontVariant: "small-caps" }}
                   />
                   <Checkboxes options={abstractive} toggleOption={toggleAbstractiveModel} />
@@ -400,7 +402,7 @@ const Summary = ({ data, onHighlight, showMarkup }) => {
       className="uk-margin summary-border"
       
     >
-      <h1 style={{paddingTop:"12px"}} className="uk-card-title uk-text-capitalize uk-flex uk-flex-between">
+      <h1 className="uk-card-title uk-text-capitalize uk-flex uk-flex-between">
         {name}
         <div className="uk-flex">
           <button
