@@ -343,8 +343,8 @@ const InputDocument = ({ summarize, isComputing }) => {
                 <Loading />
               ) : (
                 <button
-                  className="uk-button-primary"
-                  style={{ padding: "8pt", alignSelf: "bottom", flexGrow: 0.5 }}
+                  className="uk-button uk-button-primary"
+                  style={{alignSelf: "bottom", flexGrow: 0.5 }}
                   onClick={() =>
                     summarize(
                       textRef.current.value,
@@ -396,14 +396,14 @@ const Summary = ({ data, onHighlight, showMarkup }) => {
         {name}
         <div className="uk-flex">
           <button
-            className={showStatistics ? "uk-button-secondary" : "uk-button-primary"}
+            className={showStatistics ? "uk-button uk-button-secondary" : "uk-button uk-button-primary"}
             onClick={() => toggleShowStatistics()}
             style={{ marginRight: "10pt" }}
           >
             {showStatistics ? "Hide Statistics" : "Show Statistics"}
           </button>
           <button
-            className={showMarkup ? "uk-button-secondary" : "uk-button-primary"}
+            className={showMarkup ? "uk-button uk-button-secondary" : "uk-button uk-button-primary"}
             onClick={onHighlight}
           >
             {showMarkup ? "Hide Overlap" : "Show Overlap"}
