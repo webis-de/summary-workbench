@@ -4,6 +4,29 @@ General rules
 - Use pt only for setting fonts, px for everything else. See https://www.w3.org/Style/Examples/007/units.en.html
 
 */
+/* Styling scrollbar */
+body {
+    scrollbar-width: 10px !important;
+    scrollbar-color: #55A6D1 #9BC4D8;
+    
+}
+
+
+*::-webkit-scrollbar {
+    width: 10px;
+}
+
+*::-webkit-scrollbar-track {
+    background: #9BC4D8;
+}
+
+*::-webkit-scrollbar-thumb {
+    background-color: #55A6D1;
+    border-radius: 20px;
+    border: 3px solid #9BC4D8;
+}
+
+
 .uk-background-secondary {
     background-color: #323232 !important;
 }
@@ -16,31 +39,67 @@ General rules
     border-left: 2px solid #B02F2C;
 }
 
-.summary-border{
-    
+.summary-border {
+
     padding: 10px 10px;
     border-radius: 20px;
-    border: 2.5px solid #1d7cbb;
-
+    border: 2.5px solid #376C47;
 
 }
 
-.document-border{
-    border-left:  4px solid #DA7166;
+.colored-header {
+    color: #376C47;
+    font-weight: 400;
 }
 
-.uk-tab > li.uk-active > a {color: #B02F2C !important;}
+.underline-border {
+    border-bottom: 3px solid #B02F2C;
+}
+
+.document-border {
+    border-left: 4px solid #B02F2C;
+}
+
+.uk-tab>li.uk-active>a {
+    color: #B02F2C !important;
+}
 
 
-.fragmark1 { background-color: #c2f598; }
-.fragmark2 { background-color: #a7c6f2; }
-.fragmark3 { background-color: #f29f9f; }
-.fragmark4 { background-color: #aff2be; }
-.fragmark5 { background-color: #e8a3ff; }
-.fragmark6 { background-color: #e6e181; }
-.fragmark7 { background-color: #b8b8ff; }
-.fragmark8 { background-color: #f5cf9f; }
-.fragmark9 { background-color: #a5e6ed; }
+.fragmark1 {
+    background-color: #c2f598;
+}
+
+.fragmark2 {
+    background-color: #a7c6f2;
+}
+
+.fragmark3 {
+    background-color: #f29f9f;
+}
+
+.fragmark4 {
+    background-color: #aff2be;
+}
+
+.fragmark5 {
+    background-color: #e8a3ff;
+}
+
+.fragmark6 {
+    background-color: #e6e181;
+}
+
+.fragmark7 {
+    background-color: #b8b8ff;
+}
+
+.fragmark8 {
+    background-color: #f5cf9f;
+}
+
+.fragmark9 {
+    background-color: #a5e6ed;
+}
 
 textarea::placeholder {
     line-height: 8em;

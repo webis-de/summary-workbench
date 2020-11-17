@@ -220,7 +220,7 @@ const OldSummarize = () => {
 
 const Header = ({ text, fontSize, backgroundColor = "#B02F2C", children, style, ...props }) => (
   <div
-    className="uk-flex uk-flex-between uk-flex-middle "
+    className="uk-flex uk-flex-between uk-flex-middle"
     style={{
       paddingLeft: "20px",
       paddingRight: "10px",
@@ -301,33 +301,23 @@ const InputDocument = ({ summarize, isComputing }) => {
           <Header text="Document" fontSize="16pt" ></Header>
           <textarea
             ref={textRef}
-            className="uk-textarea"
+            className="uk-textarea uk-card uk-card-default uk-card-body"
             rows="8"
             placeholder="Paste URL or long text"
-            style={{ padding: "10pt", height: "30em", border: "1px solid #B02F2C", borderTop: null }}
+            style={{ padding: "10pt", resize:"none", height: "40em", overflow:"auto"}}
           />
         </div>
         <div style={{ flexBasis: "37%" }}>
           <div className="uk-flex uk-flex-column uk-flex between" style={{ height: "100%" }}>
             <div style={{ flex: "1" }}>
               <Header text="Models" fontSize="16pt" />
-              <div className="uk-margin"></div>
-              <div className="uk-flex uk-flex-between">
-                <div style={{ flexBasis: "48%" }}>
-                  <Header
-                    text="Abstractive"
-                    backgroundColor="green"
-                    fontSize="14pt"
-                    style={{ fontVariant: "small-caps" }}
-                  />
+              <div className="uk-flex uk-flex-between uk-card uk-card-default uk-card-body">
+                <div  style={{ flexBasis: "48%" , marginTop:"-20px" }}>
+                  <h4 className="underline-border uk-text-center colored-header ">Abstractive</h4>
                   <Checkboxes options={abstractive} toggleOption={toggleAbstractiveModel} />
                 </div>
-                <div style={{ flexBasis: "48%" }}>
-                  <Header
-                    text="Extractive"
-                    backgroundColor="green"
-                    style={{ fontVariant: "small-caps" }}
-                  />
+                <div style={{ flexBasis: "48%", marginTop:"-20px"  }}>
+                  <h4 className="underline-border uk-text-center colored-header">Extractive</h4>
                   <Checkboxes options={extractive} toggleOption={toggleExtractiveModel} />
                 </div>
               </div>
@@ -402,7 +392,7 @@ const Summary = ({ data, onHighlight, showMarkup }) => {
       className="uk-margin summary-border"
       
     >
-      <h1 className="uk-card-title uk-text-capitalize uk-flex uk-flex-between">
+      <h4 className="uk-text-capitalize uk-flex uk-flex-between colored-header">
         {name}
         <div className="uk-flex">
           <button
@@ -419,7 +409,7 @@ const Summary = ({ data, onHighlight, showMarkup }) => {
             {showMarkup ? "hide highlighting" : "show highlighting"}
           </button>
         </div>
-      </h1>
+      </h4>
       {showStatistics && <Statistics statistics={statistics} />}
       {summaryMarkup.map((markupedText, i) => (
         <p key={i}>
@@ -461,7 +451,7 @@ const SummaryView = ({ markups, setMarkups }) => {
     <div className="uk-container uk-container-expand">
       <div className="uk-flex uk-flex-between">
         <div style={{ flexBasis: "48%", flexGrow: 0 }}>
-          <Header text="Document" >
+          <Header text="Document" fontSize="16pt" >
             <button className="uk-button-primary" onClick={() => setMarkups(null)}>Clear</button>
           </Header>
           <Document
@@ -475,7 +465,7 @@ const SummaryView = ({ markups, setMarkups }) => {
         </div>
         <div style={{ flexBasis: "48%", flexGrow: 0 }}>
           <div style={{ position: "sticky", top: "100px" }}>
-            <Header text="Summaries" />
+            <Header text="Summaries" fontSize="16pt" />
             <div style={{height: "calc(100vh - 145px)" }} className="uk-card uk-card-default uk-card-body" >
               {markups.map((markup, index) => (
                 <Summary
