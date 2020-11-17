@@ -304,7 +304,7 @@ const InputDocument = ({ summarize, isComputing }) => {
             className="uk-textarea uk-card uk-card-default uk-card-body"
             rows="8"
             placeholder="Paste URL or long text"
-            style={{ padding: "10pt", resize:"none", height: "60vh", overflow:"auto"}}
+            style={{ padding: "20px", resize:"none", height: "60vh", overflow:"auto"}}
           />
         </div>
         <div style={{ flexBasis: "37%" }}>
@@ -430,10 +430,10 @@ const Summary = ({ data, onHighlight, showMarkup }) => {
 };
 // Processed document
 const Document = ({ markup, showMarkup, setMarkups }) => (
+  <div>
   <div
-    className="uk-card uk-card-default uk-card-body" style={{height: "60vh", width:"auto", overflow:"auto"}} 
+    className="uk-card uk-card-default uk-card-body" style={{height: "60vh", width:"auto", overflow:"auto", padding:"20px"}} 
   >
-    <button className="uk-button-primary uk-float-right uk-margin-bottom" onClick={() => setMarkups(null)}>Clear</button>
     {markup.map((markupedText, i) => (
       
       <p key={i}>
@@ -441,6 +441,9 @@ const Document = ({ markup, showMarkup, setMarkups }) => (
       </p>
     ))}
   </div>
+  <button className=" uk-button uk-button-primary uk-margin-top uk-width-1-1" onClick={() => setMarkups(null)}>Clear</button>
+  </div>
+
 );
 
 const SummaryView = ({ markups, setMarkups }) => {
