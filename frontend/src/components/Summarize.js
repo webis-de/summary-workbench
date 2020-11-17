@@ -35,26 +35,26 @@ const Feedback = ({ summarizer, summary, reference, url }) => {
   return submitted ? (
     <>Thanks for the Feedback!</>
   ) : (
-    <div className="uk-small">
-      <span className="colored-header"> Good Summary?</span>
-      <ThumbsUp
-        className="uk-margin-left"
-        onClick={() =>
-          feedbackRequest(summarizer, summary, reference, url, "good")
-            .then(() => setSubmitted(true))
-            .catch((e) => alert(e))
-        }
-      />
-      <ThumbsDown
-        className="uk-margin-small-left"
-        onClick={() =>
-          feedbackRequest(summarizer, summary, reference, url, "bad")
-            .then(() => setSubmitted(true))
-            .catch((e) => alert(e))
-        }
-      />
-    </div>
-  );
+      <div className="uk-small">
+        <span className="colored-header"> Good Summary?</span>
+        <ThumbsUp
+          className="uk-margin-left"
+          onClick={() =>
+            feedbackRequest(summarizer, summary, reference, url, "good")
+              .then(() => setSubmitted(true))
+              .catch((e) => alert(e))
+          }
+        />
+        <ThumbsDown
+          className="uk-margin-small-left"
+          onClick={() =>
+            feedbackRequest(summarizer, summary, reference, url, "bad")
+              .then(() => setSubmitted(true))
+              .catch((e) => alert(e))
+          }
+        />
+      </div>
+    );
 };
 
 const OldSummarize = () => {
@@ -225,7 +225,7 @@ const Header = ({ text, fontSize, backgroundColor = "#B02F2C", children, style, 
       paddingLeft: "20px",
       paddingRight: "10px",
       paddingTop: "4px",
-      paddingBottom : "4px",
+      paddingBottom: "4px",
       backgroundColor: backgroundColor,
       color: "white",
       fontSize: fontSize,
@@ -233,7 +233,7 @@ const Header = ({ text, fontSize, backgroundColor = "#B02F2C", children, style, 
     }}
     {...props}
   >
-    <div style={{fontSize:fontSize}}>{text}</div>
+    <div style={{ fontSize: fontSize }}>{text}</div>
     {children}
   </div>
 );
@@ -297,6 +297,7 @@ const InputDocument = ({ summarize, isComputing }) => {
   return (
     <div className="uk-container uk-container-expand">
       <div className="uk-flex uk-flex-between">
+        {/* Start Document container */}
         <div style={{ flexBasis: "60%" }}>
           <Header text="Document" fontSize="16pt" ></Header>
           <textarea
@@ -304,29 +305,36 @@ const InputDocument = ({ summarize, isComputing }) => {
             className="uk-textarea uk-card uk-card-default uk-card-body"
             rows="8"
             placeholder="Paste URL or long text"
-            style={{ padding: "20px", resize:"none", height: "60vh", overflow:"auto"}}
+            style={{ padding: "20px", resize: "none", height: "60vh", overflow: "auto" }}
           />
         </div>
+        {/*  End Document container */}
+
+        {/*  Start Model options container */}
         <div style={{ flexBasis: "37%" }}>
-          <div className="uk-flex uk-flex-column uk-flex between" style={{ height: "100%" }}>
+          {/*  Start flexbox */}
+          <div className="uk-flex uk-flex-column uk-flex between" style={{ height: "auto" }}>
+            {/*  Start model lists container */}
             <div style={{ flex: "1" }}>
               <Header text="Models" fontSize="16pt" />
               <div className="uk-flex uk-flex-between uk-card uk-card-default uk-card-body">
-                <div  style={{ flexBasis: "48%" , marginTop:"-20px" }}>
+                <div style={{ flexBasis: "48%", marginTop: "-20px" }}>
                   <h4 className="underline-border uk-text-center colored-header ">Abstractive</h4>
                   <Checkboxes options={abstractive} toggleOption={toggleAbstractiveModel} />
                 </div>
-                <div style={{ flexBasis: "48%", marginTop:"-20px"  }}>
+                <div style={{ flexBasis: "48%", marginTop: "-20px" }}>
                   <h4 className="underline-border uk-text-center colored-header">Extractive</h4>
                   <Checkboxes options={extractive} toggleOption={toggleExtractiveModel} />
                 </div>
               </div>
             </div>
-            <div className="uk-flex uk-flex-between uk-flex-bottom" style={{ alignSelf: "bottom" }}>
+            {/*  End model lists container */}
+            {/*  Start summary options container */}
+            <div className="uk-flex uk-flex-between uk-margin-top" >
               <div className="uk-flex uk-flex-column">
-                <div style={{ flex: 1 }} className="uk-text-small uk-flex uk-flex-between">
+                <div style={{ flex: 1 }} className="uk-flex uk-flex-between">
                   <span>Summary length</span>
-                  <span className="uk-label" style={{ width: "25pt", textAlign: "right" }}>
+                  <span className="uk-label" style={{ width: "30px", textAlign: "right" }}>
                     {percentage + "%"}
                   </span>
                 </div>
@@ -342,23 +350,25 @@ const InputDocument = ({ summarize, isComputing }) => {
               {isComputing ? (
                 <Loading />
               ) : (
-                <button
-                  className="uk-button uk-button-primary"
-                  style={{alignSelf: "bottom", flexGrow: 0.5 }}
-                  onClick={() =>
-                    summarize(
-                      textRef.current.value,
-                      getSetModels(abstractiveModels).concat(getSetModels(extractiveModels)),
-                      percentage
-                    )
-                  }
-                >
-                  Summarize
-                </button>
-              )}
+                  <button
+                    className="uk-button uk-button-primary"
+                    onClick={() =>
+                      summarize(
+                        textRef.current.value,
+                        getSetModels(abstractiveModels).concat(getSetModels(extractiveModels)),
+                        percentage
+                      )
+                    }
+                  >
+                    Summarize
+                  </button>
+                )}
             </div>
+            {/*  End summary options container */}
           </div>
+          {/*  End flexbox */}
         </div>
+        {/*  End Model options container */}
       </div>
     </div>
   );
@@ -390,7 +400,7 @@ const Summary = ({ data, onHighlight, showMarkup }) => {
   return (
     <div
       className="uk-margin summary-border"
-      
+
     >
       <h4 className="uk-text-capitalize uk-flex uk-flex-between colored-header">
         {name}
@@ -431,17 +441,17 @@ const Summary = ({ data, onHighlight, showMarkup }) => {
 // Processed document
 const Document = ({ markup, showMarkup, setMarkups }) => (
   <div>
-  <div
-    className="uk-card uk-card-default uk-card-body" style={{height: "60vh", width:"auto", overflow:"auto", padding:"20px"}} 
-  >
-    {markup.map((markupedText, i) => (
-      
-      <p key={i}>
-        <Markup markupedText={markupedText} showMarkup={showMarkup} />
-      </p>
-    ))}
-  </div>
-  <button className=" uk-button uk-button-primary uk-margin-top uk-width-1-1" onClick={() => setMarkups(null)}>Clear</button>
+    <div
+      className="uk-card uk-card-default uk-card-body" style={{ height: "60vh", width: "auto", overflow: "auto", padding: "20px" }}
+    >
+      {markup.map((markupedText, i) => (
+
+        <p key={i}>
+          <Markup markupedText={markupedText} showMarkup={showMarkup} />
+        </p>
+      ))}
+    </div>
+    <button className=" uk-button uk-button-primary uk-margin-top uk-width-1-1" onClick={() => setMarkups(null)}>Clear</button>
   </div>
 
 );
@@ -471,7 +481,7 @@ const SummaryView = ({ markups, setMarkups }) => {
         <div style={{ flexBasis: "38%", flexGrow: 0 }}>
           <div style={{ position: "sticky", top: "100px" }}>
             <Header text="Summaries" fontSize="16pt" />
-            <div style={{height: "auto", overflow:"auto" }} className="uk-card uk-card-default uk-card-body" >
+            <div style={{ height: "auto", overflow: "auto" }} className="uk-card uk-card-default uk-card-body" >
               {markups.map((markup, index) => (
                 <Summary
                   data={markup}
