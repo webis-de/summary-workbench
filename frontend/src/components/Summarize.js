@@ -304,7 +304,7 @@ const InputDocument = ({ summarize, isComputing }) => {
             className="uk-textarea uk-card uk-card-default uk-card-body"
             rows="8"
             placeholder="Paste URL or long text"
-            style={{ padding: "10pt", resize:"none", height: "40em", overflow:"auto"}}
+            style={{ padding: "10pt", resize:"none", height: "60vh", overflow:"auto"}}
           />
         </div>
         <div style={{ flexBasis: "37%" }}>
@@ -428,10 +428,10 @@ const Summary = ({ data, onHighlight, showMarkup }) => {
     </div>
   );
 };
-
+// Processed document
 const Document = ({ markup, showMarkup }) => (
   <div
-    className="uk-card uk-card-default uk-card-body document-border"
+    className="uk-card uk-card-default uk-card-body" style={{height: "60vh", width:"auto", overflow:"auto"}} 
   >
     {markup.map((markupedText, i) => (
       <p key={i}>
@@ -450,7 +450,7 @@ const SummaryView = ({ markups, setMarkups }) => {
   return (
     <div className="uk-container uk-container-expand">
       <div className="uk-flex uk-flex-between">
-        <div style={{ flexBasis: "48%", flexGrow: 0 }}>
+        <div style={{ flexBasis: "60%", flexGrow: 0 }}>
           <Header text="Document" fontSize="16pt" >
             <button className="uk-button-primary" onClick={() => setMarkups(null)}>Clear</button>
           </Header>
@@ -463,10 +463,10 @@ const SummaryView = ({ markups, setMarkups }) => {
             showMarkup={markupIndex !== null}
           />
         </div>
-        <div style={{ flexBasis: "48%", flexGrow: 0 }}>
+        <div style={{ flexBasis: "38%", flexGrow: 0 }}>
           <div style={{ position: "sticky", top: "100px" }}>
             <Header text="Summaries" fontSize="16pt" />
-            <div style={{height: "calc(100vh - 145px)" }} className="uk-card uk-card-default uk-card-body" >
+            <div style={{height: "auto", overflow:"auto" }} className="uk-card uk-card-default uk-card-body" >
               {markups.map((markup, index) => (
                 <Summary
                   data={markup}
