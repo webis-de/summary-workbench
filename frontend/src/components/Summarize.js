@@ -27,7 +27,7 @@ const withHover = (WrappedComponent, color) => (props) => {
   );
 };
 
-const ThumbsUp = withHover(FaThumbsUp, "blue");
+const ThumbsUp = withHover(FaThumbsUp, "green");
 const ThumbsDown = withHover(FaThumbsDown, "red");
 
 const Feedback = ({ summarizer, summary, reference, url }) => {
@@ -220,23 +220,25 @@ const OldSummarize = () => {
 
 const Header = ({ text, backgroundColor = "#B02F2C", children, style, ...props }) => (
   <div
-    className="uk-flex uk-flex-between uk-flex-middle"
+    className="uk-flex uk-flex-between uk-flex-middle "
     style={{
-      paddingLeft: "20pt",
-      paddingRight: "10pt",
+      paddingLeft: "20px",
+      paddingRight: "10px",
+      paddingTop: "4px",
+      paddingBottom : "4px",
       backgroundColor: backgroundColor,
       color: "white",
       ...style,
     }}
     {...props}
   >
-    <div style={{ fontSize: "15pt", fontWeight: "bold" }}>{text}</div>
+    <div style={{ fontSize: "14pt" }}>{text}</div>
     {children}
   </div>
 );
 
 const Checkbox = ({ is_set, readable, onClick }) => (
-  <label style={{ padding: "5pt", paddingLeft: "10pt" }}>
+  <label style={{ padding: "5px" }}>
     <input
       className="uk-checkbox uk-margin-small-right"
       checked={is_set}
@@ -395,10 +397,10 @@ const Summary = ({ data, onHighlight, showMarkup }) => {
 
   return (
     <div
-      className="uk-card uk-card-default uk-card-body uk-card-small uk-margin"
-      style={{ border: "1px", borderColor: "grey", borderStyle: "solid" }}
+      className="uk-margin summary-border"
+      
     >
-      <h1 className="uk-card-title uk-text-capitalize uk-flex uk-flex-between">
+      <h1 style={{paddingTop:"12px"}} className="uk-card-title uk-text-capitalize uk-flex uk-flex-between">
         {name}
         <div className="uk-flex">
           <button
@@ -437,8 +439,7 @@ const Summary = ({ data, onHighlight, showMarkup }) => {
 
 const Document = ({ markup, showMarkup }) => (
   <div
-    className="uk-card uk-card-default uk-card-body uk-card-small"
-    style={{ border: "1px", borderColor: "grey", borderStyle: "solid", borderTop: null }}
+    className="uk-card uk-card-default uk-card-body document-border"
   >
     {markup.map((markupedText, i) => (
       <p key={i}>
@@ -459,7 +460,7 @@ const SummaryView = ({ markups, setMarkups }) => {
       <div className="uk-flex uk-flex-between">
         <div style={{ flexBasis: "48%", flexGrow: 0 }}>
           <Header text="Document" >
-            <button className="uk-button-primary" onClick={() => setMarkups(null)}>enter new document</button>
+            <button className="uk-button-primary" onClick={() => setMarkups(null)}>Clear</button>
           </Header>
           <Document
             markup={
@@ -473,7 +474,7 @@ const SummaryView = ({ markups, setMarkups }) => {
         <div style={{ flexBasis: "48%", flexGrow: 0 }}>
           <div style={{ position: "sticky", top: "100px" }}>
             <Header text="Summaries" />
-            <div style={{ padding: "2pt", height: "calc(100vh - 145px)", overflowY: "scroll" }}>
+            <div style={{height: "calc(100vh - 145px)" }} className="uk-card uk-card-default uk-card-body" >
               {markups.map((markup, index) => (
                 <Summary
                   data={markup}

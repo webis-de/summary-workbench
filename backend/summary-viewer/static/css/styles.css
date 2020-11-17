@@ -1,3 +1,8 @@
+/*
+General rules
+- Use pt only for setting fonts, px for everything else. See https://www.w3.org/Style/Examples/007/units.en.html
+
+*/
 .summary-border{
     border-left: 4px solid #2B8083;
 }

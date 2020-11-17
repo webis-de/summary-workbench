@@ -1,4 +1,9 @@
 /* body { font-family: monospace; } */
+/*
+General rules
+- Use pt only for setting fonts, px for everything else. See https://www.w3.org/Style/Examples/007/units.en.html
+
+*/
 .uk-background-secondary {
     background-color: #323232 !important;
 }
@@ -11,6 +16,18 @@
     border-left: 2px solid #B02F2C;
 }
 
+.summary-border{
+    
+    padding: 10px 10px;
+    border-radius: 20px;
+    border: 2.5px solid #1d7cbb;
+
+
+}
+
+.document-border{
+    border-left:  4px solid #DA7166;
+}
 
 .uk-tab > li.uk-active > a {color: #B02F2C !important;}
 
