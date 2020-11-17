@@ -313,58 +313,73 @@ const InputDocument = ({ summarize, isComputing }) => {
         {/*  Start Model options container */}
         <div style={{ flexBasis: "37%" }}>
           {/*  Start flexbox */}
-          <div className="uk-flex uk-flex-column uk-flex between" style={{ height: "auto" }}>
+          <div className="uk-flex uk-flex-column uk-flex between" >
             {/*  Start model lists container */}
             <div style={{ flex: "1" }}>
               <Header text="Models" fontSize="16pt" />
-              <div className="uk-flex uk-flex-between uk-card uk-card-default uk-card-body">
-                <div style={{ flexBasis: "48%", marginTop: "-20px" }}>
-                  <h4 className="underline-border uk-text-center colored-header ">Abstractive</h4>
+              
+              <div className="uk-card uk-card-default uk-card-body" style={{height:"60vh"}}>
+                {/* Start model checkbox lists */}
+                <div className="uk-flex">
+                <div style={{ flex: "1", marginTop: "-20px" }} className="uk-margin-right" >
+                  <h4 className="underline-border uk-text-left colored-header ">Abstractive</h4>
                   <Checkboxes options={abstractive} toggleOption={toggleAbstractiveModel} />
                 </div>
-                <div style={{ flexBasis: "48%", marginTop: "-20px" }}>
-                  <h4 className="underline-border uk-text-center colored-header">Extractive</h4>
+                <div style={{ flex: "1", marginTop: "-20px" }}>
+                  <h4 className="underline-border uk-text-left colored-header">Extractive</h4>
                   <Checkboxes options={extractive} toggleOption={toggleExtractiveModel} />
                 </div>
+                </div>
+                  {/* End model checkbox lists */}
+
+                {/*  Start summary options container */}
+                <div  className="uk-margin-top">
+                  <div className="uk-flex uk-flex-column uk-width-1-2">
+                    <div style={{flex:"1"}}>
+                      <h4 className="colored-header" style={{display:"inline-flex"}}>Summary length</h4>
+                      <span className="uk-label" style={{ width: "30px", marginLeft:"10px", textAlign: "center", float:"right" }}>
+                        {percentage + "%"}
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="5"
+                      max="25"
+                      defaultValue={percentage}
+                      onChange={(e) => setPercentage(e.currentTarget.value)}
+                    />
+                  </div>
+                  <div className="uk-margin-top">
+                  {isComputing ? (
+                    <Loading />
+                  ) : (
+                      <button
+                        className="uk-button uk-button-primary uk-width-1-1"
+                        onClick={() =>
+                          summarize(
+                            textRef.current.value,
+                            getSetModels(abstractiveModels).concat(getSetModels(extractiveModels)),
+                            percentage
+                          )
+                        }
+                      >
+                        Summarize
+                      </button>
+                      )}
+                    </div>
+                </div>
+                {/*  End summary options container */}
+
+
               </div>
+             
+
+
+
+
             </div>
             {/*  End model lists container */}
-            {/*  Start summary options container */}
-            <div className="uk-flex uk-flex-between uk-margin-top" >
-              <div className="uk-flex uk-flex-column">
-                <div style={{ flex: 1 }} className="uk-flex uk-flex-between">
-                  <span>Summary length</span>
-                  <span className="uk-label" style={{ width: "30px", textAlign: "right" }}>
-                    {percentage + "%"}
-                  </span>
-                </div>
-                <div className="uk-margin-small" />
-                <input
-                  type="range"
-                  min="5"
-                  max="25"
-                  defaultValue={percentage}
-                  onChange={(e) => setPercentage(e.currentTarget.value)}
-                />
-              </div>
-              {isComputing ? (
-                <Loading />
-              ) : (
-                  <button
-                    className="uk-button uk-button-primary"
-                    onClick={() =>
-                      summarize(
-                        textRef.current.value,
-                        getSetModels(abstractiveModels).concat(getSetModels(extractiveModels)),
-                        percentage
-                      )
-                    }
-                  >
-                    Summarize
-                  </button>
-                )}
-            </div>
-            {/*  End summary options container */}
+
           </div>
           {/*  End flexbox */}
         </div>
