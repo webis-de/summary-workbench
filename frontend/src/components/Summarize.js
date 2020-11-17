@@ -333,11 +333,11 @@ const InputDocument = ({ summarize, isComputing }) => {
                   {/* End model checkbox lists */}
 
                 {/*  Start summary options container */}
-                <div  className="uk-margin-top">
-                  <div className="uk-flex uk-flex-column uk-width-1-2">
+                <div  className="uk-margin-large-top">
+                  <div className="uk-flex uk-flex-column uk-width-1-1">
                     <div style={{flex:"1"}}>
-                      <h4 className="colored-header" style={{display:"inline-flex"}}>Summary length</h4>
-                      <span className="uk-label" style={{ width: "30px", marginLeft:"10px", textAlign: "center", float:"right" }}>
+                      <h4 className="colored-header" style={{display:"inline-flex"}}>Summary Length</h4>
+                      <span className="uk-label uk-text-center uk-text-middle" style={{ width: "35px",height:"30px", marginLeft:"10px", float:"right" }}>
                         {percentage + "%"}
                       </span>
                     </div>
@@ -349,7 +349,7 @@ const InputDocument = ({ summarize, isComputing }) => {
                       onChange={(e) => setPercentage(e.currentTarget.value)}
                     />
                   </div>
-                  <div className="uk-margin-top">
+                  <div className="uk-margin-top uk-position-bottom">
                   {isComputing ? (
                     <Loading />
                   ) : (
