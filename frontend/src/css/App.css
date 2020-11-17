@@ -38,7 +38,6 @@ body {
 .left-border-thin {
     border-left: 2px solid #B02F2C;
 }
-
 .summary-border {
 
     padding: 10px 10px;
@@ -46,16 +45,13 @@ body {
     border: 2.5px solid #376C47;
 
 }
-
 .colored-header {
     color: #376C47;
-    font-weight: 400;
+    font-weight: 500;
 }
-
 .underline-border {
     border-bottom: 3px solid #B02F2C;
 }
-
 .document-border {
     border-left: 4px solid #B02F2C;
 }

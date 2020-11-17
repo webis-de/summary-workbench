@@ -36,7 +36,7 @@ const Feedback = ({ summarizer, summary, reference, url }) => {
     <>Thanks for the Feedback!</>
   ) : (
     <div className="uk-small">
-      Good Summary?
+      <span className="colored-header"> Good Summary?</span>
       <ThumbsUp
         className="uk-margin-left"
         onClick={() =>
@@ -400,13 +400,13 @@ const Summary = ({ data, onHighlight, showMarkup }) => {
             onClick={() => toggleShowStatistics()}
             style={{ marginRight: "10pt" }}
           >
-            {showStatistics ? "hide statistics" : "show statistics"}
+            {showStatistics ? "Hide Statistics" : "Show Statistics"}
           </button>
           <button
             className={showMarkup ? "uk-button-secondary" : "uk-button-primary"}
             onClick={onHighlight}
           >
-            {showMarkup ? "hide highlighting" : "show highlighting"}
+            {showMarkup ? "Hide Overlap" : "Show Overlap"}
           </button>
         </div>
       </h4>
@@ -429,11 +429,13 @@ const Summary = ({ data, onHighlight, showMarkup }) => {
   );
 };
 // Processed document
-const Document = ({ markup, showMarkup }) => (
+const Document = ({ markup, showMarkup, setMarkups }) => (
   <div
     className="uk-card uk-card-default uk-card-body" style={{height: "60vh", width:"auto", overflow:"auto"}} 
   >
+    <button className="uk-button-primary uk-float-right uk-margin-bottom" onClick={() => setMarkups(null)}>Clear</button>
     {markup.map((markupedText, i) => (
+      
       <p key={i}>
         <Markup markupedText={markupedText} showMarkup={showMarkup} />
       </p>
@@ -452,9 +454,9 @@ const SummaryView = ({ markups, setMarkups }) => {
       <div className="uk-flex uk-flex-between">
         <div style={{ flexBasis: "60%", flexGrow: 0 }}>
           <Header text="Document" fontSize="16pt" >
-            <button className="uk-button-primary" onClick={() => setMarkups(null)}>Clear</button>
           </Header>
           <Document
+            setMarkups={setMarkups}
             markup={
               markupIndex !== null
                 ? markups[markupIndex]["requestMarkup"]
