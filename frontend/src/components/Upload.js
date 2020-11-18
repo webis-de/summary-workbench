@@ -54,9 +54,9 @@ const Upload = ({ className, reloadResult }) => {
               })
               .catch((error) => {
                 if (error instanceof TypeError) {
-                  alert("server not available");
+                  alert("Server not available");
                 } else {
-                  alert("internal server error");
+                  alert("Internal server error");
                 }
               })
               .finally(() => setIsComputing(false));
@@ -68,11 +68,11 @@ const Upload = ({ className, reloadResult }) => {
           }
         } else {
           setIsComputing(false);
-          alert("files have to have equal number of lines");
+          alert("Files must have equal number of lines");
         }
       });
     } else {
-      alert("choose file");
+      alert("Upload files");
     }
   };
 
@@ -94,13 +94,13 @@ const Upload = ({ className, reloadResult }) => {
       </div>
       <div className="uk-flex uk-flex-left">
         <Loading isLoading={isComputing}>
-          {/* <Button variant="primary" onClick={() => compute(false)}>
-            {"Evaluate"}
-          </Button> */}
-          <div />
-          <Button variant="primary" onClick={() => compute(true)}>
+          <Button variant="primary" onClick={() => compute(false)}>
             {"Evaluate"}
           </Button>
+          <div />
+          {/* <Button variant="primary" onClick={() => compute(true)}>
+            {"Evaluate with SummEval"}
+          </Button> */}
         </Loading>
       </div>
     </Section>

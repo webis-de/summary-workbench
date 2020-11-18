@@ -15,7 +15,7 @@ const ResultInfo = ({ scoreInfo, comparisons }) => {
         <a href="/#">Metrics</a>
       </li>}
       <li>
-        <a href="/#">Compare</a>
+        <a href="/#">Visualize Overlap</a>
       </li>
     </ul>
     <ul id="result-display" className="uk-switcher">

@@ -105,13 +105,13 @@ const OneHypRef = ({ className }) => {
         <div className="uk-flex uk-flex-between">
         <div className="uk-flex uk-flex-left">
           <Loading isLoading={isComputing}>
-            {/* <Button variant="primary" onClick={() => compute(false)}>
-              {"Evaluate"}
-            </Button> */}
-            <div/>
-            <Button variant="primary" onClick={() => compute(true)}>
+            <Button variant="primary" onClick={() => compute(false)}>
               {"Evaluate"}
             </Button>
+            <div/>
+            {/* <Button variant="primary" onClick={() => compute(true)}>
+              {"Evaluate with SummEval"}
+            </Button> */}
           </Loading>
         </div>
           <Button
