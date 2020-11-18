@@ -35,26 +35,26 @@ const Feedback = ({ summarizer, summary, reference, url }) => {
   return submitted ? (
     <>Thanks for the Feedback!</>
   ) : (
-      <div className="uk-small">
-        <span className="colored-header"> Good Summary?</span>
-        <ThumbsUp
-          className="uk-margin-left"
-          onClick={() =>
-            feedbackRequest(summarizer, summary, reference, url, "good")
-              .then(() => setSubmitted(true))
-              .catch((e) => alert(e))
-          }
-        />
-        <ThumbsDown
-          className="uk-margin-small-left"
-          onClick={() =>
-            feedbackRequest(summarizer, summary, reference, url, "bad")
-              .then(() => setSubmitted(true))
-              .catch((e) => alert(e))
-          }
-        />
-      </div>
-    );
+    <div className="uk-small">
+      <span className="colored-header"> Good Summary?</span>
+      <ThumbsUp
+        className="uk-margin-left"
+        onClick={() =>
+          feedbackRequest(summarizer, summary, reference, url, "good")
+            .then(() => setSubmitted(true))
+            .catch((e) => alert(e))
+        }
+      />
+      <ThumbsDown
+        className="uk-margin-small-left"
+        onClick={() =>
+          feedbackRequest(summarizer, summary, reference, url, "bad")
+            .then(() => setSubmitted(true))
+            .catch((e) => alert(e))
+        }
+      />
+    </div>
+  );
 };
 
 const OldSummarize = () => {
@@ -300,7 +300,7 @@ const InputDocument = ({ summarize, isComputing }) => {
       <div className="uk-flex uk-flex-between">
         {/* Start Document container */}
         <div style={{ flexBasis: "60%" }}>
-          <Header text="Document" fontSize="16pt" ></Header>
+          <Header text="Document" fontSize="16pt"></Header>
           <textarea
             ref={textRef}
             className="uk-textarea uk-card uk-card-default uk-card-body"
@@ -314,31 +314,40 @@ const InputDocument = ({ summarize, isComputing }) => {
         {/*  Start Model options container */}
         <div style={{ flexBasis: "37%" }}>
           {/*  Start flexbox */}
-          <div className="uk-flex uk-flex-column uk-flex between" >
+          <div className="uk-flex uk-flex-column uk-flex between">
             {/*  Start model lists container */}
             <div style={{ flex: "1" }}>
               <Header text="Models" fontSize="16pt" />
-              
-              <div className="uk-card uk-card-default uk-card-body" style={{height:"60vh"}}>
+              <div className="uk-card uk-card-default uk-card-body" style={{ height: "60vh" }}>
                 {/* Start model checkbox lists */}
                 <div className="uk-flex">
-                <div style={{ flex: "1", marginTop: "-20px" }} className="uk-margin-right" >
-                  <h4 className="underline-border uk-text-left colored-header ">Abstractive</h4>
-                  <Checkboxes options={abstractive} toggleOption={toggleAbstractiveModel} />
+                  <div style={{ flex: "1", marginTop: "-20px" }} className="uk-margin-right">
+                    <h4 className="underline-border uk-text-left colored-header ">Abstractive</h4>
+                    <Checkboxes options={abstractive} toggleOption={toggleAbstractiveModel} />
+                  </div>
+                  <div style={{ flex: "1", marginTop: "-20px" }}>
+                    <h4 className="underline-border uk-text-left colored-header">Extractive</h4>
+                    <Checkboxes options={extractive} toggleOption={toggleExtractiveModel} />
+                  </div>
                 </div>
-                <div style={{ flex: "1", marginTop: "-20px" }}>
-                  <h4 className="underline-border uk-text-left colored-header">Extractive</h4>
-                  <Checkboxes options={extractive} toggleOption={toggleExtractiveModel} />
-                </div>
-                </div>
-                  {/* End model checkbox lists */}
+                {/* End model checkbox lists */}
 
                 {/*  Start summary options container */}
-                <div  className="uk-margin-large-top">
+                <div className="uk-margin-large-top">
                   <div className="uk-flex uk-flex-column uk-width-1-1">
-                    <div style={{flex:"1"}}>
-                      <h4 className="colored-header" style={{display:"inline-flex"}}>Summary Length</h4>
-                      <span className="uk-label uk-text-center uk-text-middle" style={{ width: "35px",height:"30px", marginLeft:"10px", float:"right" }}>
+                    <div style={{ flex: "1" }}>
+                      <h4 className="colored-header" style={{ display: "inline-flex" }}>
+                        Summary Length
+                      </h4>
+                      <span
+                        className="uk-flex uk-flex-center uk-flex-middle uk-label"
+                        style={{
+                          width: "35px",
+                          height: "30px",
+                          marginLeft: "10px",
+                          float: "right",
+                        }}
+                      >
                         {percentage + "%"}
                       </span>
                     </div>
@@ -351,9 +360,9 @@ const InputDocument = ({ summarize, isComputing }) => {
                     />
                   </div>
                   <div className="uk-position-bottom-center uk-margin-bottom">
-                  {isComputing ? (
-                    <Loading />
-                  ) : (
+                    {isComputing ? (
+                      <Loading />
+                    ) : (
                       <button
                         className="uk-button uk-button-primary"
                         onClick={() =>
@@ -366,21 +375,13 @@ const InputDocument = ({ summarize, isComputing }) => {
                       >
                         Summarize
                       </button>
-                      )}
-                    </div>
+                    )}
+                  </div>
                 </div>
                 {/*  End summary options container */}
-
-
               </div>
-             
-
-
-
-
             </div>
             {/*  End model lists container */}
-
           </div>
           {/*  End flexbox */}
         </div>
@@ -414,26 +415,26 @@ const Summary = ({ data, onHighlight, showMarkup }) => {
   const [showStatistics, toggleShowStatistics] = useReducer((oldState) => !oldState, false);
 
   return (
-    <div
-      className="uk-margin summary-border"
-
-    >
+    <div className="uk-margin summary-border">
       <h4 className="uk-text-capitalize uk-flex uk-flex-between colored-header">
-        {name}
         <div className="uk-flex">
           <button
-            className={showStatistics ? "uk-button uk-button-secondary" : "uk-button uk-button-primary"}
+            className={
+              showStatistics ? "uk-button uk-button-secondary" : "uk-button uk-button-primary"
+            }
             onClick={() => toggleShowStatistics()}
             style={{ marginRight: "10pt" }}
           >
             {showStatistics ? "Hide Statistics" : "Show Statistics"}
           </button>
+          {onHighlight &&
           <button
             className={showMarkup ? "uk-button uk-button-secondary" : "uk-button uk-button-primary"}
             onClick={onHighlight}
           >
             {showMarkup ? "Hide Overlap" : "Show Overlap"}
           </button>
+          }
         </div>
       </h4>
       {showStatistics && <Statistics statistics={statistics} />}
@@ -455,24 +456,28 @@ const Summary = ({ data, onHighlight, showMarkup }) => {
   );
 };
 // Processed document
-const Document = ({ markup, showMarkup, setMarkups }) => (
+const Document = ({ markup, showMarkup, clearMarkups }) => (
   <div>
     <div
-      className="uk-card uk-card-default uk-card-body" style={{ height: "60vh", width: "auto", overflow: "auto", padding: "20px" }}
+      className="uk-card uk-card-default uk-card-body"
+      style={{ height: "60vh", width: "auto", overflow: "auto", padding: "20px" }}
     >
       {markup.map((markupedText, i) => (
-
         <p key={i}>
           <Markup markupedText={markupedText} showMarkup={showMarkup} />
         </p>
       ))}
     </div>
-    <button className=" uk-button uk-button-primary uk-margin-top uk-width-1-1" onClick={() => setMarkups(null)}>Clear</button>
+    <button
+      className=" uk-button uk-button-primary uk-margin-top uk-width-1-1"
+      onClick={clearMarkups}
+    >
+      Clear
+    </button>
   </div>
-
 );
 
-const SummaryView = ({ markups, setMarkups }) => {
+const SummaryTabView = ({ markups, clearMarkups, toggleView }) => {
   const [markupIndex, highlight] = useReducer(
     (oldIndex, newIndex) => (oldIndex === newIndex ? null : newIndex),
     null
@@ -482,10 +487,9 @@ const SummaryView = ({ markups, setMarkups }) => {
     <div className="uk-container uk-container-expand">
       <div className="uk-flex uk-flex-between">
         <div style={{ flexBasis: "60%", flexGrow: 0 }}>
-          <Header text="Document" fontSize="16pt" >
-          </Header>
+          <Header text="Document" fontSize="16pt" />
           <Document
-            setMarkups={setMarkups}
+            clearMarkups={clearMarkups}
             markup={
               markupIndex !== null
                 ? markups[markupIndex]["requestMarkup"]
@@ -495,21 +499,84 @@ const SummaryView = ({ markups, setMarkups }) => {
           />
         </div>
         <div style={{ flexBasis: "38%", flexGrow: 0 }}>
-          <div style={{ position: "sticky", top: "100px" }}>
-            <Header text="Summaries" fontSize="16pt" />
-            <div style={{ height: "auto", overflow: "auto" }} className="uk-card uk-card-default uk-card-body" >
-              {markups.map((markup, index) => (
-                <Summary
-                  data={markup}
-                  showMarkup={index === markupIndex}
-                  onHighlight={() => highlight(index)}
-                />
+          <Header text="Summaries" fontSize="16pt">
+            <button className="uk-button uk-button-primary" onClick={toggleView}>
+              Compare Summaries
+            </button>
+          </Header>
+          <div
+            style={{ height: "auto", overflow: "auto" }}
+            className="uk-card uk-card-default uk-card-body"
+          >
+            <ul className="uk-tab uk-margin" data-uk-tab uk-tab="connect: #summary-display;">
+              {markups.map(({ name }) => (
+                <li key={name}>
+                  <a style={{ fontSize: "1em" }} href="/#">
+                    {summarizersDict[name]}
+                  </a>
+                </li>
               ))}
-            </div>
+            </ul>
+            <ul id="summary-display" className="uk-switcher">
+              {markups.map((markup, index) => (
+                <li key={index}>
+                  <Summary
+                    data={markup}
+                    showMarkup={index === markupIndex}
+                    onHighlight={() => highlight(index)}
+                  />
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </div>
     </div>
+  );
+};
+
+const SummaryCompareView = ({ markups, clearMarkups, toggleView }) => {
+  const [showHighlight, toggleShowHighlight] = useReducer((old) => !old, false);
+
+  return (
+    <div className="uk-container uk-container-expand">
+      <div className="uk-flex">
+        <button className="uk-button uk-button-primary" style={{flex: "1 1 0px"}} onClick={clearMarkups}>
+          Clear
+        </button>
+        <button className="uk-button uk-button-primary uk-margin-left" style={{flex: "1 1 0px"}} onClick={toggleShowHighlight}>
+          Show Overlap
+        </button>
+        <button className="uk-button uk-button-primary uk-margin-left" style={{flex: "1 1 0px"}} onClick={toggleView}>
+          Show Document
+        </button>
+      </div>
+      <div className="uk-margin uk-grid uk-child-width-expand@s ">
+            {markups.map((markup, index) => (
+            <div>
+            <Header text={summarizersDict[markup["name"]]} fontSize="16pt" />
+        <div
+          style={{ height: "auto", overflow: "auto" }}
+          className="uk-card uk-card-default uk-card-body"
+        >
+                <Summary
+                  data={markup}
+                  showMarkup={showHighlight}
+                />
+        </div>
+        </div>
+            ))}
+        </div>
+    </div>
+  );
+};
+
+const SummaryView = ({ markups, clearMarkups }) => {
+  const [showTab, toggleShowTab] = useReducer((oldState) => !oldState, true);
+  return showTab ? (
+    <SummaryTabView markups={markups} clearMarkups={clearMarkups} toggleView={toggleShowTab} />
+  ) : (
+    <SummaryCompareView markups={markups} clearMarkups={clearMarkups} toggleView={toggleShowTab} />
   );
 };
 
@@ -553,9 +620,9 @@ const Summarize = () => {
     const ratio = parseInt(percentage) / 100;
 
     if (!models.length) {
-      UIkit.notification({ message: "No summarizer selected", status: "danger", pos: "top-left" });
+      UIkit.notification({ message: "No summarizer selected", status: "danger" });
     } else if (!text) {
-      UIkit.notification({ message: "Please enter some text.", status: "danger", pos: "top-left" });
+      UIkit.notification({ message: "Please enter some text.", status: "danger" });
     } else {
       setComputing(true);
       summarizeRequest(text, models, ratio, kind)
@@ -590,7 +657,7 @@ const Summarize = () => {
   };
 
   if (markups) {
-    return <SummaryView markups={markups} setMarkups={setMarkups} />;
+    return <SummaryView markups={markups} clearMarkups={() => setMarkups(null)} />;
   } else {
     return <InputDocument summarize={summarize} isComputing={computing} />;
   }

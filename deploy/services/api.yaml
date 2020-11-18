@@ -57,9 +57,9 @@ spec:
             - name: PEGASUSCNN_URL
               value: "http://summarizer-pegasuscnn:5000"
             - name: PEGASUSXSUM_URL
-              value: "http://summarizer-pegasusxsum:5000"
+              value: "http://summarizer-pegasusx:5000"
             - name: LONGFORMER2ROBERTA_URL
-              value: "http://summarizer-longformer2roberta:5000"
+              value: "http://summarizer-l2roberta:5000"
 
           ports:
             - name: api-port

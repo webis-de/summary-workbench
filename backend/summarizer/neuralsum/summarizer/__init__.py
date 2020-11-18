@@ -5,6 +5,7 @@ from transformers import (AutoModelForSeq2SeqLM, AutoTokenizer,
 
 NEURALSUM_MODEL = environ.get("NEURALSUM_MODEL")
 
+
 class NeuralSummarizer(object):
     MODELS = {
         "T5": "t5-base",
@@ -49,7 +50,6 @@ class NeuralSummarizer(object):
             )
 
     def summarize(self, text: str = None, ratio: float = 0.2):
-
         """Currently used models cannot process sequences longer than 1024 tokens. Thus, truncate the text to appropriate number of tokens.
         """
         tokens = self.tokenizer(text, return_tensors="pt", truncation=True).input_ids

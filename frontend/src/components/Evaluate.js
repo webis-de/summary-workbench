@@ -14,7 +14,6 @@ const Evaluate = () => {
   return (
     <div className="uk-container uk-container-expand uk-margin-large-top">
       <SettingsProvider>
-        
         <CalculateProvider>
         <div className="uk-flex uk-flex-between">
             <div style={{flexBasis:"60%"}}>
