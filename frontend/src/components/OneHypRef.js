@@ -78,9 +78,9 @@ const OneHypRef = ({ className }) => {
     <>
       <Section
         title={
-          <>
-            <FaKeyboard /> Single Example
-          </>
+          <div>
+          <p className="card-title"><FaKeyboard /> Single Example</p> 
+        </div>
         }
         className={className ? className : ""}
       >
@@ -90,25 +90,27 @@ const OneHypRef = ({ className }) => {
             ref={hypRef}
             as="textarea"
             rows="5"
-            placeholder="Enter the generated hypothesis"
+            placeholder="Enter the reference text"
+            style={{ resize: "none", overflow: "auto" }}
           />
           <textarea
             className="uk-textarea"
             ref={refRef}
             as="textarea"
             rows="5"
-            placeholder="Enter the reference text"
+            placeholder="Enter the generated text"
+            style={{resize: "none", overflow: "auto" }}
           />
         </div>
         <div className="uk-flex uk-flex-between">
         <div className="uk-flex uk-flex-left">
           <Loading isLoading={isComputing}>
-            <Button variant="primary" onClick={() => compute(false)}>
+            {/* <Button variant="primary" onClick={() => compute(false)}>
               {"Evaluate"}
-            </Button>
-            <div style={{ paddingLeft: "10px" }} />
+            </Button> */}
+            <div/>
             <Button variant="primary" onClick={() => compute(true)}>
-              {"Evaluate with Summ_eval"}
+              {"Evaluate"}
             </Button>
           </Loading>
         </div>

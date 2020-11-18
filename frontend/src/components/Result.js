@@ -1,6 +1,7 @@
 import React, { useContext, useRef } from "react";
-import { FaUpload } from "react-icons/fa";
-
+import { FaSave } from "react-icons/fa";
+import { FaCalculator } from "react-icons/fa";
+import { FaPen } from "react-icons/fa";
 import { saveCalculationRequest } from "../api";
 import { CalculateContext } from "../contexts/CalculateContext";
 import { ResultInfo } from "./ResultInfo";
@@ -8,7 +9,7 @@ import { Section } from "./utils/Section";
 
 const UploadButton = ({ className, onClick }) => (
   <button className={"uk-button uk-button-primary" + (className !== null ? "" : " " + className)} onClick={onClick}>
-    <FaUpload />
+    <FaSave />
   </button>
 );
 
@@ -32,7 +33,15 @@ const Result = ({ className, reloadSaved }) => {
     return (
       <Section
         title={
-          <div className="uk-flex">
+          <div>
+            <p className="card-title"><FaCalculator /> Results</p> 
+            
+          </div>
+        }
+        className={className}
+      >
+        <p className="uk-text-primary" style={{"marginTop":"-25px"}}> <FaPen /> Rename and save results </p>
+        <div className="uk-flex uk-width-1-3">
             <input
               className="uk-input"
               ref={nameRef}
@@ -40,11 +49,8 @@ const Result = ({ className, reloadSaved }) => {
               onKeyDown={(e) => e.keyCode === 13 && upload()}
             />
             <UploadButton
-              onClick={upload} />
-          </div>
-        }
-        className={className}
-      >
+                onClick={upload} />
+              </div>
         <ResultInfo
           scoreInfo={calculateResult.scores}
           comparisons={calculateResult.comparisons}

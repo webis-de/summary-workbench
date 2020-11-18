@@ -10,7 +10,11 @@ const Settings = () => {
 
   return (
     <Section
-      title={<><FaCogs /> Choose metrics</>}
+      title={
+        <div>
+        <p className="card-title"><FaCogs /> Choose Metrics</p> 
+        </div>
+      }
     >
       <SettingCheckboxes
         settings={settings}

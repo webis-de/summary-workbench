@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import { FaRegFile } from "react-icons/fa";
-
+import { FaInfoCircle } from "react-icons/fa";
 import { evaluateRequest } from "../api";
 import { CalculateContext } from "../contexts/CalculateContext";
 import { SettingsContext } from "../contexts/SettingsContext";
@@ -79,26 +79,27 @@ const Upload = ({ className, reloadResult }) => {
   return (
     <Section
       title={
-        <>
-          <FaRegFile /> Upload files
-        </>
+        <div>
+          <p className="card-title"><FaRegFile /> Upload files</p> 
+        </div>
       }
     >
+      <p className="uk-text-primary" style={{"marginTop":"-25px"}}> <FaInfoCircle /> Both files must contain the same number of non-empty lines</p>
       <div
         className="uk-margin uk-grid uk-grid-small uk-child-width-1-2@s"
         style={{ gridRowGap: "10px" }}
       >
-        <ChooseFile kind="hypothesis" file={hypFile} setFile={setHypFile} name="HypFile" />
-        <ChooseFile kind="reference" file={refFile} setFile={setRefFile} name="RefFile" />
+        <ChooseFile kind="reference texts" file={refFile} setFile={setRefFile} name="RefFile" />
+        <ChooseFile kind="generated texts" file={hypFile} setFile={setHypFile} name="HypFile" />
       </div>
       <div className="uk-flex uk-flex-left">
         <Loading isLoading={isComputing}>
-          <Button variant="primary" onClick={() => compute(false)}>
+          {/* <Button variant="primary" onClick={() => compute(false)}>
             {"Evaluate"}
-          </Button>
-          <div style={{ paddingLeft: "10px" }} />
+          </Button> */}
+          <div />
           <Button variant="primary" onClick={() => compute(true)}>
-            {"Evaluate with Summ_eval"}
+            {"Evaluate"}
           </Button>
         </Loading>
       </div>

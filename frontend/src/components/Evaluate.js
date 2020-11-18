@@ -12,14 +12,23 @@ const Evaluate = () => {
   const [resultKey, reloadResult] = useReducer((oldKey) => !oldKey, true);
   const [savedKey, reloadSaved] = useReducer((oldKey) => !oldKey, true);
   return (
-    <div className="uk-container">
+    <div className="uk-container uk-container-expand uk-margin-large-top">
       <SettingsProvider>
-        <Settings className="uk-margin" />
+        
         <CalculateProvider>
-          <OneHypRef className="uk-margin" />
-          <Upload className="uk-margin" reloadResult={reloadResult} />
-          <Result className="uk-margin" key={resultKey} reloadSaved={reloadSaved} />
-        </CalculateProvider>
+        <div className="uk-flex uk-flex-between">
+            <div style={{flexBasis:"60%"}}>
+            <Upload className="uk-margin" reloadResult={reloadResult} />
+            <OneHypRef className="uk-margin" />
+            </div>
+            <div style={{flexBasis:"37%"}}>
+            <Settings className="uk-margin" />
+            </div>
+          </div>
+          <div className="uk-margin-large-top">
+              <Result className="uk-margin" key={resultKey} reloadSaved={reloadSaved} />
+            </div>
+          </CalculateProvider>
         <Saved className="uk-margin" key={savedKey} reloadSaved={reloadSaved} />
       </SettingsProvider>
     </div>

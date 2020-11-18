@@ -37,7 +37,7 @@ const ChooseFile = ({ kind, className, name, file, setFile }) => {
           type="text"
           value={file === null ? "" : file.name}
           onClick={() => uploadRef.current.click()}
-          placeholder={"Upload " + kind + " file"}
+          placeholder={"Upload file with " + kind }
           readOnly
           style={{"borderColor": "lightgrey"}}
         />

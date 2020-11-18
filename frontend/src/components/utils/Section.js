@@ -2,11 +2,14 @@ import React from "react";
 
 const Section = ({ className, title, children }) => (
   <div
-    className={"uk-card uk-card-default uk-card-body uk-padding-small" + (className === undefined ? "" : " " + className)}
-    style={{ borderLeft: "4px solid #B02F2C" }}
+    className={"uk-card uk-card-default" + (className === undefined ? "" : " " + className)}
   >
-    <h4 className="uk-card-title">{title}</h4>
+    <div className="card-header uk-text-middle">
+      {title}
+    </div>
+    <div className="uk-card-body">
     {children}
+    </div>
   </div>
 );
 
