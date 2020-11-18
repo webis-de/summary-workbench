@@ -296,7 +296,7 @@ const InputDocument = ({ summarize, isComputing }) => {
   const [percentage, setPercentage] = useState("15");
 
   return (
-    <div className="uk-container uk-container-expand uk-margin-large-top">
+    <div className="uk-container uk-container-expand uk-margin-medium-top@s uk-margin-large-top@l">
       <div className="uk-flex uk-flex-between">
         {/* Start Document container */}
         <div style={{ flexBasis: "60%" }}>

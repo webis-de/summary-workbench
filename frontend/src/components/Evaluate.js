@@ -12,7 +12,7 @@ const Evaluate = () => {
   const [resultKey, reloadResult] = useReducer((oldKey) => !oldKey, true);
   const [savedKey, reloadSaved] = useReducer((oldKey) => !oldKey, true);
   return (
-    <div className="uk-container uk-container-expand uk-margin-large-top">
+    <div className="uk-container uk-container-expand uk-margin-medium-top uk-margin-large-top@l ">
       <SettingsProvider>
         <CalculateProvider>
         <div className="uk-flex uk-flex-between">
