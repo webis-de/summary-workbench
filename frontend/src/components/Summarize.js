@@ -321,11 +321,11 @@ const InputDocument = ({ summarize, isComputing }) => {
               <div className="uk-card uk-card-default uk-card-body" style={{ height: "60vh" }}>
                 {/* Start model checkbox lists */}
                 <div className="uk-flex">
-                  <div style={{ flex: "1", marginTop: "-20px" }} className="uk-margin-right">
+                  <div style={{ flex: "1", marginTop: "-25px" }} className="uk-margin-right">
                     <h4 className="underline-border uk-text-left colored-header ">Abstractive</h4>
                     <Checkboxes options={abstractive} toggleOption={toggleAbstractiveModel} />
                   </div>
-                  <div style={{ flex: "1", marginTop: "-20px" }}>
+                  <div style={{ flex: "1", marginTop: "-25px" }}>
                     <h4 className="underline-border uk-text-left colored-header">Extractive</h4>
                     <Checkboxes options={extractive} toggleOption={toggleExtractiveModel} />
                   </div>
@@ -333,7 +333,7 @@ const InputDocument = ({ summarize, isComputing }) => {
                 {/* End model checkbox lists */}
 
                 {/*  Start summary options container */}
-                <div className="uk-margin-large-top">
+                <div className="uk-margin-small-top">
                   <div className="uk-flex uk-flex-column uk-width-1-1">
                     <div style={{ flex: "1" }}>
                       <h4 className="colored-header" style={{ display: "inline-flex" }}>
@@ -359,7 +359,7 @@ const InputDocument = ({ summarize, isComputing }) => {
                       onChange={(e) => setPercentage(e.currentTarget.value)}
                     />
                   </div>
-                  <div className="uk-position-bottom-center uk-margin-bottom">
+                  <div className="uk-position-bottom-center">
                     {isComputing ? (
                       <Loading />
                     ) : (
