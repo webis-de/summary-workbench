@@ -224,8 +224,9 @@ const Header = ({ text, fontSize, backgroundColor = "#B02F2C", children, style, 
     style={{
       paddingLeft: "20px",
       paddingRight: "10px",
-      paddingTop: "4px",
-      paddingBottom: "4px",
+      paddingTop: "10px",
+      fontWeight: "500",
+      paddingBottom: "12px",
       backgroundColor: backgroundColor,
       color: "white",
       fontSize: fontSize,
@@ -295,7 +296,7 @@ const InputDocument = ({ summarize, isComputing }) => {
   const [percentage, setPercentage] = useState("15");
 
   return (
-    <div className="uk-container uk-container-expand">
+    <div className="uk-container uk-container-expand uk-margin-large-top">
       <div className="uk-flex uk-flex-between">
         {/* Start Document container */}
         <div style={{ flexBasis: "60%" }}>
@@ -349,12 +350,12 @@ const InputDocument = ({ summarize, isComputing }) => {
                       onChange={(e) => setPercentage(e.currentTarget.value)}
                     />
                   </div>
-                  <div className="uk-margin-top uk-position-bottom">
+                  <div className="uk-position-bottom-center uk-margin-bottom">
                   {isComputing ? (
                     <Loading />
                   ) : (
                       <button
-                        className="uk-button uk-button-primary uk-width-1-1"
+                        className="uk-button uk-button-primary"
                         onClick={() =>
                           summarize(
                             textRef.current.value,
