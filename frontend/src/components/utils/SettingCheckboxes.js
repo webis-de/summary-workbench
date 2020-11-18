@@ -14,7 +14,7 @@ const SettingCheckbox = ({ metric, is_set, readable, onClick }) => (
 );
 
 const SettingCheckboxes = ({ className, settings, toggleSetting }) => (
-  <div className="uk-flex uk-flex-around uk-flex-wrap">
+  <div className=" uk-grid uk-flex uk-flex-between uk-padding-remove" datatype="uk-grid">
     {Object.entries(settings).map(([metric, { is_set, readable }]) => (
       <SettingCheckbox
         key={metric}

@@ -300,7 +300,7 @@ const InputDocument = ({ summarize, isComputing }) => {
       <div className="uk-flex uk-flex-between">
         {/* Start Document container */}
         <div style={{ flexBasis: "60%" }}>
-          <Header text="Document" fontSize="16pt"></Header>
+          <Header text="Document" fontSize="14pt"></Header>
           <textarea
             ref={textRef}
             className="uk-textarea uk-card uk-card-default uk-card-body"
@@ -317,7 +317,7 @@ const InputDocument = ({ summarize, isComputing }) => {
           <div className="uk-flex uk-flex-column uk-flex between">
             {/*  Start model lists container */}
             <div style={{ flex: "1" }}>
-              <Header text="Models" fontSize="16pt" />
+              <Header text="Models" fontSize="14pt" />
               <div className="uk-card uk-card-default uk-card-body" style={{ height: "60vh" }}>
                 {/* Start model checkbox lists */}
                 <div className="uk-flex">
