@@ -364,7 +364,7 @@ const InputDocument = ({ summarize, isComputing }) => {
                       <Loading />
                     ) : (
                       <button
-                        className="uk-button uk-button-primary"
+                        className="uk-button uk-button-primary "
                         onClick={() =>
                           summarize(
                             textRef.current.value,
@@ -415,7 +415,7 @@ const Summary = ({ data, onHighlight, showMarkup }) => {
   const [showStatistics, toggleShowStatistics] = useReducer((oldState) => !oldState, false);
 
   return (
-    <div className="uk-margin summary-border">
+    <div className="uk-margin">
       <h4 className="uk-text-capitalize uk-flex uk-flex-between colored-header">
         <div className="uk-flex">
           <button
