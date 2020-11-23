@@ -14,13 +14,13 @@ const TransposeButton = ({ transpose, onClick }) => (
 
 const ExportPreview = ({ text }) =>
   text !== null && (
-    <pre className="uk-padding-small" style={{ border: "solid 1px grey" }}>
+    <pre className="uk-padding-small" style={{ border: "solid 1px grey", maxWidth: "50vw"}}>
       {text}
     </pre>
   );
 
 const PrecionField = ({ onChange }) => (
-  <input className="uk-input" placeholder="precision" onChange={onChange} />
+  <input className="uk-input"  placeholder="precision" onChange={onChange} />
 );
 
 const ScoreTableDummy = ({ scoreInfo }) => {
@@ -39,6 +39,9 @@ const ScoreTableDummy = ({ scoreInfo }) => {
     let value = newValue.replace(/\D/g, "");
     if (value === "") {
       value = "3";
+    }
+    if (value > 30) {
+      value = 30
     }
     return value;
   }, "3");

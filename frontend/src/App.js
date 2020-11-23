@@ -61,7 +61,7 @@ const Content = ({ routes }) => {
 
       <Switch>
         {routes.map(([path, readable, component]) => (
-          <Route key={path} path={path} component={component} />
+          <Route key={location.key} path={path} component={component} />
         ))}
         <Redirect to={routes[0][0]} />
       </Switch>

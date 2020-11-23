@@ -17,17 +17,10 @@ class RougeScorer:
 
 class BLEUScorer:
     def __init__(self):
-        self.bleu = Bleu(4)
+        self.bleu = Bleu()
 
     def score(self, hypotheses, references):
-        hyp_list_zip = [[hyp] for hyp in hypotheses]
-        ref_list_zip = [[ref] for ref in references]
-
-        hyps = dict(enumerate(hyp_list_zip))
-        refs = dict(enumerate(ref_list_zip))
-
-        score = self.bleu.compute_score(refs, hyps)[0]
-        return dict(zip(["BLEU 1", "BLEU 2", "BLEU 3", "BLEU 4"], score))
+        return {"BLEU": self.bleu.compute_score(hypotheses, references)}
 
 
 class CIDErScorer:
@@ -35,13 +28,7 @@ class CIDErScorer:
         self.cider = Cider()
 
     def score(self, hypotheses, references):
-        hyp_list_zip = [[hyp] for hyp in hypotheses]
-        ref_list_zip = [[ref] for ref in references]
-
-        hyps = dict(enumerate(hyp_list_zip))
-        refs = dict(enumerate(ref_list_zip))
-
-        return {"CIDEr": self.cider.compute_score(refs, hyps)[0]}
+        return {"CIDEr": self.cider.compute_score(hypotheses, references)}
 
 
 class Metrics:

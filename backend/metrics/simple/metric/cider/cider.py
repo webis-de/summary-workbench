@@ -1,54 +1,48 @@
-# Filename: cider.py
-#
-# Description: Describes the class to compute the CIDEr (Consensus-Based Image Description Evaluation) Metric 
-#               by Vedantam, Zitnick, and Parikh (http://arxiv.org/abs/1411.5726)
-#
-# Creation Date: Sun Feb  8 14:16:54 2015
-#
-# Authors: Ramakrishna Vedantam <vrama91@vt.edu> and Tsung-Yi Lin <tl483@cornell.edu>
-
+# pylint: disable=C0103
+import re
 from .cider_scorer import CiderScorer
-import pdb
 
-class Cider:
-    """
-    Main Class to compute the CIDEr metric 
+tokenizer = re.compile(r'\w+')
 
-    """
-    def __init__(self, test=None, refs=None, n=4, sigma=6.0):
-        # set cider to sum over 1 to 4-grams
-        self._n = n
-        # set the standard deviation parameter for gaussian penalty
-        self._sigma = sigma
+def tokenize(document):
+    return tokenizer.findall(document)
 
-    def compute_score(self, gts, res):
+class Cider():
+    def __init__(self, n_gram=4, sigma=6.0, tokenize=True):
         """
-        Main function to compute CIDEr score
-        :param  hypo_for_image (dict) : dictionary with key <image> and value <tokenized hypothesis / candidate sentence>
-                ref_for_image (dict)  : dictionary with key <image> and value <tokenized reference sentence>
-        :return: cider (float) : computed CIDEr score for the corpus 
+        CIDEr metric
+        Makes use of https://github.com/Maluuba/nlg-eval/tree/master/nlgeval/pycocoevalcap/cider
+
+        Args:
+                :param n_gram: CIDEr calculation takes into account n_grams of up to this length
+                :param sigma: sigma used in Gaussian length penalty, described in Section 8 of original paper
+                :param tokenize: whether to apply basic tokenization to input; otherwise assumes that user has \
+                        done any necessary tokenization
+
         """
+        self.n_gram = n_gram
+        self.sigma = sigma
+        self.tokenize = tokenize
 
-        assert(gts.keys() == res.keys())
-        imgIds = gts.keys()
-
-        cider_scorer = CiderScorer(n=self._n, sigma=self._sigma)
-
-        for id in imgIds:
-            hypo = res[id]
-            ref = gts[id]
-
-            # Sanity check.
-            assert(type(hypo) is list)
-            assert(len(hypo) == 1)
-            assert(type(ref) is list)
-            assert(len(ref) > 0)
-
-            cider_scorer += (hypo[0], ref)
-
-        (score, scores) = cider_scorer.compute_score()
-
-        return score, scores
-
-    def method(self):
-        return "CIDEr"
+    def compute_score(self, summaries, references, aggregate=True):
+        if isinstance(summaries, str):
+            summaries = [summaries]
+        if isinstance(references, str):
+            references = [references]
+        if self.tokenize:
+            if isinstance(references[0], str):
+                references = [" ".join(tokenize(reference)) \
+                              for reference in references]
+            else:
+                references = [[" ".join(tokenize(ref)) \
+                              for ref in reference] for reference in references]
+            summaries = [" ".join(tokenize(summary)) for summary in summaries]
+        cider_scorer = CiderScorer(n=self.n_gram, sigma=self.sigma)
+        for summ, ref in zip(summaries, references):
+            if not isinstance(ref, list):
+                ref = [ref]
+            cider_scorer += (summ, ref)
+        score, scores = cider_scorer.compute_score()
+        if not aggregate:
+            return score
+        return score
