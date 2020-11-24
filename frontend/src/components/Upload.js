@@ -2,7 +2,6 @@ import React, { useContext, useState } from "react";
 import { FaRegFile } from "react-icons/fa";
 import { FaInfoCircle } from "react-icons/fa";
 import { evaluateRequest } from "../api";
-import { CalculateContext } from "../contexts/CalculateContext";
 import { SettingsContext } from "../contexts/SettingsContext";
 import { markup } from "../utils/fragcolors";
 import { readFile } from "../utils/readFile";
@@ -11,12 +10,11 @@ import { Section } from "./utils/Section";
 import { Loading } from "./utils/Loading";
 import { Button } from "./utils/Button";
 
-const Upload = ({ className, reloadResult }) => {
+const Upload = ({ className, setCalculateResult }) => {
   const [hypFile, setHypFile] = useState(null);
   const [refFile, setRefFile] = useState(null);
 
   const { settings } = useContext(SettingsContext);
-  const { setCalculateResult } = useContext(CalculateContext);
 
   const [isComputing, setIsComputing] = useState(false);
 
@@ -50,7 +48,6 @@ const Upload = ({ className, reloadResult }) => {
               .then((scores) => {
                 const comparisons = getComparisons(hypdata, refdata);
                 setCalculateResult({ name, scores, comparisons });
-                reloadResult();
               })
               .catch((error) => {
                 if (error instanceof TypeError) {
@@ -63,7 +60,6 @@ const Upload = ({ className, reloadResult }) => {
           } else {
             const comparisons = getComparisons(hypdata, refdata, summ_eval);
             setCalculateResult({ name, scores: {}, comparisons });
-            reloadResult();
             setIsComputing(false);
           }
         } else {

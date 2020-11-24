@@ -1,4 +1,4 @@
-import React, { useContext, useRef } from "react";
+import React, { useContext, useRef, useEffect } from "react";
 import { FaSave } from "react-icons/fa";
 import { FaCalculator } from "react-icons/fa";
 import { FaPen } from "react-icons/fa";
@@ -13,8 +13,7 @@ const UploadButton = ({ className, onClick }) => (
   </button>
 );
 
-const Result = ({ className, reloadSaved }) => {
-  const { calculateResult, setCalculateResult } = useContext(CalculateContext);
+const Result = ({ className, reloadSaved, calculateResult, setCalculateResult }) => {
   const nameRef = useRef();
 
   const upload = () => {
@@ -34,8 +33,7 @@ const Result = ({ className, reloadSaved }) => {
       <Section
         title={
           <div>
-            <p className="card-title"><FaCalculator /> Results</p> 
-            
+            <p className="card-title"><FaCalculator /> Results</p>
           </div>
         }
         className={className}

@@ -1,7 +1,8 @@
 import React from "react";
 
-const Section = ({ className, title, children }) => (
+const Section = ({ className, title, children, ...other }) => (
   <div
+    {...other}
     className={"uk-card uk-card-default" + (className === undefined ? "" : " " + className)}
   >
     <div className="card-header uk-text-middle">
