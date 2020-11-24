@@ -1,5 +1,5 @@
 import isURL from "is-url";
-import React, { useReducer, useRef, useState } from "react";
+import React, { useReducer, useRef, useState, useEffect } from "react";
 import { FaThumbsDown, FaThumbsUp } from "react-icons/fa";
 import UIkit from "uikit";
 
@@ -240,7 +240,7 @@ const Header = ({ text, fontSize, backgroundColor = "#B02F2C", children, style, 
 );
 
 const Checkbox = ({ is_set, readable, onClick }) => (
-  <label style={{ padding: "5px" }}>
+  <label style={{ padding: "5px", whiteSpace: "nowrap" }}>
     <input
       className="uk-checkbox uk-margin-small-right"
       checked={is_set}
@@ -248,7 +248,7 @@ const Checkbox = ({ is_set, readable, onClick }) => (
       onClick={onClick}
       type="checkbox"
     />
-    {readable}
+    <span style={{ whiteSpace: "nowrap" }}>{readable}</span>
   </label>
 );
 
@@ -289,103 +289,108 @@ const getSetModels = (models) =>
 
 const Loading = () => <div data-uk-spinner />;
 
+const _anyModelSet = (models) => Object.values(models).some(({is_set}) => is_set)
+
 const InputDocument = ({ summarize, isComputing }) => {
   const textRef = useRef();
   const [abstractiveModels, toggleAbstractiveModel] = useReducer(toggleSettingReducer, abstractive);
   const [extractiveModels, toggleExtractiveModel] = useReducer(toggleSettingReducer, extractive);
   const [percentage, setPercentage] = useState("15");
+  const [validTextSet, setValidTextSet] = useState(false);
+
+  const anyModelSet = () => _anyModelSet(abstractiveModels) || _anyModelSet(extractiveModels)
+  const textEntered = () => Boolean(textRef.current) && Boolean(textRef.current.value.length)
 
   return (
     <div className="uk-container uk-container-expand uk-margin-medium-top@s uk-margin-large-top@l">
-      <div className="uk-flex uk-flex-between">
+      <div className="uk-flex uk-flex-between uk-flex-stretch" style={{ minHeight: "60vh" }}>
         {/* Start Document container */}
-        <div style={{ flexBasis: "60%" }}>
+        <div className="uk-flex uk-flex-column" style={{ flexBasis: "60%" }}>
           <Header text="Document" fontSize="14pt"></Header>
           <textarea
             ref={textRef}
+            id="lel"
+            onChange={() => {setValidTextSet(textEntered()); console.log(textRef.current.length) }}
             className="uk-textarea uk-card uk-card-default uk-card-body"
             rows="8"
             placeholder="Paste URL or long text"
-            style={{ padding: "20px", resize: "none", height: "60vh", overflow: "auto" }}
+            style={{ height: "100%", padding: "20px", resize: "none", overflow: "auto" }}
           />
         </div>
         {/*  End Document container */}
 
-        {/*  Start Model options container */}
-        <div style={{ flexBasis: "37%" }}>
-          {/*  Start flexbox */}
-          <div className="uk-flex uk-flex-column uk-flex between">
-            {/*  Start model lists container */}
-            <div style={{ flex: "1" }}>
-              <Header text="Models" fontSize="14pt" />
-              <div className="uk-card uk-card-default uk-card-body" style={{ height: "60vh" }}>
-                {/* Start model checkbox lists */}
-                <div className="uk-flex">
-                  <div style={{ flex: "1", marginTop: "-25px" }} className="uk-margin-right">
-                    <h4 className="underline-border uk-text-left colored-header ">Abstractive</h4>
-                    <Checkboxes options={abstractive} toggleOption={toggleAbstractiveModel} />
-                  </div>
-                  <div style={{ flex: "1", marginTop: "-25px" }}>
-                    <h4 className="underline-border uk-text-left colored-header">Extractive</h4>
-                    <Checkboxes options={extractive} toggleOption={toggleExtractiveModel} />
-                  </div>
-                </div>
-                {/* End model checkbox lists */}
+        <div style={{ flexBasis: "3%" }} />
 
-                {/*  Start summary options container */}
-                <div className="uk-margin-small-top">
-                  <div className="uk-flex uk-flex-column uk-width-1-1">
-                    <div style={{ flex: "1" }}>
-                      <h4 className="colored-header" style={{ display: "inline-flex" }}>
-                        Summary Length
-                      </h4>
-                      <span
-                        className="uk-flex uk-flex-center uk-flex-middle uk-label"
-                        style={{
-                          width: "35px",
-                          height: "30px",
-                          marginLeft: "10px",
-                          float: "right",
-                        }}
-                      >
-                        {percentage + "%"}
-                      </span>
-                    </div>
-                    <input
-                      type="range"
-                      min="5"
-                      max="25"
-                      defaultValue={percentage}
-                      onChange={(e) => setPercentage(e.currentTarget.value)}
-                    />
-                  </div>
-                  <div className="uk-position-bottom-center">
-                    {isComputing ? (
-                      <Loading />
-                    ) : (
-                      <button
-                        className="uk-button uk-button-primary "
-                        onClick={() =>
-                          summarize(
-                            textRef.current.value,
-                            getSetModels(abstractiveModels).concat(getSetModels(extractiveModels)),
-                            percentage
-                          )
-                        }
-                      >
-                        Summarize
-                      </button>
-                    )}
-                  </div>
-                </div>
-                {/*  End summary options container */}
+        {/*  Start model lists container */}
+        <div className="uk-flex uk-flex-column" style={{ flexBasis: "37%" }}>
+          <Header text="Models" fontSize="14pt" />
+          <div
+            className="uk-card uk-card-default uk-card-body uk-flex-stretch"
+            style={{ height: "100%" }}
+          >
+            {/* Start model checkbox lists */}
+            <div className="uk-flex">
+              <div style={{ flex: "1", marginTop: "-25px" }} className="uk-margin-right">
+                <h4 className="underline-border uk-text-left colored-header ">Abstractive</h4>
+                <Checkboxes options={abstractive} toggleOption={toggleAbstractiveModel} />
+              </div>
+              <div style={{ flex: "1", marginTop: "-25px" }}>
+                <h4 className="underline-border uk-text-left colored-header">Extractive</h4>
+                <Checkboxes options={extractive} toggleOption={toggleExtractiveModel} />
               </div>
             </div>
-            {/*  End model lists container */}
+            {/* End model checkbox lists */}
+
+            {/*  Start summary options container */}
+            <div className="uk-margin-small-top">
+              <div className="uk-flex uk-flex-column uk-width-1-1 uk-margin">
+                <div style={{ flex: "1" }}>
+                  <h4 className="colored-header" style={{ display: "inline-flex" }}>
+                    Summary Length
+                  </h4>
+                  <span
+                    className="uk-flex uk-flex-center uk-flex-middle uk-label"
+                    style={{
+                      width: "35px",
+                      height: "30px",
+                      marginLeft: "10px",
+                      float: "right",
+                    }}
+                  >
+                    {percentage + "%"}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="5"
+                  max="25"
+                  defaultValue={percentage}
+                  onChange={(e) => setPercentage(e.currentTarget.value)}
+                />
+              </div>
+              <div className="uk-flex uk-flex-center">
+                {isComputing ? (
+                  <Loading />
+                ) : (
+                  <button
+                    className="uk-button uk-button-primary" disabled={!validTextSet || !anyModelSet()}
+                    onClick={() =>
+                      summarize(
+                        textRef.current.value,
+                        getSetModels(abstractiveModels).concat(getSetModels(extractiveModels)),
+                        percentage
+                      )
+                    }
+                  >
+                    Summarize
+                  </button>
+                )}
+              </div>
+            </div>
+            {/*  End summary options container */}
           </div>
-          {/*  End flexbox */}
         </div>
-        {/*  End Model options container */}
+        {/*  End model lists container */}
       </div>
     </div>
   );
@@ -427,14 +432,16 @@ const Summary = ({ data, onHighlight, showMarkup }) => {
           >
             {showStatistics ? "Hide Statistics" : "Show Statistics"}
           </button>
-          {onHighlight &&
-          <button
-            className={showMarkup ? "uk-button uk-button-secondary" : "uk-button uk-button-primary"}
-            onClick={onHighlight}
-          >
-            {showMarkup ? "Hide Overlap" : "Show Overlap"}
-          </button>
-          }
+          {onHighlight && (
+            <button
+              className={
+                showMarkup ? "uk-button uk-button-secondary" : "uk-button uk-button-primary"
+              }
+              onClick={onHighlight}
+            >
+              {showMarkup ? "Hide Overlap" : "Show Overlap"}
+            </button>
+          )}
         </div>
       </h4>
       {showStatistics && <Statistics statistics={statistics} />}
@@ -541,32 +548,41 @@ const SummaryCompareView = ({ markups, clearMarkups, toggleView }) => {
   return (
     <div className="uk-container uk-container-expand">
       <div className="uk-flex">
-        <button className="uk-button uk-button-primary" style={{flex: "1 1 0px"}} onClick={clearMarkups}>
+        <button
+          className="uk-button uk-button-primary"
+          style={{ flex: "1 1 0px" }}
+          onClick={clearMarkups}
+        >
           Clear
         </button>
-        <button className="uk-button uk-button-primary uk-margin-left" style={{flex: "1 1 0px"}} onClick={toggleShowHighlight}>
+        <button
+          className="uk-button uk-button-primary uk-margin-left"
+          style={{ flex: "1 1 0px" }}
+          onClick={toggleShowHighlight}
+        >
           Show Overlap
         </button>
-        <button className="uk-button uk-button-primary uk-margin-left" style={{flex: "1 1 0px"}} onClick={toggleView}>
+        <button
+          className="uk-button uk-button-primary uk-margin-left"
+          style={{ flex: "1 1 0px" }}
+          onClick={toggleView}
+        >
           Show Document
         </button>
       </div>
       <div className="uk-margin uk-grid uk-child-width-expand@s ">
-            {markups.map((markup, index) => (
-            <div>
+        {markups.map((markup, index) => (
+          <div>
             <Header text={summarizersDict[markup["name"]]} fontSize="16pt" />
-        <div
-          style={{ height: "auto", overflow: "auto" }}
-          className="uk-card uk-card-default uk-card-body"
-        >
-                <Summary
-                  data={markup}
-                  showMarkup={showHighlight}
-                />
-        </div>
-        </div>
-            ))}
-        </div>
+            <div
+              style={{ height: "auto", overflow: "auto" }}
+              className="uk-card uk-card-default uk-card-body"
+            >
+              <Summary data={markup} showMarkup={showHighlight} />
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
