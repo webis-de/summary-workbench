@@ -1,11 +1,7 @@
+from app.models import Calculation
 from flask import current_app, request
 from flask_restx import Resource
-from marshmallow import Schema, fields
-from app.models import Calculation
-
-from marshmallow import Schema, fields
-
-
+from marshmallow import Schema, fields, validate
 
 class SavedCalculationResource(Resource):
     def get(self, name):
@@ -28,7 +24,7 @@ class SavedCalculationResource(Resource):
 
 
 class SavedCalculationsSchema(Schema):
-    name = fields.String(required=True)
+    name = fields.String(required=True, validate=validate.Regexp("^.*\S+.*$"))
     scores = fields.Dict(keys=fields.String(), values=fields.Dict(keys=fields.String(), values=fields.Float()), required=True)
     comparisons = fields.Raw(required=True)
 
@@ -44,7 +40,7 @@ class SavedCalculationsResource(Resource):
     def post(self):
         try:
             saved_calculation_args = SavedCalculationsSchema().load(request.json)
-            name = saved_calculation_args["name"]
+            name = saved_calculation_args["name"].strip()
             comparisons = saved_calculation_args["comparisons"]
             scores = saved_calculation_args["scores"]
             Calculation.insert_entry(name=name, comparisons=comparisons, scores=scores)

@@ -1,26 +1,18 @@
 import isURL from "is-url";
-import React, { useReducer, useRef, useState, useEffect } from "react";
-import { FaThumbsDown, FaThumbsUp } from "react-icons/fa";
+import React, { useReducer, useRef, useState } from "react";
+import { FaBars, FaThumbsDown, FaThumbsUp } from "react-icons/fa";
 import UIkit from "uikit";
 
 import { feedbackRequest, summarizeRequest, summarizers, summarizersDict } from "../api";
 import { markup as genMarkup } from "../utils/fragcolors";
 import { Markup } from "./Markup";
-import { Button } from "./utils/Button";
-import { ComputeButton } from "./utils/ComputeButton";
-import { MarkupDisplayer } from "./utils/MarkupDisplayer";
-import { Section } from "./utils/Section";
 
-const selectToName = (ref, summs) => {
-  return Object.values(ref.current.selectedOptions).map((option) => summs[option.index][0]);
-};
-
-const withHover = (WrappedComponent, color) => (props) => {
+const withHover = (WrappedComponent, color) => ({ style, ...props }) => {
   const [hovered, setHovered] = useState(false);
   return (
     <WrappedComponent
       {...props}
-      style={{ color: hovered ? color : "" }}
+      style={{ color: hovered ? color : "", ...style }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     />
@@ -29,6 +21,7 @@ const withHover = (WrappedComponent, color) => (props) => {
 
 const ThumbsUp = withHover(FaThumbsUp, "green");
 const ThumbsDown = withHover(FaThumbsDown, "red");
+const Bars = withHover(FaBars, "green");
 
 const Feedback = ({ summarizer, summary, reference, url }) => {
   const [submitted, setSubmitted] = useState(false);
@@ -53,167 +46,6 @@ const Feedback = ({ summarizer, summary, reference, url }) => {
             .catch((e) => alert(e))
         }
       />
-    </div>
-  );
-};
-
-const OldSummarize = () => {
-  const inputRef = useRef();
-  const abstractiveRef = useRef();
-  const extractiveRef = useRef();
-  const [isComputing, setIsComputing] = useState(false);
-  const [showHighlighting, toggleShowHighlighting] = useReducer((state) => !state, false);
-  const [markups, setMarkups] = useState(null);
-  const [percentage, setPercentage] = useState("15");
-
-  const compute = () => {
-    const requestText = inputRef.current.value.trim();
-    if (requestText === "") {
-      alert("Please enter some text.");
-      return;
-    }
-    let textKind = "raw";
-    if (isURL(requestText)) {
-      textKind = "url";
-    }
-    const selectedSummarizers = selectToName(abstractiveRef, summarizers["abstractive"]).concat(
-      selectToName(extractiveRef, summarizers["extractive"])
-    );
-    if (selectedSummarizers.length === 0) {
-      alert("No summarizer selected");
-      return;
-    }
-    setIsComputing(true);
-    summarizeRequest(requestText, selectedSummarizers, parseInt(percentage) / 100, textKind)
-      .then(({ summaries, original_text }) => {
-        if (Object.values(summaries).every((summaryText) => summaryText === "")) {
-          alert("No summaries could be generated. The input is probably too short.");
-        } else {
-          const newMarkups = [];
-          for (const [name, summaryText] of Object.entries(summaries)) {
-            const [requestMarkup, summaryMarkup] = genMarkup(original_text, summaryText);
-            const currMarkup = { name, original_text, summaryText };
-            currMarkup["summaryMarkup"] = generateParagraphs(summaryMarkup);
-            currMarkup["requestMarkup"] = generateParagraphs(requestMarkup);
-            currMarkup["url"] = isURL(requestText) ? requestText : null;
-            newMarkups.push(currMarkup);
-          }
-          newMarkups.sort((a, b) => a["name"] > b["name"]);
-          setMarkups(newMarkups);
-        }
-      })
-      .finally(() => setIsComputing(false))
-      .catch((e) => alert(e));
-  };
-
-  return (
-    <div className="uk-container">
-      <Section title={"Select models"}>
-        <div className="uk-column-1-2">
-          <div className="uk-flex-grow">
-            <h3 className="uk-text-small" style={{ textTransform: "capitalize" }}>
-              abstractive models
-            </h3>
-            <div>
-              <select ref={abstractiveRef} className="uk-select" multiple size={5}>
-                {summarizers["abstractive"].map(([name, readable]) => (
-                  <option key={name}>{readable}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <div>
-            <h3 className="uk-text-small" style={{ textTransform: "capitalize" }}>
-              extractive models
-            </h3>
-            <div>
-              <select ref={extractiveRef} className="uk-select" multiple size={5}>
-                {summarizers["extractive"].map(([name, readable]) => (
-                  <option key={name}>{readable}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-      </Section>
-      <div className="uk-flex"></div>
-      <textarea
-        className="uk-textarea uk-margin"
-        ref={inputRef}
-        rows="8"
-        placeholder="Enter some long text or a URL (https://...)"
-      />
-      <div className="uk-flex uk-flex-between uk-flex-bottom">
-        <div className="left-border-thin uk-width-small uk-margin-left">
-          <h5 className="uk-text-small uk-margin-left">
-            Summary length
-            <span className="uk-label">{percentage + "%"}</span>
-          </h5>
-          <input
-            className="uk-margin-left"
-            type="range"
-            min="5"
-            max="25"
-            defaultValue={percentage}
-            onChange={(e) => setPercentage(e.currentTarget.value)}
-          />
-        </div>
-        <div className="uk-margin-left">
-          <ComputeButton isComputing={isComputing} onClick={compute} methodCalled={"Summarize"} />
-          <span className="uk-margin-left"></span>
-          <Button
-            disabled={markups === null}
-            variant={showHighlighting ? "primary" : "default"}
-            onClick={() => toggleShowHighlighting()}
-          >
-            highlight
-          </Button>
-        </div>
-      </div>
-
-      {markups !== null && (
-        <>
-          <ul className="uk-tab uk-margin" data-uk-tab uk-tab="connect: #summary-display;">
-            {markups.map(({ name }) => (
-              <li key={name}>
-                <a style={{ fontSize: "1em" }} href="/#">
-                  {summarizersDict[name]}
-                </a>
-              </li>
-            ))}
-          </ul>
-          <ul id="summary-display" className="uk-switcher">
-            {markups.map(
-              ({ name, requestMarkup, summaryMarkup, summaryText, original_text, url }) => (
-                <li key={name}>
-                  <MarkupDisplayer
-                    paragraphedText={summaryMarkup}
-                    name="summary"
-                    showMarkup={showHighlighting}
-                    maxHeight="300px"
-                    minHeight="300px"
-                  />
-                  <div className="uk-flex uk-flex-right">
-                    <Feedback
-                      key={summaryText}
-                      summarizer={name}
-                      summary={summaryText}
-                      reference={original_text}
-                      url={url}
-                    />
-                  </div>
-                  <MarkupDisplayer
-                    paragraphedText={requestMarkup}
-                    name="original text"
-                    showMarkup={showHighlighting}
-                    maxHeight="1000px"
-                  />
-                </li>
-              )
-            )}
-          </ul>
-        </>
-      )}
     </div>
   );
 };
@@ -289,7 +121,7 @@ const getSetModels = (models) =>
 
 const Loading = () => <div data-uk-spinner />;
 
-const _anyModelSet = (models) => Object.values(models).some(({is_set}) => is_set)
+const _anyModelSet = (models) => Object.values(models).some(({ is_set }) => is_set);
 
 const InputDocument = ({ summarize, isComputing }) => {
   const textRef = useRef();
@@ -298,19 +130,22 @@ const InputDocument = ({ summarize, isComputing }) => {
   const [percentage, setPercentage] = useState("15");
   const [validTextSet, setValidTextSet] = useState(false);
 
-  const anyModelSet = () => _anyModelSet(abstractiveModels) || _anyModelSet(extractiveModels)
-  const textEntered = () => Boolean(textRef.current) && Boolean(textRef.current.value.length)
+  const anyModelSet = () => _anyModelSet(abstractiveModels) || _anyModelSet(extractiveModels);
+  const textEntered = () => Boolean(textRef.current) && Boolean(textRef.current.value.length);
 
   return (
     <div className="uk-container uk-container-expand uk-margin-medium-top@s uk-margin-large-top@l">
-      <div className="uk-flex uk-flex-between uk-flex-stretch" style={{ minHeight: "60vh" }}>
+      <div className="uk-flex uk-flex-between" style={{ minHeight: "60vh" }}>
         {/* Start Document container */}
         <div className="uk-flex uk-flex-column" style={{ flexBasis: "60%" }}>
           <Header text="Document" fontSize="14pt"></Header>
           <textarea
             ref={textRef}
             id="lel"
-            onChange={() => {setValidTextSet(textEntered()); console.log(textRef.current.length) }}
+            onChange={() => {
+              setValidTextSet(textEntered());
+              console.log(textRef.current.length);
+            }}
             className="uk-textarea uk-card uk-card-default uk-card-body"
             rows="8"
             placeholder="Paste URL or long text"
@@ -373,7 +208,8 @@ const InputDocument = ({ summarize, isComputing }) => {
                   <Loading />
                 ) : (
                   <button
-                    className="uk-button uk-button-primary" disabled={!validTextSet || !anyModelSet()}
+                    className="uk-button uk-button-primary"
+                    disabled={!validTextSet || !anyModelSet()}
                     onClick={() =>
                       summarize(
                         textRef.current.value,
@@ -491,51 +327,45 @@ const SummaryTabView = ({ markups, clearMarkups, toggleView }) => {
   );
 
   return (
-    <div className="uk-container uk-container-expand">
-      <div className="uk-flex uk-flex-between">
-        <div style={{ flexBasis: "60%", flexGrow: 0 }}>
-          <Header text="Document" fontSize="16pt" />
-          <Document
-            clearMarkups={clearMarkups}
-            markup={
-              markupIndex !== null
-                ? markups[markupIndex]["requestMarkup"]
-                : markups[0]["requestMarkup"]
-            }
-            showMarkup={markupIndex !== null}
-          />
-        </div>
-        <div style={{ flexBasis: "38%", flexGrow: 0 }}>
-          <Header text="Summaries" fontSize="16pt">
-            <button className="uk-button uk-button-primary" onClick={toggleView}>
-              Compare Summaries
-            </button>
-          </Header>
-          <div
-            style={{ height: "auto", overflow: "auto" }}
-            className="uk-card uk-card-default uk-card-body"
-          >
-            <ul className="uk-tab uk-margin" data-uk-tab uk-tab="connect: #summary-display;">
-              {markups.map(({ name }) => (
-                <li key={name}>
-                  <a style={{ fontSize: "1em" }} href="/#">
-                    {summarizersDict[name]}
-                  </a>
-                </li>
-              ))}
-            </ul>
-            <ul id="summary-display" className="uk-switcher">
-              {markups.map((markup, index) => (
-                <li key={index}>
-                  <Summary
-                    data={markup}
-                    showMarkup={index === markupIndex}
-                    onHighlight={() => highlight(index)}
-                  />
-                </li>
-              ))}
-            </ul>
-          </div>
+    <div className="uk-flex uk-flex-between">
+      <div style={{ flexBasis: "60%", flexGrow: 0 }}>
+        <Header text="Document" fontSize="16pt" />
+        <Document
+          clearMarkups={clearMarkups}
+          markup={
+            markupIndex !== null
+              ? markups[markupIndex]["requestMarkup"]
+              : markups[0]["requestMarkup"]
+          }
+          showMarkup={markupIndex !== null}
+        />
+      </div>
+      <div style={{ flexBasis: "38%", flexGrow: 0 }}>
+        <Header text="Summaries" fontSize="16pt" />
+        <div
+          style={{ height: "auto", overflow: "auto" }}
+          className="uk-card uk-card-default uk-card-body"
+        >
+          <ul className="uk-tab uk-margin" data-uk-tab uk-tab="connect: #summary-display;">
+            {markups.map(({ name }) => (
+              <li key={name}>
+                <a style={{ fontSize: "1em" }} href="/#">
+                  {summarizersDict[name]}
+                </a>
+              </li>
+            ))}
+          </ul>
+          <ul id="summary-display" className="uk-switcher">
+            {markups.map((markup, index) => (
+              <li key={index}>
+                <Summary
+                  data={markup}
+                  showMarkup={index === markupIndex}
+                  onHighlight={() => highlight(index)}
+                />
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </div>
@@ -543,56 +373,53 @@ const SummaryTabView = ({ markups, clearMarkups, toggleView }) => {
 };
 
 const SummaryCompareView = ({ markups, clearMarkups, toggleView }) => {
-  const [showHighlight, toggleShowHighlight] = useReducer((old) => !old, false);
-
   return (
-    <div className="uk-container uk-container-expand">
-      <div className="uk-flex">
-        <button
-          className="uk-button uk-button-primary"
-          style={{ flex: "1 1 0px" }}
-          onClick={clearMarkups}
-        >
-          Clear
-        </button>
-        <button
-          className="uk-button uk-button-primary uk-margin-left"
-          style={{ flex: "1 1 0px" }}
-          onClick={toggleShowHighlight}
-        >
-          Show Overlap
-        </button>
-        <button
-          className="uk-button uk-button-primary uk-margin-left"
-          style={{ flex: "1 1 0px" }}
-          onClick={toggleView}
-        >
-          Show Document
-        </button>
-      </div>
-      <div className="uk-margin uk-grid uk-child-width-expand@s ">
-        {markups.map((markup, index) => (
-          <div>
-            <Header text={summarizersDict[markup["name"]]} fontSize="16pt" />
-            <div
-              style={{ height: "auto", overflow: "auto" }}
-              className="uk-card uk-card-default uk-card-body"
-            >
-              <Summary data={markup} showMarkup={showHighlight} />
-            </div>
+    <div className="uk-margin uk-grid uk-child-width-expand@s ">
+      {markups.map((markup, index) => (
+        <div>
+          <Header text={summarizersDict[markup["name"]]} fontSize="16pt" />
+          <div
+            style={{ height: "auto", overflow: "auto" }}
+            className="uk-card uk-card-default uk-card-body"
+          >
+            <Summary data={markup} showMarkup={false} />
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   );
 };
 
 const SummaryView = ({ markups, clearMarkups }) => {
   const [showTab, toggleShowTab] = useReducer((oldState) => !oldState, true);
-  return showTab ? (
-    <SummaryTabView markups={markups} clearMarkups={clearMarkups} toggleView={toggleShowTab} />
-  ) : (
-    <SummaryCompareView markups={markups} clearMarkups={clearMarkups} toggleView={toggleShowTab} />
+
+  return (
+    <div className="uk-container uk-container-expand">
+      <div className="uk-flex">
+        <div style={{ flexGrow: 1 }}>
+          {showTab ? (
+            <SummaryTabView
+              markups={markups}
+              clearMarkups={clearMarkups}
+              toggleView={toggleShowTab}
+            />
+          ) : (
+            <SummaryCompareView
+              markups={markups}
+              clearMarkups={clearMarkups}
+              toggleView={toggleShowTab}
+            />
+          )}
+        </div>
+        <div className="uk-flex uk-flex-column" style={{ marginLeft: "10px", minWidth: "15px" }}>
+          <Bars
+            style={{ minWidth: "20px", transform: "rotate(90deg)" }}
+            onClick={toggleShowTab}
+            data-uk-tooltip="title: Toggle View; pos: left; delay: 500"
+          />
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -672,11 +499,15 @@ const Summarize = () => {
     }
   };
 
-  if (markups) {
-    return <SummaryView markups={markups} clearMarkups={() => setMarkups(null)} />;
-  } else {
-    return <InputDocument summarize={summarize} isComputing={computing} />;
-  }
+  return (
+    <>
+      {markups ? (
+        <SummaryView markups={markups} clearMarkups={() => setMarkups(null)} />
+      ) : (
+        <InputDocument summarize={summarize} isComputing={computing} />
+      )}
+    </>
+  );
 };
 
 export { Summarize };

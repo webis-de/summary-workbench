@@ -80,7 +80,6 @@ export { getCalculationDataRequest };
 
 const summarizers = {
   "abstractive": [
-    ["bertsum", "BERTSummarizer"],
     ["t5", "T5"],
     ["bartcnn", "BART-CNN"],
     ["bartxsum", "BART-XSum"],
@@ -89,6 +88,7 @@ const summarizers = {
     ["longformer2roberta", "Longformer2Roberta"],
   ],
   "extractive": [
+    ["bertsum", "BERTSummarizer"],
     ["textrank", "TextRank"],
     ["newspaper3k", "Newspaper3k"],
   ]

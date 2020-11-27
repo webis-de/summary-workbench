@@ -1,9 +1,9 @@
-import React, { useContext, useRef, useEffect } from "react";
+import React, { useRef, useEffect } from "react";
+import UIkit from "uikit";
 import { FaSave } from "react-icons/fa";
 import { FaCalculator } from "react-icons/fa";
 import { FaPen } from "react-icons/fa";
 import { saveCalculationRequest } from "../api";
-import { CalculateContext } from "../contexts/CalculateContext";
 import { ResultInfo } from "./ResultInfo";
 import { Section } from "./utils/Section";
 
@@ -13,11 +13,21 @@ const UploadButton = ({ className, onClick }) => (
   </button>
 );
 
-const Result = ({ className, reloadSaved, calculateResult, setCalculateResult }) => {
+const Result = ({ className, reloadSaved, calculateResult, setCalculateResult, resultRef }) => {
   const nameRef = useRef();
+
+  useEffect(() => {
+    if (calculateResult) {
+      resultRef.current.scrollIntoView({ block: "start", behavior: "smooth",  alignToTop: true});
+    }
+  }, [calculateResult, resultRef]);
 
   const upload = () => {
     const name = nameRef.current.value;
+    if (!name.trim().length) {
+      UIkit.notification({ message: "please enter a name", status: "danger" });
+      return;
+    }
     const scores = calculateResult.scores["metrics"];
     const comparisons = calculateResult.comparisons;
     saveCalculationRequest(name, scores, comparisons)

@@ -1,7 +1,7 @@
-import React, { useState, useRef } from "react";
+import React, { useRef, useState } from "react";
 
-const ChooseFile = ({ kind, className, name, file, setFile }) => {
-  const uploadRef = useRef()
+const ChooseFile = ({ kind, className, name, file, setFile, lines, linesAreSame, ...other }) => {
+  const uploadRef = useRef();
   const [isDragged, setIsDragged] = useState(false);
   const dropHandler = (e) => {
     e.preventDefault();
@@ -19,29 +19,52 @@ const ChooseFile = ({ kind, className, name, file, setFile }) => {
 
   const fileSelectOnChange = (e) => setFile(e.target.files[0]);
 
-
   return (
-    <div>
+    <div {...other}>
       <div
-        className="uk-width-expand"
+        className="uk-flex uk-flex-stretch"
         onDragOver={(e) => {
           setIsDragged(true);
           e.preventDefault();
         }}
-        onDragLeave={(e) => setIsDragged(false)}
+        onDragLeave={() => setIsDragged(false)}
         onDrop={(e) => dropHandler(e)}
+        onClick={() => uploadRef.current.click()}
         style={isDragged ? { borderStyle: "solid", borderWidth: "1px" } : {}}
       >
         <input
-          className="uk-input"
+          className="uk-textarea"
           type="text"
-          value={file === null ? "" : file.name}
-          onClick={() => uploadRef.current.click()}
-          placeholder={"Upload file with " + kind }
+          value={file ? file.name : ""}
+          placeholder={"Upload file with " + kind}
           readOnly
-          style={{"borderColor": "lightgrey"}}
+          style={{ borderColor: "lightgrey" }}
         />
-        <input type="file" ref={uploadRef} onChange={fileSelectOnChange} style={{display: "none"}} />
+        {lines !== null && (
+          <span
+            className={`uk-flex uk-flex-middle`}
+            style={{
+              ...(linesAreSame === null
+                ? { backgroundColor: "#f8f8f8" }
+                : linesAreSame
+                ? { backgroundColor: "#32d296", color: "white" }
+                : { backgroundColor: "#f0506e", color: "white" }),
+              ...{
+                paddingLeft: "10px",
+                paddingRight: "10px",
+                whiteSpace: "nowrap",
+              },
+            }}
+          >
+            {`${lines} lines`}
+          </span>
+        )}
+        <input
+          type="file"
+          ref={uploadRef}
+          onChange={fileSelectOnChange}
+          style={{ display: "none" }}
+        />
       </div>
     </div>
   );

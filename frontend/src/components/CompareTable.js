@@ -4,7 +4,7 @@ import { Button } from "./utils/Button";
 import { Markup } from "./Markup";
 
 const defaultStart = 1;
-const defaultPageSize = 1;
+const defaultPageSize = 10;
 
 const ComparisonDisplay = ({ start, size, comparisons }) => (
   <table className="uk-table uk-table-divider uk-table-small uk-table-middle">

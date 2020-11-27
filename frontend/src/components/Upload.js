@@ -1,18 +1,50 @@
-import React, { useContext, useState } from "react";
-import { FaRegFile } from "react-icons/fa";
-import { FaInfoCircle } from "react-icons/fa";
+import React, { useContext, useEffect, useState } from "react";
+import { FaExclamationCircle, FaInfoCircle, FaRegFile } from "react-icons/fa";
+
 import { evaluateRequest } from "../api";
 import { SettingsContext } from "../contexts/SettingsContext";
 import { markup } from "../utils/fragcolors";
 import { readFile } from "../utils/readFile";
-import { ChooseFile } from "./utils/ChooseFile";
-import { Section } from "./utils/Section";
-import { Loading } from "./utils/Loading";
 import { Button } from "./utils/Button";
+import { ChooseFile } from "./utils/ChooseFile";
+import { Loading } from "./utils/Loading";
+import { Section } from "./utils/Section";
+
+const numberOfLines = (string) => {
+  let numLines = 1;
+  const length = string.length;
+  for (let i = 0; i < length; i++) {
+    if (string[i] === "\n") {
+      numLines++;
+    }
+  }
+  return numLines;
+};
 
 const Upload = ({ className, setCalculateResult }) => {
   const [hypFile, setHypFile] = useState(null);
   const [refFile, setRefFile] = useState(null);
+  const [refFileLines, setRefFileLines] = useState(null);
+  const [hypFileLines, setHypFileLines] = useState(null);
+  const [linesAreSame, setLinesAreSame] = useState(null);
+
+  useEffect(() => {
+    if (hypFile !== null) {
+      readFile(hypFile).then((text) => setHypFileLines(numberOfLines(text)));
+    }
+  }, [hypFile]);
+  useEffect(() => {
+    if (refFile !== null) {
+      readFile(refFile).then((text) => setRefFileLines(numberOfLines(text)));
+    }
+  }, [refFile]);
+  useEffect(
+    () =>
+      setLinesAreSame(
+        refFileLines !== null && hypFileLines !== null ? refFileLines === hypFileLines : null
+      ),
+    [refFileLines, hypFileLines]
+  );
 
   const { settings } = useContext(SettingsContext);
 
@@ -59,7 +91,7 @@ const Upload = ({ className, setCalculateResult }) => {
               .finally(() => setIsComputing(false));
           } else {
             const comparisons = getComparisons(hypdata, refdata, summ_eval);
-            setCalculateResult({ name, scores: {}, comparisons });
+            setCalculateResult({ name, scores: {metrics: {}}, comparisons });
             setIsComputing(false);
           }
         } else {
@@ -76,21 +108,42 @@ const Upload = ({ className, setCalculateResult }) => {
     <Section
       title={
         <div>
-          <p className="card-title"><FaRegFile /> Upload files</p> 
+          <p className="card-title">
+            <FaRegFile /> Upload files
+          </p>
         </div>
       }
     >
-      <p className="uk-text-primary" style={{"marginTop":"-25px"}}> <FaInfoCircle /> Both files must contain the same number of non-empty lines</p>
+      { refFile === null && hypFile === null ? <p className="uk-text-primary" style={{ marginTop: "-25px" }}>
+        <FaInfoCircle /> Both files must contain the same number of non-empty lines
+      </p> : linesAreSame === false && <p className="uk-text-danger" style={{ marginTop: "-25px" }}>
+          <FaExclamationCircle /> Both files must contain the same number of non-empty lines
+        </p>
+      }
       <div
         className="uk-margin uk-grid uk-grid-small uk-child-width-1-2@s"
         style={{ gridRowGap: "10px" }}
       >
-        <ChooseFile kind="reference texts" file={refFile} setFile={setRefFile} name="RefFile" />
-        <ChooseFile kind="generated texts" file={hypFile} setFile={setHypFile} name="HypFile" />
+        <ChooseFile
+          kind="reference texts"
+          file={refFile}
+          setFile={setRefFile}
+          lines={refFileLines}
+          linesAreSame={linesAreSame}
+          name="RefFile"
+        />
+        <ChooseFile
+          kind="generated texts"
+          file={hypFile}
+          setFile={setHypFile}
+          lines={hypFileLines}
+          linesAreSame={linesAreSame}
+          name="HypFile"
+        />
       </div>
       <div className="uk-flex uk-flex-left">
         <Loading isLoading={isComputing}>
-          <Button variant="primary" onClick={() => compute(false)}>
+          <Button variant="primary" disabled={!linesAreSame} onClick={() => compute(false)}>
             {"Evaluate"}
           </Button>
           <div />
