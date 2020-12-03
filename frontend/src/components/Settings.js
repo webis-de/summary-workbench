@@ -1,4 +1,4 @@
-import React, { useContext, useMemo } from "react";
+import React, { useContext } from "react";
 import { FaCogs } from "react-icons/fa";
 
 import { SettingsContext } from "../contexts/SettingsContext";
@@ -6,7 +6,7 @@ import { Section } from "./utils/Section";
 import { SettingCheckboxes } from "./utils/SettingCheckboxes";
 
 const filterSettingsType = (settings, type) =>
-  Object.fromEntries(Object.entries(settings).filter(([key, value]) => value.type == type));
+  Object.fromEntries(Object.entries(settings).filter(([key, value]) => value.type === type));
 
 const Settings = () => {
   const { settings, toggleSetting } = useContext(SettingsContext);

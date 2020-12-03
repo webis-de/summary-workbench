@@ -68,6 +68,7 @@ class Metrics:
         "meteor": "METEOR_URL",
         "moverscore": "MOVER_SCORE_URL",
         "bleurt": "BLEURT_URL",
+        "sentence_transformers": "SENTENCE_TRANSFORMERS_URL",
     }
     MULTIPLE_METRICS = {"bleu", "cider", "rouge"}
 

@@ -1,11 +1,13 @@
 import React, { useEffect, useReducer, useRef, useState } from "react";
 
 import { SettingsProvider } from "../contexts/SettingsContext";
-//import { OneHypRef } from "./OneHypRef";
+import { OneHypRef } from "./OneHypRef";
 import { Result } from "./Result";
 import { Saved } from "./Saved";
 import { Settings } from "./Settings";
 import { Upload } from "./Upload";
+import { Section } from "./utils/Section";
+import { FaRegFile } from "react-icons/fa";
 
 const Evaluate = () => {
   const [savedKey, reloadSaved] = useReducer((oldKey) => !oldKey, true);
@@ -22,8 +24,28 @@ const Evaluate = () => {
         <div />
         <div className="uk-flex uk-flex-between">
           <div style={{ flexBasis: "60%" }}>
+
+    <Section
+      title={
+        <div className="card-title uk-flex">
+            <FaRegFile />
+            <ul className="uk-tab dark-tab" data-uk-tab uk-tab="connect: #choose-upload;" style={{margin: "0"}}>
+            <li><a href="/#">Upload files</a></li>
+            <li><a href="/#">Single Example</a></li>
+            </ul>
+        </div>
+      }
+    >
+
+        <ul id="choose-upload" className="uk-switcher">
+          <li>
             <Upload className="uk-margin" setCalculateResult={setCalculateResult} />
-            {/*<OneHypRef className="uk-margin" />*/}
+          </li>
+          <li>
+            <OneHypRef className="uk-margin" />
+          </li>
+        </ul>
+    </Section>
           </div>
           <div style={{ flexBasis: "37%" }}>
             <Settings className="uk-margin" />

@@ -1,6 +1,7 @@
 import isURL from "is-url";
 import React, { useReducer, useRef, useState } from "react";
 import { FaBars, FaThumbsDown, FaThumbsUp } from "react-icons/fa";
+import { CSSTransition } from "react-transition-group";
 import UIkit from "uikit";
 
 import { feedbackRequest, summarizeRequest, summarizers, summarizersDict } from "../api";
@@ -66,7 +67,7 @@ const Header = ({ text, fontSize, backgroundColor = "#B02F2C", children, style, 
     }}
     {...props}
   >
-    <div style={{ fontSize: fontSize }}>{text}</div>
+    {text && <div style={{ fontSize: fontSize }}>{text}</div>}
     {children}
   </div>
 );
@@ -141,7 +142,6 @@ const InputDocument = ({ summarize, isComputing }) => {
           <Header text="Document" fontSize="14pt"></Header>
           <textarea
             ref={textRef}
-            id="lel"
             onChange={() => {
               setValidTextSet(textEntered());
               console.log(textRef.current.length);
@@ -320,7 +320,7 @@ const Document = ({ markup, showMarkup, clearMarkups }) => (
   </div>
 );
 
-const SummaryTabView = ({ markups, clearMarkups, toggleView }) => {
+const SummaryTabView = ({ markups, clearMarkups, documentLength }) => {
   const [markupIndex, highlight] = useReducer(
     (oldIndex, newIndex) => (oldIndex === newIndex ? null : newIndex),
     null
@@ -329,7 +329,9 @@ const SummaryTabView = ({ markups, clearMarkups, toggleView }) => {
   return (
     <div className="uk-flex uk-flex-between">
       <div style={{ flexBasis: "60%", flexGrow: 0 }}>
-        <Header text="Document" fontSize="16pt" />
+        <Header text="Document" fontSize="16pt">
+          <span style={{ fontSize: "12pt" }}>{documentLength} words</span>
+        </Header>
         <Document
           clearMarkups={clearMarkups}
           markup={
@@ -341,20 +343,21 @@ const SummaryTabView = ({ markups, clearMarkups, toggleView }) => {
         />
       </div>
       <div style={{ flexBasis: "38%", flexGrow: 0 }}>
-        <Header text="Summaries" fontSize="16pt" />
-        <div
-          style={{ height: "auto", overflow: "auto" }}
-          className="uk-card uk-card-default uk-card-body"
-        >
-          <ul className="uk-tab uk-margin" data-uk-tab uk-tab="connect: #summary-display;">
+        <Header>
+          <ul className="uk-tab dark-tab uk-margin" data-uk-tab uk-tab="connect: #summary-display;">
             {markups.map(({ name }) => (
               <li key={name}>
-                <a style={{ fontSize: "1em" }} href="/#">
+                <a className="" style={{ color: "blue", fontSize: "1em" }} href="/#">
                   {summarizersDict[name]}
                 </a>
               </li>
             ))}
           </ul>
+        </Header>
+        <div
+          style={{ height: "auto", overflow: "auto" }}
+          className="uk-card uk-card-default uk-card-body"
+        >
           <ul id="summary-display" className="uk-switcher">
             {markups.map((markup, index) => (
               <li key={index}>
@@ -372,25 +375,51 @@ const SummaryTabView = ({ markups, clearMarkups, toggleView }) => {
   );
 };
 
-const SummaryCompareView = ({ markups, clearMarkups, toggleView }) => {
+const SummaryCompareView = ({ markups, clearMarkups }) => {
+  const grids = [];
+  let grid = null;
+  for (let i = 0; i < markups.length; i++) {
+    if (i % 3 === 0) {
+      grid && grids.push(grid);
+      grid = [];
+    }
+    grid.push(markups[i]);
+  }
+  grids.push(grid);
   return (
-    <div className="uk-margin uk-grid uk-child-width-expand@s ">
-      {markups.map((markup, index) => (
-        <div>
-          <Header text={summarizersDict[markup["name"]]} fontSize="16pt" />
-          <div
-            style={{ height: "auto", overflow: "auto" }}
-            className="uk-card uk-card-default uk-card-body"
-          >
-            <Summary data={markup} showMarkup={false} />
-          </div>
+    <>
+      {grids.map((grid, grid_index) => (
+        <div key={grid_index} className="uk-margin uk-grid uk-child-width-expand@s">
+          {grid.map((markup, markup_index) => (
+            <div key={markup_index}>
+              <Header text={summarizersDict[markup["name"]]} fontSize="16pt" />
+              <div
+                style={{ maxHeight: "500px", overflow: "auto" }}
+                className="uk-card uk-card-default uk-card-body"
+              >
+                <Summary data={markup} showMarkup={false} />
+              </div>
+            </div>
+          ))}
         </div>
       ))}
-    </div>
+    </>
   );
 };
 
-const SummaryView = ({ markups, clearMarkups }) => {
+const ToggleView = ({ showTab, toggleShowTab }) => (
+  <CSSTransition in={showTab} timeout={300} classNames="summarizer-toggle-view">
+    <Bars
+      style={{ minWidth: "20px" }}
+      onClick={toggleShowTab}
+      data-uk-tooltip={
+        "title: " + (showTab ? "Compare View" : "Reset View") + "; pos: left; delay: 500"
+      }
+    />
+  </CSSTransition>
+);
+
+const SummaryView = ({ markups, clearMarkups, documentLength }) => {
   const [showTab, toggleShowTab] = useReducer((oldState) => !oldState, true);
 
   return (
@@ -399,24 +428,16 @@ const SummaryView = ({ markups, clearMarkups }) => {
         <div style={{ flexGrow: 1 }}>
           {showTab ? (
             <SummaryTabView
+              documentLength={documentLength}
               markups={markups}
               clearMarkups={clearMarkups}
-              toggleView={toggleShowTab}
             />
           ) : (
-            <SummaryCompareView
-              markups={markups}
-              clearMarkups={clearMarkups}
-              toggleView={toggleShowTab}
-            />
+            <SummaryCompareView markups={markups} clearMarkups={clearMarkups} />
           )}
         </div>
-        <div className="uk-flex uk-flex-column" style={{ marginLeft: "10px", minWidth: "15px" }}>
-          <Bars
-            style={{ minWidth: "20px", transform: "rotate(90deg)" }}
-            onClick={toggleShowTab}
-            data-uk-tooltip="title: Toggle View; pos: left; delay: 500"
-          />
+        <div className="uk-flex uk-flex-column" style={{ marginLeft: "10px", minWidth: "20px" }}>
+          <ToggleView showTab={showTab} toggleShowTab={toggleShowTab} />
         </div>
       </div>
     </div>
@@ -456,6 +477,7 @@ const generateStatistics = (text) => {
 const Summarize = () => {
   const [markups, setMarkups] = useState(null);
   const [computing, setComputing] = useState(null);
+  const [documentLength, setDocumentLength] = useState(0);
 
   const summarize = (rawText, models, percentage) => {
     const text = rawText.trim();
@@ -492,6 +514,7 @@ const Summarize = () => {
             }
             newMarkups.sort((a, b) => a["name"] > b["name"]);
             setMarkups(newMarkups);
+            setDocumentLength([...original_text.matchAll(/[a-zA-Z]+/g)].length);
           }
         })
         .finally(() => setComputing(false))
@@ -502,7 +525,11 @@ const Summarize = () => {
   return (
     <>
       {markups ? (
-        <SummaryView markups={markups} clearMarkups={() => setMarkups(null)} />
+        <SummaryView
+          documentLength={documentLength}
+          markups={markups}
+          clearMarkups={() => setMarkups(null)}
+        />
       ) : (
         <InputDocument summarize={summarize} isComputing={computing} />
       )}

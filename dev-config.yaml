@@ -6,11 +6,12 @@ enabled-services:
 #  - moverscore            # metric
 #  - bertsum               # summarizer
 #  - bleurt                # metric
-  - bert                  # metric
+  - sentence_transformers # metric
+#  - bert                  # metric
 #  - t5                    # summarizer
 #  - bartcnn               # summarizer
 #  - bartxsum              # summarizer
 #  - pegasuscnn            # summarizer
 #  - pegasusxsum           # summarizer
 #  - longformer2roberta    # summarizer
-  - summ_eval             # metric (summ_eval)
+#  - summ_eval             # metric (summ_eval)

@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { FaExclamationCircle, FaInfoCircle, FaRegFile } from "react-icons/fa";
+import { FaExclamationCircle, FaInfoCircle } from "react-icons/fa";
 
 import { evaluateRequest } from "../api";
 import { SettingsContext } from "../contexts/SettingsContext";
@@ -8,7 +8,6 @@ import { readFile } from "../utils/readFile";
 import { Button } from "./utils/Button";
 import { ChooseFile } from "./utils/ChooseFile";
 import { Loading } from "./utils/Loading";
-import { Section } from "./utils/Section";
 
 const numberOfLines = (string) => {
   let numLines = 1;
@@ -104,16 +103,7 @@ const Upload = ({ className, setCalculateResult }) => {
     }
   };
 
-  return (
-    <Section
-      title={
-        <div>
-          <p className="card-title">
-            <FaRegFile /> Upload files
-          </p>
-        </div>
-      }
-    >
+  return <>
       { refFile === null && hypFile === null ? <p className="uk-text-primary" style={{ marginTop: "-25px" }}>
         <FaInfoCircle /> Both files must contain the same number of non-empty lines
       </p> : linesAreSame === false && <p className="uk-text-danger" style={{ marginTop: "-25px" }}>
@@ -152,8 +142,7 @@ const Upload = ({ className, setCalculateResult }) => {
           </Button> */}
         </Loading>
       </div>
-    </Section>
-  );
+    </>
 };
 
 export { Upload };

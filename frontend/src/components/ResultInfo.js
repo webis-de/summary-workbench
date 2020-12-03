@@ -20,7 +20,7 @@ const ResultInfo = ({ scoreInfo, comparisons }) => {
       </li>
     </ul>
     <ul id="result-display" className="uk-switcher">
-      {hasScores > 0 &&
+      {hasScores &&
       <li>
         {hasScores && <ScoreTable scoreInfo={metrics} />}
         {summ_eval !== undefined && <SummEvalTable scoreInfo={summ_eval} />}

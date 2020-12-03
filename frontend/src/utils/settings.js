@@ -27,6 +27,10 @@ const settings = {
     readable: "MoverScore",
     type: "semantic",
   },
+  sentence_transformers: {
+    readable: "Sentence Transformers",
+    type: "semantic",
+  },
   rouge: {
     readable: "ROUGE",
     type: "lexical",

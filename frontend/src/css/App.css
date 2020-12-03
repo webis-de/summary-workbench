@@ -8,7 +8,6 @@ General rules
 body {
     scrollbar-width: 10px !important;
     scrollbar-color: #55A6D1 #9BC4D8;
-    
 }
 
 /* Heading styles */
@@ -18,6 +17,7 @@ body {
     color: white;
     background-color: #B02F2C ;
 }
+
 
 .card-title{
     color: white !important;
@@ -33,15 +33,13 @@ body {
 /* Placeholder text styles */
 input {
     text-align: center;
-    
   }
-  ::-webkit-input-placeholder {
-    text-align: center;
-  }
+::-webkit-input-placeholder {
+  text-align: center;
+}
   ::-moz-placeholder {
     text-align: center;
   }
-  
 
  /* Scrollbar styles*/
 *::-webkit-scrollbar {
@@ -92,6 +90,22 @@ input {
     color: #B02F2C !important;
 }
 
+.dark-tab a {
+  color: #bbb !important;
+}
+
+
+.dark-tab > .uk-active > a {
+    border-color: white !important;
+}
+
+.dark-tab::before {
+    border-color: #bbb !important;
+}
+
+.uk-tab.dark-tab>.uk-active>a {
+  color: white !important;
+}
 
 .fragmark1 {
     background-color: #c2f598;
@@ -133,5 +147,26 @@ textarea::placeholder {
     line-height: 8em;
     text-align: center;
     font-size: 1.3em;
-    margin: 20pt;
+}
+
+.summarizer-toggle-view-enter-done {
+  transform: rotate(0);
+}
+.summarizer-toggle-view-enter {
+  transform: rotate(90deg);
+}
+.summarizer-toggle-view-enter-active {
+  transform: rotate(0);
+  transition: transform 300ms;
+}
+.summarizer-toggle-view-exit-done {
+  transform: rotate(90deg);
+}
+.summarizer-toggle-view-exit {
+  transform: rotate(0);
+  transition: transform 300ms;
+}
+.summarizer-toggle-view-exit-active {
+  transform: rotate(90deg);
+  transition: transform 300ms;
 }

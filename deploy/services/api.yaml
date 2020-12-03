@@ -22,7 +22,7 @@ spec:
           command: ["./wait-for-it.sh", "-h", "summarizer-mongodb", "-p", "27017"]
       containers:
         - name: api
-          image: docker.io/ds40bamo/summarizer-api:1.2
+          image: docker.io/ds40bamo/summarizer-api:1.2.2
           imagePullPolicy: Always
           command: ["bash", "-c", "gunicorn wsgi:app"]
           env:
@@ -60,7 +60,8 @@ spec:
               value: "http://summarizer-pegasusx:5000"
             - name: LONGFORMER2ROBERTA_URL
               value: "http://summarizer-l2roberta:5000"
-
+            - name: SENTENCE_TRANSFORMERS_URL
+              value: "http://summarizer-senttrans:5000"
           ports:
             - name: api-port
               containerPort: 5000

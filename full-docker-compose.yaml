@@ -27,6 +27,7 @@ services:
       - PEGASUSCNN_URL=http://pegasuscnn:5000
       - PEGASUSXSUM_URL=http://pegasusxsum:5000
       - LONGFORMER2ROBERTA_URL=http://longformer2roberta:5000
+      - SENTENCE_TRANSFORMERS_URL=http://sentence_transformers:5000
     command: bash -c "pipenv sync && pipenv run python wsgi.py"
 
   bert:
@@ -71,6 +72,15 @@ services:
     volumes:
       - ./backend/metrics/moverscore/:/app
       - moverscore_root:/root
+    command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run python wsgi.py"
+
+  sentence_transformers:
+    image: sentence_transformers:latest
+    build: docker/backend/slim
+    working_dir: /app
+    volumes:
+      - ./backend/metrics/sentence_transformers/:/app
+      - sentence_transformers_root:/root
     command: bash -c "pipenv sync && pipenv run python model_setup.py && pipenv run python wsgi.py"
 
   simple_metrics:
@@ -227,3 +237,4 @@ volumes:
   pegasusxsum_root:
   longformer2roberta_root:
   summary_viewer_root:
+  sentence_transformers_root:

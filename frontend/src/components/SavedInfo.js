@@ -3,16 +3,16 @@ import React, { useMemo, useState } from "react";
 import { getCalculationDataRequest } from "../api";
 import { CompareTable } from "./CompareTable";
 import { ScoreTable } from "./ScoreTable";
-import { Loading } from "./utils/Loading";
 import { DeleteButton } from "./utils/DeleteButton";
+import { Loading } from "./utils/Loading";
+
+let toggleKey = 0;
 
 const SavedInfo = ({ name, scoreInfo, deleteCalculation }) => {
   const [comparisons, setComparisons] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const hasScores = useMemo(() => Object.keys(scoreInfo).length > 0, [
-    scoreInfo,
-  ]);
+  const hasScores = useMemo(() => Object.keys(scoreInfo).length > 0, [scoreInfo]);
 
   const loadComparisons = (key) => {
     if (comparisons === null) {
@@ -22,7 +22,7 @@ const SavedInfo = ({ name, scoreInfo, deleteCalculation }) => {
         .finally(() => setIsLoading(false));
     }
   };
-  const toggleId = "toggle-" + name;
+  const toggleId = "toggle-saved-calculation-" + toggleKey++;
   return (
     <div>
       <div className="uk-flex uk-flex-middle">
@@ -31,7 +31,7 @@ const SavedInfo = ({ name, scoreInfo, deleteCalculation }) => {
           data-uk-tab
           uk-tab={"connect: #" + toggleId + ";"}
         >
-          <li className="uk-active">
+          <li>
             <a href="/#">Metrics</a>
           </li>
           <li>
@@ -43,13 +43,7 @@ const SavedInfo = ({ name, scoreInfo, deleteCalculation }) => {
         <DeleteButton onClick={(e) => deleteCalculation(name)} />
       </div>
       <ul id={toggleId} className="uk-switcher">
-        <li>
-          {hasScores ? (
-            <ScoreTable scoreInfo={scoreInfo} />
-          ) : (
-            "no scores were computed"
-          )}
-        </li>
+        <li>{hasScores ? <ScoreTable scoreInfo={scoreInfo} /> : "no scores were computed"}</li>
         <li>
           <Loading isLoading={isLoading}>
             {comparisons !== null && <CompareTable comparisons={comparisons} />}

@@ -33,7 +33,6 @@ const Saved = ({ className, reloadSaved }) => {
 
   if (numberCalculations > 0) {
     return (
-      
       <ul
         className="uk-padding-small"
         data-uk-accordion
@@ -47,7 +46,7 @@ const Saved = ({ className, reloadSaved }) => {
             <ul
               data-uk-accordion
             >
-              {calculations.map(({ name, scores }) => (
+              {calculations.map(({ name, scores }, index) => (
                 <li
                   className="uk-padding-small"
                   key={name}
