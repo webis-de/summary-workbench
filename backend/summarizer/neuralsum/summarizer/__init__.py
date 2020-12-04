@@ -49,15 +49,21 @@ class NeuralSummarizer(object):
                 "allenai/longformer-base-4096"
             )
 
+    def _truncate_text(self, text, remove_extra_tokens=0):
+        for i in range(3):
+            tokens = self.tokenizer(text, return_tensors="pt", truncation=True).input_ids
+            max_model_length = tokens.size()[1]
+            truncated_tokens = tokens[0][:max_model_length - remove_extra_tokens]
+            text = self.tokenizer.decode(truncated_tokens, clean_up_tokenization_spaces=True)
+            without_truncate_length = self.tokenizer(text, return_tensors="pt").input_ids.size()[1]
+            if max_model_length >= without_truncate_length:
+                return tokens, text
+        return self._truncate_text(text, remove_extra_tokens=remove_extra_tokens+3)
+
     def summarize(self, text: str = None, ratio: float = 0.2):
         """Currently used models cannot process sequences longer than 1024 tokens. Thus, truncate the text to appropriate number of tokens.
         """
-        tokens = self.tokenizer(text, return_tensors="pt", truncation=True).input_ids
-        max_model_length = tokens.size()[1]
-        truncated_tokens = tokens[0][: max_model_length - 3]
-        truncated_text = self.tokenizer.decode(
-            truncated_tokens, clean_up_tokenization_spaces=True
-        )
+        tokens, truncated_text = self._truncate_text(text)
         min_summary_length = round(len(truncated_text.split()) * ratio)
 
         if self.pipeline:
