@@ -1,4 +1,5 @@
 import React, { useEffect, useReducer, useRef, useState } from "react";
+import { FaRegFile } from "react-icons/fa";
 
 import { SettingsProvider } from "../contexts/SettingsContext";
 import { OneHypRef } from "./OneHypRef";
@@ -7,14 +8,13 @@ import { Saved } from "./Saved";
 import { Settings } from "./Settings";
 import { Upload } from "./Upload";
 import { Section } from "./utils/Section";
-import { FaRegFile } from "react-icons/fa";
 
 const Evaluate = () => {
   const [savedKey, reloadSaved] = useReducer((oldKey) => !oldKey, true);
   const [calculateResult, setCalculateResult] = useState(null);
-  const [rerender, toggleRerender] = useReducer((v) => !v, false)
+  const [rerender, toggleRerender] = useReducer((v) => !v, false);
 
-  useEffect(() => toggleRerender(), [calculateResult])
+  useEffect(() => toggleRerender(), [calculateResult]);
 
   const resultRef = useRef(null);
 
@@ -24,29 +24,37 @@ const Evaluate = () => {
         <div />
         <div className="uk-flex uk-flex-between">
           <div style={{ flexBasis: "60%" }}>
-
-    <Section
-      title={
-        <div className="card-title uk-flex">
-            <FaRegFile />
-            <ul className="uk-tab dark-tab" data-uk-tab uk-tab="connect: #choose-upload;" style={{margin: "0"}}>
-            <li><a href="/#">Upload files</a></li>
-            <li><a href="/#">Single Example</a></li>
-            </ul>
-        </div>
-      }
-    >
-
-        <ul id="choose-upload" className="uk-switcher">
-          <li>
-            <Upload className="uk-margin" setCalculateResult={setCalculateResult} />
-          </li>
-          <li>
-            <OneHypRef className="uk-margin" />
-          </li>
-        </ul>
-    </Section>
+            <Section
+              title={
+                <div className="card-title uk-flex">
+                  <FaRegFile />
+                  <ul
+                    className="uk-tab dark-tab"
+                    data-uk-tab
+                    uk-tab="connect: #choose-upload;"
+                    style={{ margin: "0" }}
+                  >
+                    <li>
+                      <a href="/#">Upload files</a>
+                    </li>
+                    <li>
+                      <a href="/#">Single Example</a>
+                    </li>
+                  </ul>
+                </div>
+              }
+            >
+              <ul id="choose-upload" className="uk-switcher">
+                <li>
+                  <Upload className="uk-margin" setCalculateResult={setCalculateResult} />
+                </li>
+                <li>
+                  <OneHypRef className="uk-margin" />
+                </li>
+              </ul>
+            </Section>
           </div>
+          <div style={{ minWidth: "10px" }} />
           <div style={{ flexBasis: "37%" }}>
             <Settings className="uk-margin" />
           </div>
@@ -60,7 +68,7 @@ const Evaluate = () => {
           setCalculateResult={setCalculateResult}
           reloadSaved={reloadSaved}
         />
-        <Saved className="uk-margin" key={savedKey +2} reloadSaved={reloadSaved} />
+        <Saved className="uk-margin" key={savedKey + 2} reloadSaved={reloadSaved} />
       </SettingsProvider>
     </div>
   );

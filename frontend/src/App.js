@@ -4,9 +4,9 @@ import { Link, Redirect, Route, Router, Switch, useLocation } from "react-router
 import { About } from "./components/About";
 import { Evaluate } from "./components/Evaluate";
 import { Summarize } from "./components/Summarize";
-import history from "./history.js";
+import history from "./history";
 
-const routes = [
+const routeMap = [
   ["/summarize", "Summarize", Summarize],
   ["/evaluate", "Evaluate", Evaluate],
   ["/about", "About", About],
@@ -14,13 +14,13 @@ const routes = [
 
 const App = () => (
   <Router history={history}>
-    <Content routes={routes} />
+    <Content routes={routeMap} />
   </Router>
 );
 
 const Content = ({ routes }) => {
-  const base = window.location.protocol + "//" + window.location.hostname;
-  const summary_viewer_url = new URL(
+  const base = `${window.location.protocol}//${window.location.hostname}`;
+  const summaryViewerUrl = new URL(
     process.env.REACT_APP_DEVELOP
       ? `${base}:4000/`
       : `${base}:${window.location.port}/summary_viewer/`
@@ -31,15 +31,14 @@ const Content = ({ routes }) => {
       <div className="uk-background-secondary global-nav" data-uk-sticky>
         <nav
           className="uk-navbar-container uk-navbar-transparent uk-container uk-light"
-          data-uk-navbar="mode: click"
-        >
+          data-uk-navbar="mode: click">
           <div className="uk-navbar-item uk-logo">
             <a href="/">Webis Summarization</a>
           </div>
           <div className="uk-navbar-center">
             <ul className="uk-navbar-nav">
               <li>
-                <a href={summary_viewer_url} target="_blank">
+                <a href={summaryViewerUrl} target="_blank" rel="noreferrer">
                   Summary Viewer
                 </a>
               </li>
@@ -47,8 +46,8 @@ const Content = ({ routes }) => {
           </div>
           <div className="uk-navbar-right">
             <ul className="uk-navbar-nav">
-              {routes.map(([path, readable, component]) => (
-                <li key={path} className={path === location["pathname"] ? "uk-active" : null}>
+              {routes.map(([path, readable]) => (
+                <li key={path} className={path === location.pathname ? "uk-active" : null}>
                   <Link to={path}>{readable}</Link>
                 </li>
               ))}
@@ -60,7 +59,7 @@ const Content = ({ routes }) => {
       <div className="uk-margin" />
 
       <Switch>
-        {routes.map(([path, readable, component]) => (
+        {routes.map(([path, , component]) => (
           <Route key={location.key} path={path} component={component} />
         ))}
         <Redirect to={routes[0][0]} />

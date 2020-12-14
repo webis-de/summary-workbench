@@ -2,10 +2,11 @@ import isURL from "is-url";
 import React, { useReducer, useRef, useState } from "react";
 import { FaBars, FaThumbsDown, FaThumbsUp } from "react-icons/fa";
 import { CSSTransition } from "react-transition-group";
-import UIkit from "uikit";
+import { message } from "../utils/message";
 
 import { feedbackRequest, summarizeRequest, summarizers, summarizersDict } from "../api";
 import { markup as genMarkup } from "../utils/fragcolors";
+import { displayMessage } from "../utils/message";
 import { Markup } from "./Markup";
 
 const withHover = (WrappedComponent, color) => ({ style, ...props }) => {
@@ -36,7 +37,7 @@ const Feedback = ({ summarizer, summary, reference, url }) => {
         onClick={() =>
           feedbackRequest(summarizer, summary, reference, url, "good")
             .then(() => setSubmitted(true))
-            .catch((e) => alert(e))
+            .catch((e) => displayMessage(e.message))
         }
       />
       <ThumbsDown
@@ -44,14 +45,14 @@ const Feedback = ({ summarizer, summary, reference, url }) => {
         onClick={() =>
           feedbackRequest(summarizer, summary, reference, url, "bad")
             .then(() => setSubmitted(true))
-            .catch((e) => alert(e))
+            .catch((e) => displayMessage(e.message))
         }
       />
     </div>
   );
 };
 
-const Header = ({ text, fontSize, backgroundColor = "#B02F2C", children, style, ...props }) => (
+const Header = ({ text, fontSize, backgroundColor = "#B02F2C", children, style }) => (
   <div
     className="uk-flex uk-flex-between uk-flex-middle"
     style={{
@@ -60,24 +61,23 @@ const Header = ({ text, fontSize, backgroundColor = "#B02F2C", children, style, 
       paddingTop: "10px",
       fontWeight: "500",
       paddingBottom: "12px",
-      backgroundColor: backgroundColor,
+      backgroundColor,
       color: "white",
-      fontSize: fontSize,
+      fontSize,
       ...style,
     }}
-    {...props}
   >
-    {text && <div style={{ fontSize: fontSize }}>{text}</div>}
+    {text && <div style={{ fontSize }}>{text}</div>}
     {children}
   </div>
 );
 
-const Checkbox = ({ is_set, readable, onClick }) => (
+const Checkbox = ({ isSet, readable, onClick }) => (
   <label style={{ padding: "5px", whiteSpace: "nowrap" }}>
     <input
       className="uk-checkbox uk-margin-small-right"
-      checked={is_set}
-      readOnly={true}
+      checked={isSet}
+      readOnly
       onClick={onClick}
       type="checkbox"
     />
@@ -87,22 +87,22 @@ const Checkbox = ({ is_set, readable, onClick }) => (
 
 const initModels = (models) => {
   const init = {};
-  for (const [option, readable] of models) {
-    init[option] = { is_set: false, readable };
-  }
+  models.forEach(([option, readable]) => {
+    init[option] = { isSet: false, readable };
+  });
   return init;
 };
 
-const extractive = initModels(summarizers["extractive"]);
-const abstractive = initModels(summarizers["abstractive"]);
+const extractive = initModels(summarizers.extractive);
+const abstractive = initModels(summarizers.abstractive);
 
-const Checkboxes = ({ className, options, toggleOption }) => (
+const Checkboxes = ({ options, toggleOption }) => (
   <div className="uk-flex uk-flex-column">
-    {Object.entries(options).map(([option, { is_set, readable }]) => (
+    {Object.entries(options).map(([option, { isSet, readable }]) => (
       <Checkbox
         key={option}
         readable={readable}
-        is_set={is_set}
+        isSet={isSet}
         onClick={() => toggleOption(option)}
       />
     ))}
@@ -110,19 +110,19 @@ const Checkboxes = ({ className, options, toggleOption }) => (
 );
 
 const toggleSettingReducer = (settings, metric) => {
-  const newSettings = Object.assign({}, settings);
-  newSettings[metric].is_set = !newSettings[metric].is_set;
+  const newSettings = { ...settings };
+  newSettings[metric].isSet = !newSettings[metric].isSet;
   return newSettings;
 };
 
 const getSetModels = (models) =>
   Object.entries(models)
-    .filter((e) => e[1].is_set)
+    .filter((e) => e[1].isSet)
     .map((e) => e[0]);
 
 const Loading = () => <div data-uk-spinner />;
 
-const _anyModelSet = (models) => Object.values(models).some(({ is_set }) => is_set);
+const _anyModelSet = (models) => Object.values(models).some(({ isSet }) => isSet);
 
 const InputDocument = ({ summarize, isComputing }) => {
   const textRef = useRef();
@@ -139,13 +139,10 @@ const InputDocument = ({ summarize, isComputing }) => {
       <div className="uk-flex uk-flex-between" style={{ minHeight: "60vh" }}>
         {/* Start Document container */}
         <div className="uk-flex uk-flex-column" style={{ flexBasis: "60%" }}>
-          <Header text="Document" fontSize="14pt"></Header>
+          <Header text="Document" fontSize="14pt" />
           <textarea
             ref={textRef}
-            onChange={() => {
-              setValidTextSet(textEntered());
-              console.log(textRef.current.length);
-            }}
+            onChange={() => setValidTextSet(textEntered())}
             className="uk-textarea uk-card uk-card-default uk-card-body"
             rows="8"
             placeholder="Paste URL or long text"
@@ -154,7 +151,7 @@ const InputDocument = ({ summarize, isComputing }) => {
         </div>
         {/*  End Document container */}
 
-        <div style={{ flexBasis: "3%" }} />
+        <div style={{ minWidth: "10px" }} />
 
         {/*  Start model lists container */}
         <div className="uk-flex uk-flex-column" style={{ flexBasis: "37%" }}>
@@ -192,7 +189,7 @@ const InputDocument = ({ summarize, isComputing }) => {
                       float: "right",
                     }}
                   >
-                    {percentage + "%"}
+                    {`${percentage}%`}
                   </span>
                 </div>
                 <input
@@ -242,7 +239,7 @@ const Statistics = ({ statistics }) => (
     </thead>
     <tbody>
       {Object.entries(statistics).map(([name, value]) => (
-        <tr>
+        <tr key={name}>
           <td>{name}</td>
           <td>{value}</td>
         </tr>
@@ -252,7 +249,7 @@ const Statistics = ({ statistics }) => (
 );
 
 const Summary = ({ data, onHighlight, showMarkup }) => {
-  const { name, summaryMarkup, summaryText, original_text, url, statistics } = data;
+  const { name, summaryMarkup, summaryText, original, url, statistics } = data;
   const [showStatistics, toggleShowStatistics] = useReducer((oldState) => !oldState, false);
 
   return (
@@ -291,7 +288,7 @@ const Summary = ({ data, onHighlight, showMarkup }) => {
           key={summaryText}
           summarizer={name}
           summary={summaryText}
-          reference={original_text}
+          reference={original}
           url={url}
         />
       </div>
@@ -335,9 +332,7 @@ const SummaryTabView = ({ markups, clearMarkups, documentLength }) => {
         <Document
           clearMarkups={clearMarkups}
           markup={
-            markupIndex !== null
-              ? markups[markupIndex]["requestMarkup"]
-              : markups[0]["requestMarkup"]
+            markupIndex !== null ? markups[markupIndex].requestMarkup : markups[0].requestMarkup
           }
           showMarkup={markupIndex !== null}
         />
@@ -375,24 +370,31 @@ const SummaryTabView = ({ markups, clearMarkups, documentLength }) => {
   );
 };
 
-const SummaryCompareView = ({ markups, clearMarkups }) => {
+const buildGrids = (list) => {
   const grids = [];
   let grid = null;
-  for (let i = 0; i < markups.length; i++) {
+  for (let i = 0; i < list.length; i++) {
     if (i % 3 === 0) {
-      grid && grids.push(grid);
+      if (grid) {
+        grids.push(grid);
+      }
       grid = [];
     }
-    grid.push(markups[i]);
+    grid.push(list[i]);
   }
   grids.push(grid);
+  return grids;
+};
+
+const SummaryCompareView = ({ markups }) => {
+  const grids = buildGrids(markups);
   return (
     <>
-      {grids.map((grid, grid_index) => (
-        <div key={grid_index} className="uk-margin uk-grid uk-child-width-expand@s">
-          {grid.map((markup, markup_index) => (
-            <div key={markup_index}>
-              <Header text={summarizersDict[markup["name"]]} fontSize="16pt" />
+      {grids.map((grid, gridIndex) => (
+        <div key={gridIndex} className="uk-margin uk-grid uk-child-width-expand@s">
+          {grid.map((markup, markupIndex) => (
+            <div key={markupIndex}>
+              <Header text={summarizersDict[markup.name]} fontSize="16pt" />
               <div
                 style={{ maxHeight: "500px", overflow: "auto" }}
                 className="uk-card uk-card-default uk-card-body"
@@ -412,9 +414,7 @@ const ToggleView = ({ showTab, toggleShowTab }) => (
     <Bars
       style={{ minWidth: "20px" }}
       onClick={toggleShowTab}
-      data-uk-tooltip={
-        "title: " + (showTab ? "Compare View" : "Reset View") + "; pos: left; delay: 500"
-      }
+      data-uk-tooltip={`title: ${showTab ? "Compare View" : "Reset View"}; pos: left; delay: 500`}
     />
   </CSSTransition>
 );
@@ -447,18 +447,17 @@ const SummaryView = ({ markups, clearMarkups, documentLength }) => {
 const generateParagraphs = (markupedText) => {
   const paragraphedText = [];
   let currParagraph = [];
-  for (const [text, classes] of markupedText) {
+  markupedText.forEach(([text, classes]) => {
     const splits = text.split("\n\n");
     while (true) {
       currParagraph.push([splits.shift(), classes]);
-      if (splits.length > 0) {
-        paragraphedText.push(currParagraph);
-        currParagraph = [];
-      } else {
+      if (splits.length === 0) {
         break;
       }
+      paragraphedText.push(currParagraph);
+      currParagraph = [];
     }
-  }
+  });
   if (currParagraph.length > 0) {
     paragraphedText.push(currParagraph);
   }
@@ -481,30 +480,25 @@ const Summarize = () => {
 
   const summarize = (rawText, models, percentage) => {
     const text = rawText.trim();
-    const kind = isURL(text) ? "url" : "raw";
-    const ratio = parseInt(percentage) / 100;
+    const ratio = parseInt(percentage, 10) / 100;
 
     if (!models.length) {
-      UIkit.notification({ message: "No summarizer selected", status: "danger" });
+      displayMessage("No summarizer selected");
     } else if (!text) {
-      UIkit.notification({ message: "Please enter some text.", status: "danger" });
+      displayMessage("Please enter some text.");
     } else {
       setComputing(true);
-      summarizeRequest(text, models, ratio, kind)
-        .then(({ summaries, original_text }) => {
+      summarizeRequest(text, models, ratio)
+        .then(({ summaries, original }) => {
           if (Object.values(summaries).every((summaryText) => summaryText === "")) {
-            UIkit.notification({
-              message: "No summaries could be generated. The input is probably too short.",
-              status: "danger",
-              pos: "top-left",
-            });
+            displayMessage("No summaries could be generated. The input is probably too short.");
           } else {
             const newMarkups = [];
             for (const [name, summaryText] of Object.entries(summaries)) {
-              const [requestMarkup, summaryMarkup] = genMarkup(original_text, summaryText);
+              const [requestMarkup, summaryMarkup] = genMarkup(original, summaryText);
               newMarkups.push({
                 name,
-                original_text,
+                original,
                 summaryText,
                 summaryMarkup: generateParagraphs(summaryMarkup),
                 requestMarkup: generateParagraphs(requestMarkup),
@@ -512,9 +506,9 @@ const Summarize = () => {
                 url: isURL(text) ? text : null,
               });
             }
-            newMarkups.sort((a, b) => a["name"] > b["name"]);
+            newMarkups.sort((a, b) => a.name > b.name);
             setMarkups(newMarkups);
-            setDocumentLength([...original_text.matchAll(/[a-zA-Z]+/g)].length);
+            setDocumentLength([...original.matchAll(/[a-zA-Z]+/g)].length);
           }
         })
         .finally(() => setComputing(false))

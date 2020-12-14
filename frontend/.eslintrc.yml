@@ -1,0 +1,35 @@
+env:
+  browser: true
+  node: true
+extends:
+  - airbnb
+  - eslint:recommended
+  - plugin:react/recommended
+  - plugin:react-hooks/recommended
+  - plugin:prettier/recommended
+  - prettier/flowtype
+  - prettier/react
+parser: "babel-eslint"
+parserOptions:
+  ecmaFeatures:
+    jsx: true
+  ecmaVersion: 12
+  sourceType: module
+plugins:
+  - react
+  - react-hooks
+  - simple-import-sort
+  - import
+  - promise
+rules:
+  react/react-in-jsx-scope: 0
+  react/jsx-filename-extension: 0
+  react/prop-types: 0
+  import/prefer-default-export: 0
+  jsx-a11y/control-has-associated-label: 0
+  react/button-has-type: 0
+  no-underscore-dangle: 0
+  react/jsx-props-no-spreading: 0
+  no-plusplus: 0
+  react/display-name: 0
+  jsx-a11y/label-has-associated-control: 0

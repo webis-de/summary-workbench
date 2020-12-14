@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useState, useMemo } from "react";
+import React, { useEffect, useMemo, useReducer, useState } from "react";
 
 import { toCSV, toLatex } from "../utils/export";
 import { Button } from "./utils/Button";
@@ -12,22 +12,21 @@ const TransposeButton = ({ transpose, onClick }) => (
   </Button>
 );
 
-const ExportPreview = ({ text }) =>
-  text !== null && (
-    <pre className="uk-padding-small" style={{ border: "solid 1px grey", maxWidth: "50vw"}}>
-      {text}
-    </pre>
-  );
+const ExportPreview = ({ text }) => (
+  <pre className="uk-padding-small" style={{ border: "solid 1px grey" }}>
+    {text}
+  </pre>
+);
 
 const PrecionField = ({ onChange }) => (
-  <input className="uk-input"  placeholder="precision" onChange={onChange} />
+  <input className="uk-input" placeholder="precision" onChange={onChange} />
 );
 
 const ScoreTableDummy = ({ scoreInfo }) => {
-  const flatScores = useMemo(() => Object.values(scoreInfo).reduce(
-    (acc, value) => acc.concat(Object.entries(value)),
-    []
-  ), [scoreInfo]);
+  const flatScores = useMemo(
+    () => Object.values(scoreInfo).reduce((acc, value) => acc.concat(Object.entries(value)), []),
+    [scoreInfo]
+  );
   const [allChecked, setAllChecked] = useState(true);
   const [isChecked, toggleChecked] = useReducer(
     (state, i) => [...state.slice(0, i), !state[i], ...state.slice(i + 1)],
@@ -41,7 +40,7 @@ const ScoreTableDummy = ({ scoreInfo }) => {
       value = "3";
     }
     if (value > 30) {
-      value = 30
+      value = 30;
     }
     return value;
   }, "3");
@@ -54,10 +53,12 @@ const ScoreTableDummy = ({ scoreInfo }) => {
       } else if (format === "latex") {
         return toLatex(chosenScores, transpose, precision);
       }
-    } catch (e) {if (! (e instanceof(RangeError))) {
-      throw e
-    }}
-    return oldstate
+    } catch (e) {
+      if (!(e instanceof RangeError)) {
+        throw e;
+      }
+    }
+    return oldstate;
   }, null);
   useEffect(() => updateExportText(), [currFormat, transpose, precision]);
   useEffect(() => {
@@ -130,7 +131,7 @@ const ScoreTableDummy = ({ scoreInfo }) => {
           <TransposeButton transpose={transpose} onClick={() => toggleTranspose()} />
         </div>
       </div>
-      <ExportPreview text={exportText} />
+      {exportText !== null && <ExportPreview text={exportText} />}
     </>
   );
 };

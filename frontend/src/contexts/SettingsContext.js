@@ -1,6 +1,6 @@
 import React, { useMemo, useReducer } from "react";
 
-import { settings as baseSettings } from "../utils/settings";
+import { settings as baseSettings } from "../config";
 
 const SettingsContext = React.createContext();
 
@@ -9,9 +9,9 @@ const loadSetting = metric => JSON.parse(window.localStorage.getItem(metric)) ==
 
 const toggleSettingReducer = (settings, metric) => {
   const newSettings = Object.assign({}, settings);
-  const is_set = !newSettings[metric].is_set;
-  newSettings[metric].is_set = is_set
-  saveSetting(metric, is_set)
+  const isSet = !newSettings[metric].isSet;
+  newSettings[metric].isSet = isSet
+  saveSetting(metric, isSet)
   return newSettings;
 };
 
@@ -19,7 +19,7 @@ const SettingsProvider = ({ children }) => {
   const defaultSettings = useMemo(() =>
     Object.fromEntries(
       Object.entries(baseSettings).map(([metric, info]) => {
-        info.is_set = loadSetting(metric);
+        info.isSet = loadSetting(metric);
         return [metric, info];
       })
     )

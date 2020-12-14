@@ -1,14 +1,15 @@
 const DEVELOP = process.env.REACT_APP_DEVELOP;
 let baseName = "";
 if (DEVELOP === "true") {
-  const HOST = process.env.REACT_APP_API_HOST;
-  const PORT = process.env.REACT_APP_API_PORT;
+  const HOST = process.env.REACT_APP_API_HOST || "localhost";
+  const PORT = process.env.REACT_APP_API_PORT || "5000";
   baseName = `http://${HOST}:${PORT}`;
+  console.log(baseName);
 }
 
-const evaluateRequest = (metrics, hypdata, refdata, summ_eval) => {
+const evaluateRequest = (metrics, hypdata, refdata) => {
   const method = "POST";
-  const body = JSON.stringify({ metrics, hypdata, refdata, summ_eval });
+  const body = JSON.stringify({ metrics, hypdata, refdata });
   return fetch(`${baseName}/api/evaluate`, {
     method,
     body,
@@ -16,9 +17,8 @@ const evaluateRequest = (metrics, hypdata, refdata, summ_eval) => {
   }).then((response) => {
     if (response.ok) {
       return response.json();
-    } else {
-      throw new Error("response not ok");
     }
+    throw new Error("response not ok");
   });
 };
 
@@ -52,7 +52,7 @@ export { getSavedCalculationsRequest };
 
 const deleteCalculationRequest = (name) => {
   const method = "DELETE";
-  return fetch(`${baseName}/api/calculation/` + encodeURIComponent(name), { method }).then(
+  return fetch(`${baseName}/api/calculation/${encodeURIComponent(name)}`, { method }).then(
     (response) => {
       if (response.status === 404) {
         throw new Error("Resource not found");
@@ -65,13 +65,12 @@ export { deleteCalculationRequest };
 
 const getCalculationDataRequest = (name) => {
   const method = "GET";
-  return fetch(`${baseName}/api/calculation/` + encodeURIComponent(name), { method }).then(
+  return fetch(`${baseName}/api/calculation/${encodeURIComponent(name)}`, { method }).then(
     (response) => {
       if (response.ok) {
         return response.json();
-      } else {
-        alert("server error");
       }
+      throw Error("server error");
     }
   );
 };
@@ -79,7 +78,7 @@ const getCalculationDataRequest = (name) => {
 export { getCalculationDataRequest };
 
 const summarizers = {
-  "abstractive": [
+  abstractive: [
     ["t5", "T5"],
     ["bartcnn", "BART-CNN"],
     ["bartxsum", "BART-XSum"],
@@ -87,23 +86,23 @@ const summarizers = {
     ["pegasusxsum", "Pegasus-XSum"],
     ["longformer2roberta", "Longformer2Roberta"],
   ],
-  "extractive": [
+  extractive: [
     ["bertsum", "BERTSummarizer"],
     ["textrank", "TextRank"],
     ["newspaper3k", "Newspaper3k"],
-  ]
+  ],
 };
 
-const summarizersDict = {}
-for (const names of Object.values(summarizers)) {
-  for (const [shortName, longName] of names) {
-    summarizersDict[shortName] = longName
-  }
-}
+const summarizersDict = {};
+Object.values(summarizers).forEach((names) => {
+  names.forEach(([shortName, longName]) => {
+    summarizersDict[shortName] = longName;
+  });
+});
 
-const summarizeRequest = (text, summarizers, ratio, kind) => {
+const summarizeRequest = (text, summarizers, ratio) => {
   const method = "POST";
-  const body = JSON.stringify({ text, summarizers, ratio, kind });
+  const body = JSON.stringify({ text, summarizers, ratio });
   return fetch(`${baseName}/api/summarize`, {
     method,
     body,
@@ -111,30 +110,26 @@ const summarizeRequest = (text, summarizers, ratio, kind) => {
   }).then((response) => {
     if (response.ok) {
       return response.json();
-    } else {
-      throw new Error("failure with Request");
     }
+    throw new Error("failure with Request");
   });
 };
 
 export { summarizeRequest, summarizers, summarizersDict };
 
-
 const feedbackRequest = (summarizer, summary, reference, url, feedback) => {
   const method = "POST";
   let body = { summarizer, summary, reference, feedback };
   if (url !== null) {
-    body = {url, ...body}
+    body = { url, ...body };
   }
-  body = JSON.stringify(body)
+  body = JSON.stringify(body);
   return fetch(`${baseName}/api/feedback`, {
     method,
     body,
     headers: { "Content-Type": "application/json" },
   }).then((response) => {
-    if (response.ok) {
-      return response.json();
-    } else {
+    if (!response.ok) {
       throw new Error("failure with Request");
     }
   });

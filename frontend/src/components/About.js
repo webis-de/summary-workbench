@@ -30,13 +30,38 @@ const MetricTable = ({ content }) => (
 );
 
 const metricData = [
-  ["BERTScore", "https://arxiv.org/pdf/1904.09675.pdf", "https://github.com/Tiiiger/bert_score", "roberta-large-mnli"],
-  ["BLEU", "https://www.aclweb.org/anthology/P02-1040.pdf", "https://github.com/Maluuba/nlg-eval", "", ],
+  [
+    "BERTScore",
+    "https://arxiv.org/pdf/1904.09675.pdf",
+    "https://github.com/Tiiiger/bert_score",
+    "roberta-large-mnli",
+  ],
+  [
+    "BLEU",
+    "https://www.aclweb.org/anthology/P02-1040.pdf",
+    "https://github.com/Maluuba/nlg-eval",
+    "",
+  ],
   ["CIDEr", "https://arxiv.org/pdf/1411.5726.pdf", "https://github.com/Maluuba/nlg-eval", ""],
-  ["METEOR", "https://www.aclweb.org/anthology/W05-0909.pdf", "https://github.com/Maluuba/nlg-eval", "", ],
-  ["MoverScore", "https://arxiv.org/pdf/1909.02622.pdf", "https://github.com/AIPHES/emnlp19-moverscore", "distilbert-base-uncased", ],
+  [
+    "METEOR",
+    "https://www.aclweb.org/anthology/W05-0909.pdf",
+    "https://github.com/Maluuba/nlg-eval",
+    "",
+  ],
+  [
+    "MoverScore",
+    "https://arxiv.org/pdf/1909.02622.pdf",
+    "https://github.com/AIPHES/emnlp19-moverscore",
+    "distilbert-base-uncased",
+  ],
   ["ROUGE", "https://www.aclweb.org/anthology/W04-1013.pdf", "https://github.com/pltrdy/rouge", ""],
-  ["Greedy matching", "https://www.aclweb.org/anthology/W12-2018.pdf", "https://github.com/Maluuba/nlg-eval", "glove.6B.300d", ]
+  [
+    "Greedy matching",
+    "https://www.aclweb.org/anthology/W12-2018.pdf",
+    "https://github.com/Maluuba/nlg-eval",
+    "glove.6B.300d",
+  ],
 ];
 
 const About = () => (
@@ -47,7 +72,6 @@ const About = () => (
         Available models:
         <ul>
           <li>
-            {" "}
             <a href="https://www.aclweb.org/anthology/W04-3252/">TextRank</a>
           </li>
           <li>
@@ -63,7 +87,7 @@ const About = () => (
       <h4>Evaluation</h4>
       <div className="uk-margin-left">
         <MetricTable content={metricData} />
-        <div style={{marginTop: "1em", marginBottom: "1.5em"}} className="uk-text-meta">
+        <div style={{ marginTop: "1em", marginBottom: "1.5em" }} className="uk-text-meta">
           Evaluate a single hypothesis against the reference or upload hypothesis and reference
           files. Results can be saved and exported as LaTeX and CSV.
         </div>
@@ -73,8 +97,7 @@ const About = () => (
       <h4>Code</h4>
       <a
         className="uk-margin-left"
-        href="https://git.informatik.uni-leipzig.de/ds40bamo/comparefile"
-      >
+        href="https://git.informatik.uni-leipzig.de/ds40bamo/comparefile">
         https://git.informatik.uni-leipzig.de/ds40bamo/comparefile
       </a>
     </div>

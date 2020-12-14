@@ -6,12 +6,11 @@ import { SettingsContext } from "../contexts/SettingsContext";
 import { markup } from "../utils/fragcolors";
 import { Markup } from "./Markup";
 import { ScoreTable } from "./ScoreTable";
-import { SummEvalTable } from "./SummEvalTable";
 import { Button } from "./utils/Button";
 import { Loading } from "./utils/Loading";
 
 const OneHypRefResult = ({ className, scoreInfo, hypothesis, reference }) => {
-  const { metrics, summ_eval } = scoreInfo;
+  const { metrics } = scoreInfo;
   const hasScores = Object.keys(metrics).length > 0;
 
   return (
@@ -29,7 +28,6 @@ const OneHypRefResult = ({ className, scoreInfo, hypothesis, reference }) => {
         </tbody>
       </table>
       {hasScores && <ScoreTable scoreInfo={metrics} />}
-      {summ_eval !== undefined && <SummEvalTable scoreInfo={summ_eval} />}
     </div>
   );
 };
@@ -56,7 +54,7 @@ const OneHypRef = () => {
   const getChosenMetrics = () => {
     const chosenMetrics = [];
     for (const [metric, metricInfo] of Object.entries(settings)) {
-      if (metricInfo.is_set) {
+      if (metricInfo.isSet) {
         chosenMetrics.push(metric);
       }
     }

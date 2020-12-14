@@ -10,9 +10,16 @@ body {
     scrollbar-color: #55A6D1 #9BC4D8;
 }
 
+.background {
+  background-color: #B02F2C !important;
+}
+
+.foreground {
+  color: #B02F2C !important;
+}
+
 /* Heading styles */
 .card-header{
-
     border-bottom: 2px solid #B02F2C;
     color: white;
     background-color: #B02F2C ;
