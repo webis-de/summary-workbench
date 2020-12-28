@@ -156,6 +156,10 @@ textarea::placeholder {
     font-size: 1.3em;
 }
 
+.margin-right:not(:last-child) {
+  margin-right: 20px
+}
+
 .summarizer-toggle-view-enter-done {
   transform: rotate(0);
 }

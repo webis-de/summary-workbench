@@ -1,14 +1,10 @@
 import React from "react";
-import { Button } from "./Button";
 import { FaTrash } from "react-icons/fa";
 
-const DeleteButton = ({ onClick }) => (
-  <Button
-    size="small"
-    variant="danger"
-    onClick={onClick}
-    style={{ minWidth: "50px" }}
-  >
+import { Button } from "./Button";
+
+const DeleteButton = ({ style, ...other }) => (
+  <Button size="small" variant="danger" style={{ minWidth: "50px", ...style }} {...other}>
     <FaTrash />
   </Button>
 );

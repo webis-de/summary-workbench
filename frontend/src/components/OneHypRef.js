@@ -89,19 +89,19 @@ const OneHypRef = () => {
       </div>
       <div className="uk-flex uk-flex-between">
         <div className="uk-flex uk-flex-left">
-          <Loading isLoading={isComputing}>
-            <Button
-              variant="primary"
-              disabled={!hypText.length || !refText.length}
-              onClick={() => compute(false)}
-            >
-              Evaluate
-            </Button>
-            <div />
-            {/* <Button variant="primary" onClick={() => compute(true)}>
-              {"Evaluate with SummEval"}
-            </Button> */}
-          </Loading>
+          {isComputing ? (
+            <Loading />
+          ) : (
+            <>
+              <Button
+                variant="primary"
+                disabled={!hypText.length || !refText.length}
+                onClick={() => compute(false)}
+              >
+                Evaluate
+              </Button>
+            </>
+          )}
         </div>
         <Button
           variant="primary"

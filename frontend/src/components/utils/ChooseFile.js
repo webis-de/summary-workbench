@@ -1,6 +1,40 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
-const ChooseFile = ({ kind, className, name, file, setFile, lines, linesAreSame, ...other }) => {
+import { displayMessage } from "../../utils/message";
+import { readFile } from "../../utils/readFile";
+
+const sameLength = (elements) => {
+  const validElements = elements.filter((e) => e !== null);
+  if (!validElements.length) {
+    return true;
+  }
+  const [first, ...other] = validElements;
+  return other.every((e) => e.length === first.length);
+};
+
+const useFile = () => {
+  const [file, setFile] = useState(null);
+  const [fileName, setFileName] = useState(null);
+  const [lines, setLines] = useState(null);
+  useEffect(() => {
+    if (file) {
+      readFile(file)
+        .then((text) => text.trim())
+        .then((text) => {
+          setLines(text.split("\n").map((line) => line.trim()));
+          setFileName(file.name);
+        })
+        .catch((err) => displayMessage(err.message));
+    } else {
+      setLines(null);
+      setFileName(null);
+    }
+  }, [file]);
+
+  return [fileName, setFile, lines];
+};
+
+const ChooseFile = ({ kind, name, fileName, setFile, lines, linesAreSame, ...other }) => {
   const uploadRef = useRef();
   const [isDragged, setIsDragged] = useState(false);
   const dropHandler = (e) => {
@@ -20,9 +54,9 @@ const ChooseFile = ({ kind, className, name, file, setFile, lines, linesAreSame,
   const fileSelectOnChange = (e) => setFile(e.target.files[0]);
 
   return (
-    <div {...other}>
+    <div onFocus={() => uploadRef.current.click()} {...other}>
       <div
-        className="uk-flex uk-flex-stretch"
+        className="uk-flex uk-flex-stretch uk-box-shadow-hover-medium"
         onDragOver={(e) => {
           setIsDragged(true);
           e.preventDefault();
@@ -35,14 +69,14 @@ const ChooseFile = ({ kind, className, name, file, setFile, lines, linesAreSame,
         <input
           className="uk-textarea"
           type="text"
-          value={file ? file.name : ""}
+          value={fileName}
           placeholder={"Upload file with " + kind}
           readOnly
           style={{ borderColor: "lightgrey" }}
         />
         {lines !== null && (
           <span
-            className={`uk-flex uk-flex-middle`}
+            className="uk-flex uk-flex-middle"
             style={{
               ...(linesAreSame === null
                 ? { backgroundColor: "#f8f8f8" }
@@ -56,7 +90,7 @@ const ChooseFile = ({ kind, className, name, file, setFile, lines, linesAreSame,
               },
             }}
           >
-            {`${lines} lines`}
+            {`${lines.length} lines`}
           </span>
         )}
         <input
@@ -70,4 +104,4 @@ const ChooseFile = ({ kind, className, name, file, setFile, lines, linesAreSame,
   );
 };
 
-export { ChooseFile };
+export { ChooseFile, useFile, sameLength };

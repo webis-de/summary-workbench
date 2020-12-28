@@ -47,9 +47,11 @@ const SavedInfo = ({ name, scoreInfo, deleteCalculation }) => {
       <ul id={toggleId} className="uk-switcher">
         <li>{hasScores ? <ScoreTable scoreInfo={scoreInfo} /> : "no scores were computed"}</li>
         <li>
-          <Loading isLoading={isLoading}>
-            {comparisons !== null && <CompareTable comparisons={comparisons} />}
-          </Loading>
+          {isLoading ? (
+            <Loading />
+          ) : (
+            <>{comparisons !== null && <CompareTable comparisons={comparisons} />}</>
+          )}
         </li>
       </ul>
     </div>

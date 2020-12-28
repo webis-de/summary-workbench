@@ -4,11 +4,13 @@ import { Link, Redirect, Route, Router, Switch, useLocation } from "react-router
 import { About } from "./components/About";
 import { Evaluate } from "./components/Evaluate";
 import { Summarize } from "./components/Summarize";
+import { Visualize } from "./components/Visualize";
 import history from "./history";
 
 const routeMap = [
   ["/summarize", "Summarize", Summarize],
   ["/evaluate", "Evaluate", Evaluate],
+  ["/visualize", "Visualize", Visualize],
   ["/about", "About", About],
 ];
 
@@ -19,30 +21,16 @@ const App = () => (
 );
 
 const Content = ({ routes }) => {
-  const base = `${window.location.protocol}//${window.location.hostname}`;
-  const summaryViewerUrl = new URL(
-    process.env.REACT_APP_DEVELOP
-      ? `${base}:4000/`
-      : `${base}:${window.location.port}/summary_viewer/`
-  );
   const location = useLocation();
   return (
     <>
       <div className="uk-background-secondary global-nav" data-uk-sticky>
         <nav
           className="uk-navbar-container uk-navbar-transparent uk-container uk-light"
-          data-uk-navbar="mode: click">
+          data-uk-navbar="mode: click"
+        >
           <div className="uk-navbar-item uk-logo">
             <a href="/">Webis Summarization</a>
-          </div>
-          <div className="uk-navbar-center">
-            <ul className="uk-navbar-nav">
-              <li>
-                <a href={summaryViewerUrl} target="_blank" rel="noreferrer">
-                  Summary Viewer
-                </a>
-              </li>
-            </ul>
           </div>
           <div className="uk-navbar-right">
             <ul className="uk-navbar-nav">

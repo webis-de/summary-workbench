@@ -21,9 +21,8 @@ const Evaluate = () => {
   return (
     <div className="uk-container uk-container-expand uk-margin-medium-top uk-margin-large-top@l ">
       <SettingsProvider>
-        <div />
         <div className="uk-flex uk-flex-between">
-          <div style={{ flexBasis: "60%" }}>
+          <div style={{ flexBasis: "60%", maxWidth: "60%" }}>
             <Section
               title={
                 <div className="card-title uk-flex">

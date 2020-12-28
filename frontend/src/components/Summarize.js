@@ -2,7 +2,6 @@ import isURL from "is-url";
 import React, { useReducer, useRef, useState } from "react";
 import { FaBars, FaThumbsDown, FaThumbsUp } from "react-icons/fa";
 import { CSSTransition } from "react-transition-group";
-import { message } from "../utils/message";
 
 import { feedbackRequest, summarizeRequest, summarizers, summarizersDict } from "../api";
 import { markup as genMarkup } from "../utils/fragcolors";

@@ -1,15 +1,5 @@
 import React from "react";
 
-const Loading = ({ isLoading, children }) => {
-  return (
-    <>
-      {isLoading ? (
-        <div data-uk-spinner/>
-      ) : (
-        <>{children}</>
-      )}
-    </>
-  );
-};
+const Loading = () => <div data-uk-spinner />;
 
 export { Loading };
