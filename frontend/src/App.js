@@ -4,13 +4,13 @@ import { Link, Redirect, Route, Router, Switch, useLocation } from "react-router
 import { About } from "./components/About";
 import { Evaluate } from "./components/Evaluate";
 import { Summarize } from "./components/Summarize";
-import { Visualize } from "./components/Visualize";
+import { VisualizationOverview } from "./components/Visualize";
 import history from "./history";
 
 const routeMap = [
   ["/summarize", "Summarize", Summarize],
   ["/evaluate", "Evaluate", Evaluate],
-  ["/visualize", "Visualize", Visualize],
+  ["/visualize", "Visualize", VisualizationOverview],
   ["/about", "About", About],
 ];
 

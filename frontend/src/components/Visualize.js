@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useReducer, useState } from "react";
 import { FaInfoCircle, FaTrash } from "react-icons/fa";
 import {
   MdSentimentDissatisfied,
@@ -10,10 +10,13 @@ import {
 
 import { useKeycode } from "../hooks/keycode";
 import { useList } from "../hooks/list";
+import { usePagination } from "../hooks/pagination";
 import { Button } from "./utils/Button";
 import { ChooseFile, sameLength, useFile } from "./utils/ChooseFile";
 import { DeleteButton } from "./utils/DeleteButton";
 import { Modal } from "./utils/Modal";
+import { Pagination } from "./utils/Pagination.js";
+import { Section } from "./utils/Section";
 
 const ModelModal = ({ isOpen, setIsOpen, models, addModel, otherLines }) => {
   const [name, setName] = useState("");
@@ -124,10 +127,11 @@ const AnnotationDesigner = ({ type, options, addOption, removeOption, alterOptio
     return (
       <div className="uk-margin-top">
         <Button onClick={() => addOption("")}>Add Option</Button>
-        {Object.entries(options).map(([key]) => (
+        {Object.entries(options).map(([key, option]) => (
           <div key={key} className="uk-flex uk-margin-top">
             <input
               className="uk-input"
+              value={option}
               onChange={(e) => alterOption(key, e.target.value)}
               placeholder="option value"
             />
@@ -205,28 +209,27 @@ const getAnnotation = (type, options) => {
 const Annotation = ({ question, type, options }) => {
   return (
     <>
-      <div
+      <fieldset
         style={{
           whiteSpace: "pre-wrap",
           minHeight: "1.25em",
           lineHeight: "1.25",
           marginBottom: "10px",
+          borderRadius: "3px",
         }}
       >
-        {question}
-      </div>
-      <div className="uk-flex uk-flex-center">{getAnnotation(type, options)}</div>
+        <legend>{question}</legend>
+        <div className="uk-flex uk-flex-center">{getAnnotation(type, options)}</div>
+      </fieldset>
     </>
   );
 };
+
 const AnnotationPreview = ({ question, type, options }) => (
-  <fieldset
-    className="uk-margin-top uk-padding-small"
-    style={{ border: "1px solid", borderRadius: "3px" }}
-  >
-    <legend>Preview</legend>
+  <div>
+    <h5>Preview</h5>
     <Annotation question={question} type={type} options={options} />
-  </fieldset>
+  </div>
 );
 
 const answerTypes = ["short text", "likert scale", "checkboxes", "radio buttons"];
@@ -293,6 +296,7 @@ const AnnotationModal = ({ isOpen, setIsOpen, addAnnotation }) => {
             removeOption={removeOption}
             alterOption={alterOption}
           />
+          <div className="uk-margin-top" />
           <AnnotationPreview question={question} type={type} options={options} />
         </>
       )}
@@ -398,7 +402,7 @@ const AnnotationTable = ({ annotations, removeAnnotation }) => (
   </div>
 );
 
-const Visualize = () => {
+const VisualizationCreator = ({ toggleOverview, addVisualization }) => {
   const [modelModalIsOpen, setModelModalOpen] = useState(false);
   const [annotationModalIsOpen, setAnnotationModalOpen] = useState(false);
 
@@ -407,14 +411,24 @@ const Visualize = () => {
 
   const [models, addModel, removeModel] = useList();
   const allLines = [refFileLines, docFileLines, ...Object.values(models).map(({ lines }) => lines)];
-  const atLeastOneModel = Boolean(Object.keys(models).length)
+  const atLeastOneModel = Boolean(Object.keys(models).length);
   const linesAreSame = sameLength(allLines);
   const [annotations, addAnnotation, removeAnnotation] = useList();
 
+  let tooltip = null;
+  if (!atLeastOneModel) {
+    tooltip = "title: add at least one model; pos: right;";
+  } else if (!linesAreSame) {
+    tooltip = "title: not all lines are same; pos: right;";
+  }
+
   return (
-    <div className="uk-container">
+    <>
       <div className="uk-flex">
         <div className="uk-flex-column" style={{ display: "inline-flex", minWidth: "300px" }}>
+          <Button className="uk-margin-small" onClick={() => toggleOverview()} variant="primary">
+            Abort
+          </Button>
           <ChooseFile
             className="uk-margin-small"
             kind="Documents"
@@ -450,16 +464,23 @@ const Visualize = () => {
                 Add Annotation
               </button>
 
-              <button
-                className="uk-button uk-button-primary uk-margin-small"
-                onClick={() => console.log("save")}
+              <Button
+                className="uk-margin-small"
+                variant="primary"
+                onClick={() => {
+                  addVisualization({
+                    documents: { lines: docFileLines, name: docFileName },
+                    references: { lines: refFileLines, name: refFileName },
+                    models: Object.values(models),
+                    annotations: Object.values(annotations),
+                  });
+                  toggleOverview();
+                }}
                 disabled={!atLeastOneModel || !linesAreSame}
-                data-uk-tooltip={
-                  atLeastOneModel ? (linesAreSame ? null : "title: not all lines are same; pos: right;") : "title: add at least one model; pos: right;"
-                }
+                data-uk-tooltip={tooltip}
               >
                 Save
-              </button>
+              </Button>
             </>
           )}
         </div>
@@ -467,11 +488,7 @@ const Visualize = () => {
         <>
           <div style={{ width: "20px" }} />
           <div className="uk-flex-column" style={{ flexGrow: 1 }}>
-            <ul
-              className="uk-tab dark-tab uk-margin"
-              data-uk-tab
-              uk-tab="connect: #visualization-options;"
-            >
+            <ul className="uk-tab uk-margin" data-uk-tab uk-tab="connect: #visualization-options;">
               <li>
                 <a href="/#">Models</a>
               </li>
@@ -507,8 +524,181 @@ const Visualize = () => {
           addAnnotation={addAnnotation}
         />
       )}
+    </>
+  );
+};
+
+const Annotations = ({ annotations }) => {
+  return (
+    <>
+      {annotations.map(({ question, type, options }) => (
+        <Annotation question={question} type={type} options={options} />
+      ))}
+    </>
+  );
+};
+
+const Visualize = ({ visualization, clear }) => {
+  const { documents, references, models, annotations } = visualization;
+  const name = `${documents.name}-${references.name}`;
+  const [page, setPage, size, , numItems] = usePagination(documents.lines.length, 1, 1);
+  const linesIndex = page - 1;
+  return (
+    <div>
+      <div className="uk-flex uk-flex-middle">
+        <Button onClick={clear} variant="primary" style={{ marginRight: "10vw" }}>
+          Abort
+        </Button>
+        <Pagination
+          activePage={page}
+          size={size}
+          numItems={numItems}
+          pageRange={5}
+          onChange={setPage}
+        />
+      </div>
+      <h3 style={{ marginTop: "10px" }}>{name}</h3>
+      <div className="uk-flex uk-flex-top">
+        <div style={{ flexBasis: "50%" }}>
+          <Section
+            title={
+              <div>
+                <p className="card-title">Document</p>
+              </div>
+            }
+          >
+            {[documents.lines[linesIndex]]}
+          </Section>
+          <h3 className="uk-margin-top">Annotations</h3>
+          <Annotations annotations={annotations} />
+        </div>
+        <div style={{ margin: "10px" }} />
+        <div style={{ flexBasis: "50%" }}>
+          {models.map(({ name, lines }) => (
+            <Section
+              style={{ flexBasis: "50%" }}
+              title={
+                <div>
+                  <p className="card-title">{name}</p>
+                </div>
+              }
+            >
+              {[lines[linesIndex]]}
+            </Section>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };
 
-export { Visualize };
+const VisualizationOverview = () => {
+  const [visualizations, addVisualization, removeVisualization] = useList();
+  const [showOverview, toggleShowOverview] = useReducer((e) => !e, true);
+  const [visualize, setVisualize] = useState(null);
+  console.log(visualize);
+  useEffect(
+    () =>
+      addVisualization({
+        documents: { lines: ["hello world"], name: "test" },
+        references: { lines: ["hello world"], name: "test" },
+        models: [{ name: "test2", lines: ["hello"] }],
+        annotations: [{ question: "hello", type: "likert scale" }],
+      }),
+    []
+  );
+  return (
+    <div className="uk-container">
+      {visualize ? (
+        <Visualize visualization={visualize} clear={() => setVisualize(null)} />
+      ) : showOverview ? (
+        <div className="uk-flex uk-flex-top">
+          <Button onClick={() => toggleShowOverview()} variant="primary">
+            Create Visualization
+          </Button>
+          <div style={{ width: "20px" }} />
+          <ul
+            data-uk-accordion="toggle: > * > .uk-accordion-title;"
+            style={{ margin: 0, flexGrow: 1 }}
+          >
+            {Object.entries(visualizations).map(([key, visualization]) => {
+              const { documents, references, models, annotations } = visualization;
+              return (
+                <li
+                  key={key}
+                  style={{
+                    border: "1px",
+                    borderColor: "grey",
+                    borderStyle: "solid",
+                  }}
+                >
+                  <div className="uk-flex uk-flex-middle">
+                    <a
+                      className="uk-accordion-title uk-flex uk-flex-between uk-flex-middle uk-text-small uk-width-expand uk-padding-small"
+                      href="/#"
+                    >
+                      <span
+                        style={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {`${documents.name}-${references.name}`}
+                      </span>
+                      <div>
+                        <span className="uk-badge uk-padding-small">{documents.lines.length}</span>
+                      </div>
+                    </a>
+                    <div className="uk-margin-right uk-flex" style={{ marginLeft: "10%" }}>
+                      <Button
+                        variant="primary"
+                        size="small"
+                        className="uk-margin-right"
+                        onClick={() => setVisualize(visualization)}
+                      >
+                        visualize
+                      </Button>
+                      <DeleteButton onClick={() => removeVisualization(key)} className="" />
+                    </div>
+                  </div>
+                  <div className="uk-padding-small uk-accordion-content" style={{ margin: 0 }}>
+                    <div className="uk-flex-column" style={{ flexGrow: 1 }}>
+                      <ul
+                        className="uk-tab uk-margin"
+                        data-uk-tab
+                        uk-tab="connect: #visualization-options;"
+                      >
+                        <li>
+                          <a href="/#">Models</a>
+                        </li>
+                        <li>
+                          <a href="/#">Annotations</a>
+                        </li>
+                      </ul>
+                      <ul id="visualization-options" className="uk-switcher">
+                        <li>
+                          <ModelTable models={models} linesAreSame removeModel={() => {}} />
+                        </li>
+                        <li>
+                          <AnnotationTable annotations={annotations} removeAnnotation={() => {}} />
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ) : (
+        <VisualizationCreator
+          toggleOverview={toggleShowOverview}
+          addVisualization={addVisualization}
+        />
+      )}
+    </div>
+  );
+};
+
+export { VisualizationOverview };
