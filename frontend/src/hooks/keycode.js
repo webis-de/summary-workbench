@@ -6,7 +6,7 @@ const useKeycode = (keycodes, callback, condition = true) => {
       const listener = (e) => {
         if (keycodes.includes(e.keyCode)) {
           e.preventDefault();
-          callback();
+          callback(e.keyCode);
         }
       };
       window.addEventListener("keydown", listener);

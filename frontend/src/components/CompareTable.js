@@ -2,7 +2,7 @@ import React from "react";
 
 import { usePagination } from "../hooks/pagination";
 import { Markup } from "./Markup";
-import { Pagination } from "./utils/Pagination";
+import { Pagination } from "./utils/Pagination.js";
 
 const ComparisonDisplay = ({ page, size, comparisons }) => {
   return (

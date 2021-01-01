@@ -14,7 +14,6 @@ const useList = (initialList = []) => {
     delete newElements[elementId];
     setElements(newElements);
   };
-  console.log(id.current)
   const alterElement = (elementId, value) => {
     const newElements = { ...elements };
     newElements[elementId] = value;

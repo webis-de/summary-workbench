@@ -5,7 +5,7 @@ import {displayMessage} from "../utils/message"
 import { saveCalculationRequest } from "../api";
 import { ResultInfo } from "./ResultInfo";
 import { Button } from "./utils/Button";
-import { Section } from "./utils/Section";
+import { Card } from "./utils/Card";
 
 const UploadButton = (props) => (
   <Button variant="primary" {...props}>
@@ -40,7 +40,7 @@ const Result = ({ className, reloadSaved, calculateResult, setCalculateResult, r
 
   if (calculateResult !== null) {
     return (
-      <Section
+      <Card
         title={
           <div>
             <p className="card-title">
@@ -63,7 +63,7 @@ const Result = ({ className, reloadSaved, calculateResult, setCalculateResult, r
           <UploadButton onClick={upload} />
         </div>
         <ResultInfo scoreInfo={calculateResult.scores} comparisons={calculateResult.comparisons} />
-      </Section>
+      </Card>
     );
   }
   return null;

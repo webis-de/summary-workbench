@@ -7,7 +7,7 @@ import { Result } from "./Result";
 import { Saved } from "./Saved";
 import { Settings } from "./Settings";
 import { Upload } from "./Upload";
-import { Section } from "./utils/Section";
+import { Card } from "./utils/Card";
 
 const Evaluate = () => {
   const [savedKey, reloadSaved] = useReducer((oldKey) => !oldKey, true);
@@ -23,7 +23,7 @@ const Evaluate = () => {
       <SettingsProvider>
         <div className="uk-flex uk-flex-between">
           <div style={{ flexBasis: "60%", maxWidth: "60%" }}>
-            <Section
+            <Card
               title={
                 <div className="card-title uk-flex">
                   <FaRegFile />
@@ -51,7 +51,7 @@ const Evaluate = () => {
                   <OneHypRef className="uk-margin" />
                 </li>
               </ul>
-            </Section>
+            </Card>
           </div>
           <div style={{ minWidth: "10px" }} />
           <div style={{ flexBasis: "37%" }}>

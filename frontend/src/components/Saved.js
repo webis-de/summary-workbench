@@ -1,16 +1,20 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 
-import {
-  deleteCalculationRequest,
-  getSavedCalculationsRequest,
-} from "../api";
-import { SettingsContext } from "../contexts/SettingsContext";
+import { deleteCalculationRequest, getSavedCalculationsRequest } from "../api";
+import { settings } from "../config";
+import { displayMessage } from "../utils/message";
 import { SavedInfo } from "./SavedInfo";
-import { MetricBadges } from "./utils/MetricBadges";
+import { Accordion, AccordionItem } from "./utils/Accordion";
+
+const allMetrics = Object.entries(settings).map(([metric, { readable }]) => [metric, readable]);
+
+const toMetricBadges = (scores) => {
+  const computedMetrics = Object.keys(scores);
+  return allMetrics.map(([metric, readable]) => [readable, computedMetrics.includes(metric)]);
+};
 
 const Saved = ({ className, reloadSaved }) => {
   const [calculations, setCalculations] = useState([]);
-  const { settings } = useContext(SettingsContext);
 
   useEffect(() => {
     getSavedCalculationsRequest().then((data) => setCalculations(data));
@@ -19,79 +23,25 @@ const Saved = ({ className, reloadSaved }) => {
   const deleteCalculation = (name) => {
     deleteCalculationRequest(name)
       .then(() => reloadSaved())
-      .catch((e) => alert(e));
+      .catch((e) => displayMessage(e));
   };
-  const numberCalculations = useMemo(() => calculations.length, [calculations]);
-  const allMetrics = useMemo(
-    () =>
-      Object.entries(settings).map(([metric, { readable }]) => [
-        metric,
-        readable,
-      ]),
-    [settings]
-  );
 
-  if (numberCalculations > 0) {
+  if (calculations.length > 0) {
     return (
-      <ul
-        className="uk-padding-small"
-        data-uk-accordion
-        style={{ border: "1px", borderColor: "grey", borderStyle: "solid" }}
-      >
-        <li className="uk-open">
-          <a className="uk-accordion-title" href="/#">
-            Saved Calculations
-          </a>
-          <div className="uk-accordion-content">
-            <ul
-              data-uk-accordion
-            >
-              {calculations.map(({ name, scores }, index) => (
-                <li
-                  className="uk-padding-small"
-                  key={name}
-                  style={{
-                    border: "1px",
-                    borderColor: "grey",
-                    borderStyle: "solid",
-                  }}
-                >
-                  <a
-                    title={name}
-                    className="uk-accordion-title uk-flex uk-flex-between uk-text-small uk-width-expand"
-                    href="/#"
-                  >
-                    <span
-                      style={{
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      {name}
-                    </span>
-                    <MetricBadges
-                      allMetrics={allMetrics}
-                      computedMetrics={Object.keys(scores)}
-                    />
-                  </a>
-                  <div className="uk-accordion-content">
-                    <SavedInfo
-                      name={name}
-                      scoreInfo={scores}
-                      deleteCalculation={deleteCalculation}
-                    />
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </li>
-      </ul>
+      <Accordion className={className}>
+        <AccordionItem text="Saved Calculations" open>
+          <Accordion>
+            {calculations.map(({ name, scores }) => (
+              <AccordionItem key={name} text={name} badges={toMetricBadges(scores)}>
+                <SavedInfo name={name} scoreInfo={scores} deleteCalculation={deleteCalculation} />
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </AccordionItem>
+      </Accordion>
     );
-  } else {
-    return null;
   }
+  return null;
 };
 
 export { Saved };

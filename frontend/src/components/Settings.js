@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { FaCogs } from "react-icons/fa";
 
 import { SettingsContext } from "../contexts/SettingsContext";
-import { Section } from "./utils/Section";
+import { Card } from "./utils/Card";
 import { SettingCheckboxes } from "./utils/SettingCheckboxes";
 
 const filterSettingsType = (settings, type) =>
@@ -15,7 +15,7 @@ const Settings = () => {
   const semanticSettings = filterSettingsType(settings, "semantic");
 
   return (
-    <Section
+    <Card
       title={
         <div>
           <p className="card-title">
@@ -34,7 +34,7 @@ const Settings = () => {
           <SettingCheckboxes settings={semanticSettings} toggleSetting={toggleSetting} />
         </div>
       </div>
-    </Section>
+    </Card>
   );
 };
 

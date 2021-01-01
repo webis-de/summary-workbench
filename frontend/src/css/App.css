@@ -157,7 +157,11 @@ textarea::placeholder {
 }
 
 .margin-right:not(:last-child) {
-  margin-right: 20px
+  margin-right: 20px;
+}
+
+.margin-left-10percent:not(:empty) {
+    margin-left: 10%;
 }
 
 .summarizer-toggle-view-enter-done {
