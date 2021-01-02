@@ -8,7 +8,6 @@ const metricURLs = {
   SIMPLE_METRICS_URL: process.env["SIMPLE_METRICS_URL"],
 };
 
-
 const summarizerURLs = {
   BERTSUM_URL: process.env["BERTSUM_URL"],
   T5_URL: process.env["T5_URL"],
@@ -20,7 +19,23 @@ const summarizerURLs = {
   SIMPLE_SUMMARIZERS_URL: process.env["SIMPLE_SUMMARIZERS_URL"],
 };
 
-const PORT = process.env["PORT"] || 5000
-const MONGODB_HOST = process.env["MONGODB_HOST"]
+const PORT = process.env["PORT"] || 5000;
+const DEBUG = process.env["DEBUG"];
+let ACCESS_TOKEN_SECRET = process.env["ACCESS_TOKEN_SECRET"];
+let REFRESH_TOKEN_SECRET = process.env["REFRESH_TOKEN_SECRET"];
 
-module.exports = { metricURLs, summarizerURLs, MONGODB_HOST, PORT};
+if (!ACCESS_TOKEN_SECRET && !REFRESH_TOKEN_SECRET) {
+  if (DEBUG) {
+    ACCESS_TOKEN_SECRET = "no_secret";
+    REFRESH_TOKEN_SECRET = "no_secret";
+  } else {
+    console.error(
+      'the "ACCESS_TOKEN_SECRET" and "REFRESH_TOKEN_SECRET" environment variables have to be set when not running in DEBUG mode'
+    );
+    process.exit(1);
+  }
+}
+
+const MONGODB_HOST = process.env["MONGODB_HOST"];
+
+module.exports = { metricURLs, summarizerURLs, MONGODB_HOST, PORT, ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET };

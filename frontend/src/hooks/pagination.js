@@ -1,4 +1,4 @@
-import { useEffect, useReducer } from "react";
+import { useReducer } from "react";
 
 const parseNumber = (number, defaultValue) => {
   if (typeof number === "string") {

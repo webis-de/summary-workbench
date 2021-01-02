@@ -1,9 +1,10 @@
 const express = require("express");
+const validateMiddleware = require("../middleware/validate");
+
 const { body, check, validationResult } = require("express-validator");
 const { spawn } = require("child_process");
 
-const {isURL} = require("validator");
-
+const { isURL } = require("validator");
 
 const Calculations = require("../models/calculations");
 const Feedbacks = require("../models/feedbacks");
@@ -13,26 +14,17 @@ const summarizeEvaluator = require("../summarizers");
 
 const router = express.Router();
 
+const download = (url) =>
+  new Promise((resolve, reject) => {
+    const p = spawn("python3", ["download_article.py", url]);
+    let text = "";
+    let errorText = "";
 
-const validateMiddleware = async (req, res, next) => {
-  try {
-    validationResult(req).throw();
-  } catch (err) {
-    return res.status(400).json({ errors: err.mapped() });
-  }
-  next();
-};
-
-const download = (url) => new Promise((resolve, reject) => {
-  const p = spawn("python3", ["download_article.py", url]);
-  let text = ""
-  let errorText = ""
-
-  p.stdout.on("data", (data) => text += data.toString())
-  p.stderr.on("data", (err) => errorText += err.toString())
-  p.on("exit", (e) => e ? reject(errorText) : resolve(text))
-  p.on("error", (e) => reject(e.message))
-})
+    p.stdout.on("data", (data) => (text += data.toString()));
+    p.stderr.on("data", (err) => (errorText += err.toString()));
+    p.on("exit", (e) => (e ? reject(errorText) : resolve(text)));
+    p.on("error", (e) => reject(e.message));
+  });
 
 const allIsIn = (validElements) => (list) =>
   list.every((el) => validElements.has(el));
@@ -76,7 +68,7 @@ const validateHypRefMiddleware = (req, res, next) => {
       .status(400)
       .json({ message: "hypdata and refdata have to be same size" });
   }
-  next();
+  return next();
 };
 
 router.post(
@@ -91,7 +83,7 @@ router.post(
         metrics: await metricEvaluator.evaluate(metrics, refdata, hypdata),
       });
     } catch (err) {
-      next(err);
+      return next(err);
     }
   }
 );
@@ -115,11 +107,15 @@ router.post(
   async (req, res, next) => {
     try {
       const { summarizers, text, ratio } = req.body;
-      const original = isURL(text) ? (await download(text)) : text;
-      const summaries = await summarizeEvaluator.summarize(summarizers, original, ratio)
-      return res.json({original, summaries});
+      const original = isURL(text) ? await download(text) : text;
+      const summaries = await summarizeEvaluator.summarize(
+        summarizers,
+        original,
+        ratio
+      );
+      return res.json({ original, summaries });
     } catch (err) {
-      next(err);
+      return next(err);
     }
   }
 );
@@ -151,7 +147,7 @@ router
     try {
       return res.json(await Calculations.allWithoutComparisons());
     } catch (err) {
-      next(err);
+      return next(err);
     }
   })
   .post(calculationsValidator, validateMiddleware, async (req, res, next) => {
@@ -159,11 +155,12 @@ router
       await Calculations.insert(req.body);
       return res.status(200).end();
     } catch (err) {
-      next(err);
+      return next(err);
     }
   });
 
-const successOr404 = (val, res) => (val ? res.json(val) : res.status(404).end());
+const successOr404 = (val, res) =>
+  val ? res.json(val) : res.status(404).end();
 const calculationValidator = [check("name").isString().notEmpty()];
 router
   .route("/calculation/:name")
@@ -171,15 +168,15 @@ router
     try {
       return successOr404(await Calculations.get(req.params.name), res);
     } catch (err) {
-      next(err);
+      return next(err);
     }
   })
   .delete(calculationValidator, validateMiddleware, async (req, res, next) => {
     try {
-      const val = await Calculations.delete(req.params.name)
+      const val = await Calculations.delete(req.params.name);
       return successOr404(val, res);
     } catch (err) {
-      next(err);
+      return next(err);
     }
   });
 
@@ -199,7 +196,7 @@ router.post(
       await Feedbacks.insert(req.body);
       return res.status(200).end();
     } catch (err) {
-      next(err);
+      return next(err);
     }
   }
 );

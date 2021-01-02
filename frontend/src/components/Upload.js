@@ -5,7 +5,6 @@ import { evaluateRequest } from "../api";
 import { SettingsContext } from "../contexts/SettingsContext";
 import { markup } from "../utils/fragcolors";
 import { displayMessage } from "../utils/message";
-import { readFile } from "../utils/readFile";
 import { Button } from "./utils/Button";
 import { ChooseFile, sameLength, useFile } from "./utils/ChooseFile";
 import { Loading } from "./utils/Loading";

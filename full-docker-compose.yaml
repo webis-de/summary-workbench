@@ -11,6 +11,7 @@ services:
       - ./backend/api/:/app
       - api_node_modules:/app/node_modules
     environment:
+      - DEBUG=true
       - MONGODB_HOST=mongodb://mongo/app
       - BERT_URL=http://bert:5000
       - BLEURT_URL=http://bleurt:5000

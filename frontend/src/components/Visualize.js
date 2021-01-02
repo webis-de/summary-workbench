@@ -439,7 +439,7 @@ const useMarkup = (doc, ref = null) => {
       setDocMarkup(null);
       setRefMarkup(null);
     }
-  }, [reference]);
+  }, [reference, doc]);
   return [docMarkup, refMarkup, refMarkup ? reference : null, toggleReference];
 };
 
@@ -551,7 +551,7 @@ const VisualizationOverview = () => {
         models: [{ name: "test2", lines: ["hello"] }],
         annotations: [{ question: "hello", type: "likert scale" }],
       }),
-    []
+    [addVisualization]
   );
 
   return (
