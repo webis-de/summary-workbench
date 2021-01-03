@@ -9,14 +9,11 @@ const userRouter = require("./routes/user");
 
 const app = express();
 
-const errorMiddleware = (err, req, res, next) => {
-  console.error(err);
-  return res.status(400).json({ error: err.message });
-};
+const errorMiddleware = (err, req, res, next) => res.status(400).json({ error: err.message });
 
 app.use(logger("dev"));
 app.use(cookieParser());
-app.use(cors());
+app.use(cors({origin: true, credentials: true}));
 app.use(helmet());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());

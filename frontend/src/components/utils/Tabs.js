@@ -1,10 +1,12 @@
 import React from "react";
 
-const TabHead = ({ tabs }) => (
+const TabHead = ({ tabs, setActiveTab }) => (
   <ul className="uk-tab" data-uk-tab="connect: + .uk-switcher;">
-    {tabs.map((tab) => (
+    {tabs.map((tab, i) => (
       <li key={tab}>
-        <a href="/#">{tab}</a>
+        <a href="/#" onClick={() => setActiveTab && setActiveTab(i)}>
+          {tab}
+        </a>
       </li>
     ))}
   </ul>

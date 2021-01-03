@@ -7,12 +7,12 @@ const UserSchema = new mongoose.Schema(
   {
     username: {
       type: String,
-      required: true,
+      required: [true, "username is required"],
       trim: true,
     },
     email: {
       type: String,
-      required: true,
+      required: [true, "email is required"],
       unique: true,
       lowercase: true,
       validate: mongooseValidator({
@@ -22,7 +22,8 @@ const UserSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
+      required: [true, "password is required"],
+      minLength: [7, "password has to have at least length 7"]
     },
   },
   { versionKey: false }

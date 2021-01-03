@@ -20,7 +20,7 @@ router.route("/register").post(async (req, res, next) => {
     const user = await User.createUser(req.body);
     return await user.sendNewTokens(res);
   } catch (err) {
-    return next(new Error("email is already taken"));
+    return next(Object.values(err.errors)[0]);
   }
 });
 

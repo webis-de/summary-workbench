@@ -543,16 +543,6 @@ const VisualizationOverview = () => {
   const [visualizations, addVisualization, removeVisualization] = useList();
   const [showOverview, toggleShowOverview] = useReducer((e) => !e, true);
   const [visualize, setVisualize] = useState(null);
-  useEffect(
-    () =>
-      addVisualization({
-        documents: { lines: ["hello world"], name: "test" },
-        references: { lines: ["hello world"], name: "test" },
-        models: [{ name: "test2", lines: ["hello"] }],
-        annotations: [{ question: "hello", type: "likert scale" }],
-      }),
-    [addVisualization]
-  );
 
   return (
     <div className="uk-container">
