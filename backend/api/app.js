@@ -9,7 +9,7 @@ const userRouter = require("./routes/user");
 
 const app = express();
 
-const errorMiddleware = (err, req, res, next) => {console.log(err); res.status(400).json({ error: err.message })};
+const errorMiddleware = (err, req, res, next) => res.status(400).json({ error: err.message });
 
 app.use(logger("dev"));
 app.use(helmet());

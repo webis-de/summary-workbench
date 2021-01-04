@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useState } from "react";
+import { useCallback, useEffect, useReducer, useRef } from "react";
 
 import { post } from "../request";
 
@@ -10,41 +10,57 @@ const useUser = () => {
     setLoginStatus(newState);
     return newState;
   }, getLoginStatus());
-  const [accessToken, setAccessToken] = useState(null);
-  const updateAccessToken = ({ accesstoken }) => {
-    setAccessToken(accesstoken || null);
-    if (accesstoken) setLoggedin(true);
-    else setLoggedin(false);
-    return accesstoken;
-  };
-  const clearAccessToken = () => updateAccessToken(null);
-  useEffect(() => post("/api/user/refresh").then(updateAccessToken).catch(clearAccessToken), []);
-  const register = (json) => post("/api/user/register", json).then(updateAccessToken);
-  const login = (json) => post("/api/user/login", json).then(updateAccessToken);
-  const logout = () => post("/api/user/logout").then(clearAccessToken);
-  const refresh = () => post("/api/user/refresh").then(updateAccessToken);
-  const auth = (func) => async (...args) => {
-    let token = accessToken;
-    if (!token) {
-      token = await refresh();
-    }
-    if (token) {
+  const accessToken = useRef(null);
+  const refreshRequest = useRef(null);
+  const updateAccessToken = useCallback(
+    ({ accesstoken }) => {
+      accessToken.current = accesstoken || null;
+      if (accesstoken) setLoggedin(true);
+      else setLoggedin(false);
+      return accesstoken;
+    },
+    [setLoggedin]
+  );
+  const clearAccessToken = useCallback(() => updateAccessToken({ accesstoken: null }), [
+    updateAccessToken,
+  ]);
+  const register = useCallback((json) => post("/api/user/register", json).then(updateAccessToken), [
+    updateAccessToken,
+  ]);
+  const login = useCallback((json) => post("/api/user/login", json).then(updateAccessToken), [
+    updateAccessToken,
+  ]);
+  const logout = useCallback(() => post("/api/user/logout").then(clearAccessToken), [
+    clearAccessToken,
+  ]);
+  const refresh = useCallback(() => {
+    refreshRequest.current = post("/api/user/refresh")
+      .then(updateAccessToken)
+      .catch(clearAccessToken);
+  }, [updateAccessToken, clearAccessToken]);
+  const getToken = useCallback(async () => {
+    if (!refreshRequest.current) refresh();
+    await refreshRequest.current;
+    if (accessToken.current === null) throw new Error("not logged in");
+    return accessToken.current;
+  }, [refresh]);
+  useEffect(getToken, [getToken]);
+  const auth = useCallback(
+    (func) => async (...args) => {
+      let token = await getToken();
       try {
-        return await func(...args, token);
+        return func(...args, token);
       } catch (error) {
         if (error.type && error.type === "INVALID_TOKEN") {
-          token = await refresh();
-          if (token) {
-            return func(...args, token);
-          } else {
-            throw new Error("not logged in");
-          }
+          refresh();
+          token = await getToken();
+          return func(...args, token);
         }
         throw error;
       }
-    }
-    throw new Error("not logged in");
-  };
+    },
+    [getToken, refresh]
+  );
 
   return { loggedin, register, login, logout, auth };
 };

@@ -591,7 +591,7 @@ const Visualize = ({ visualization, clear }) => {
       updateAnnotationRequest(_id, { content: annotation }, auth).catch(({ error }) =>
         displayMessage(error)
       ),
-    [annotation]
+    [annotation, _id, auth]
   );
   const [page, setPage, size, , numItems] = usePagination(length, 1, 1);
   const linesIndex = page - 1;
