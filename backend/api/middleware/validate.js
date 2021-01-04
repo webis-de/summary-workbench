@@ -1,3 +1,5 @@
+const { validationResult } = require("express-validator");
+
 const validateMiddleware = async (req, res, next) => {
   try {
     validationResult(req).throw();

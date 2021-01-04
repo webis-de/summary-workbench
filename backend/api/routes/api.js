@@ -3,11 +3,15 @@ const validateMiddleware = require("../middleware/validate");
 
 const { body, check, validationResult } = require("express-validator");
 const { spawn } = require("child_process");
+const auth = require("../middleware/auth");
 
 const { isURL } = require("validator");
 
 const Calculations = require("../models/calculations");
 const Feedbacks = require("../models/feedbacks");
+const Visualization = require("../models/visualization");
+const User = require("../models/user");
+const Annotation = require("../models/annotation");
 
 const metricEvaluator = require("../metrics");
 const summarizeEvaluator = require("../summarizers");
@@ -200,5 +204,62 @@ router.post(
     }
   }
 );
+
+router.get("/visualizations", auth, async (req, res, next) => {
+  try {
+    const visualizations = await req.user.getVisualizations();
+    return res.status(200).json({ visualizations });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+const visualizationRouter = express.Router()
+visualizationRouter.use(auth)
+router.use("/visualization", visualizationRouter)
+
+visualizationRouter.route("").post(async (req, res, next) => {
+  try {
+    await req.user.addVisualization(req.body);
+    return res.status(200).end();
+  } catch (err) {
+    return next(err);
+  }
+});
+
+visualizationRouter.route("/:id").delete(async (req, res, next) => {
+  try {
+    await req.user.deleteVisualization(req.params.id);
+    return res.status(200).end();
+  } catch (err) {
+    return next(err);
+  }
+});
+
+visualizationRouter
+  .route("/:id/annotation")
+  .get(async (req, res, next) => {
+    try {
+      const visualization = await req.user.getVisualization(req.params.id);
+      const annotation = await visualization.getAnnotation(req.user);
+      const visDoc = visualization._doc
+      if (annotation){
+        visDoc.annotation = annotation
+        return res.status(200).json(visDoc);
+      }
+      throw new Error("annotation not found");
+    } catch (err) {
+      return next(err);
+    }
+  })
+
+router.post("/annotation/:id", auth, async (req, res, next) => {
+    try {
+      await Annotation.updateContent(req.params.id, req.user, req.body.content);
+      return res.status(200).end();
+    } catch (err) {
+      return next(err);
+    }
+  });
 
 module.exports = router;

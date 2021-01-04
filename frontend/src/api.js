@@ -57,3 +57,24 @@ const feedbackRequest = (summarizer, summary, reference, url, feedback) => {
 };
 
 export { feedbackRequest };
+
+const saveVisualizationRequest = (visualization, auth) =>
+  auth(post)("/api/visualization", visualization);
+
+export { saveVisualizationRequest };
+
+const getVisualizationsRequest = (auth) => auth(get)("/api/visualizations");
+
+export { getVisualizationsRequest };
+
+const deleteVisualizationRequest = (id, auth) => auth(del)(`/api/visualization/${id}`);
+
+export { deleteVisualizationRequest };
+
+const getAnnotationRequest = (id, auth) => auth(get)(`/api/visualization/${id}/annotation`);
+
+export { getAnnotationRequest };
+
+const updateAnnotationRequest = (id, json, auth) => auth(post)(`/api/annotation/${id}`, json);
+
+export { updateAnnotationRequest };

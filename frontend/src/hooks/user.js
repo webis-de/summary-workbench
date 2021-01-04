@@ -12,29 +12,41 @@ const useUser = () => {
   }, getLoginStatus());
   const [accessToken, setAccessToken] = useState(null);
   const updateAccessToken = ({ accesstoken }) => {
-    setAccessToken(accesstoken);
-    setLoggedin(true);
+    setAccessToken(accesstoken || null);
+    if (accesstoken) setLoggedin(true);
+    else setLoggedin(false);
     return accesstoken;
   };
-  const clearAccessToken = () => {
-    setAccessToken(null);
-    setLoggedin(false);
-  };
+  const clearAccessToken = () => updateAccessToken(null);
   useEffect(() => post("/api/user/refresh").then(updateAccessToken).catch(clearAccessToken), []);
   const register = (json) => post("/api/user/register", json).then(updateAccessToken);
   const login = (json) => post("/api/user/login", json).then(updateAccessToken);
   const logout = () => post("/api/user/logout").then(clearAccessToken);
   const refresh = () => post("/api/user/refresh").then(updateAccessToken);
-  const authPost = async (path, json) => {
-    try {
-      return await post(path, json, accessToken);
-    } catch (error) {
-      const token = await refresh();
-      return post(path, json, token);
+  const auth = (func) => async (...args) => {
+    let token = accessToken;
+    if (!token) {
+      token = await refresh();
     }
+    if (token) {
+      try {
+        return await func(...args, token);
+      } catch (error) {
+        if (error.type && error.type === "INVALID_TOKEN") {
+          token = await refresh();
+          if (token) {
+            return func(...args, token);
+          } else {
+            throw new Error("not logged in");
+          }
+        }
+        throw error;
+      }
+    }
+    throw new Error("not logged in");
   };
 
-  return { loggedin, register, login, logout, authPost };
+  return { loggedin, register, login, logout, auth };
 };
 
 export { useUser };

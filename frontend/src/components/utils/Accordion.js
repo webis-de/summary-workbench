@@ -20,6 +20,7 @@ const AccordionItem = ({ children, text, buttons, remove, badges = [], open = fa
         <a
           className="uk-accordion-title uk-flex uk-flex-between uk-flex-middle uk-text-small uk-width-expand uk-padding-small"
           href="/#"
+          style={buttons || remove ? {paddingRight: "10%"} : null}
         >
           <span
             style={{
@@ -40,7 +41,7 @@ const AccordionItem = ({ children, text, buttons, remove, badges = [], open = fa
             </div>
           )}
         </a>
-        <div className="margin-left-10percent">
+        <div>
           {buttons &&
             buttons.map(([buttonsText, buttonsOnClick], i) => (
               <Button

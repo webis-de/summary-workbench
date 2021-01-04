@@ -7,11 +7,21 @@ const createAccessToken = (userID) =>
 const createRefreshToken = (userID) =>
   jwt.sign({ userID }, REFRESH_TOKEN_SECRET, { expiresIn: "7d" });
 
-const verifyAccessToken = (token) =>
-  jwt.verify(token, ACCESS_TOKEN_SECRET).userID;
+const verifyAccessToken = (token) => {
+  try {
+    return jwt.verify(token, ACCESS_TOKEN_SECRET).userID;
+  } catch (error) {
+    throw { error: "invalid token", type: "INVALID_TOKEN" };
+  }
+};
 
-const verifyRefreshToken = (token) =>
-  jwt.verify(token, REFRESH_TOKEN_SECRET).userID;
+const verifyRefreshToken = (token) => {
+  try {
+    return jwt.verify(token, REFRESH_TOKEN_SECRET).userID;
+  } catch (error) {
+    throw { error: "invalid token", type: "INVALID_TOKEN" };
+  }
+};
 
 const sendAccessToken = (res, accesstoken) => res.send({ accesstoken });
 

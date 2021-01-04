@@ -1,5 +1,26 @@
 import React from "react";
 
-const Loading = () => <div data-uk-spinner />;
+const Loading = (props) => (
+  <span data-uk-spinner {...props} />
+);
 
-export { Loading };
+const CenterLoading  = () => (
+  <div style={{
+      flexGrow: 1,
+    }}
+  ><Loading className="uk-flex uk-flex-center"
+  /></div>
+);
+
+const AbsoluteLoading  = () => (
+  <Loading
+    style={{
+      position: "absolute",
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%, -50%)",
+    }}
+  />
+);
+
+export { Loading, CenterLoading, AbsoluteLoading };

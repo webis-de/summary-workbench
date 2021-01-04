@@ -3,7 +3,7 @@ const validateMiddleware = require("../middleware/validate");
 const User = require("../models/user");
 const auth = require("../middleware/auth");
 
-const { body, check, validationResult } = require("express-validator");
+const { body, check } = require("express-validator");
 
 const {
   sendAccessToken,
