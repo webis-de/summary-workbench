@@ -14,10 +14,8 @@ const useUser = () => {
   const refreshRequest = useRef(null);
   const updateAccessToken = useCallback(
     ({ accesstoken }) => {
-      accessToken.current = accesstoken || null;
       if (accesstoken) setLoggedin(true);
       else setLoggedin(false);
-      return accesstoken;
     },
     [setLoggedin]
   );
@@ -49,7 +47,7 @@ const useUser = () => {
     (func) => async (...args) => {
       let token = await getToken();
       try {
-        return func(...args, token);
+        return await func(...args, token);
       } catch (error) {
         if (error.type && error.type === "INVALID_TOKEN") {
           refresh();

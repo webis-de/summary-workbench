@@ -99,7 +99,6 @@ const VisualizationSchema = new mongoose.Schema(
 );
 
 VisualizationSchema.pre("save", function (next) {
-  console.log(this.models);
   this.length = this.documents.length;
   next();
 });
