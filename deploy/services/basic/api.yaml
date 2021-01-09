@@ -22,12 +22,22 @@ spec:
           command: ["./wait-for-it.sh", "-h", "summarizer-mongodb", "-p", "27017"]
       containers:
         - name: api
-          image: docker.io/ds40bamo/summarizer-api:1.2.2
+          image: docker.io/ds40bamo/summarizer-api:1.3.1
           imagePullPolicy: Always
-          command: ["bash", "-c", "gunicorn wsgi:app"]
+          command: ["node", "index.js"]
           env:
-            - name: GUNICORN_CMD_ARGS
-              value: "-cgunicorn.conf.py"
+            - name: ACCESS_TOKEN_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: token-secrets
+                  key: access-token-secret
+            - name: REFRESH_TOKEN_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: token-secrets
+                  key: refresh-token-secret
+            - name: NODE_ENV
+              value: "production"
             - name: MONGODB_HOST
               value: "mongodb://summarizer-mongodb/app"
             - name: BERT_URL

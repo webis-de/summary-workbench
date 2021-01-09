@@ -2,7 +2,7 @@ import { useCallback, useEffect, useReducer, useRef } from "react";
 
 import { post } from "../request";
 
-const getLoginStatus = () => Boolean(window.localStorage.getItem("loggedin"));
+const getLoginStatus = () => JSON.parse(window.localStorage.getItem("loggedin"));
 const setLoginStatus = (status) => window.localStorage.setItem("loggedin", status);
 
 const useUser = () => {
@@ -14,6 +14,7 @@ const useUser = () => {
   const refreshRequest = useRef(null);
   const updateAccessToken = useCallback(
     ({ accesstoken }) => {
+      accessToken.current = accesstoken;
       if (accesstoken) setLoggedin(true);
       else setLoggedin(false);
     },
@@ -42,7 +43,7 @@ const useUser = () => {
     if (accessToken.current === null) throw new Error("not logged in");
     return accessToken.current;
   }, [refresh]);
-  useEffect(getToken, [getToken]);
+  useEffect(() => !refreshRequest.current && refresh(), [refresh]);
   const auth = useCallback(
     (func) => async (...args) => {
       let token = await getToken();

@@ -53,12 +53,26 @@ const Register = ({ isVisible, close }) => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [infoText, setInfoText] = useState(null);
   const { register } = useContext(UserContext);
-  const accept = () =>
+  const accept = () => {
+    if (!username) {
+      setInfoText("username is missing");
+      return;
+    }
+    if (!email) {
+      setInfoText("email is missing");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setInfoText("entered passwords are not the same");
+      return;
+    }
     register({ username, email, password })
       .then(() => close())
       .catch((err) => setInfoText(err.error));
+  };
   useKeycode([13], accept, isVisible);
   return (
     <div>
@@ -79,6 +93,12 @@ const Register = ({ isVisible, close }) => {
         className="uk-input uk-margin-top"
         placeholder="password"
         onChange={(e) => setPassword(e.target.value)}
+      />
+      <input
+        type="password"
+        className="uk-input uk-margin-top"
+        placeholder="confirm password"
+        onChange={(e) => setConfirmPassword(e.target.value)}
       />
       {infoText && (
         <div className="uk-margin-top uk-text-primary">

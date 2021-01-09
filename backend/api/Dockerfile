@@ -1,14 +1,8 @@
-ARG image=python:3.8
+FROM python:3.8-slim
 
-FROM ${image} as lock-stage
 WORKDIR /app
-COPY . .
-RUN pip install pipenv
-RUN pipenv lock --requirements | tee requirements.txt
+COPY . /app/
+RUN apt update && apt install -y nodejs npm && pip3 install newspaper3k
+RUN npm ci
 
-FROM ${image}
-WORKDIR /app
-COPY . .
-COPY --from=lock-stage /app/requirements.txt .
-
-RUN pip install --no-cache-dir -r requirements.txt
+CMD node /app/index.js

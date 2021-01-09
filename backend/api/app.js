@@ -20,6 +20,7 @@ app.use(express.json());
 
 app.use("/api", apiRouter);
 app.use("/api/user", userRouter);
+app.get("/health", (req, res) => res.status(200).end())
 app.use(errorMiddleware);
 
 module.exports = app;
