@@ -2,6 +2,7 @@ const User = require("../models/user");
 const { verifyAccessToken } = require("../tokens");
 
 const auth = async (req, res, next) => {
+
   try {
     const authorization = req.header("Authorization");
     if (!authorization) throw { error: "Authorization header missing", type: "UNAUTHORIZED" };
@@ -16,6 +17,7 @@ const auth = async (req, res, next) => {
     req.user = user;
     return next();
   } catch (err) {
+    console.log(err)
     return res.status(401).send(err);
   }
 };

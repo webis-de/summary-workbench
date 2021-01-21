@@ -22,7 +22,7 @@ const request = async (method, path, json, auth) => {
     resJson = await response.json();
   } catch (err) {}
   if (response.ok) return resJson;
-  throw new Error({error: resJson});
+  throw resJson;
 };
 
 const post = async (path, json = null, auth = null) => request("POST", path, json, auth);

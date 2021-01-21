@@ -186,7 +186,7 @@ const LogoutButton = ({ className, style }) => {
         href="/#"
         onClick={(e) => {
           e.preventDefault();
-          logout().then(() => displayMessage("logout successfull"));
+          logout().then(() => displayMessage("logout successfull", { status: "success" }));
         }}
       >
         <FaSignOutAlt style={{ width: "20px", marginRight: "5px" }} /> Logout
