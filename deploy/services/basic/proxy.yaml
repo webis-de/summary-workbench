@@ -56,16 +56,6 @@ spec:
         - name: configs
           configMap:
             name: summarizer-proxy
-      initContainers:
-        - name: init-wait-for-backend
-          image: docker.io/ds40bamo/wait-for-it
-          command: ["bash", "-c", "./wait-for-it.sh -t 15 -h summarizer-api -p 5000"]
-        - name: init-wait-for-frontend
-          image: docker.io/ds40bamo/wait-for-it
-          command: ["bash", "-c", "./wait-for-it.sh -t 15 -h summarizer-frontend -p 80"]
-        - name: init-wait-for-summary-viewer
-          image: docker.io/ds40bamo/wait-for-it
-          command: ["bash", "-c", "./wait-for-it.sh -t 15 -h summarizer-summary-viewer -p 5000"]
       containers:
         - name: proxy
           image: nginx:alpine

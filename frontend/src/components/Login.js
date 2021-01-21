@@ -5,6 +5,7 @@ import { UserContext } from "../contexts/UserContext";
 import { useKeycode } from "../hooks/keycode";
 import { displayMessage } from "../utils/message";
 import { Button } from "./utils/Button";
+import { Loading } from "./utils/Loading";
 import { Modal } from "./utils/Modal";
 import { TabContent, TabHead, TabItem } from "./utils/Tabs";
 
@@ -55,6 +56,7 @@ const Register = ({ isVisible, close }) => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [infoText, setInfoText] = useState(null);
+  const [isLoading, setLoading] = useState(false);
   const { register } = useContext(UserContext);
   const accept = () => {
     if (!username) {
@@ -69,9 +71,11 @@ const Register = ({ isVisible, close }) => {
       setInfoText("entered passwords are not the same");
       return;
     }
+    setLoading(true);
     register({ username, email, password })
       .then(() => close())
-      .catch((err) => setInfoText(err.error));
+      .catch(() => setInfoText(`could not register (maybe user already exists)`))
+      .finally(() => setLoading(false));
   };
   useKeycode([13], accept, isVisible);
   return (
@@ -105,14 +109,18 @@ const Register = ({ isVisible, close }) => {
           <FaInfoCircle /> {infoText}
         </div>
       )}
-      <Button
-        variant="primary"
-        className="uk-margin-top"
-        style={{ float: "right" }}
-        onClick={accept}
-      >
-        Register
-      </Button>
+      {isLoading ? (
+        <Loading style={{ float: "right" }} />
+      ) : (
+        <Button
+          variant="primary"
+          className="uk-margin-top"
+          style={{ float: "right" }}
+          onClick={accept}
+        >
+          Register
+        </Button>
+      )}
     </div>
   );
 };
