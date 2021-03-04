@@ -6,13 +6,6 @@ import { displayMessage } from "../utils/message";
 import { SavedInfo } from "./SavedInfo";
 import { Accordion, AccordionItem } from "./utils/Accordion";
 
-const allMetrics = Object.entries(settings).map(([metric, { readable }]) => [metric, readable]);
-
-const toMetricBadges = (scores) => {
-  const computedMetrics = Object.keys(scores);
-  return allMetrics.map(([metric, readable]) => [readable, computedMetrics.includes(metric)]);
-};
-
 const Saved = ({ className, reloadSaved }) => {
   const [calculations, setCalculations] = useState([]);
 
@@ -32,7 +25,7 @@ const Saved = ({ className, reloadSaved }) => {
         <AccordionItem text="Saved Calculations" open>
           <Accordion>
             {calculations.map(({ name, scores }) => (
-              <AccordionItem key={name} text={name} badges={toMetricBadges(scores)}>
+              <AccordionItem key={name} text={name} badges={Object.keys(scores).map((key) => settings[key].readable)}>
                 <SavedInfo name={name} scoreInfo={scores} deleteCalculation={deleteCalculation} />
               </AccordionItem>
             ))}

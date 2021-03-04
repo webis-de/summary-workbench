@@ -10,8 +10,8 @@ const ComparisonDisplay = ({ page, size, comparisons }) => {
       <thead>
         <tr>
           <th />
-          <th>hypothesis</th>
           <th>reference</th>
+          <th>hypothesis</th>
         </tr>
       </thead>
       <tbody>
@@ -19,10 +19,10 @@ const ComparisonDisplay = ({ page, size, comparisons }) => {
           <tr key={index}>
             <td>{index}</td>
             <td>
-              <Markup markupedText={hyp} />
+              <Markup markupedText={ref} />
             </td>
             <td>
-              <Markup markupedText={ref} />
+              <Markup markupedText={hyp} />
             </td>
           </tr>
         ))}
@@ -45,7 +45,7 @@ const CompareTable = ({ comparisons }) => {
           <input
             className="uk-input"
             type="text"
-            placeholder="page"
+            placeholder="jump to page"
             onKeyDown={(e) => e.keyCode === 13 && setPage(e.target.value)}
           />
         </div>
@@ -53,7 +53,7 @@ const CompareTable = ({ comparisons }) => {
           <input
             className="uk-input"
             type="text"
-            placeholder="size"
+            placeholder="examples per page"
             onKeyDown={(e) => e.keyCode === 13 && setSize(e.target.value)}
           />
         </div>

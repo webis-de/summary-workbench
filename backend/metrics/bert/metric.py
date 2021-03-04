@@ -8,4 +8,4 @@ class BERTScorer:
         self.bert = Bert(model_type=self.MODEL)
 
     def score(self, hypotheses, references):
-        return {"bert": float(np.average(self.bert.score(hypotheses, references)[0]))}
+        return {"bert": float(np.average(self.bert.score(hypotheses, references)[0], rescale_with_baseline=True, lang="en"))}

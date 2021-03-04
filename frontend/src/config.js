@@ -16,7 +16,7 @@ const settings = {
     type: "lexical",
   },
   greedy_matching: {
-    readable: "greedy matching",
+    readable: "Greedy Matching",
     type: "lexical",
   },
   meteor: {

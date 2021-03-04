@@ -1,6 +1,8 @@
 import inspect
 import logging
+
 import nltk
+
 
 def setup():
     logger = logging.getLogger(inspect.currentframe().f_code.co_name)

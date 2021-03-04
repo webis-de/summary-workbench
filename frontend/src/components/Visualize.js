@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useReducer, useRef, useState } from "react";
-import { FaInfoCircle, FaTrash } from "react-icons/fa";
+import { FaInfoCircle, FaPlus, FaTrash } from "react-icons/fa";
 
 import {
   deleteVisualizationRequest,
@@ -98,7 +98,6 @@ const AnnotationDesigner = ({ type, options, addOption, removeOption, alterOptio
   if (optionTypes.includes(type)) {
     return (
       <div className="uk-margin-top">
-        <Button onClick={() => addOption("")}>Add Option</Button>
         {Object.entries(options).map(([key, option]) => (
           <div key={key} className="uk-flex uk-margin-top">
             <input
@@ -110,6 +109,11 @@ const AnnotationDesigner = ({ type, options, addOption, removeOption, alterOptio
             <DeleteButton onClick={() => removeOption(key)} />
           </div>
         ))}
+        <div className="uk-margin uk-flex uk-flex-center">
+          <Button onClick={() => addOption("")}>
+            <FaPlus />
+          </Button>
+        </div>
       </div>
     );
   }
@@ -290,8 +294,7 @@ const ModelTable = ({ models, linesAreSame = true, removeModel }) => (
           <td
             style={{
               position: "absolute",
-              top: "50%",
-              transform: "translate(-100%, -50%)",
+              transform: "translate(-100%, -6%)",
             }}
           >
             {removeModel && (

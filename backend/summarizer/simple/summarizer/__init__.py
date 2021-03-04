@@ -1,5 +1,4 @@
-from math import ceil
-
+import nltk
 from newspaper import nlp
 
 from .textrank import TextRank
@@ -10,7 +9,7 @@ class TextRankSummarizer:
         self.textrank = TextRank(weight_function="lexical_overlap")
 
     def summarize(self, text, ratio):
-        return self.textrank.summarize(text=text, ratio=ratio).strip()
+        return self.textrank.summarize(text=text, ratio=ratio * 0.5).strip()
 
 
 class Newspaper3kSummarizer:
@@ -20,7 +19,9 @@ class Newspaper3kSummarizer:
     def summarize(self, text, ratio):
         num_sent = len(nlp.split_sentences(text))
         return " ".join(
-            nlp.summarize(title=" ", text=text, max_sents=ceil(num_sent * ratio))
+            nlp.summarize(
+                title=" ", text=text, max_sents=max(round(num_sent * ratio * 0.1), 1)
+            )
         )
 
 
@@ -45,6 +46,8 @@ class Summarizers:
 
         for summarizer_name in scorable_summarizers:
             summarizer = self.summarizers[summarizer_name]
-            results[summarizer_name] = summarizer.summarize(text, ratio)
+            summary = summarizer.summarize(text, ratio)
+            summary = nltk.sent_tokenize(summary)
+            results[summarizer_name] = summary
 
         return results

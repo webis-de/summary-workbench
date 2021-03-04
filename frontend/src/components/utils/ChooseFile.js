@@ -41,12 +41,12 @@ const ChooseFile = ({ kind, name, fileName, setFile, lines, linesAreSame, ...oth
     e.preventDefault();
 
     if (e.dataTransfer.items) {
-      for (const item of e.dataTransfer.items) {
+      e.dataTransfer.items.foreach((item) => {
         const entry = item.webkitGetAsEntry();
         if (entry !== null && entry.isFile) {
           setFile(item.getAsFile());
         }
-      }
+      });
     }
     setIsDragged(false);
   };
@@ -54,7 +54,7 @@ const ChooseFile = ({ kind, name, fileName, setFile, lines, linesAreSame, ...oth
   const fileSelectOnChange = (e) => setFile(e.target.files[0]);
 
   return (
-    <div onFocus={() => uploadRef.current.click()} {...other}>
+    <div {...other}>
       <div
         className="uk-flex uk-flex-stretch uk-box-shadow-hover-medium"
         onDragOver={(e) => {

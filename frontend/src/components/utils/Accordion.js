@@ -5,8 +5,6 @@ import { Button } from "./Button";
 import { DeleteButton } from "./DeleteButton";
 
 const AccordionItem = ({ children, text, buttons, remove, badges = [], open = false }) => {
-  const badgesWithVariant =
-    badges[0] instanceof Array ? badges : badges.map((badge) => [badge, true]);
   return (
     <li
       className={open ? "uk-open" : ""}
@@ -33,8 +31,8 @@ const AccordionItem = ({ children, text, buttons, remove, badges = [], open = fa
           </span>
           {badges && (
             <div className="uk-flex uk-flex-wrap" style={{ gridRowGap: "10px" }}>
-              {badgesWithVariant.map(([badge, emphasis], i) => (
-                <Badge key={i} emphasis={emphasis}>
+              {badges.map((badge, i) => (
+                <Badge key={i} emphasis={true}>
                   {badge}
                 </Badge>
               ))}

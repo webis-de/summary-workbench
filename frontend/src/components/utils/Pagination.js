@@ -1,5 +1,7 @@
 import React from "react";
 
+import { Button } from "./Button";
+
 const range = (from, to) => {
   const size = to - from;
   return size > 0 ? [...Array(size).keys(size)].map((i) => from + i) : [];
@@ -75,13 +77,16 @@ const Pagination = ({ activePage, size, numItems, onChange, pageRange = 5 }) => 
   };
   return (
     <div className="uk-flex uk-flex-center">
-      {activePage > 1 ? (
-        <a className="uk-flex uk-flex-center" href="/#" onClick={onClickFrom(activePage - 1)}>
-          <span className="uk-flex uk-flex-center" data-uk-pagination-previous />
-        </a>
-      ) : (
-        <span className="uk-flex uk-flex-center" data-uk-pagination-previous />
-      )}
+      <div className="uk-flex uk-flex-middle">
+        <Button
+          size="small"
+          variant={activePage <= 1 ? "default" : "primary"}
+          disabled={activePage <= 1}
+          onClick={onClickFrom(activePage - 1)}
+        >
+          prev
+        </Button>
+      </div>
       <ul className="uk-pagination uk-flex-center" uk-margin style={{ width: "400px" }}>
         <PaginationBefore
           activePage={activePage}
@@ -98,13 +103,16 @@ const Pagination = ({ activePage, size, numItems, onChange, pageRange = 5 }) => 
           onClickFrom={onClickFrom}
         />
       </ul>
-      {activePage < lastPage ? (
-        <a href="/#" className="uk-flex uk-flex-center" onClick={onClickFrom(activePage + 1)}>
-          <span className="uk-flex uk-flex-center" data-uk-pagination-next />
-        </a>
-      ) : (
-        <span className="uk-flex uk-flex-center" data-uk-pagination-next />
-      )}
+      <div className="uk-flex uk-flex-middle">
+        <Button
+          size="small"
+          variant={activePage >= lastPage ? "default" : "primary"}
+          disabled={activePage >= lastPage}
+          onClick={onClickFrom(activePage + 1)}
+        >
+          next
+        </Button>
+      </div>
     </div>
   );
 };
