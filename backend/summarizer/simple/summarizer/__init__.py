@@ -1,4 +1,3 @@
-import nltk
 from newspaper import nlp
 
 from .textrank import TextRank
@@ -47,7 +46,6 @@ class Summarizers:
         for summarizer_name in scorable_summarizers:
             summarizer = self.summarizers[summarizer_name]
             summary = summarizer.summarize(text, ratio)
-            summary = nltk.sent_tokenize(summary)
             results[summarizer_name] = summary
 
         return results

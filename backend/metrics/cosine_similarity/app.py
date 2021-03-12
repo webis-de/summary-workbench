@@ -2,25 +2,31 @@ import logging
 
 from flask import Flask, jsonify, request
 
-from summarizer import BertSummarizer
+from metric import BERTScorer
 
-summarizer = BertSummarizer()
+scorer = BERTScorer()
 
 app = Flask(__name__)
 
 
 @app.route("/", methods=["POST"])
-def summarize_route():
+def score_route():
     try:
         request_json = request.json
 
-        text = request_json["text"]
-        ratio = request_json["ratio"]
+        hyps = request_json["hyps"]
+        refs = request_json["refs"]
 
-        summary = summarizer.summarize(text, ratio * 0.25)
+        if isinstance(hyps, str):
+            hyps = [hyps]
+
+        if isinstance(refs, str):
+            refs = [refs]
+
+        score = scorer.score(hyps, refs)
 
         headers = {"Content-Type": "application/json"}
-        return jsonify({"bertsum": summary}), 200, headers
+        return jsonify({"bert": score}), 200, headers
     except Exception as error:
         logging.warning(error)
         return "", 400

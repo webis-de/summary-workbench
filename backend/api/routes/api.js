@@ -2,7 +2,7 @@ const express = require("express");
 const validateMiddleware = require("../middleware/validate");
 
 const { body, check, validationResult } = require("express-validator");
-const { spawn } = require("child_process");
+const { sentenceSplitter, articleDownloader } = require("../subservices");
 const auth = require("../middleware/auth");
 
 const { isURL } = require("validator");
@@ -18,17 +18,6 @@ const summarizeEvaluator = require("../summarizers");
 
 const router = express.Router();
 
-const download = (url) =>
-  new Promise((resolve, reject) => {
-    const p = spawn("python3", ["download_article.py", url]);
-    let text = "";
-    let errorText = "";
-
-    p.stdout.on("data", (data) => (text += data.toString()));
-    p.stderr.on("data", (err) => (errorText += err.toString()));
-    p.on("exit", (e) => (e ? reject(errorText) : resolve(text)));
-    p.on("error", (e) => reject(e.message));
-  });
 
 const allIsIn = (validElements) => (list) =>
   list.every((el) => validElements.has(el));
@@ -111,12 +100,16 @@ router.post(
   async (req, res, next) => {
     try {
       const { summarizers, text, ratio } = req.body;
-      const original = isURL(text) ? await download(text) : text;
-      const summaries = await summarizeEvaluator.summarize(
+      const original = isURL(text) ? await articleDownloader.download(text) : text;
+      let summariesText = await summarizeEvaluator.summarize(
         summarizers,
         original,
         ratio
       );
+      summaries = {}
+      for (const [metric, result] of Object.entries(summariesText)) {
+        summaries[metric] = await sentenceSplitter.split(result)
+      }
       return res.json({ original, summaries });
     } catch (err) {
       return next(err);

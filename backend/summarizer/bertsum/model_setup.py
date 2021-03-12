@@ -1,8 +1,6 @@
 import inspect
 import logging
 
-import nltk
-
 from summarizer import BertSummarizer
 from summarizer.BertParent import BertParent
 
@@ -17,7 +15,6 @@ def setup():
     model.from_pretrained(model_name, output_hidden_states=True)
     tokenizer.from_pretrained(model_name)
     logger.info("done")
-    nltk.download("punkt")
 
 
 if __name__ == "__main__":

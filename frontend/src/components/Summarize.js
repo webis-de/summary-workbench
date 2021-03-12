@@ -127,17 +127,17 @@ const Loading = () => <div data-uk-spinner />;
 
 const _anyModelSet = (models) => Object.values(models).some(({ isSet }) => isSet);
 
-const sampleText = `Alan Mathison Turing OBE FRS (/ˈtjʊərɪŋ/; 23 June 1912 – 7 June 1954) was an English mathematician, computer scientist, logician, cryptanalyst, philosopher, and theoretical biologist.[6][7] Turing was highly influential in the development of theoretical computer science, providing a formalisation of the concepts of algorithm and computation with the Turing machine, which can be considered a model of a general-purpose computer.[8][9][10] Turing is widely considered to be the father of theoretical computer science and artificial intelligence.[11] Despite these accomplishments, he was never fully recognised in his home country, if only because much of his work was covered by the Official Secrets Act.
+const sampleText = `Alan Mathison Turing was an English mathematician, computer scientist, logician, cryptanalyst, philosopher, and theoretical biologist. Turing was highly influential in the development of theoretical computer science, providing a formalisation of the concepts of algorithm and computation with the Turing machine, which can be considered a model of a general-purpose computer. Turing is widely considered to be the father of theoretical computer science and artificial intelligence.[11] Despite these accomplishments, he was never fully recognised in his home country, if only because much of his work was covered by the Official Secrets Act.
 
 During the Second World War, Turing worked for the Government Code and Cypher School (GC&CS) at Bletchley Park, Britain's codebreaking centre that produced Ultra intelligence. For a time he led Hut 8, the section that was responsible for German naval cryptanalysis. Here, he devised a number of techniques for speeding the breaking of German ciphers, including improvements to the pre-war Polish bombe method, an electromechanical machine that could find settings for the Enigma machine.
 
-Turing played a crucial role in cracking intercepted coded messages that enabled the Allies to defeat the Nazis in many crucial engagements, including the Battle of the Atlantic.[12][13] Due to the problems of counterfactual history, it is hard to estimate the precise effect Ultra intelligence had on the war,[14] but Professor Jack Copeland has estimated that this work shortened the war in Europe by more than two years and saved over 14 million lives.[12]
+Turing played a crucial role in cracking intercepted coded messages that enabled the Allies to defeat the Nazis in many crucial engagements, including the Battle of the Atlantic. Due to the problems of counterfactual history, it is hard to estimate the precise effect Ultra intelligence had on the war, but Professor Jack Copeland has estimated that this work shortened the war in Europe by more than two years and saved over 14 million lives.
 
-After the war, Turing worked at the National Physical Laboratory, where he designed the Automatic Computing Engine. The Automatic Computing Engine was one of the first designs for a stored-program computer. In 1948, Turing joined Max Newman's Computing Machine Laboratory, at the Victoria University of Manchester, where he helped develop the Manchester computers[15] and became interested in mathematical biology. He wrote a paper on the chemical basis of morphogenesis[1] and predicted oscillating chemical reactions such as the Belousov–Zhabotinsky reaction, first observed in the 1960s.
+After the war, Turing worked at the National Physical Laboratory, where he designed the Automatic Computing Engine. The Automatic Computing Engine was one of the first designs for a stored-program computer. In 1948, Turing joined Max Newman's Computing Machine Laboratory, at the Victoria University of Manchester, where he helped develop the Manchester computers and became interested in mathematical biology. He wrote a paper on the chemical basis of morphogenesis and predicted oscillating chemical reactions such as the Belousov–Zhabotinsky reaction, first observed in the 1960s.
 
 Turing was prosecuted in 1952 for homosexual acts; the Labouchere Amendment of 1885 had mandated that "gross indecency" was a criminal offence in the UK. He accepted chemical castration treatment, with DES, as an alternative to prison. Turing died in 1954, 16 days before his 42nd birthday, from cyanide poisoning. An inquest determined his death as a suicide, but it has been noted that the known evidence is also consistent with accidental poisoning.
 
-In 2009, following an Internet campaign, British Prime Minister Gordon Brown made an official public apology on behalf of the British government for "the appalling way he was treated". Queen Elizabeth II granted Turing a posthumous pardon in 2013. The "Alan Turing law" is now an informal term for a 2017 law in the United Kingdom that retroactively pardoned men cautioned or convicted under historical legislation that outlawed homosexual acts.[16]`;
+In 2009, following an Internet campaign, British Prime Minister Gordon Brown made an official public apology on behalf of the British government for "the appalling way he was treated". Queen Elizabeth II granted Turing a posthumous pardon in 2013. The "Alan Turing law" is now an informal term for a 2017 law in the United Kingdom that retroactively pardoned men cautioned or convicted under historical legislation that outlawed homosexual acts.`;
 
 const InputDocument = ({ summarize, isComputing }) => {
   const [documentText, setDocumentText] = useState("");
@@ -258,7 +258,12 @@ const Summary = ({ data, onHighlight, showMarkup, showOverlapButton = true }) =>
       <div className="uk-flex uk-flex-right" style={{ transform: "translate(20px, -20px)" }}>
         <Badge>{`${statistics.numWords} words`}</Badge>
         <Badge>{`${(statistics.percentOverlap * 100).toFixed(0)}% overlap`}</Badge>
-        { showOverlapButton && <div style={{ marginLeft: "10px" }}> <ToggleOverlap show={!showMarkup} toggle={onHighlight} /> </div>}
+        {showOverlapButton && (
+          <div style={{ marginLeft: "10px" }}>
+            {" "}
+            <ToggleOverlap show={!showMarkup} toggle={onHighlight} />{" "}
+          </div>
+        )}
       </div>
       {summaryMarkup.map((markupedText, i) => (
         <p key={i} style={{ marginTop: 0 }}>
@@ -442,7 +447,11 @@ const SummaryView = ({ markups, clearMarkups, documentLength }) => {
               clearMarkups={clearMarkups}
             />
           ) : (
-            <SummaryCompareView showOverlap={showOverlap} markups={markups} clearMarkups={clearMarkups} />
+            <SummaryCompareView
+              showOverlap={showOverlap}
+              markups={markups}
+              clearMarkups={clearMarkups}
+            />
           )}
         </div>
         <div
@@ -513,13 +522,13 @@ const Summarize = () => {
           } else {
             const newMarkups = [];
             Object.entries(summaries).forEach(([name, summarySentences]) => {
-              let paragraphs = []
-              const paragraphSize = 3
+              let paragraphs = [];
+              const paragraphSize = 3;
               for (let index = 0; index < summarySentences.length; index += paragraphSize) {
-                const paragraph = summarySentences.slice(index, index+paragraphSize);
-                paragraphs.push(paragraph.join(" "))
+                const paragraph = summarySentences.slice(index, index + paragraphSize);
+                paragraphs.push(paragraph.join(" "));
               }
-              const summaryText = paragraphs.join("\n\n")
+              const summaryText = paragraphs.join("\n\n");
               const [requestMarkup, summaryMarkup] = genMarkup(original, summaryText);
               newMarkups.push({
                 name,
@@ -537,7 +546,7 @@ const Summarize = () => {
           }
         })
         .finally(() => setComputing(false))
-        .catch(({ error }) => alert(error));
+        .catch((error) => alert(JSON.stringify(error)));
     }
   };
 

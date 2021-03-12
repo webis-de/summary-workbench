@@ -41,7 +41,7 @@ const Content = () => {
           data-uk-navbar="mode: click"
         >
           <div className="uk-navbar-item uk-logo">
-            <a href="/">Webis Summarization</a>
+            <a href="/">TL;DR</a>
           </div>
           <div className="uk-navbar-right">
             <ul className="uk-navbar-nav">

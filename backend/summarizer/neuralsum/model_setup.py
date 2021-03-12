@@ -1,8 +1,6 @@
 import inspect
 import logging
 
-import nltk
-
 from summarizer import NEURALSUM_MODEL, NeuralSummarizer
 
 
@@ -12,7 +10,6 @@ def setup():
     logger.info("downloading %s", NEURALSUM_MODEL)
     NeuralSummarizer(NEURALSUM_MODEL)
     logger.info("done")
-    nltk.download("punkt")
 
 
 if __name__ == "__main__":

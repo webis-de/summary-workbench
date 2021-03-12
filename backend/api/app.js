@@ -19,7 +19,7 @@ app.use(helmet());
 app.use(cookieParser());
 app.use(cors({origin: true, credentials: true}));
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json({limit: "10mb"}));
+app.use(express.json({limit: "30mb"}));
 
 app.use("/api", apiRouter);
 app.use("/api/user", userRouter);

@@ -1,7 +1,6 @@
 import logging
 import re
 
-import nltk
 from flask import Flask, jsonify, request
 
 from summarizer import NEURALSUM_MODEL, NeuralSummarizer
@@ -22,7 +21,6 @@ def summarize_route():
         ratio = request_json["ratio"]
 
         summary = summarizer.summarize(text, ratio)
-        summary = nltk.sent_tokenize(summary)
 
         headers = {"Content-Type": "application/json"}
         return jsonify({MODEL_STRING: summary}), 200, headers
