@@ -1,0 +1,25 @@
+api:
+  version: "1.3.2"
+
+frontend:
+  version: "1.3.2"
+
+metrics:
+#  - ./metrics/bert
+  - ./metrics/bleu
+#  - ./metrics/bleurt
+#  - ./metrics/cider
+#  - ./metrics/cosine_similarity
+#  - ./metrics/greedy_matching
+#  - ./metrics/meteor
+#  - ./metrics/moverscore
+#  - ./metrics/rouge
+#  - ./metrics/sentence_transformers
+
+summarizers:
+#  - ./summarizer/bertsum
+#  - ./summarizer/textrank
+#  - ./summarizer/newspaper3k
+#  - source: ./summarizer/neuralsum
+#    name: t5
+#    readable: T5

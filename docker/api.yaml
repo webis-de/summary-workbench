@@ -1,0 +1,16 @@
+api:
+  image: api:latest
+  build: docker/backend/api
+  working_dir: /app
+  ports:
+    - "5000:5000"
+  volumes:
+    - ./backend/api/:/app
+    - api_node_modules:/app/node_modules
+  environment:
+    - DEBUG=true
+    - MONGODB_HOST=mongodb://mongo/app
+  command: bash -c "npm install && npm run start"
+
+volumes:
+  api_node_modules:

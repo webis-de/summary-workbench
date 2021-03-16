@@ -1,0 +1,7 @@
+mongo:
+  image: mongo:latest
+  volumes:
+    - mongodata:/data/db
+
+volumes:
+  mongodata:

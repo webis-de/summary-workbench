@@ -16,10 +16,6 @@ spec:
         app: summarizer
         tier: api
     spec:
-      initContainers:
-        - name: init-wait-for-mongodb
-          image: docker.io/ds40bamo/wait-for-it
-          command: ["./wait-for-it.sh", "-h", "summarizer-mongodb", "-p", "27017"]
       containers:
         - name: api
           image: docker.io/ds40bamo/summarizer-api:1.3.2
