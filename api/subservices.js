@@ -40,16 +40,18 @@ class ArticleDownloader {
     this.port = port;
     this.running = true;
     this.process.on("exit", () => (this.running = false));
-    console.log(`article downloader listening on port ${port}`);
+    console.log(`${this.constructor.name}: listening on port ${port}`);
   }
 
   wait() {
+    console.log(`${this.constructor.name}: waiting`)
     while (!port_used(this.port) && this.running) {
       sleep(1000);
     }
     if (!this.running) {
       throw Error("process exited");
     }
+    console.log(`${this.constructor.name}: waiting done`)
   }
 
   download(url) {
@@ -65,16 +67,18 @@ class SentenceSplitter {
     this.port = port;
     this.running = true;
     this.process.on("exit", () => (this.running = false));
-    console.log(`sentence splitter listening on port ${port}`);
+    console.log(`${this.constructor.name}: listening on port ${port}`);
   }
 
   wait() {
+    console.log(`${this.constructor.name}: waiting`)
     while (!port_used(this.port) && this.running) {
       sleep(1000);
     }
     if (!this.running) {
       throw Error("process exited");
     }
+    console.log(`${this.constructor.name}: waiting done`)
   }
 
   split(text) {

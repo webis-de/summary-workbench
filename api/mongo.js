@@ -1,16 +1,21 @@
 const { MONGODB_HOST } = require("./config");
 const mongoose = require("mongoose");
 
-const connectDB = () => new Promise((resolve, reject) => {
-  mongoose.connect(MONGODB_HOST, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useCreateIndex: true,
-    useFindAndModify: false,
+const connectDB = () =>
+  new Promise((resolve, reject) => {
+    console.log("MongoDB: waiting");
+    mongoose.connect(MONGODB_HOST, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useCreateIndex: true,
+      useFindAndModify: false,
+    });
+    const db = mongoose.connection;
+    db.once("open", () => {
+      console.log("MongoDB: done waiting");
+      resolve();
+    });
+    db.on("error", (err) => reject(err));
   });
-  const db = mongoose.connection;
-  db.once("open", () => resolve());
-  db.on("error", err => reject(err));
-})
 
-module.exports = { connectDB }
+module.exports = { connectDB };

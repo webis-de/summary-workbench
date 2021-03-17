@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from sys import argv, version, stderr
 import nltk
 from flask import Flask, request

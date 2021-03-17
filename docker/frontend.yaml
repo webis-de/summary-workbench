@@ -1,6 +1,8 @@
 frontend:
   image: frontend:latest
-  build: docker/frontend
+  build:
+    context: ./frontend/
+    dockerfile: Dockerfile.dev
   working_dir: /app
   stdin_open: true
   ports:

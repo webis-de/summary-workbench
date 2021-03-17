@@ -1,6 +1,3 @@
 name: bleu
 readable: BLEU
-image: ""
-python:
-  version: "3.8"
-  slim: true
+devimage: slim

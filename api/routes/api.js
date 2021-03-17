@@ -1,5 +1,6 @@
 const express = require("express");
 const validateMiddleware = require("../middleware/validate");
+const { METRICS, SUMMARIZERS } = require("../config")
 
 const { body, check, validationResult } = require("express-validator");
 const { sentenceSplitter, articleDownloader } = require("../subservices");
@@ -13,8 +14,8 @@ const Visualization = require("../models/visualization");
 const User = require("../models/user");
 const Annotation = require("../models/annotation");
 
-const metricEvaluator = require("../metrics");
-const summarizeEvaluator = require("../summarizers");
+const { evaluate } = require("../metrics");
+const { summarize } = require("../summarizers");
 
 const router = express.Router();
 
@@ -50,7 +51,7 @@ const isListOfStrings = (field, validElements) => {
 const evaluateValidator = [
   isListOfStrings(body("hypdata")),
   isListOfStrings(body("refdata")),
-  isListOfStrings(body("metrics"), metricEvaluator.AVAILABLE_METRICS),
+  isListOfStrings(body("metrics"), METRICS),
 ];
 
 const validateHypRefMiddleware = (req, res, next) => {
@@ -72,7 +73,7 @@ router.post(
     try {
       const { metrics, refdata, hypdata } = req.body;
       return res.json({
-        metrics: await metricEvaluator.evaluate(metrics, refdata, hypdata),
+        metrics: await evaluate(metrics, refdata, hypdata),
       });
     } catch (err) {
       return next(err);
@@ -88,7 +89,7 @@ const summarizeValidator = [
     .withMessage("has to be between 0.0 and 1.0"),
   isListOfStrings(
     body("summarizers"),
-    summarizeEvaluator.AVAILABLE_SUMMARIZERS
+    SUMMARIZERS
   ),
 ];
 
@@ -102,7 +103,7 @@ router.post(
       const original = isURL(text)
         ? await articleDownloader.download(text)
         : text;
-      let summariesText = await summarizeEvaluator.summarize(
+      let summariesText = await summarize(
         summarizers,
         original,
         ratio
@@ -126,7 +127,7 @@ const isNestedListOfStrings = (v) =>
   v instanceof Array && _isNestedListOfStrings(v);
 
 const scoresValidator = (v) =>
-  allIsIn(metricEvaluator.AVAILABLE_METRICS)(Object.keys(v)) &&
+  allIsIn(METRICS)(Object.keys(v)) &&
   Object.values(v).map((el) =>
     Object.entries(el).every(
       (key, value) => typeof key === "string" && typeof value === "number"
@@ -179,7 +180,7 @@ router
   });
 
 const feedbackValidator = [
-  body("summarizer").isIn([...summarizeEvaluator.AVAILABLE_SUMMARIZERS]),
+  body("summarizer").isIn(SUMMARIZERS),
   body("summary").isString(),
   body("reference").isString(),
   body("url").optional().isURL(),
