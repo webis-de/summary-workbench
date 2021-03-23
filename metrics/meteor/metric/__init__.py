@@ -3,7 +3,7 @@ from .meteor import Meteor
 __author__ = "tylin"
 
 
-class METEORScorer:
+class MetricPlugin:
     def __init__(self):
         self.meteor = Meteor()
 

@@ -1,6 +1,9 @@
 import logging
 from os import environ
 
+import sys
+sys.path.insert(0, "/app")
+
 from flask import Flask, jsonify, request
 
 PLUGIN_TYPE = environ.get("PLUGIN_TYPE")

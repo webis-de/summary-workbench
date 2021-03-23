@@ -1,7 +1,7 @@
 from .textrank import TextRank
 
 
-class TextRankSummarizer:
+class SummarizerPlugin:
     def __init__(self):
         self.textrank = TextRank(weight_function="lexical_overlap")
 

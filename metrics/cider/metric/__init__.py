@@ -3,7 +3,7 @@ from pathlib import Path
 from .cider import Cider
 
 
-class CIDErScorer:
+class MetricPlugin:
     def __init__(self):
         self.cider = Cider()
 

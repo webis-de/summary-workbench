@@ -1,0 +1,7 @@
+version: "1.0"
+name: sentence_transformers
+readable: Sentence Transformers
+model: roberta-large-nli-stsb-mean-tokens
+type: semantic
+devimage: slim
+deployimage: slim

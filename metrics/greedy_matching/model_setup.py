@@ -13,7 +13,7 @@ import requests
 from gensim.models import KeyedVectors
 from gensim.scripts.glove2word2vec import glove2word2vec
 
-from metric import GreedyMatchingScorer
+from metric import MetricPlugin
 
 
 def download_file(url, save_path, logger=None):
@@ -71,18 +71,18 @@ def setup_glove():
 
     logger.info("begin")
 
-    base_path = GreedyMatchingScorer.MODEL_BASE_PATH
-    model_path = GreedyMatchingScorer.MODEL_PATH()
+    base_path = MetricPlugin.MODEL_BASE_PATH
+    model_path = MetricPlugin.MODEL_PATH()
 
-    hash_path = base_path / f"{GreedyMatchingScorer.MODEL_NAME}_hash.json"
+    hash_path = base_path / f"{MetricPlugin.MODEL_NAME}_hash.json"
     if not _hash_is_valid(hash_path, [model_path]):
         logging.info("fetch glove model")
         base_path.mkdir(parents=True, exist_ok=True)
 
-        model_file = GreedyMatchingScorer.MODEL_NAME
+        model_file = MetricPlugin.MODEL_NAME
         extract_file = f"{model_file}.txt"
         converted_file = f"{model_file}.model.txt"
-        model_url = GreedyMatchingScorer.MODEL_URL()
+        model_url = MetricPlugin.MODEL_URL()
         zip_file = "model.zip"
         zip_path = base_path / zip_file
 

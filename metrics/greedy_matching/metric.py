@@ -5,6 +5,7 @@ from gensim.models import KeyedVectors
 from nltk.tokenize import word_tokenize
 from sklearn.metrics.pairwise import cosine_similarity
 from urllib.parse import urljoin
+import os
 
 
 class Embedding:
@@ -19,8 +20,8 @@ class Embedding:
             return self.unk
 
 
-class GreedyMatchingScorer:
-    MODEL_NAME = "glove.6B.300d"
+class MetricPlugin:
+    MODEL_NAME = os.environ.get("PLUGIN_MODEL") or "glove.6B.300d"
     MODEL_ZIP = "glove.6B.zip"
     MODEL_BASE_PATH = Path("~/.cache/glove/").expanduser()
     MODEL_BASE_URL = "http://nlp.stanford.edu/data/"

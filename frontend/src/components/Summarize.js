@@ -3,7 +3,8 @@ import React, { useReducer, useRef, useState } from "react";
 import { FaBars, FaEye, FaEyeSlash, FaThumbsDown, FaThumbsUp } from "react-icons/fa";
 import { CSSTransition } from "react-transition-group";
 
-import { feedbackRequest, summarizeRequest, summarizers, summarizersDict } from "../api";
+import { feedbackRequest, summarizeRequest } from "../api";
+import { summarizers } from "../config";
 import { markup as genMarkup } from "../utils/fragcolors";
 import { displayMessage } from "../utils/message";
 import { Markup } from "./Markup";
@@ -88,27 +89,30 @@ const Checkbox = ({ isSet, readable, onClick }) => (
   </label>
 );
 
-const initModels = (models) => {
-  const init = {};
-  models.forEach(([option, readable]) => {
-    init[option] = { isSet: false, readable };
+const initSummarizers = (models) => {
+  const types = {};
+  Object.entries(models).forEach(([key, value]) => {
+    value.isSet = false;
+    const { type } = value;
+    if (types[type]) types[type].push(key);
+    else types[type] = [key];
   });
-  return init;
+  return types;
 };
 
-const extractive = initModels(summarizers.extractive);
-const abstractive = initModels(summarizers.abstractive);
+const summarizerTypes = initSummarizers(summarizers);
 
-const Checkboxes = ({ options, toggleOption }) => (
+const Checkboxes = ({ models, submodels, toggleOption }) => (
   <div className="uk-flex uk-flex-column">
-    {Object.entries(options).map(([option, { isSet, readable }]) => (
+    {submodels.forEach((model) => (
       <Checkbox
-        key={option}
-        readable={readable}
-        isSet={isSet}
-        onClick={() => toggleOption(option)}
+        key={model}
+        readable={models.readable}
+        isSet={models.isSet}
+        onClick={() => toggleOption(model)}
       />
     ))}
+    )
   </div>
 );
 
@@ -125,30 +129,23 @@ const getSetModels = (models) =>
 
 const Loading = () => <div data-uk-spinner />;
 
-const _anyModelSet = (models) => Object.values(models).some(({ isSet }) => isSet);
-
 const sampleText = `Alan Mathison Turing was an English mathematician, computer scientist, logician, cryptanalyst, philosopher, and theoretical biologist. Turing was highly influential in the development of theoretical computer science, providing a formalisation of the concepts of algorithm and computation with the Turing machine, which can be considered a model of a general-purpose computer. Turing is widely considered to be the father of theoretical computer science and artificial intelligence. Despite these accomplishments, he was never fully recognised in his home country, if only because much of his work was covered by the Official Secrets Act.
-
 During the Second World War, Turing worked for the Government Code and Cypher School (GC&CS) at Bletchley Park, Britain's codebreaking centre that produced Ultra intelligence. For a time he led Hut 8, the section that was responsible for German naval cryptanalysis. Here, he devised a number of techniques for speeding the breaking of German ciphers, including improvements to the pre-war Polish bombe method, an electromechanical machine that could find settings for the Enigma machine.
-
 Turing played a crucial role in cracking intercepted coded messages that enabled the Allies to defeat the Nazis in many crucial engagements, including the Battle of the Atlantic. Due to the problems of counterfactual history, it is hard to estimate the precise effect Ultra intelligence had on the war, but Professor Jack Copeland has estimated that this work shortened the war in Europe by more than two years and saved over 14 million lives.
-
 After the war, Turing worked at the National Physical Laboratory, where he designed the Automatic Computing Engine. The Automatic Computing Engine was one of the first designs for a stored-program computer. In 1948, Turing joined Max Newman's Computing Machine Laboratory, at the Victoria University of Manchester, where he helped develop the Manchester computers and became interested in mathematical biology. He wrote a paper on the chemical basis of morphogenesis and predicted oscillating chemical reactions such as the Belousov–Zhabotinsky reaction, first observed in the 1960s.
-
 Turing was prosecuted in 1952 for homosexual acts; the Labouchere Amendment of 1885 had mandated that "gross indecency" was a criminal offence in the UK. He accepted chemical castration treatment, with DES, as an alternative to prison. Turing died in 1954, 16 days before his 42nd birthday, from cyanide poisoning. An inquest determined his death as a suicide, but it has been noted that the known evidence is also consistent with accidental poisoning.
-
 In 2009, following an Internet campaign, British Prime Minister Gordon Brown made an official public apology on behalf of the British government for "the appalling way he was treated". Queen Elizabeth II granted Turing a posthumous pardon in 2013. The "Alan Turing law" is now an informal term for a 2017 law in the United Kingdom that retroactively pardoned men cautioned or convicted under historical legislation that outlawed homosexual acts.`;
 
 const InputDocument = ({ summarize, isComputing }) => {
   const [documentText, setDocumentText] = useState("");
-  const [abstractiveModels, toggleAbstractiveModel] = useReducer(toggleSettingReducer, abstractive);
-  const [extractiveModels, toggleExtractiveModel] = useReducer(toggleSettingReducer, extractive);
+  const [models, toggleModel] = useReducer(toggleSettingReducer, summarizers);
   const [percentage, setPercentage] = useState("15");
 
-  const anyModelSet = () => _anyModelSet(abstractiveModels) || _anyModelSet(extractiveModels);
+  const anyModelSet = () => Object.values(models).some(({ isSet }) => isSet);
+
   const insertSampleText = () => {
     setDocumentText(sampleText);
-    !extractiveModels["textrank"].isSet && toggleExtractiveModel("textrank");
+    models.textrank && !models.textrank.isSet && toggleModel("textrank");
   };
 
   return (
@@ -182,15 +179,22 @@ const InputDocument = ({ summarize, isComputing }) => {
             style={{ height: "100%" }}
           >
             {/* Start model checkbox lists */}
-            <div className="uk-flex">
-              <div style={{ flex: "1", marginTop: "-25px" }} className="uk-margin-right">
-                <h4 className="underline-border uk-text-left colored-header ">Abstractive</h4>
-                <Checkboxes options={abstractive} toggleOption={toggleAbstractiveModel} />
-              </div>
-              <div style={{ flex: "1", marginTop: "-25px" }}>
-                <h4 className="underline-border uk-text-left colored-header">Extractive</h4>
-                <Checkboxes options={extractive} toggleOption={toggleExtractiveModel} />
-              </div>
+            <div className="uk-flex" style={{ marginTop: "-25px" }}>
+              {Object.keys(summarizerTypes).length ? (
+                Object.entries(summarizerTypes).forEach(([key, value]) => (
+                  <div style={{ flex: "1" }} className="margin-right">
+                    <h4
+                      className="underline-border uk-text-left colored-header"
+                      style={{ textTransform: "capitalize" }}
+                    >
+                      {key}
+                    </h4>
+                    <Checkboxes models={models} submodels={value} toggleOption={toggleModel} />
+                  </div>
+                ))
+              ) : (
+                <div>no summarizers configured</div>
+              )}
             </div>
             {/* End model checkbox lists */}
 
@@ -228,13 +232,7 @@ const InputDocument = ({ summarize, isComputing }) => {
                   <button
                     className="uk-button uk-button-primary"
                     disabled={!Boolean(documentText) || !anyModelSet()}
-                    onClick={() =>
-                      summarize(
-                        documentText,
-                        getSetModels(abstractiveModels).concat(getSetModels(extractiveModels)),
-                        percentage
-                      )
-                    }
+                    onClick={() => summarize(documentText, getSetModels(models), percentage)}
                   >
                     Summarize
                   </button>
@@ -330,7 +328,7 @@ const SummaryTabView = ({ markups, clearMarkups, documentLength }) => {
             {markups.map(({ name }) => (
               <li key={name}>
                 <a className="" style={{ color: "blue", fontSize: "1em" }} href="/#">
-                  {summarizersDict[name]}
+                  {summarizers[name].readable}
                 </a>
               </li>
             ))}
@@ -381,7 +379,7 @@ const SummaryCompareView = ({ markups, showOverlap }) => {
         <div key={gridIndex} className="uk-margin uk-grid uk-child-width-expand@s">
           {grid.map((markup, markupIndex) => (
             <div key={markupIndex}>
-              <Header text={summarizersDict[markup.name]} fontSize="16pt" />
+              <Header text={summarizers[markup.name].readable} fontSize="16pt" />
               <div
                 style={{ maxHeight: "500px", overflow: "auto" }}
                 className="uk-card uk-card-default uk-card-body"

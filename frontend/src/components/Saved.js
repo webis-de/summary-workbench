@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 import { deleteCalculationRequest, getSavedCalculationsRequest } from "../api";
-import { settings } from "../config";
+import { metrics } from "../config";
 import { displayMessage } from "../utils/message";
 import { SavedInfo } from "./SavedInfo";
 import { Accordion, AccordionItem } from "./utils/Accordion";
@@ -25,7 +25,11 @@ const Saved = ({ className, reloadSaved }) => {
         <AccordionItem text="Saved Calculations" open>
           <Accordion>
             {calculations.map(({ name, scores }) => (
-              <AccordionItem key={name} text={name} badges={Object.keys(scores).map((key) => settings[key].readable)}>
+              <AccordionItem
+                key={name}
+                text={name}
+                badges={Object.keys(scores).map((key) => metrics[key].readable)}
+              >
                 <SavedInfo name={name} scoreInfo={scores} deleteCalculation={deleteCalculation} />
               </AccordionItem>
             ))}

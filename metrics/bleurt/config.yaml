@@ -1,0 +1,9 @@
+version: "1.0"
+name: bleurt
+readable: BLEURT
+type: semantic
+homepage:
+sourcecode:
+model: bleurt-base-128
+devimage: slim
+deployimage: slim

@@ -1,6 +1,6 @@
 import React, { useMemo, useReducer } from "react";
 
-import { settings as baseSettings } from "../config";
+import { metrics } from "../config";
 
 const SettingsContext = React.createContext();
 
@@ -20,7 +20,7 @@ const SettingsProvider = ({ children }) => {
   const defaultSettings = useMemo(
     () =>
       Object.fromEntries(
-        Object.entries(baseSettings).map(([metric, info]) => {
+        Object.entries(metrics).map(([metric, info]) => {
           info.isSet = loadSetting(metric);
           return [metric, info];
         })

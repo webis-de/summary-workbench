@@ -12,7 +12,7 @@ api:
   environment:
     - DEBUG=true
     - MONGODB_HOST=mongodb://mongo/app
-  command: bash -c "npm install && npm run start"
+  command: bash -c "npm install && node_modules/.bin/nodemon index.js"
 
 volumes:
   api_node_modules:

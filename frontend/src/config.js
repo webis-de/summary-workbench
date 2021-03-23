@@ -1,40 +1,4 @@
-const settings = {
-  bert: {
-    readable: "BERTScore",
-    type: "semantic",
-  },
-  bleu: {
-    readable: "BLEU",
-    type: "lexical",
-  },
-  bleurt: {
-    readable: "BLEURT",
-    type: "semantic",
-  },
-  cider: {
-    readable: "CIDEr",
-    type: "lexical",
-  },
-  greedy_matching: {
-    readable: "Greedy Matching",
-    type: "lexical",
-  },
-  meteor: {
-    readable: "METEOR",
-    type: "lexical",
-  },
-  moverscore: {
-    readable: "MoverScore",
-    type: "semantic",
-  },
-  sentence_transformers: {
-    readable: "Sentence Transformers",
-    type: "semantic",
-  },
-  rouge: {
-    readable: "ROUGE",
-    type: "lexical",
-  },
-};
+const metrics = JSON.parse(process.env.REACT_APP_METRICS);
+const summarizers = JSON.parse(process.env.REACT_APP_SUMMARIZERS);
 
-export { settings };
+export { metrics, summarizers };

@@ -1,12 +1,14 @@
+import os
 from pathlib import Path
+from urllib.parse import urljoin
+
+import numpy as np
 
 import bleurt.score
-import numpy as np
-from urllib.parse import urljoin
 
 
 class BLEURTScorer:
-    MODEL = "bleurt-base-128"
+    MODEL = os.environ.get("PLUGIN_MODEL") or "bleurt-base-128"
     MODEL_BASE_URL = "https://storage.googleapis.com/bleurt-oss/"
     MODEL_PATH = Path("~/.cache/bleurt/").expanduser()
 

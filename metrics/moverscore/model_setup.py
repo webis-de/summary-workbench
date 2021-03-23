@@ -1,10 +1,10 @@
 import logging
 
-from moverscore import MoverScoreV2
+from metric import MODEL_CLASS
 
 
 def setup():
-    MoverScoreV2.model_setup()
+    MODEL_CLASS.model_setup()
 
 
 if __name__ == "__main__":

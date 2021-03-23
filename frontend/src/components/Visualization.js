@@ -41,7 +41,6 @@ const Visualization = () => {
   const [predFileLines] = useFile(predFile);
   const [linesAreSame, setLinesAreSame] = useState(null);
   const [models, addModel] = useReducer((oldState, model) => [model, ...oldState], []);
-  console.log(models);
 
   useEffect(() => {
     if (refFileLines !== null && docFileLines !== null) {
@@ -107,31 +106,6 @@ const Visualization = () => {
             </tbody>
           </table>
         )}
-      </div>
-      <div id="add-model" data-uk-modal>
-        <div className="uk-modal-dialog uk-modal-body">
-          <input className="uk-input" type="text" placeholder="Name" />
-          <ChooseFile
-            className="uk-margin-small"
-            placeholder="Upload Predictions"
-            file={predFile}
-            setFile={setPredFile}
-            lines={predFileLines}
-            linesAreSame={null}
-          />
-          <p className="uk-text-right">
-            <button className="uk-button uk-button-default uk-modal-close" type="button">
-              Cancel
-            </button>
-            <button
-              className="uk-button uk-button-primary"
-              onClick={() => console.log("hello")}
-              type="button"
-            >
-              Save
-            </button>
-          </p>
-        </div>
       </div>
     </>
   );

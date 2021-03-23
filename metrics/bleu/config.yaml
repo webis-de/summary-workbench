@@ -1,3 +1,8 @@
+version: "1.0"
 name: bleu
 readable: BLEU
+type: lexical
+homepage: https://www.aclweb.org/anthology/P02-1040.pdf
+sourcecode: https://arxiv.org/pdf/1904.09675.pdf
 devimage: slim
+deployimage: slim

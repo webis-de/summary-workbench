@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-from sys import argv, version, stderr
+from sys import argv
 import nltk
 from flask import Flask, request
-stderr.write(str(version))
 
 app = Flask(__name__)
 

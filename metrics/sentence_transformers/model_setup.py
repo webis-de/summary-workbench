@@ -1,14 +1,14 @@
 import inspect
 import logging
 
-from metric import SentenceTransformersScorer
+from metric import MetricPlugin
 
 
 def setup():
     logger = logging.getLogger(inspect.currentframe().f_code.co_name)
     logger.setLevel(logging.INFO)
     logger.info("begin")
-    SentenceTransformersScorer()
+    MetricPlugin()
     logger.info("done")
 
 

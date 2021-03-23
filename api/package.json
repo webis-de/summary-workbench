@@ -8,7 +8,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node_modules/.bin/nodemon index.js"
+    "start": "node_modules/.bin/nodemon index.js",
+    "lul": "id"
   },
   "author": "Dominik Schwabe",
   "license": "ISC",

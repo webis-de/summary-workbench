@@ -8,7 +8,7 @@ from zipfile import ZipFile
 
 import requests
 
-from metric import BLEURTScorer
+from metric import MetricPlugin
 
 
 def download_file(url, save_path, logger=None):
@@ -57,14 +57,14 @@ def _recursive_files(path):
 
 
 def setup():
-    model_url = BLEURTScorer.MODEL_URL()
-    model_path = BLEURTScorer.MODEL_PATH
+    model_url = MetricPlugin.MODEL_URL()
+    model_path = MetricPlugin.MODEL_PATH
     zip_path = model_path / "model.zip"
     logger = logging.getLogger(inspect.currentframe().f_code.co_name)
     logger.setLevel(logging.INFO)
     logger.info("begin")
-    hash_path = model_path / f"{BLEURTScorer.MODEL}_hash.json"
-    bleurt_folder = model_path / BLEURTScorer.MODEL
+    hash_path = model_path / f"{MetricPlugin.MODEL}_hash.json"
+    bleurt_folder = model_path / MetricPlugin.MODEL
 
     logger.info("checking hash")
     if not hash_path.exists() or not _hash_is_valid(

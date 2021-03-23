@@ -1,6 +1,6 @@
 from newspaper import nlp
 
-class Newspaper3kSummarizer:
+class SummarizerPlugin:
     def __init__(self):
         pass
 

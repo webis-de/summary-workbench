@@ -13,14 +13,14 @@ const SettingCheckbox = ({ isSet, readable, onClick }) => (
   </label>
 );
 
-const SettingCheckboxes = ({ settings, toggleSetting }) => (
+const SettingCheckboxes = ({ settings, subsettings, toggleSetting }) => (
   <div className="uk-flex uk-flex-column">
-    {Object.entries(settings).map(([metric, { isSet, readable }]) => (
+    {subsettings.map((metric) => (
       <SettingCheckbox
         key={metric}
         metric={metric}
-        isSet={isSet}
-        readable={readable}
+        isSet={settings[metric].isSet}
+        readable={settings[metric].readable}
         onClick={() => toggleSetting(metric)}
       />
     ))}

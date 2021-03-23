@@ -22,33 +22,10 @@ const getCalculationDataRequest = (name) => get(`/api/calculation/${encodeURICom
 
 export { getCalculationDataRequest };
 
-const summarizers = {
-  abstractive: [
-    ["t5", "T5"],
-    ["bartcnn", "BART-CNN"],
-    ["bartxsum", "BART-XSum"],
-    ["pegasuscnn", "Pegasus-CNN"],
-    ["pegasusxsum", "Pegasus-XSum"],
-    ["longformer2roberta", "Longformer2Roberta"],
-  ],
-  extractive: [
-    ["bertsum", "BERTSummarizer"],
-    ["textrank", "TextRank"],
-    ["newspaper3k", "Newspaper3k"],
-  ],
-};
-
-const summarizersDict = {};
-Object.values(summarizers).forEach((names) => {
-  names.forEach(([shortName, longName]) => {
-    summarizersDict[shortName] = longName;
-  });
-});
-
 const summarizeRequest = (text, summarizers, ratio) =>
   post("/api/summarize", { text, summarizers, ratio });
 
-export { summarizeRequest, summarizers, summarizersDict };
+export { summarizeRequest };
 
 const feedbackRequest = (summarizer, summary, reference, url, feedback) => {
   let json = { summarizer, summary, reference, feedback };

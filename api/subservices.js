@@ -6,8 +6,11 @@ const { PORT } = require("./config");
 
 const port_used = (port) =>
   new Promise((resolve) => {
-    const client = net.connect(port, "localhost");
-    client.on("connect", () => resolve(true));
+    const client = net.connect({ port, host: "localhost" });
+    client.on("connect", () => {
+      client.destroy();
+      resolve(true);
+    });
     client.on("error", () => resolve(false));
   });
 
@@ -17,41 +20,54 @@ const getServer = (port) => {
   return srv;
 };
 
-const get_free_ports = (count) => {
+const get_free_ports = async (count) => {
   let dummyServer = null;
   const servers = [];
-  if (!port_used(PORT)) {
-    const dummyServer = getServer(PORT);
-  }
-  for (let i = 0; i < count; i++) {
-    servers.push(getServer(0));
-  }
+  if (!(await port_used(PORT))) dummyServer = getServer(PORT);
+  for (let i = 0; i < count; i++) servers.push(getServer(0));
   const ports = servers.map((server) => server.address().port);
-  servers.forEach((server) => server.close());
+  console.log(`dummyServer ${dummyServer}`);
   if (dummyServer) dummyServer.close();
+  servers.forEach((server) => server.close());
   return ports;
 };
 
-const sleep = async (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-class ArticleDownloader {
-  constructor(port) {
-    this.process = spawn("subservices/download_article.py", [port]);
+class Subservice {
+  constructor(command, verbose = false) {
+    this.command = command;
+    this.verbose = verbose;
+  }
+
+  init(port) {
+    this.process = spawn(this.command, [port]);
+    if (this.verbose) {
+      this.process.stdout.pipe(process.stdout);
+      this.process.stderr.pipe(process.stdout);
+    }
     this.port = port;
     this.running = true;
     this.process.on("exit", () => (this.running = false));
     console.log(`${this.constructor.name}: listening on port ${port}`);
   }
 
-  wait() {
-    console.log(`${this.constructor.name}: waiting`)
-    while (!port_used(this.port) && this.running) {
-      sleep(1000);
+  async wait() {
+    console.log(`${this.constructor.name}: waiting`);
+    while (!(await port_used(this.port)) && this.running) {
+      await sleep(1000);
     }
     if (!this.running) {
-      throw Error("process exited");
+      console.log(this.running);
+      throw new Error(`${this.constructor.name}: process exited`);
     }
-    console.log(`${this.constructor.name}: waiting done`)
+    console.log(`${this.constructor.name}: waiting done`);
+  }
+}
+
+class ArticleDownloader extends Subservice {
+  constructor(verbose = false) {
+    super("subservices/download_article.py", verbose);
   }
 
   download(url) {
@@ -61,24 +77,9 @@ class ArticleDownloader {
   }
 }
 
-class SentenceSplitter {
-  constructor(port) {
-    this.process = spawn("subservices/sentence_split.py", [port]);
-    this.port = port;
-    this.running = true;
-    this.process.on("exit", () => (this.running = false));
-    console.log(`${this.constructor.name}: listening on port ${port}`);
-  }
-
-  wait() {
-    console.log(`${this.constructor.name}: waiting`)
-    while (!port_used(this.port) && this.running) {
-      sleep(1000);
-    }
-    if (!this.running) {
-      throw Error("process exited");
-    }
-    console.log(`${this.constructor.name}: waiting done`)
+class SentenceSplitter extends Subservice {
+  constructor(verbose = false) {
+    super("subservices/sentence_split.py", verbose);
   }
 
   split(text) {
@@ -88,12 +89,15 @@ class SentenceSplitter {
   }
 }
 
-const [article_port, sentence_port] = get_free_ports(2);
+const articleDownloader = new ArticleDownloader();
+const sentenceSplitter = new SentenceSplitter();
 
-const articleDownloader = new ArticleDownloader(article_port);
-const sentenceSplitter = new SentenceSplitter(sentence_port);
+const initSubservices = async () => {
+  const [article_port, sentence_port] = await get_free_ports(2);
+  articleDownloader.init(article_port);
+  sentenceSplitter.init(sentence_port);
+  await articleDownloader.wait();
+  await sentenceSplitter.wait();
+};
 
-articleDownloader.wait();
-sentenceSplitter.wait();
-
-module.exports = { articleDownloader, sentenceSplitter };
+module.exports = { articleDownloader, sentenceSplitter, initSubservices };
