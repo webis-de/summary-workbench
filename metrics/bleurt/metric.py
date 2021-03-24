@@ -7,7 +7,7 @@ import numpy as np
 import bleurt.score
 
 
-class BLEURTScorer:
+class MetricPlugin:
     MODEL = os.environ.get("PLUGIN_MODEL") or "bleurt-base-128"
     MODEL_BASE_URL = "https://storage.googleapis.com/bleurt-oss/"
     MODEL_PATH = Path("~/.cache/bleurt/").expanduser()
@@ -19,5 +19,5 @@ class BLEURTScorer:
     def __init__(self):
         self.bleurt = bleurt.score.BleurtScorer(str(self.MODEL_PATH / self.MODEL))
 
-    def score(self, hypotheses, references):
+    def evaluate(self, hypotheses, references):
         return {"bleurt": float(np.average(self.bleurt.score(references, hypotheses)))}

@@ -1,23 +1,23 @@
 const METRICS = process.env["METRICS"]
-  .split(" ")
+  .split(",")
   .filter((metric) => Boolean(metric));
 
 console.log("Metrics: ", METRICS);
 
 const SUMMARIZERS = process.env["SUMMARIZERS"]
-  .split(" ")
+  .split(",")
   .filter((metric) => Boolean(metric));
 
 console.log("Summarizers: ", SUMMARIZERS);
 
 const METRIC_URLS = METRICS.reduce((acc, val) => {
   url = `${val.toUpperCase()}_METRIC_URL`;
-  return { [url]: process.env[url], ...acc };
+  return { [val]: process.env[url], ...acc };
 }, {});
 
 const SUMMARIZER_URLS = SUMMARIZERS.reduce((acc, val) => {
-  url = `${val.toUpperCase()}_SUMMARIZER_URL`;
-  return { [url]: process.env[url], ...acc };
+  const url = `${val.toUpperCase()}_SUMMARIZER_URL`;
+  return { [val]: process.env[url], ...acc };
 }, {});
 
 const PORT = process.env["PORT"] || 5000;
@@ -41,6 +41,8 @@ if (!ACCESS_TOKEN_SECRET && !REFRESH_TOKEN_SECRET) {
 const MONGODB_HOST = process.env["MONGODB_HOST"];
 
 module.exports = {
+  METRICS,
+  SUMMARIZERS,
   METRIC_URLS,
   SUMMARIZER_URLS,
   MONGODB_HOST,

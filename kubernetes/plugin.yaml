@@ -1,37 +1,34 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: summarizer-senttrans
+  name: summarizer-bartcnn
   labels:
     app: summarizer
-    tier: senttrans
+    tier: bartcnn
 spec:
   selector:
     matchLabels:
       app: summarizer
-      tier: senttrans
+      tier: bartcnn
   template:
     metadata:
       labels:
         app: summarizer
-        tier: senttrans
+        tier: bartcnn
     spec:
       containers:
-        - name: senttrans
-          image: docker.io/ds40bamo/sentence_transformers:1.0
+        - name: bartcnn
+          image: docker.io/ds40bamo/neuralsum-bartcnn:1.0
           imagePullPolicy: Always
-          command: ["bash", "-c", "gunicorn wsgi:app"]
-          env:
-            - name: GUNICORN-CMD-ARGS
-              value: "-cgunicorn.conf.py"
+          env: []
           ports:
-            - name: senttrans-port
+            - name: bartcnn-port
               containerPort: 5000
               protocol: TCP
           readinessProbe:
             httpGet:
               path: /health
-              port: senttrans-port
+              port: bartcnn-port
             periodSeconds: 60
             timeoutSeconds: 60
       restartPolicy: Always
@@ -39,11 +36,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: summarizer-senttrans
+  name: summarizer-bartcnn
 spec:
   selector:
     app: summarizer
-    tier: senttrans
+    tier: bartcnn
   ports:
     - port: 5000
-      targetPort: senttrans-port
+      targetPort: bartcnn-port

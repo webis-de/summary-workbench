@@ -6,12 +6,7 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-flask = "*"
-gunicorn = "*"
-torch = "*"
-sentence_transformers = "*"
-scikit-learn = "*"
-spacy = "*"
+newspaper3k = "*"
 
 [requires]
 python_version = "3.8"

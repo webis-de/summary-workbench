@@ -20,7 +20,7 @@ const { summarize } = require("../summarizers");
 const router = express.Router();
 
 const allIsIn = (validElements) => (list) =>
-  list.every((el) => validElements.has(el));
+  list.every((el) => validElements.includes(el));
 
 const setDefault = (defaultValue) => {
   return (v) => (v === undefined ? defaultValue : v);

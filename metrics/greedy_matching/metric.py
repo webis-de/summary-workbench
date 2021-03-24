@@ -37,7 +37,7 @@ class MetricPlugin:
     def __init__(self):
         self.emb = Embedding(self.MODEL_PATH())
 
-    def score(self, hypotheses, references):
+    def evaluate(self, hypotheses, references):
         references = [references]
 
         def embedd(lines):

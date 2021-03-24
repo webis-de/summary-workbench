@@ -5,5 +5,5 @@ type: semantic
 model: MoverScoreV2
 homepage: https://arxiv.org/pdf/1909.02622.pdf
 sourcecode: https://github.com/AIPHES/emnlp19-moverscore
-devimage: slim
-deployimage: slim
+devimage: default
+deployimage: default

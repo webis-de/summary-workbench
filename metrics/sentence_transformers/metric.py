@@ -14,7 +14,7 @@ class MetricPlugin:
     def __init__(self):
         self.model = SentenceTransformer(self.MODEL)
 
-    def score(self, hypotheses, references):
+    def evaluate(self, hypotheses, references):
         embeddings1 = self.model.encode(hypotheses, convert_to_tensor=True)
         embeddings2 = self.model.encode(references, convert_to_tensor=True)
         cosine_scores = _paired_cosin_sim(embeddings1, embeddings2)

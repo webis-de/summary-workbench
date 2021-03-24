@@ -1,27 +1,49 @@
 docker_username: ds40bamo
-
-api:
-  version: "1.3.2"
-
-frontend:
-  version: "1.3.2"
+deploy:
+  nodeport: 30900
 
 metrics:
-#  - ./metrics/bert
+  - ./metrics/bert
   - ./metrics/bleu
-#  - ./metrics/bleurt
-#  - ./metrics/cider
-#  - ./metrics/cosine_similarity
-#  - ./metrics/greedy_matching
-#  - ./metrics/meteor
-#  - ./metrics/moverscore
-#  - ./metrics/rouge
-#  - ./metrics/sentence_transformers
+  - ./metrics/bleurt
+  - ./metrics/cider
+  - ./metrics/greedy_matching
+  - ./metrics/meteor
+  - ./metrics/moverscore
+  - ./metrics/rouge
+  - ./metrics/sentence_transformers
 
 summarizers:
-#  - ./summarizer/bertsum
-#  - ./summarizer/textrank
-#  - ./summarizer/newspaper3k
-#  - source: ./summarizer/neuralsum
-#    name: t5
-#    readable: T5
+  - ./summarizer/bertsum
+  - ./summarizer/textrank
+  - ./summarizer/newspaper3k
+  - source: ./summarizer/neuralsum
+    config:
+      name: t5
+      readable: T5
+      model: T5
+  - source: ./summarizer/neuralsum
+    config:
+      name: bartcnn
+      readable: BART-CNN
+      model: BART-CNN
+  - source: ./summarizer/neuralsum
+    config:
+      name: bartxsum
+      readable: BART-XSum
+      model: BART-XSum
+  - source: ./summarizer/neuralsum
+    config:
+      name: pegasuscnn
+      readable: Pegasus-CNN
+      model: Pegasus-CNN
+  - source: ./summarizer/neuralsum
+    config:
+      name: pegasusxsum
+      readable: Pegasus-XSum
+      model: Pegasus-XSum
+  - source: ./summarizer/neuralsum
+    config:
+      name: longformer2roberta
+      readable: Longformer2Roberta
+      model: Longformer2Roberta

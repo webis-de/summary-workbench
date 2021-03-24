@@ -18,13 +18,9 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: docker.io/ds40bamo/tldr-frontend:1.3.2
+          image:
           imagePullPolicy: Always
-          env:
-            - name: REACT_APP_METRICS
-              value: '{"bleu":{"readable":"BLEU","type":"lexical"}}'
-            - name: REACT_APP_SUMMARIZERS
-              value: '{}'
+          env: []
           ports:
             - name: frontend-port
               containerPort: 80

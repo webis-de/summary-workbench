@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: docker.io/ds40bamo/tldr-api:1.3.2
+          image:
           imagePullPolicy: Always
           env:
             - name: ACCESS_TOKEN_SECRET
@@ -32,15 +32,9 @@ spec:
                   name: token-secrets
                   key: refresh-token-secret
             - name: NODE_ENV
-              value: production
+              value: "production"
             - name: MONGODB_HOST
-              value: mongodb://summarizer-mongodb/app
-            - name: BLEU_METRIC_URL
-              value: http://bleu:5000
-            - name: METRICS
-              value: bleu
-            - name: SUMMARIZERS
-              value: ''
+              value: "mongodb://summarizer-mongodb/app"
           ports:
             - name: api-port
               containerPort: 5000

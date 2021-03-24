@@ -7,7 +7,7 @@ class MetricPlugin:
     def __init__(self):
         self.meteor = Meteor()
 
-    def score(self, hypotheses, references):
+    def evaluate(self, hypotheses, references):
         hyp_list_zip = [[hyp] for hyp in hypotheses]
         ref_list_zip = [[ref] for ref in references]
 

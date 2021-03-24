@@ -62,7 +62,7 @@ spec:
           volumeMounts:
             - name: configs
               subPath: nginx.conf
-              mountPath: /etc/nginx/nginx.conf
+              mountPath: "/etc/nginx/nginx.conf"
               readOnly: true
           readinessProbe:
             httpGet:
@@ -82,4 +82,4 @@ spec:
   ports:
     - port: 80
       targetPort: proxy-port
-      nodePort: 30900
+      nodePort:

@@ -76,18 +76,21 @@ const Header = ({ text, fontSize, backgroundColor = "#B02F2C", children, style }
   </div>
 );
 
-const Checkbox = ({ isSet, readable, onClick }) => (
-  <label style={{ padding: "5px", whiteSpace: "nowrap" }}>
-    <input
-      className="uk-checkbox uk-margin-small-right"
-      checked={isSet}
-      readOnly
-      onClick={onClick}
-      type="checkbox"
-    />
-    <span style={{ whiteSpace: "nowrap" }}>{readable}</span>
-  </label>
-);
+const Checkbox = ({ isSet, readable, onClick }) => {
+  console.log(readable);
+  return (
+    <label style={{ padding: "5px", whiteSpace: "nowrap" }}>
+      <input
+        className="uk-checkbox uk-margin-small-right"
+        checked={isSet}
+        readOnly
+        onClick={onClick}
+        type="checkbox"
+      />
+      <span style={{ whiteSpace: "nowrap" }}>{readable}</span>
+    </label>
+  );
+};
 
 const initSummarizers = (models) => {
   const types = {};
@@ -104,15 +107,17 @@ const summarizerTypes = initSummarizers(summarizers);
 
 const Checkboxes = ({ models, submodels, toggleOption }) => (
   <div className="uk-flex uk-flex-column">
-    {submodels.forEach((model) => (
-      <Checkbox
-        key={model}
-        readable={models.readable}
-        isSet={models.isSet}
-        onClick={() => toggleOption(model)}
-      />
-    ))}
-    )
+    {submodels.map((model) => {
+      const { readable, isSet } = models[model];
+      return (
+        <Checkbox
+          key={model}
+          readable={readable}
+          isSet={isSet}
+          onClick={() => toggleOption(model)}
+        />
+      );
+    })}
   </div>
 );
 
@@ -181,7 +186,7 @@ const InputDocument = ({ summarize, isComputing }) => {
             {/* Start model checkbox lists */}
             <div className="uk-flex" style={{ marginTop: "-25px" }}>
               {Object.keys(summarizerTypes).length ? (
-                Object.entries(summarizerTypes).forEach(([key, value]) => (
+                Object.entries(summarizerTypes).map(([key, value]) => (
                   <div style={{ flex: "1" }} className="margin-right">
                     <h4
                       className="underline-border uk-text-left colored-header"

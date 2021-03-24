@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: summarizer-mongodb
+  labels:
+    app: summarizer
+    tier: mongodb
+spec:
+  selector:
+    matchLabels:
+      app: summarizer
+      tier: mongodb
+  template:
+    metadata:
+      labels:
+        app: summarizer
+        tier: mongodb
+    spec:
+      volumes:
+        - name: mongodata
+          persistentVolumeClaim:
+            claimName: summarizer-mongodb-data
+      containers:
+        - name: mongodb
+          image: mongo:latest
+          ports:
+            - name: mongodb-port
+              containerPort: 27017
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /data/db
+              name: mongodata
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 27017
+            periodSeconds: 15
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: summarizer-mongodb
+spec:
+  selector:
+    app: summarizer
+    tier: mongodb
+  ports:
+    - port: 27017
+      targetPort: mongodb-port

@@ -2,8 +2,12 @@
 
 import io
 import json
+import secrets
 import os
+import shutil
 import tarfile
+import base64
+from hashlib import sha256
 from abc import ABC, abstractmethod
 from pathlib import Path
 
@@ -18,6 +22,7 @@ import docker
 
 os.chdir(Path(__file__).absolute().parent)
 
+KUBERNETES_PATH = Path("./deploy")
 
 def abort(messages, origin=None):
     if isinstance(messages, marshmallow.ValidationError):
@@ -53,23 +58,37 @@ def abort(messages, origin=None):
             print(first + rest)
     exit(1)
 
+def gen_hash(text):
+    hasher = sha256()
+    hasher.update(text.encode("utf-8"))
+    return hasher.digest().hex()
+
+
 
 def load_dockerfile_base():
     with open("./docker/Dockerfile") as file:
         return file.read().strip()
 
 
-def load_yaml(path, json=False):
+def load_yaml(path, json=False, multiple=False):
     typ = "safe" if json else None
-    return YAML(typ=typ).load(Path(path))
+    yaml = YAML(typ=typ)
+    path = Path(path)
+    if multiple:
+        return list(yaml.load_all(path))
+    return yaml.load(path)
 
 
-def dump_yaml(data, path):
+def dump_yaml(data, path, multiple=False):
+    path = Path(path)
     yaml = YAML()
     yaml.width = 4096
     yaml.default_flow_style = False
-    yaml.indent(mapping=2, offset=2)
-    yaml.dump(data, path)
+    yaml.indent(mapping=2, offset=2, sequence=4)
+    if multiple:
+        yaml.dump_all(data, path)
+    else:
+        yaml.dump(data, path)
 
 
 def load_config():
@@ -168,7 +187,10 @@ class Plugin(ABC):
 
         source = global_config["source"]
         self.plugin_path = Path(source).absolute()
-        config_json = load_yaml(self.plugin_path / "config.yaml")
+        try:
+            config_json = load_yaml(self.plugin_path / "config.yaml")
+        except FileNotFoundError:
+            abort("plugin could not be found", source)
 
         try:
             config = self.plugin_schema().load(config_json)
@@ -189,13 +211,13 @@ class Plugin(ABC):
         if not config.get("type"):
             abort("no type is set for the plugin", self.name)
 
-        config["deploy_name"] = self.name + ":" + self.version
         config["image"] = f"{self.type.lower()}_{self.name}:latest"
-        build_path = self.plugin_path / "Dockerfile.dev"
-        if not build_path.exists():
-            if not "devimage" in config:
+        if "devimage" in config:
+            build_path = Path("./docker/images-dev") / config["devimage"]
+        else:
+            build_path = self.plugin_path / "Dockerfile.dev"
+            if not build_path.exists():
                 abort("no Dockerfile.dev or devimage was provided", self.name)
-            build_path = Path("./docker/images") / config["devimage"]
         docker_image_path = build_path.absolute()
         config["build"] = {
             "context": str(docker_image_path.parent),
@@ -207,7 +229,8 @@ class Plugin(ABC):
             str(Path("./plugin_server").absolute()): "/server",
         }
         config["named_volumes"] = {f"{self.name}_root": "/root"}
-        environment = global_config.get("environment", {})
+        environment = {}
+        environment.update(global_config.get("environment", {}))
         environment.update({"PLUGIN_NAME": self.name, "PLUGIN_TYPE": self.type})
         model = config.get("model")
         if model:
@@ -232,6 +255,15 @@ class Plugin(ABC):
         else:
             abort("neither requirements.txt nor Pipfile exists", self.name)
         config["command"] = f'bash -c "{command}"'
+
+
+    @abstractmethod
+    def global_config_schema(self):
+        pass
+
+    @abstractmethod
+    def plugin_schema(self):
+        pass
 
     @property
     @abstractmethod
@@ -281,10 +313,6 @@ class Plugin(ABC):
         return "\n".join(dockerfile_parts)
 
     @property
-    def deploy_name(self):
-        return self.config["deploy_name"]
-
-    @property
     def volumes(self):
         config = self.config
         volumes = config["named_volumes"].copy()
@@ -301,7 +329,11 @@ class Plugin(ABC):
 
     @property
     def environment(self):
-        return list(map("=".join, self.config["environment"].items()))
+        return list(map(tuple, self.config["environment"].items()))
+
+    @property
+    def environment_list(self):
+        return list(map("=".join, self.environment))
 
     @property
     def repository(self):
@@ -309,10 +341,11 @@ class Plugin(ABC):
 
     @property
     def tag(self):
-        return f"{self.docker_username}/{self.deploy_name}"
+        return f"{self.repository}:{self.version}"
 
+    @property
     def url_env(self):
-        return f"{self.name.upper()}_{self.type}_URL={self.url}"
+        return (f"{self.name.upper()}_{self.type}_URL", f"{self.url}")
 
     def named_volumes_to_config(self):
         return {volume: None for volume in self.config["named_volumes"].keys()}
@@ -399,6 +432,41 @@ class Plugin(ABC):
                     )
         print(f"done pushing " + colored_tag)
 
+    @property
+    def image_url(self):
+        return f"docker.io/{self.tag}"
+
+    def gen_kubernetes(self):
+        name = self.name
+        deployment_name = f"summarizer-{name}"
+        port_name = name
+        if len(port_name) > 16:
+            port_name = name[:11] + gen_hash(name)[:5]
+        env = list(dict(zip(("name", "value"), env)) for env in self.environment)
+        image_url = self.image_url
+        deployment, service = load_yaml("./kubernetes/plugin.yaml", multiple=True)
+        metadata = deployment["metadata"]
+        metadata["name"] = deployment_name
+        metadata["labels"]["tier"] = name
+        spec = deployment["spec"]
+        spec["selector"]["matchLabels"]["tier"] = name
+        template = spec["template"]
+        template["metadata"]["labels"]["tier"] = name
+        container = template["spec"]["containers"][0]
+        container["name"] = name
+        container["image"] = image_url
+        container["env"] = env
+        container["ports"][0]["name"] = port_name
+        container["readinessProbe"]["httpGet"]["port"] = port_name
+
+        service["metadata"]["name"] = deployment_name
+        spec = service["spec"]
+        spec["selector"]["tier"] = name
+        spec["ports"][0]["targetPort"] = port_name
+        path = Path(KUBERNETES_PATH / f"{self.type.lower()}/{name}.yaml")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        dump_yaml([deployment, service], path, multiple=True)
+
     def to_yaml(self):
         config = self.config
         service_conf = CommentedMap()
@@ -407,20 +475,18 @@ class Plugin(ABC):
         service_conf["working_dir"] = config["working_dir"]
         service_conf["volumes"] = list(map(":".join, self.volumes.items()))
         service_conf["command"] = config["command"]
-        service_conf["environment"] = self.environment
+        service_conf["environment"] = self.environment_list
         yaml_data = CommentedMap()
         yaml_data[self.name] = service_conf
         return yaml_data
 
 
 class MetricPlugin(Plugin):
-    @property
     def global_config_schema(self):
-        return GlobalMetricConfigSchema
+        return GlobalMetricConfigSchema()
 
-    @property
     def plugin_schema(self):
-        return MetricPluginSchema
+        return MetricPluginSchema()
 
     @property
     def type(self):
@@ -428,13 +494,11 @@ class MetricPlugin(Plugin):
 
 
 class SummarizerPlugin(Plugin):
-    @property
-    def global_config_schema():
-        return GlobalSummarizerConfigSchema
+    def global_config_schema(self):
+        return GlobalSummarizerConfigSchema()
 
-    @property
-    def plugin_schema():
-        return SummarizerPluginSchema
+    def plugin_schema(self):
+        return SummarizerPluginSchema()
 
     @property
     def type(self):
@@ -447,17 +511,56 @@ class Plugins(list, ABC):
     def type(self):
         pass
 
+    @property
+    def api_env(self):
+        return [(f"{self.type}", ",".join(plugin.name for plugin in self))]
+
+    @property
+    def frontend_env(self):
+        return [
+            (
+                f"REACT_APP_{self.type}",
+                json.dumps(
+                    {plugin.name: plugin.frontend_env for plugin in self},
+                    separators=(",", ":"),
+                ),
+            )
+        ]
+
+    @property
+    def api_docker_compose_env(self):
+        return list(map("=".join, self.api_env))
+
+    @property
+    def frontend_docker_compose_env(self):
+        return list(map("=".join, self.frontend_env))
+
+    @property
+    def api_kubernets_env(self):
+        envs = [plugin.url_env for plugin in self]
+        envs.extend(self.api_env)
+        return list(dict(zip(("name", "value"), env)) for env in envs)
+
+    @property
+    def frontend_kubernets_env(self):
+        envs = self.frontend_env
+        return list(dict(zip(("name", "value"), env)) for env in envs)
+
+    def gen_kubernetes(self):
+        for plugin in self:
+            plugin.gen_kubernetes()
+
 
 class MetricPlugins(Plugins):
     @property
     def type(self):
-        return "metrics"
+        return "METRICS"
 
 
 class SummarizerPlugins(Plugins):
     @property
     def type(self):
-        return "summarizers"
+        return "SUMMARIZERS"
 
 
 def get_plugins():
@@ -492,35 +595,20 @@ def init_compose_file():
 
 def _gen_docker_compose():
     compose_data, services_data, volumes = init_compose_file()
-
     metric_plugins, summarizer_plugins = get_plugins()
 
     for plugin in metric_plugins + summarizer_plugins:
         volumes.extend(plugin.named_volumes_to_config())
-        services_data["api"]["environment"].append(plugin.url_env())
+        services_data["api"]["environment"].append("=".join(plugin.url_env))
         services_data.update(plugin.to_yaml())
 
-    api_metrics_env = "METRICS=" + ",".join([plugin.name for plugin in metric_plugins])
-    api_summarizers_env = "SUMMARIZERS=" + ",".join(
-        [plugin.name for plugin in summarizer_plugins]
-    )
-
     api_environment = services_data["api"]["environment"]
-    api_environment.append(api_metrics_env)
-    api_environment.append(api_summarizers_env)
-
-    frontend_metrics_env = "REACT_APP_METRICS=" + json.dumps(
-        {plugin.name: plugin.frontend_env for plugin in metric_plugins},
-        separators=(",", ":"),
-    )
-    frontend_summarizers_env = "REACT_APP_SUMMARIZERS=" + json.dumps(
-        {plugin.name: plugin.frontend_env for plugin in summarizer_plugins},
-        separators=(",", ":"),
-    )
+    api_environment.extend(metric_plugins.api_docker_compose_env)
+    api_environment.extend(summarizer_plugins.api_docker_compose_env)
 
     frontend_environment = services_data["frontend"]["environment"]
-    frontend_environment.append(frontend_metrics_env)
-    frontend_environment.append(frontend_summarizers_env)
+    frontend_environment.extend(metric_plugins.frontend_docker_compose_env)
+    frontend_environment.extend(summarizer_plugins.frontend_docker_compose_env)
 
     compose_data["services"] = services_data
     compose_data["volumes"] = volumes.to_dict()
@@ -535,13 +623,15 @@ class Docker:
     def __init__(self):
         try:
             self.client = docker.from_env()
-            self.metric_plugins, self.summarizer_plugins = get_plugins()
         except docker.errors.DockerException:
             abort("the docker service is not running", "docker")
+        self.metric_plugins, self.summarizer_plugins = get_plugins()
+        self.api = Api()
+        self.frontend = Frontend()
 
     @staticmethod
     def print_images(plugins):
-        print(colored(plugins.type, "green"))
+        print(colored(plugins.type.lower(), "green"))
         for plugin in plugins:
             print(f"  {plugin.name} (version: {plugin.version})")
         print()
@@ -550,53 +640,292 @@ class Docker:
     def plugins(self):
         return self.metric_plugins + self.summarizer_plugins
 
+    @property
+    def base_services(self):
+        return [self.api, self.frontend]
+
+    @property
+    def services(self):
+        return self.base_services + self.plugins
+
     def get_image(self, name):
-        for plugin in self.plugins:
-            if plugin.name == name:
-                return plugin
+        for service in self.services:
+            if service.name == name:
+                return service
+
+    def print_base_images(self):
+        print(colored("base", "green"))
+        for service in self.base_services:
+            print(f"  {service.type} (version: {service.version})")
+        print()
 
     def list_images(self):
+        self.print_base_images()
         self.print_images(self.metric_plugins)
         self.print_images(self.summarizer_plugins)
 
-    def build(self, name):
-        plugin = self.get_image(name)
-        if not plugin:
-            abort(f"image '{name}' does not exit", "build")
-        plugin.build()
+    def exists(self, image):
+        try:
+            self.client.images.get(image)
+            return True
+        except docker.errors.ImageNotFound:
+            return False
 
-    def build_all(self):
-        for plugin in self.plugins:
-            plugin.build()
+
+    def build(self, name, force):
+        service = self.get_image(name)
+        if not service:
+            abort(f"service '{name}' does not exit", "build")
+        if not force and self.exists(service.tag):
+            service_tag = colored(service.tag, "green")
+            print(f"image {service_tag} already present")
+        else:
+            service.build()
+
+    def build_all(self, force):
+        for service in self.services:
+            if not force and self.exists(service.tag):
+                service_tag = colored(service.tag, "green")
+                print(f"image {service_tag} already present")
+            else:
+                service.build()
 
     def push(self, name):
-        plugin = self.get_image(name)
-        if not plugin:
-            abort(f"image '{name}' does not exit", "push")
-        plugin.push()
+        service = self.get_image(name)
+        if not service:
+            abort(f"service '{name}' does not exit", "push")
+        service.push()
 
     def push_all(self):
-        for plugin in self.plugins:
-            plugin.push()
+        for service in self.services:
+            service.push()
+
+
+class Service(ABC):
+    PLUGINS = None
+    CONFIG = None
+
+    def __init__(self):
+        if not self.CONFIG:
+            self.CONFIG = load_config()
+        if not self.PLUGINS:
+            self.PLUGINS = get_plugins()
+
+    @property
+    def name(self):
+        return self.type
+
+    @property
+    def version(self):
+        try:
+            return self._version
+        except AttributeError:
+            _version = load_yaml(f"./{self.type}/config.yaml", json=True).get("version")
+            if not _version:
+                abort("version is missing", "config")
+            self._version = _version
+            return _version
+
+    @property
+    def docker_username(self):
+        try:
+            return self._docker_username
+        except AttributeError:
+            _docker_username = self.CONFIG.get("docker_username")
+            if not _docker_username:
+                abort("docker_username needs to be defined for tagging the image", self.name)
+            self._docker_username = _docker_username
+            return _docker_username
+
+    @property
+    def nodeport(self):
+        try:
+            return self._nodeport
+        except AttributeError:
+            deploy = self.CONFIG.get("deploy")
+            _nodeport = deploy.get("nodeport") if deploy else None
+            if not _nodeport:
+                abort("deploy nodeport needs to be defined", "kubernetes")
+            self._nodeport = _nodeport
+            return _nodeport
+
+    @property
+    @abstractmethod
+    def type(self):
+        pass
+
+    @property
+    def path(self):
+        raise NotImplementedError()
+
+    @property
+    def repository(self):
+        return f"{self.docker_username}/tldr-{self.name}"
+
+    @property
+    def tag(self):
+        return f"{self.repository}:{self.version}"
+
+    @property
+    def image_url(self):
+        return f"docker.io/{self.tag}"
+
+
+    def build(self):
+        colored_tag = colored(self.tag, "green")
+        print(f"building " + colored_tag)
+
+        client = docker.from_env()
+        for status in client.api.build(path=self.path, decode=True):
+            error = status.get("error")
+            if error:
+                abort(error, self.name)
+            stream = status.get("stream")
+            if stream:
+                print(stream, end="")
+        image = client.images.build(path=self.path)[0]
+        image.tag(self.tag)
+        print(f"done building " + colored_tag)
+
+    def push(self):
+        colored_tag = colored(self.tag, "green")
+        print(f"pushing " + colored_tag)
+        for line in docker.from_env().images.push(
+            repository=self.repository, tag=self.version, stream=True
+        ):
+            if b"error" in line:
+                status = json.loads(line)
+                error = status.get("error")
+                if error:
+                    abort(
+                        [
+                            [self.name, error],
+                            ["push", "failed (maybe you need to login first)"],
+                        ]
+                    )
+        print(f"done pushing " + colored_tag)
+
+
+class Api(Service):
+    @property
+    def type(self):
+        return "api"
+
+    @property
+    def path(self):
+        return "./api/"
+
+    def gen_kubernetes(self):
+        metric_plugins, summarizer_plugins = self.PLUGINS
+
+        docs = load_yaml(f"./kubernetes/basic/{self.type}.yaml", multiple=True)
+        container = docs[0]["spec"]["template"]["spec"]["containers"][0]
+        container["image"] = self.image_url
+        env = container["env"]
+        env.extend(metric_plugins.api_kubernets_env)
+        env.extend(summarizer_plugins.api_kubernets_env)
+
+        path = Path(KUBERNETES_PATH / f"services/basic/{self.type}.yaml")
+        path.parent.mkdir(exist_ok=True, parents=True)
+        dump_yaml(docs, path, multiple=True)
+
+
+class Frontend(Service):
+    @property
+    def type(self):
+        return "frontend"
+
+    @property
+    def path(self):
+        return "./frontend/"
+
+    def gen_kubernetes(self):
+        metric_plugins, summarizer_plugins = self.PLUGINS
+
+        docs = load_yaml(f"./kubernetes/basic/{self.type}.yaml", multiple=True)
+        container = docs[0]["spec"]["template"]["spec"]["containers"][0]
+        container["image"] = self.image_url
+        env = container["env"]
+        env.extend(metric_plugins.frontend_kubernets_env)
+        env.extend(summarizer_plugins.frontend_kubernets_env)
+
+        path = Path(KUBERNETES_PATH / f"services/basic/{self.type}.yaml")
+        path.parent.mkdir(exist_ok=True, parents=True)
+        dump_yaml(docs, path, multiple=True)
+
+
+class MongoDB(Service):
+    @property
+    def type(self):
+        return "mongodb"
+
+    def gen_kubernetes(self):
+        shutil.copyfile(
+            f"./kubernetes/basic/{self.type}.yaml",
+            KUBERNETES_PATH / f"services/basic/{self.type}.yaml",
+        )
+
+
+class Proxy(Service):
+    @property
+    def type(self):
+        return "proxy"
+
+    def gen_kubernetes(self):
+        docs = load_yaml(f"./kubernetes/basic/{self.type}.yaml", multiple=True)
+        port = docs[2]["spec"]["ports"][0]
+        port["nodePort"] = self.nodeport
+
+        path = Path(KUBERNETES_PATH / f"services/basic/{self.type}.yaml")
+        path.parent.mkdir(exist_ok=True, parents=True)
+        dump_yaml(docs, path, multiple=True)
+
+def gen_secret(nbytes):
+    return base64.b64encode(secrets.token_bytes(nbytes)).decode("ascii")
+
+
+def gen_token_secrets(nbytes=256):
+    token_secrets = load_yaml(f"./kubernetes/token_secrets.yaml")
+    data = token_secrets["data"]
+    data["access-token-secret"] = gen_secret(nbytes)
+    data["refresh-token-secret"] = gen_secret(nbytes)
+    dump_yaml(token_secrets, KUBERNETES_PATH / "token_secrets.yaml")
+
+
+def _gen_kubernetes():
+    Api().gen_kubernetes()
+    Frontend().gen_kubernetes()
+    MongoDB().gen_kubernetes()
+    Proxy().gen_kubernetes()
+
+    metric_plugins, summarizer_plugins = get_plugins()
+    metric_plugins.gen_kubernetes()
+    summarizer_plugins.gen_kubernetes()
 
 
 @click.command()
-def gen_kubernetes():
-    pass
+@click.option("--secrets", is_flag=True)
+def gen_kubernetes(secrets):
+    if secrets:
+        gen_token_secrets()
+    else:
+        _gen_kubernetes()
 
 
 @click.command()
 @click.option("--all", is_flag=True)
-@click.argument("name", default="")
-def build(name, all):
+@click.option("--force", is_flag=True)
+@click.argument("names", nargs=-1)
+def build(names, force, all):
     docker = Docker()
     if all:
-        docker.build_all()
-    elif not name:
-        print("give the name of the plugin to build or --all for all")
+        docker.build_all(force)
+    elif not names:
+        print("give the name of the service to build or --all for all")
         docker.list_images()
     else:
-        docker.build(name)
+        for name in names:
+            docker.build(name, force)
 
 
 @click.command()
