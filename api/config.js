@@ -24,7 +24,6 @@ SUMMARIZERS = Object.keys(SUMMARIZERS_INFO)
 
 console.log("Metrics: ", METRICS);
 console.log("Summarizers: ", SUMMARIZERS);
-console.log(process.env.NODE_ENV)
 
 const METRIC_URLS = METRICS.reduce((acc, val) => {
   url = `${val.toUpperCase()}_METRIC_URL`;
@@ -38,6 +37,7 @@ const SUMMARIZER_URLS = SUMMARIZERS.reduce((acc, val) => {
 
 const PORT = process.env.PORT || 5000;
 console.log("Modus:", process.env.NODE_ENV);
+
 let ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
 let REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
 
@@ -51,6 +51,9 @@ if (!ACCESS_TOKEN_SECRET || !REFRESH_TOKEN_SECRET) {
     );
     process.exit(1);
   }
+} else {
+  ACCESS_TOKEN_SECRET = Buffer.from(ACCESS_TOKEN_SECRET, "base64");
+  REFRESH_TOKEN_SECRET = Buffer.from(ACCESS_TOKEN_SECRET, "base64");
 }
 
 const MONGODB_HOST = process.env.MONGODB_HOST;

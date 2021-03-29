@@ -23,7 +23,7 @@ spec:
         tier: api
     spec:
       volumes:
-        - name: plugin_config
+        - name: plugin-config
           configMap:
             name: summarizer-plugins
       containers:
@@ -50,7 +50,7 @@ spec:
               containerPort: 5000
               protocol: TCP
           volumeMounts:
-            - name: plugin_config
+            - name: plugin-config
               subPath: plugin_config.json
               mountPath: "/app/plugin_config.json"
               readOnly: true

@@ -200,6 +200,10 @@ class Plugin(ABC):
         return f"http://{self.mangled_name}:5000"
 
     @property
+    def kubernetes_url(self):
+        return f"http://summarizer-{self.kubernetes_name}:5000"
+
+    @property
     def environment(self):
         config = self.config
         environment = {"PLUGIN_TYPE": self.__type__}
@@ -224,6 +228,10 @@ class Plugin(ABC):
     @property
     def url_env(self):
         return (f"{self.name.upper()}_{self.__type__}_URL", f"{self.url}")
+
+    @property
+    def kubernetes_url_env(self):
+        return (f"{self.name.upper()}_{self.__type__}_URL", f"{self.kubernetes_url}")
 
     def named_volumes_to_config(self):
         return {volume: None for volume in self.named_volumes.keys()}
@@ -315,15 +323,20 @@ class Plugin(ABC):
         return f"docker.io/{self.tag}"
 
     @property
+    def kubernetes_name(self):
+        return self.__type__.lower() + "-" + self.name.replace("_", "-")
+
+    @property
     def port_name(self):
-        name = self.name
+        name = self.kubernetes_name
         port_name = name
-        if len(port_name) > 16:
-            port_name = name[:11] + gen_hash(name)[:5]
+        if len(port_name) > 15:
+            port_name = name[:10] + gen_hash(name)[:5]
         return port_name
 
+
     def gen_kubernetes(self):
-        name = self.name
+        name = self.kubernetes_name
         version = self.version
         deployment_name = f"summarizer-{name}"
         port_name = self.port_name
@@ -358,7 +371,7 @@ class Plugin(ABC):
         selector["tier"] = name
         selector["version"] = version
         spec["ports"][0]["targetPort"] = port_name
-        path = Path(KUBERNETES_PATH / f"{self.__type__.lower()}/{name}.yaml")
+        path = Path(KUBERNETES_PATH / f"{self.__type__.lower()}/{self.name}.yaml")
         path.parent.mkdir(parents=True, exist_ok=True)
         dump_yaml([deployment, service], path, multiple=True)
 
@@ -459,7 +472,7 @@ class Plugins(ABC):
 
     @property
     def api_kubernetes_env(self):
-        envs = [plugin.url_env for plugin in self]
+        envs = [plugin.kubernetes_url_env for plugin in self]
         return list(dict(zip(("name", "value"), env)) for env in envs)
 
     def gen_kubernetes(self):

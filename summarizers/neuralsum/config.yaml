@@ -1,6 +1,4 @@
 version: "1.0"
-name: bertsum
-readable: BERTSummarizer
-type: extractive
+type: abstractive
 devimage: slim
 deployimage: slim

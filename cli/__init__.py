@@ -5,23 +5,18 @@ import secrets
 import shutil
 from abc import ABC, abstractmethod
 from pathlib import Path
-import ruamel
 
 import click
 import docker
+import ruamel
 from ruamel.yaml.comments import CommentedMap
 from termcolor import colored
 
-from .config import KUBERNETES_PATH, CONFIG_PATH
-from .plugins import MetricPlugin, MetricPlugins, SummarizerPlugin, SummarizerPlugins
-from .utils import (
-    abort,
-    add_newlines,
-    dump_yaml,
-    get_config,
-    load_yaml,
-    remove_comments,
-)
+from .config import CONFIG_PATH, KUBERNETES_PATH
+from .plugins import (MetricPlugin, MetricPlugins, SummarizerPlugin,
+                      SummarizerPlugins)
+from .utils import (abort, add_newlines, dump_yaml, get_config, load_yaml,
+                    remove_comments)
 
 os.chdir(Path(__file__).absolute().parent.parent)
 
@@ -69,11 +64,13 @@ def init_compose_file():
         services_data.update(part_data)
     return compose_data, services_data, volumes
 
+
 def gen_plugin_config(plugins_list):
     plugin_config = {}
     for plugins in plugins_list:
         plugin_config.update(plugins.plugin_config())
     return json.dumps(plugin_config, indent=2)
+
 
 def _gen_docker_compose():
     compose_data, services_data, volumes = init_compose_file()
@@ -95,8 +92,6 @@ def _gen_docker_compose():
     add_newlines(services_data)
     add_newlines(compose_data)
     dump_yaml(compose_data, Path("./docker-compose.yaml"))
-
-
 
 
 class Service(ABC):
@@ -213,7 +208,11 @@ class Api(Service):
         docs = load_yaml(
             f"./templates/kubernetes/basic/{self.__type__}.yaml", multiple=True
         )
-        docs[0]["data"] = ruamel.yaml.scalarstring.PreservedScalarString(plugin_config)
+        docs[0]["data"] = {
+            "plugin_config.json": ruamel.yaml.scalarstring.PreservedScalarString(
+                plugin_config
+            )
+        }
         container = docs[1]["spec"]["template"]["spec"]["containers"][0]
         container["image"] = self.image_url
         container["env"].extend(plugin_envs)
@@ -248,7 +247,7 @@ class MongoDB(Service):
     def gen_kubernetes(self):
         shutil.copyfile(
             f"./templates/kubernetes/basic/{self.__type__}.yaml",
-            Path(self.__deploy_path__ / f"{self.__type__}.yaml")
+            Path(self.__deploy_path__ / f"{self.__type__}.yaml"),
         )
 
 
@@ -286,6 +285,7 @@ class Docker:
         "metric": MetricPlugins,
         "summarizer": SummarizerPlugins,
     }
+
     def __init__(self):
         try:
             self.client = docker.from_env()
@@ -295,7 +295,6 @@ class Docker:
         for key, value in self.service_types.items():
             services[key] = value.load()
         self.services = services
-
 
     def print_images(self, service_type):
         print(colored(service_type, "green"))
@@ -319,8 +318,13 @@ class Docker:
                 found_service = service
                 mult_service.append(service_type)
         if len(mult_service) > 1:
-            commands = ", ".join(f"build {service_type}:{name}" for service_type in mult_service)
-            abort(f"there are multiple services with the name {name}, build one with one of the following commands: {commands}", name)
+            commands = ", ".join(
+                f"build {service_type}:{name}" for service_type in mult_service
+            )
+            abort(
+                f"there are multiple services with the name {name}, build one with one of the following commands: {commands}",
+                name,
+            )
         return found_service
 
     def list_images(self):
@@ -371,7 +375,7 @@ def gen_secret(nbytes):
 
 def gen_token_secrets(nbytes=256):
     token_secrets = load_yaml(f"./templates/kubernetes/token_secrets.yaml")
-    data = token_secrets["data"]
+    data = token_secrets["stringData"]
     data["access-token-secret"] = gen_secret(nbytes)
     data["refresh-token-secret"] = gen_secret(nbytes)
     dump_yaml(token_secrets, KUBERNETES_PATH / "token_secrets.yaml")
@@ -380,10 +384,19 @@ def gen_token_secrets(nbytes=256):
 def _gen_kubernetes():
     metric_plugins, summarizer_plugins = get_plugins()
     api_env = metric_plugins.api_kubernetes_env + summarizer_plugins.api_kubernetes_env
-    Api().gen_kubernetes(api_env, gen_plugin_config([metric_plugins, summarizer_plugins]))
+    shutil.rmtree("./deploy/basic", ignore_errors=True)
+    shutil.rmtree("./deploy/metrics", ignore_errors=True)
+    shutil.rmtree("./deploy/summarizers", ignore_errors=True)
+    Api().gen_kubernetes(
+        api_env, gen_plugin_config([metric_plugins, summarizer_plugins])
+    )
     Frontend().gen_kubernetes()
     MongoDB().gen_kubernetes()
     Proxy().gen_kubernetes()
+    shutil.copyfile(
+        f"./templates/kubernetes/volumes.yaml",
+        KUBERNETES_PATH / "volumes.yaml",
+    )
     metric_plugins.gen_kubernetes()
     summarizer_plugins.gen_kubernetes()
 
