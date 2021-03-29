@@ -7,7 +7,6 @@ sys.path.insert(0, "/app")
 from flask import Flask, jsonify, request
 
 PLUGIN_TYPE = environ.get("PLUGIN_TYPE")
-PLUGIN_NAME = environ.get("PLUGIN_NAME")
 
 
 def construct_metric():
@@ -31,7 +30,7 @@ def construct_metric():
             score = plugin.evaluate(hyps, refs)
 
             headers = {"Content-Type": "application/json"}
-            return jsonify({PLUGIN_NAME: score}), 200, headers
+            return jsonify({"score": score}), 200, headers
         except Exception as error:
             logging.warning(error)
             return "", 400
@@ -54,7 +53,7 @@ def construct_summarizer():
             summary = plugin.summarize(text, ratio)
 
             headers = {"Content-Type": "application/json"}
-            return jsonify({PLUGIN_NAME: summary}), 200, headers
+            return jsonify({"summary": summary}), 200, headers
         except Exception as error:
             logging.warning(error)
             return "", 400
@@ -71,8 +70,6 @@ PLUGIN_TYPES = {
     "SUMMARIZER": construct_summarizer,
 }
 
-if not PLUGIN_NAME:
-    raise ValueError("environment variable PLUGIN_NAME needs to be defined")
 if not PLUGIN_TYPE:
     raise ValueError(
         f"environment variable PLUGIN_TYPE needs to be defined (one of: {list(PLUGIN_TYPES)})"

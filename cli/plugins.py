@@ -1,7 +1,7 @@
 import io
 import json
 import tarfile
-from abc import ABC, abstractmethod, abstractstaticmethod
+from abc import ABC, abstractmethod
 from pathlib import Path
 
 import docker
@@ -10,6 +10,7 @@ import giturlparse
 import marshmallow
 from ruamel.yaml.comments import CommentedMap
 from termcolor import colored
+import re
 
 from .config import KUBERNETES_PATH
 from .schema import (GlobalConfigSchema, GlobalMetricConfigSchema,
@@ -176,13 +177,6 @@ class Plugin(ABC):
             str(self.plugin_path): "/app",
         }
 
-    #     @property
-    #     def host_volumes(self):
-    #         return {
-    #             str(Path("./plugin_server").absolute()): "/server",
-    #             str(self.plugin_path): "/server/plugin",
-    #         }
-
     @property
     def named_volumes(self):
         return {f"{self.mangled_name}_root": "/root"}
@@ -208,9 +202,9 @@ class Plugin(ABC):
     @property
     def environment(self):
         config = self.config
-        environment = {"PLUGIN_NAME": self.name, "PLUGIN_TYPE": self.__type__}
+        environment = {"PLUGIN_TYPE": self.__type__}
         environment.update(config.get("environment", {}))
-        model = config.get("model")
+        model = self.model
         if model:
             environment["PLUGIN_MODEL"] = model
         return list(map(tuple, environment.items()))
@@ -330,6 +324,7 @@ class Plugin(ABC):
 
     def gen_kubernetes(self):
         name = self.name
+        version = self.version
         deployment_name = f"summarizer-{name}"
         port_name = self.port_name
         env = list(dict(zip(("name", "value"), env)) for env in self.environment)
@@ -339,11 +334,17 @@ class Plugin(ABC):
         )
         metadata = deployment["metadata"]
         metadata["name"] = deployment_name
-        metadata["labels"]["tier"] = name
+        labels = metadata["labels"]
+        labels["tier"] = name
+        labels["version"] = version
         spec = deployment["spec"]
-        spec["selector"]["matchLabels"]["tier"] = name
+        labels = spec["selector"]["matchLabels"]
+        labels["tier"] = name
+        labels["version"] = version
         template = spec["template"]
-        template["metadata"]["labels"]["tier"] = name
+        labels = template["metadata"]["labels"]
+        labels["tier"] = name
+        labels["version"] = version
         container = template["spec"]["containers"][0]
         container["name"] = name
         container["image"] = image_url
@@ -353,7 +354,9 @@ class Plugin(ABC):
 
         service["metadata"]["name"] = deployment_name
         spec = service["spec"]
-        spec["selector"]["tier"] = name
+        selector = spec["selector"]
+        selector["tier"] = name
+        selector["version"] = version
         spec["ports"][0]["targetPort"] = port_name
         path = Path(KUBERNETES_PATH / f"{self.__type__.lower()}/{name}.yaml")
         path.parent.mkdir(parents=True, exist_ok=True)

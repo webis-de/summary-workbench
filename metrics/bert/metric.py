@@ -1,4 +1,4 @@
-from bert_score import BERTScorer as Bert
+from bert_score import BERTScorer
 import numpy as np
 import os
 
@@ -6,7 +6,7 @@ MODEL = os.environ.get("PLUGIN_MODEL") or "roberta-large-mnli"
 
 class MetricPlugin:
     def __init__(self):
-        self.bert = Bert(model_type=MODEL)
+        self.bert = BERTScorer(model_type=MODEL, rescale_with_baseline=True, lang="en")
 
     def evaluate(self, hypotheses, references):
-        return {"bert": float(np.average(self.bert.score(hypotheses, references)[0], rescale_with_baseline=True, lang="en"))}
+        return {"bert": float(np.average(self.bert.score(hypotheses, references)[0]))}

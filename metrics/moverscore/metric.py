@@ -1,6 +1,7 @@
 import os
 
 from moverscore import MoverScore, MoverScoreV2
+import numpy as np
 
 MODELS = {"MoverScoreV1": MoverScore, "MoverScoreV2": MoverScoreV2}
 
@@ -14,4 +15,4 @@ class MetricPlugin:
         self.mover_score = MODEL_CLASS()
 
     def evaluate(self, hypotheses, references):
-        return {"moverscore": self.mover_score.score(references, hypotheses)}
+        return {"moverscore": np.average(self.mover_score.score(references, hypotheses))}

@@ -1,7 +1,7 @@
 plugin_config.json
 experiments.py
 docker-compose.yaml
-deploy
+/deploy
 # Created by https://www.gitignore.io/api/flask,python,vim,dotenv,node,react
 # Edit at https://www.gitignore.io/?templates=flask,python,vim,dotenv,node,react
 

@@ -101,6 +101,7 @@ def _gen_docker_compose():
 
 class Service(ABC):
     __type__ = None
+    __deploy_path__ = KUBERNETES_PATH / "basic"
 
     def __init__(self):
         self.config = get_config()
@@ -220,7 +221,7 @@ class Api(Service):
         container["image"] = self.image_url
         container["env"].extend(plugin_envs)
 
-        path = Path(KUBERNETES_PATH / f"services/basic/{self.__type__}.yaml")
+        path = Path(self.__deploy_path__ / f"{self.__type__}.yaml")
         path.parent.mkdir(exist_ok=True, parents=True)
         dump_yaml(docs, path, multiple=True)
 
@@ -239,7 +240,7 @@ class Frontend(Service):
         container = docs[0]["spec"]["template"]["spec"]["containers"][0]
         container["image"] = self.image_url
 
-        path = Path(KUBERNETES_PATH / f"services/basic/{self.__type__}.yaml")
+        path = Path(self.__deploy_path__ / f"{self.__type__}.yaml")
         path.parent.mkdir(exist_ok=True, parents=True)
         dump_yaml(docs, path, multiple=True)
 
@@ -250,7 +251,7 @@ class MongoDB(Service):
     def gen_kubernetes(self):
         shutil.copyfile(
             f"./templates/kubernetes/basic/{self.__type__}.yaml",
-            KUBERNETES_PATH / f"services/basic/{self.__type__}.yaml",
+            Path(self.__deploy_path__ / f"{self.__type__}.yaml")
         )
 
 
@@ -264,7 +265,7 @@ class Proxy(Service):
         port = docs[2]["spec"]["ports"][0]
         port["nodePort"] = self.nodeport
 
-        path = Path(KUBERNETES_PATH / f"services/basic/{self.__type__}.yaml")
+        path = Path(self.__deploy_path__ / f"{self.__type__}.yaml")
         path.parent.mkdir(exist_ok=True, parents=True)
         dump_yaml(docs, path, multiple=True)
 

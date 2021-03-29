@@ -7,7 +7,7 @@ verify_ssl = true
 
 [packages]
 numpy = "*"
-bert-score = "*"
+bert-score = ">=0.3.0"
 
 [requires]
 python_version = "3.8"

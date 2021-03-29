@@ -1,34 +1,36 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: summarizer-bartcnn
+  name:
   labels:
     app: summarizer
-    tier: bartcnn
+    tier:
+    version:
 spec:
   selector:
     matchLabels:
       app: summarizer
-      tier: bartcnn
+      tier:
   template:
     metadata:
       labels:
         app: summarizer
-        tier: bartcnn
+        tier:
+        version:
     spec:
       containers:
-        - name: bartcnn
-          image: docker.io/ds40bamo/neuralsum-bartcnn:1.0
+        - name:
+          image:
           imagePullPolicy: Always
           env: []
           ports:
-            - name: bartcnn-port
+            - name:
               containerPort: 5000
               protocol: TCP
           readinessProbe:
             httpGet:
               path: /health
-              port: bartcnn-port
+              port:
             periodSeconds: 60
             timeoutSeconds: 60
       restartPolicy: Always
@@ -40,7 +42,8 @@ metadata:
 spec:
   selector:
     app: summarizer
-    tier: bartcnn
+    tier:
+    version:
   ports:
     - port: 5000
       targetPort: bartcnn-port

@@ -95,4 +95,4 @@ class SummarizerPlugin:
         self.summarizer = NeuralSummarizer(MODEL)
 
     def summarize(self, *args, **kwargs):
-        self.summarizer.summarize(*args, **kwargs)
+        return self.summarizer.summarize(*args, **kwargs)

@@ -1,0 +1,6 @@
+docker
+ruamel.yaml
+marshmallow
+termcolor
+GitPython
+giturlparse
