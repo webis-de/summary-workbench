@@ -1,6 +1,6 @@
 import React from "react";
 
-const SettingCheckbox = ({ isSet, readable, onClick }) => (
+const Checkbox = ({ isSet, readable, onClick }) => (
   <label className="uk-padding-small" style={{ whiteSpace: "nowrap" }}>
     <input
       className="uk-checkbox uk-margin-small-right"
@@ -13,18 +13,17 @@ const SettingCheckbox = ({ isSet, readable, onClick }) => (
   </label>
 );
 
-const SettingCheckboxes = ({ settings, subsettings, toggleSetting }) => (
+const Checkboxes = ({ options, toggleOption }) => (
   <div className="uk-flex uk-flex-column">
-    {subsettings.map((metric) => (
-      <SettingCheckbox
-        key={metric}
-        metric={metric}
-        isSet={settings[metric].isSet}
-        readable={settings[metric].readable}
-        onClick={() => toggleSetting(metric)}
+    {options.map(([option, readable, isSet]) => (
+      <Checkbox
+        key={option}
+        readable={readable}
+        isSet={isSet}
+        onClick={() => toggleOption(option)}
       />
     ))}
   </div>
 );
 
-export { SettingCheckboxes };
+export { Checkboxes };

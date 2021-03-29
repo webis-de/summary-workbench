@@ -1,13 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 
+import { MetricsContext } from "../contexts/MetricsContext";
 import { deleteCalculationRequest, getSavedCalculationsRequest } from "../api";
-import { metrics } from "../config";
 import { displayMessage } from "../utils/message";
 import { SavedInfo } from "./SavedInfo";
 import { Accordion, AccordionItem } from "./utils/Accordion";
 
 const Saved = ({ className, reloadSaved }) => {
   const [calculations, setCalculations] = useState([]);
+  const { loading, metrics } = useContext(MetricsContext)
 
   useEffect(() => {
     getSavedCalculationsRequest().then((data) => setCalculations(data));
@@ -28,7 +29,7 @@ const Saved = ({ className, reloadSaved }) => {
               <AccordionItem
                 key={name}
                 text={name}
-                badges={Object.keys(scores).map((key) => metrics[key].readable)}
+                badges={loading ? null : Object.keys(scores).map((key) => metrics[key].readable)}
               >
                 <SavedInfo name={name} scoreInfo={scores} deleteCalculation={deleteCalculation} />
               </AccordionItem>

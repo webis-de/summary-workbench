@@ -2,7 +2,7 @@ import React, { useContext, useState } from "react";
 import { FaExclamationCircle, FaInfoCircle } from "react-icons/fa";
 
 import { evaluateRequest } from "../api";
-import { SettingsContext } from "../contexts/SettingsContext";
+import { MetricsContext } from "../contexts/MetricsContext";
 import { markup } from "../utils/fragcolors";
 import { displayMessage } from "../utils/message";
 import { Button } from "./utils/Button";
@@ -11,15 +11,15 @@ import { Loading } from "./utils/Loading";
 
 const getChosenMetrics = (settings) =>
   Object.entries(settings)
-    .filter(([, { isSet }]) => isSet)
-    .map(([metric]) => metric);
+    .filter((e) => e[1])
+    .map((e) => e[0]);
 
 const Upload = ({ setCalculateResult }) => {
   const [hypFileName, setHypFile, hypLines] = useFile(null);
   const [refFileName, setRefFile, refLines] = useFile(null);
   const linesAreSame = sameLength([hypLines, refLines]);
 
-  const { settings } = useContext(SettingsContext);
+  const { settings } = useContext(MetricsContext);
 
   const [isComputing, setIsComputing] = useState(false);
 

@@ -1,15 +1,17 @@
 import isURL from "is-url";
-import React, { useReducer, useRef, useState } from "react";
+import React, { useContext, useReducer, useState } from "react";
 import { FaBars, FaEye, FaEyeSlash, FaThumbsDown, FaThumbsUp } from "react-icons/fa";
 import { CSSTransition } from "react-transition-group";
 
 import { feedbackRequest, summarizeRequest } from "../api";
-import { summarizers } from "../config";
+import { SummarizersContext } from "../contexts/SummarizersContext";
 import { markup as genMarkup } from "../utils/fragcolors";
 import { displayMessage } from "../utils/message";
 import { Markup } from "./Markup";
 import { Badge } from "./utils/Badge";
 import { Button } from "./utils/Button";
+import { Checkboxes } from "./utils/Checkboxes";
+import { CenterLoading } from "./utils/Loading";
 
 const withHover = (WrappedComponent, color) => ({ style, ...props }) => {
   const [hovered, setHovered] = useState(false);
@@ -76,60 +78,9 @@ const Header = ({ text, fontSize, backgroundColor = "#B02F2C", children, style }
   </div>
 );
 
-const Checkbox = ({ isSet, readable, onClick }) => {
-  console.log(readable);
-  return (
-    <label style={{ padding: "5px", whiteSpace: "nowrap" }}>
-      <input
-        className="uk-checkbox uk-margin-small-right"
-        checked={isSet}
-        readOnly
-        onClick={onClick}
-        type="checkbox"
-      />
-      <span style={{ whiteSpace: "nowrap" }}>{readable}</span>
-    </label>
-  );
-};
-
-const initSummarizers = (models) => {
-  const types = {};
-  Object.entries(models).forEach(([key, value]) => {
-    value.isSet = false;
-    const { type } = value;
-    if (types[type]) types[type].push(key);
-    else types[type] = [key];
-  });
-  return types;
-};
-
-const summarizerTypes = initSummarizers(summarizers);
-
-const Checkboxes = ({ models, submodels, toggleOption }) => (
-  <div className="uk-flex uk-flex-column">
-    {submodels.map((model) => {
-      const { readable, isSet } = models[model];
-      return (
-        <Checkbox
-          key={model}
-          readable={readable}
-          isSet={isSet}
-          onClick={() => toggleOption(model)}
-        />
-      );
-    })}
-  </div>
-);
-
-const toggleSettingReducer = (settings, metric) => {
-  const newSettings = { ...settings };
-  newSettings[metric].isSet = !newSettings[metric].isSet;
-  return newSettings;
-};
-
 const getSetModels = (models) =>
   Object.entries(models)
-    .filter((e) => e[1].isSet)
+    .filter((e) => e[1])
     .map((e) => e[0]);
 
 const Loading = () => <div data-uk-spinner />;
@@ -143,14 +94,14 @@ In 2009, following an Internet campaign, British Prime Minister Gordon Brown mad
 
 const InputDocument = ({ summarize, isComputing }) => {
   const [documentText, setDocumentText] = useState("");
-  const [models, toggleModel] = useReducer(toggleSettingReducer, summarizers);
+  const { summarizers, summarizerTypes, settings, toggleSetting } = useContext(SummarizersContext);
   const [percentage, setPercentage] = useState("15");
 
-  const anyModelSet = () => Object.values(models).some(({ isSet }) => isSet);
+  const anyModelSet = () => Object.values(settings).some((isSet) => isSet);
 
   const insertSampleText = () => {
     setDocumentText(sampleText);
-    models.textrank && !models.textrank.isSet && toggleModel("textrank");
+    if (settings.textrank) toggleSetting("textrank");
   };
 
   return (
@@ -187,14 +138,21 @@ const InputDocument = ({ summarize, isComputing }) => {
             <div className="uk-flex" style={{ marginTop: "-25px" }}>
               {Object.keys(summarizerTypes).length ? (
                 Object.entries(summarizerTypes).map(([key, value]) => (
-                  <div style={{ flex: "1" }} className="margin-right">
+                  <div key={key} style={{ flex: "1" }} className="margin-right">
                     <h4
                       className="underline-border uk-text-left colored-header"
                       style={{ textTransform: "capitalize" }}
                     >
                       {key}
                     </h4>
-                    <Checkboxes models={models} submodels={value} toggleOption={toggleModel} />
+                    <Checkboxes
+                      options={value.map((summarizer) => [
+                        summarizer,
+                        summarizers[summarizer].readable,
+                        settings[summarizer],
+                      ])}
+                      toggleOption={toggleSetting}
+                    />
                   </div>
                 ))
               ) : (
@@ -236,8 +194,8 @@ const InputDocument = ({ summarize, isComputing }) => {
                 ) : (
                   <button
                     className="uk-button uk-button-primary"
-                    disabled={!Boolean(documentText) || !anyModelSet()}
-                    onClick={() => summarize(documentText, getSetModels(models), percentage)}
+                    disabled={!documentText || !anyModelSet()}
+                    onClick={() => summarize(documentText, getSetModels(settings), percentage)}
                   >
                     Summarize
                   </button>
@@ -313,6 +271,8 @@ const SummaryTabView = ({ markups, clearMarkups, documentLength }) => {
     null
   );
 
+  const { summarizers } = useContext(SummarizersContext);
+
   return (
     <div className="uk-flex uk-flex-between">
       <div style={{ flexBasis: "60%", flexGrow: 0 }}>
@@ -378,6 +338,8 @@ const buildGrids = (list) => {
 
 const SummaryCompareView = ({ markups, showOverlap }) => {
   const grids = buildGrids(markups);
+
+  const { summarizers } = useContext(SummarizersContext);
   return (
     <>
       {grids.map((grid, gridIndex) => (
@@ -507,6 +469,7 @@ const Summarize = () => {
   const [markups, setMarkups] = useState(null);
   const [computing, setComputing] = useState(null);
   const [documentLength, setDocumentLength] = useState(0);
+  const { summarizers, loading, reload } = useContext(SummarizersContext);
 
   const summarize = (rawText, models, percentage) => {
     const text = rawText.trim();
@@ -525,7 +488,7 @@ const Summarize = () => {
           } else {
             const newMarkups = [];
             Object.entries(summaries).forEach(([name, summarySentences]) => {
-              let paragraphs = [];
+              const paragraphs = [];
               const paragraphSize = 3;
               for (let index = 0; index < summarySentences.length; index += paragraphSize) {
                 const paragraph = summarySentences.slice(index, index + paragraphSize);
@@ -555,14 +518,26 @@ const Summarize = () => {
 
   return (
     <>
-      {markups ? (
-        <SummaryView
-          documentLength={documentLength}
-          markups={markups}
-          clearMarkups={() => setMarkups(null)}
-        />
+      {loading ? (
+        <CenterLoading />
       ) : (
-        <InputDocument summarize={summarize} isComputing={computing} />
+        <>
+          {!summarizers ? (
+            <Button className="uk-container" onClick={reload}>Retry</Button>
+          ) : (
+            <>
+              {markups ? (
+                <SummaryView
+                  documentLength={documentLength}
+                  markups={markups}
+                  clearMarkups={() => setMarkups(null)}
+                />
+              ) : (
+                <InputDocument summarize={summarize} isComputing={computing} />
+              )}
+            </>
+          )}
+        </>
       )}
     </>
   );

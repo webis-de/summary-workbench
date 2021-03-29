@@ -1,5 +1,4 @@
 const { SUMMARIZERS, SUMMARIZER_URLS } = require("./config");
-console.log(SUMMARIZER_URLS)
 const axios = require("axios");
 
 const summarize = async (summarizers, text, ratio) => {

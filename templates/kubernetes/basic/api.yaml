@@ -1,3 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: summarizer-plugins
+data:
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -16,6 +22,10 @@ spec:
         app: summarizer
         tier: api
     spec:
+      volumes:
+        - name: plugin_config
+          configMap:
+            name: summarizer-plugins
       containers:
         - name: api
           image:
@@ -39,6 +49,11 @@ spec:
             - name: api-port
               containerPort: 5000
               protocol: TCP
+          volumeMounts:
+            - name: plugin_config
+              subPath: plugin_config.json
+              mountPath: "/app/plugin_config.json"
+              readOnly: true
           readinessProbe:
             httpGet:
               path: /health

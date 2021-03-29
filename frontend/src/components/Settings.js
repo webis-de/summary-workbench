@@ -1,25 +1,12 @@
 import React, { useContext } from "react";
 import { FaCogs } from "react-icons/fa";
 
-import { metrics } from "../config";
-import { SettingsContext } from "../contexts/SettingsContext";
+import { MetricsContext } from "../contexts/MetricsContext";
 import { Card } from "./utils/Card";
-import { SettingCheckboxes } from "./utils/SettingCheckboxes";
-
-const initMetrics = (models) => {
-  const types = {};
-  Object.entries(models).forEach(([key, value]) => {
-    const { type } = value;
-    if (types[type]) types[type].push(key);
-    else types[type] = [key];
-  });
-  return types;
-};
-
-const metricTypes = initMetrics(metrics);
+import { Checkboxes } from "./utils/Checkboxes";
 
 const Settings = () => {
-  const { settings, toggleSetting } = useContext(SettingsContext);
+  const { metrics, settings, toggleSetting, metricTypes } = useContext(MetricsContext);
 
   return (
     <Card
@@ -41,9 +28,12 @@ const Settings = () => {
               >
                 {key}
               </h4>
-              <SettingCheckboxes
-                settings={settings}
-                subsettings={value}
+              <Checkboxes
+                options={value.map((metric) => [
+                  metric,
+                  metrics[metric].readable,
+                  settings[metric],
+                ])}
                 toggleSetting={toggleSetting}
               />
             </div>

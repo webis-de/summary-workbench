@@ -2,7 +2,7 @@ import React, { useContext, useState } from "react";
 import UIkit from "uikit";
 
 import { evaluateRequest } from "../api";
-import { SettingsContext } from "../contexts/SettingsContext";
+import { MetricsContext } from "../contexts/MetricsContext";
 import { markup } from "../utils/fragcolors";
 import { Markup } from "./Markup";
 import { ScoreTable } from "./ScoreTable";
@@ -44,41 +44,31 @@ const TextField = ({ value, setValue, placeholder }) => (
   />
 );
 
+const getChosenMetrics = (metrics) =>
+  Object.entries(metrics)
+    .filter((e) => e[1])
+    .map((e) => e[0]);
+
 const OneHypRef = () => {
   const [hypText, setHypText] = useState("");
   const [refText, setRefText] = useState("");
   const [evaluateResult, setEvaluateResult] = useState(null);
   const [isComputing, setIsComputing] = useState(false);
-  const { settings } = useContext(SettingsContext);
+  const { settings } = useContext(MetricsContext);
 
-  const getChosenMetrics = () => {
-    const chosenMetrics = [];
-    for (const [metric, metricInfo] of Object.entries(settings)) {
-      if (metricInfo.isSet) {
-        chosenMetrics.push(metric);
-      }
-    }
-    return chosenMetrics;
-  };
-
-  const getComparison = (hypdata, refdata) => {
-    const [hyp, ref] = markup(hypdata, refdata);
-    return [hyp, ref];
-  };
-
-  const compute = (summ_eval = false) => {
+  const compute = () => {
     if (hypText.trim() === "" || refText.trim() === "") {
       UIkit.notification({ message: "no hypothesis or reference given", status: "danger" });
       return;
     }
     setIsComputing(true);
-    evaluateRequest(getChosenMetrics(settings), [hypText], [refText], summ_eval)
+    evaluateRequest(getChosenMetrics(settings), [hypText], [refText])
       .then((scores) => {
-        const [hyp, ref] = getComparison(hypText, refText);
+        const [hyp, ref] = markup(hypText, refText);
         setEvaluateResult({ scores, hyp, ref });
       })
-      .finally(() => setIsComputing(false))
-      .catch((e) => alert(e));
+      .catch((e) => alert(e))
+      .finally(() => setIsComputing(false));
   };
 
   return (
@@ -92,15 +82,13 @@ const OneHypRef = () => {
           {isComputing ? (
             <Loading />
           ) : (
-            <>
-              <Button
-                variant="primary"
-                disabled={!hypText.length || !refText.length}
-                onClick={() => compute(false)}
-              >
-                Evaluate
-              </Button>
-            </>
+            <Button
+              variant="primary"
+              disabled={!hypText.length || !refText.length}
+              onClick={() => compute()}
+            >
+              Evaluate
+            </Button>
           )}
         </div>
         <Button
@@ -113,7 +101,7 @@ const OneHypRef = () => {
           Clear
         </Button>
       </div>
-      {evaluateResult !== null && (
+      {evaluateResult && (
         <OneHypRefResult
           className="uk-margin"
           scoreInfo={evaluateResult.scores}

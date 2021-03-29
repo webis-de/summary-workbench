@@ -1,6 +1,6 @@
 const express = require("express");
 const validateMiddleware = require("../middleware/validate");
-const { METRICS, SUMMARIZERS } = require("../config")
+const { METRICS, SUMMARIZERS, SUMMARIZERS_INFO, METRICS_INFO } = require("../config")
 
 const { body, check, validationResult } = require("express-validator");
 const { sentenceSplitter, articleDownloader } = require("../subservices");
@@ -25,6 +25,28 @@ const allIsIn = (validElements) => (list) =>
 const setDefault = (defaultValue) => {
   return (v) => (v === undefined ? defaultValue : v);
 };
+
+router.get(
+  "/metrics",
+  async (req, res, next) => {
+    try {
+      return res.json(METRICS_INFO);
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+router.get(
+  "/summarizers",
+  async (req, res, next) => {
+    try {
+      return res.json(SUMMARIZERS_INFO);
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
 
 const isListOfStrings = (field, validElements) => {
   let val = field

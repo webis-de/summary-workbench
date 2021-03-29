@@ -10,7 +10,7 @@ api:
     - ./api/:/app
     - api_node_modules:/app/node_modules
   environment:
-    - DEBUG=true
+    - NODE_ENV=development
     - MONGODB_HOST=mongodb://mongo/app
   command: bash -c "npm install && node_modules/.bin/nodemon index.js"
 

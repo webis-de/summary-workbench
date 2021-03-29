@@ -1,11 +1,4 @@
-const DEVELOP = process.env.REACT_APP_DEVELOP;
-let baseName = "";
-if (DEVELOP === "true") {
-  const HOST = process.env.REACT_APP_API_HOST || "localhost";
-  const PORT = process.env.REACT_APP_API_PORT || "5000";
-  baseName = `http://${HOST}:${PORT}`;
-  console.log(baseName);
-}
+import { apiBase } from "./config";
 
 const request = async (method, path, json, auth) => {
   const args = { method, credentials: "include" };
@@ -16,7 +9,7 @@ const request = async (method, path, json, auth) => {
   }
   if (auth !== null) headers.Authorization = `Bearer ${auth}`;
   args.headers = headers;
-  const response = await fetch(`${baseName}${path}`, args);
+  const response = await fetch(`${apiBase}${path}`, args);
   let resJson = {};
   try {
     resJson = await response.json();

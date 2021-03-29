@@ -6,15 +6,21 @@ import { Evaluate } from "./components/Evaluate";
 import { LoginButton, LogoutButton } from "./components/Login";
 import { Summarize } from "./components/Summarize";
 import { VisualizationOverview } from "./components/Visualize";
+import { MetricsProvider } from "./contexts/MetricsContext";
+import { SummarizersProvider } from "./contexts/SummarizersContext";
 import { UserContext, UserProvider } from "./contexts/UserContext";
 import history from "./history";
 
 const App = () => (
-  <UserProvider>
-    <Router history={history}>
-      <Content />
-    </Router>
-  </UserProvider>
+  <MetricsProvider>
+    <SummarizersProvider>
+      <UserProvider>
+        <Router history={history}>
+          <Content />
+        </Router>
+      </UserProvider>
+    </SummarizersProvider>
+  </MetricsProvider>
 );
 
 const UserSection = () => {
