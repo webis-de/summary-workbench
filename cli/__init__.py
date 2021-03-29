@@ -115,11 +115,8 @@ class Service(ABC):
         try:
             return self._version
         except AttributeError:
-            _version = load_yaml(f"./{self.__type__}/config.yaml", json=True).get(
-                "version"
-            )
-            if not _version:
-                abort("version is missing", "config")
+            with open(f"./{self.__type__}/package.json") as file:
+                _version = json.load(file)["version"]
             self._version = _version
             return _version
 
