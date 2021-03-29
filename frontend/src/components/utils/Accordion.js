@@ -4,63 +4,61 @@ import { Badge } from "./Badge";
 import { Button } from "./Button";
 import { DeleteButton } from "./DeleteButton";
 
-const AccordionItem = ({ children, text, buttons, remove, badges = [], open = false }) => {
-  return (
-    <li
-      className={open ? "uk-open" : ""}
-      style={{
-        border: "1px",
-        borderColor: "grey",
-        borderStyle: "solid",
-      }}
-    >
-      <div className="uk-flex uk-flex-middle">
-        <a
-          className="uk-accordion-title uk-flex uk-flex-between uk-flex-middle uk-text-small uk-width-expand uk-padding-small"
-          href="/#"
-          style={buttons || remove ? {paddingRight: "10%"} : null}
+const AccordionItem = ({ children, text, buttons, remove, badges = [], open = false }) => (
+  <li
+    className={open ? "uk-open" : ""}
+    style={{
+      border: "1px",
+      borderColor: "grey",
+      borderStyle: "solid",
+    }}
+  >
+    <div className="uk-flex uk-flex-middle">
+      <a
+        className="uk-accordion-title uk-flex uk-flex-between uk-flex-middle uk-text-small uk-width-expand uk-padding-small"
+        href="/#"
+        style={buttons || remove ? { paddingRight: "10%" } : null}
+      >
+        <span
+          style={{
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
         >
-          <span
-            style={{
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          >
-            {text}
-          </span>
-          {badges && (
-            <div className="uk-flex uk-flex-wrap" style={{ gridRowGap: "10px" }}>
-              {badges.map((badge, i) => (
-                <Badge key={i} emphasis={true}>
-                  {badge}
-                </Badge>
-              ))}
-            </div>
-          )}
-        </a>
-        <div>
-          {buttons &&
-            buttons.map(([buttonsText, buttonsOnClick], i) => (
-              <Button
-                key={i}
-                variant="primary"
-                size="small"
-                className="uk-margin-right"
-                onClick={buttonsOnClick}
-              >
-                {buttonsText}
-              </Button>
+          {text}
+        </span>
+        {badges && (
+          <div className="uk-flex uk-flex-wrap" style={{ gridRowGap: "10px" }}>
+            {badges.map((badge, i) => (
+              <Badge key={i} emphasis>
+                {badge}
+              </Badge>
             ))}
-          {remove && <DeleteButton onClick={remove} className="uk-margin-right" />}
-        </div>
+          </div>
+        )}
+      </a>
+      <div>
+        {buttons &&
+          buttons.map(([buttonsText, buttonsOnClick], i) => (
+            <Button
+              key={i}
+              variant="primary"
+              size="small"
+              className="uk-margin-right"
+              onClick={buttonsOnClick}
+            >
+              {buttonsText}
+            </Button>
+          ))}
+        {remove && <DeleteButton onClick={remove} className="uk-margin-right" />}
       </div>
-      <div className="uk-padding-small uk-accordion-content" style={{ margin: 0 }}>
-        {children}
-      </div>
-    </li>
-  );
-};
+    </div>
+    <div className="uk-padding-small uk-accordion-content" style={{ margin: 0 }}>
+      {children}
+    </div>
+  </li>
+);
 
 const Accordion = ({ className, children }) => (
   <ul

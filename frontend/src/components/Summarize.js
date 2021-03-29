@@ -101,7 +101,7 @@ const InputDocument = ({ summarize, isComputing }) => {
 
   const insertSampleText = () => {
     setDocumentText(sampleText);
-    if (settings.textrank) toggleSetting("textrank");
+    if (settings.textrank !== undefined && !settings.textrank) toggleSetting("textrank");
   };
 
   return (
@@ -512,7 +512,7 @@ const Summarize = () => {
           }
         })
         .finally(() => setComputing(false))
-        .catch((error) => alert(JSON.stringify(error)));
+        .catch((error) => displayMessage(JSON.stringify(error)));
     }
   };
 
@@ -523,7 +523,9 @@ const Summarize = () => {
       ) : (
         <>
           {!summarizers ? (
-            <Button className="uk-container" onClick={reload}>Retry</Button>
+            <Button className="uk-container" onClick={reload}>
+              Retry
+            </Button>
           ) : (
             <>
               {markups ? (

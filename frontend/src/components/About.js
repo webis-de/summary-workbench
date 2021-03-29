@@ -1,3 +1,4 @@
+import gh from "parse-github-url";
 import React, { useContext } from "react";
 
 import { MetricsContext } from "../contexts/MetricsContext";
@@ -5,43 +6,40 @@ import { SummarizersContext } from "../contexts/SummarizersContext";
 import { Button } from "./utils/Button";
 import { CenterLoading } from "./utils/Loading";
 
-const extractGithubUser = (url) => url.replace(/^.*\/(\w*\/.*?)$/, "$1");
+const extractGithubUser = (url) => gh(url).repo || url;
 
-const AboutTable = ({ content, type }) => {
-  console.log(content);
-  return (
-    <table className="uk-table uk-table-striped">
-      <thead>
-        <tr>
-          <th>{type}</th>
-          <th>Code</th>
-          <th>Embedding Model</th>
+const AboutTable = ({ content, type }) => (
+  <table className="uk-table uk-table-striped">
+    <thead>
+      <tr>
+        <th>{type}</th>
+        <th>Code</th>
+        <th>Embedding Model</th>
+      </tr>
+    </thead>
+    <tbody>
+      {Object.entries(content).map(([metric, { readable, homepage, sourcecode, model }]) => (
+        <tr key={metric}>
+          <td>
+            {homepage ? (
+              <a href={homepage}>{extractGithubUser(readable)}</a>
+            ) : (
+              <span>{readable}</span>
+            )}
+          </td>
+          <td>
+            {sourcecode ? (
+              <a href={sourcecode}>{extractGithubUser(sourcecode)}</a>
+            ) : (
+              <span>{sourcecode}</span>
+            )}
+          </td>
+          <td>{model}</td>
         </tr>
-      </thead>
-      <tbody>
-        {Object.entries(content).map(([metric, { readable, homepage, sourcecode, model }]) => (
-          <tr key={metric}>
-            <td>
-              {homepage ? (
-                <a href={homepage}>{extractGithubUser(readable)}</a>
-              ) : (
-                <span>{readable}</span>
-              )}
-            </td>
-            <td>
-              {sourcecode ? (
-                <a href={sourcecode}>{extractGithubUser(sourcecode)}</a>
-              ) : (
-                <span>{sourcecode}</span>
-              )}
-            </td>
-            <td>{model}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  );
-};
+      ))}
+    </tbody>
+  </table>
+);
 
 const About = () => {
   const { summarizers, loading: summarizersLoading, reload: summarizersReload } = useContext(

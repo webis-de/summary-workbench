@@ -2,34 +2,32 @@ import React from "react";
 
 import { usePagination } from "../hooks/pagination";
 import { Markup } from "./Markup";
-import { Pagination } from "./utils/Pagination.js";
+import { Pagination } from "./utils/Pagination";
 
-const ComparisonDisplay = ({ page, size, comparisons }) => {
-  return (
-    <table className="uk-table uk-table-divider uk-table-small uk-table-middle">
-      <thead>
-        <tr>
-          <th />
-          <th>reference</th>
-          <th>hypothesis</th>
+const ComparisonDisplay = ({ page, size, comparisons }) => (
+  <table className="uk-table uk-table-divider uk-table-small uk-table-middle">
+    <thead>
+      <tr>
+        <th />
+        <th>reference</th>
+        <th>hypothesis</th>
+      </tr>
+    </thead>
+    <tbody>
+      {comparisons.slice((page - 1) * size, page * size).map(([index, hyp, ref]) => (
+        <tr key={index}>
+          <td>{index}</td>
+          <td>
+            <Markup markupedText={ref} />
+          </td>
+          <td>
+            <Markup markupedText={hyp} />
+          </td>
         </tr>
-      </thead>
-      <tbody>
-        {comparisons.slice((page - 1) * size, page * size).map(([index, hyp, ref]) => (
-          <tr key={index}>
-            <td>{index}</td>
-            <td>
-              <Markup markupedText={ref} />
-            </td>
-            <td>
-              <Markup markupedText={hyp} />
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  );
-};
+      ))}
+    </tbody>
+  </table>
+);
 
 const CompareTable = ({ comparisons }) => {
   const [page, setPage, size, setSize, numItems] = usePagination(comparisons.length);

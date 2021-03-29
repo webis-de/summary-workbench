@@ -53,6 +53,13 @@ const ChooseFile = ({ kind, name, fileName, setFile, lines, linesAreSame, ...oth
 
   const fileSelectOnChange = (e) => setFile(e.target.files[0]);
 
+  let extraStyle = { backgroundColor: "#f0506e", color: "white" }
+  if (linesAreSame === null) {
+    extraStyle = { backgroundColor: "#f8f8f8" };
+  } else if (linesAreSame) {
+    extraStyle = { backgroundColor: "#32d296", color: "white" }
+  }
+
   return (
     <div {...other}>
       <div
@@ -69,8 +76,8 @@ const ChooseFile = ({ kind, name, fileName, setFile, lines, linesAreSame, ...oth
         <input
           className="uk-textarea"
           type="text"
-          value={fileName}
-          placeholder={"Upload file with " + kind}
+          value={fileName || ""}
+          placeholder={`Upload file with ${kind}`}
           readOnly
           style={{ borderColor: "lightgrey" }}
         />
@@ -78,16 +85,10 @@ const ChooseFile = ({ kind, name, fileName, setFile, lines, linesAreSame, ...oth
           <span
             className="uk-flex uk-flex-middle"
             style={{
-              ...(linesAreSame === null
-                ? { backgroundColor: "#f8f8f8" }
-                : linesAreSame
-                ? { backgroundColor: "#32d296", color: "white" }
-                : { backgroundColor: "#f0506e", color: "white" }),
-              ...{
-                paddingLeft: "10px",
-                paddingRight: "10px",
-                whiteSpace: "nowrap",
-              },
+              ...extraStyle,
+              paddingLeft: "10px",
+              paddingRight: "10px",
+              whiteSpace: "nowrap",
             }}
           >
             {`${lines.length} lines`}

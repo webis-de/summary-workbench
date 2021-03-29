@@ -4,6 +4,7 @@ import UIkit from "uikit";
 import { evaluateRequest } from "../api";
 import { MetricsContext } from "../contexts/MetricsContext";
 import { markup } from "../utils/fragcolors";
+import { displayMessage } from "../utils/message";
 import { Markup } from "./Markup";
 import { ScoreTable } from "./ScoreTable";
 import { Button } from "./utils/Button";
@@ -67,7 +68,7 @@ const OneHypRef = () => {
         const [hyp, ref] = markup(hypText, refText);
         setEvaluateResult({ scores, hyp, ref });
       })
-      .catch((e) => alert(e))
+      .catch((e) => displayMessage(e))
       .finally(() => setIsComputing(false));
   };
 

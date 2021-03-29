@@ -29,7 +29,7 @@ const Result = ({ className, reloadSaved, calculateResult, setCalculateResult, r
       return;
     }
     const scores = calculateResult.scores.metrics;
-    const comparisons = calculateResult.comparisons;
+    const { comparisons } = calculateResult;
     saveCalculationRequest(name, scores, comparisons)
       .then(() => {
         setCalculateResult(null);

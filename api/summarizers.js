@@ -7,7 +7,7 @@ const summarize = async (summarizers, text, ratio) => {
   const results = (await axios.all(requests)).map((response) => response.data);
   const summaries = {}
   requested_summarizers.forEach((summarizer, index) => {
-    summaries[metric] = results[index]["summary"];
+    summaries[summarizer] = results[index]["summary"];
   });
   return summaries
 }

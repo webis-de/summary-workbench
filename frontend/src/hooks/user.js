@@ -43,7 +43,7 @@ const useUser = () => {
     if (accessToken.current === null) throw new Error("not logged in");
     return accessToken.current;
   }, [refresh]);
-  useEffect(() => !refreshRequest.current && refresh(), [refresh]);
+  useEffect(() => loggedin && !refreshRequest.current && refresh(), [refresh, loggedin]);
   const auth = useCallback(
     (func) => async (...args) => {
       let token = await getToken();

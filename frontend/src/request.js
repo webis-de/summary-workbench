@@ -10,11 +10,13 @@ const request = async (method, path, json, auth) => {
   if (auth !== null) headers.Authorization = `Bearer ${auth}`;
   args.headers = headers;
   const response = await fetch(`${apiBase}${path}`, args);
-  let resJson = {};
+  let resJson = {}
   try {
     resJson = await response.json();
-  } catch (err) {}
-  if (response.ok) return resJson;
+    if (response.ok) return resJson;
+  } catch {
+    return resJson;
+  }
   throw resJson;
 };
 

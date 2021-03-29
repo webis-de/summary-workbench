@@ -46,11 +46,12 @@ const ScoreTableDummy = ({ scoreInfo }) => {
   }, "3");
   const [exportText, updateExportText] = useReducer((oldstate) => {
     const chosenScores = flatScores.filter((score, i) => isChecked[i]);
-    const format = currFormat["format"];
+    const { format } = currFormat;
     try {
       if (format === "csv") {
         return toCSV(chosenScores, transpose, precision);
-      } else if (format === "latex") {
+      }
+      if (format === "latex") {
         return toLatex(chosenScores, transpose, precision);
       }
     } catch (e) {
@@ -69,7 +70,7 @@ const ScoreTableDummy = ({ scoreInfo }) => {
     }
   }, [isChecked]);
   const allOnClick = (e) => {
-    const checked = e.target.checked;
+    const { checked } = e.target;
     isChecked.forEach((value, i) => {
       if (value !== checked) {
         toggleChecked(i);
@@ -138,7 +139,7 @@ const ScoreTableDummy = ({ scoreInfo }) => {
 
 const ScoreTable = ({ scoreInfo }) => {
   const [key, reload] = useReducer((state) => !state, true);
-  useEffect(reload, [scoreInfo]);
+  useEffect(reload, [scoreInfo, reload]);
   return <ScoreTableDummy key={key} scoreInfo={scoreInfo} />;
 };
 

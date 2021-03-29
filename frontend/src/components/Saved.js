@@ -8,7 +8,7 @@ import { Accordion, AccordionItem } from "./utils/Accordion";
 
 const Saved = ({ className, reloadSaved }) => {
   const [calculations, setCalculations] = useState([]);
-  const { loading, metrics } = useContext(MetricsContext)
+  const { loading } = useContext(MetricsContext)
 
   useEffect(() => {
     getSavedCalculationsRequest().then((data) => setCalculations(data));
@@ -29,7 +29,7 @@ const Saved = ({ className, reloadSaved }) => {
               <AccordionItem
                 key={name}
                 text={name}
-                badges={loading ? null : Object.keys(scores).map((key) => metrics[key].readable)}
+                badges={loading ? null : Object.keys(scores)}
               >
                 <SavedInfo name={name} scoreInfo={scores} deleteCalculation={deleteCalculation} />
               </AccordionItem>

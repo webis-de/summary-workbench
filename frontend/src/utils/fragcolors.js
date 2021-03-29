@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 /* Copyright 2012 Marcusb @ Vroniplag Wiki.
    Licensed under GNU General Public License v3 or later.
    Modified by Dominik Schwabe @ University Leipzig 2020 */

@@ -9,15 +9,13 @@ const parseNumber = (number, defaultValue) => {
 };
 
 const usePagination = (numItems, initialPage = 1, initialSize = 10) => {
-  const sizeReducer = (oldSize, newSize) => {
-    return Math.max(1, Math.min(numItems, parseNumber(newSize, oldSize)));
-  };
+  const sizeReducer = (oldSize, newSize) =>
+    Math.max(1, Math.min(numItems, parseNumber(newSize, oldSize)));
   const [size, setSize] = useReducer(sizeReducer, initialSize);
 
   const numPages = Math.ceil(numItems / size);
-  const pageReducer = (oldPage, newPage) => {
-    return Math.max(1, Math.min(numPages, parseNumber(newPage, oldPage)));
-  };
+  const pageReducer = (oldPage, newPage) =>
+    Math.max(1, Math.min(numPages, parseNumber(newPage, oldPage)));
 
   const [page, setPage] = useReducer(pageReducer, initialPage);
 

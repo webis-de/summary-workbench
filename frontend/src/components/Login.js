@@ -9,14 +9,13 @@ import { Loading } from "./utils/Loading";
 import { Modal } from "./utils/Modal";
 import { TabContent, TabHead, TabItem } from "./utils/Tabs";
 
-const Login = ({ isVisible, close }) => {
+const Login = ({ isVisible }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [infoText, setInfoText] = useState(null);
   const { login } = useContext(UserContext);
   const accept = () =>
     login({ email, password })
-      .then(() => close())
       .catch((err) => setInfoText(err.error));
   useKeycode([13], accept, isVisible);
   return (
@@ -50,7 +49,7 @@ const Login = ({ isVisible, close }) => {
   );
 };
 
-const Register = ({ isVisible, close }) => {
+const Register = ({ isVisible }) => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -73,7 +72,6 @@ const Register = ({ isVisible, close }) => {
     }
     setLoading(true);
     register({ username, email, password })
-      .then(() => close())
       .catch(() => setInfoText(`could not register (maybe user already exists)`))
       .finally(() => setLoading(false));
   };
@@ -173,7 +171,7 @@ const LoginButton = ({ className, style }) => {
       >
         <FaSignInAlt style={{ width: "20px", marginRight: "5px" }} /> Login
       </a>
-      {isOpen && <LoginModal isOpen={isOpen} setIsOpen={setIsOpen} />}
+      <LoginModal isOpen={isOpen} setIsOpen={setIsOpen} />
     </div>
   );
 };

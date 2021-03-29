@@ -87,7 +87,7 @@ const Pagination = ({ activePage, size, numItems, onChange, pageRange = 5 }) => 
           prev
         </Button>
       </div>
-      <ul className="uk-pagination uk-flex-center" uk-margin style={{ width: "400px" }}>
+      <ul className="uk-pagination uk-flex-center" data-uk-margin style={{ width: "400px" }}>
         <PaginationBefore
           activePage={activePage}
           itemsBefore={itemsLeftRight}

@@ -63,7 +63,7 @@ The summarizer.py file should have a class `SummarizerPlugin` with the following
 - summarize(self, text, ratio)
     - text: string from which the summary is to be generated
     - ratio: number between 0 and 1 which can be used to control the length of the summary
-    - returns: a string which is the generated summary
+    - returns: a string or a list of sentences which is the generated summary
 
 # Development
 

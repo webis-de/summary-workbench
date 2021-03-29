@@ -23,7 +23,7 @@ import { ChooseFile, sameLength, useFile } from "./utils/ChooseFile";
 import { DeleteButton } from "./utils/DeleteButton";
 import { AbsoluteLoading, CenterLoading } from "./utils/Loading";
 import { Modal } from "./utils/Modal";
-import { Pagination } from "./utils/Pagination.js";
+import { Pagination } from "./utils/Pagination";
 import { TabContent, TabHead, TabItem } from "./utils/Tabs";
 
 const ModelModal = ({ isOpen, setIsOpen, models, addModel, otherLines }) => {
@@ -35,9 +35,7 @@ const ModelModal = ({ isOpen, setIsOpen, models, addModel, otherLines }) => {
   const close = () => {
     setIsOpen(false);
   };
-  const modelIsValid = () => {
-    return !Object.values(models).some((model) => model.name === name);
-  };
+  const modelIsValid = () => !Object.values(models).some((model) => model.name === name);
   const accept = () => {
     if (!name) {
       setInfoText("no name given");
@@ -458,31 +456,29 @@ const VisualizationCreator = ({ abort, save }) => {
   );
 };
 
-const AnnotationSection = ({ annotationTemplate, annotation, updateAnnotation, line }) => {
-  return (
-    <>
-      {annotationTemplate.map(({ question, type, options }, i) => {
-        let anno = null;
-        if (annotation) {
-          const annotationElement = annotation[line];
-          if (annotationElement) {
-            anno = annotationElement[i] || null;
-          }
+const AnnotationSection = ({ annotationTemplate, annotation, updateAnnotation, line }) => (
+  <>
+    {annotationTemplate.map(({ question, type, options }, i) => {
+      let anno = null;
+      if (annotation) {
+        const annotationElement = annotation[line];
+        if (annotationElement) {
+          anno = annotationElement[i] || null;
         }
-        return (
-          <Annotation
-            key={i}
-            question={question}
-            type={type}
-            options={options}
-            annotation={anno}
-            onChange={(data) => updateAnnotation([line, i, data])}
-          />
-        );
-      })}
-    </>
-  );
-};
+      }
+      return (
+        <Annotation
+          key={i}
+          question={question}
+          type={type}
+          options={options}
+          annotation={anno}
+          onChange={(data) => updateAnnotation([line, i, data])}
+        />
+      );
+    })}
+  </>
+);
 
 const useMarkup = (doc, ref = null) => {
   const [reference, toggleReference] = useReducer(
@@ -662,10 +658,10 @@ const VisualizationOverview = () => {
     }
   }, [reload, auth]);
 
-  return (
-    <div className="uk-container">
-      {visID !== null ? (
-        visualize ? (
+  if (visID !== null) {
+    if (visualize) {
+      return (
+        <div className="uk-container">
           <Visualize
             visualization={visualize}
             clear={() => {
@@ -673,10 +669,14 @@ const VisualizationOverview = () => {
               setVisualize(null);
             }}
           />
-        ) : (
-          <AbsoluteLoading />
-        )
-      ) : showOverview ? (
+        </div>
+      );
+    }
+    return <AbsoluteLoading />;
+  }
+  return (
+    <div className="uk-container">
+      {showOverview ? (
         <div className="uk-flex uk-flex-top">
           <Button onClick={() => toggleShowOverview()} variant="primary">
             Create Visualization
