@@ -34,7 +34,7 @@ const Settings = () => {
                   metrics[metric].readable,
                   settings[metric],
                 ])}
-                toggleSetting={toggleSetting}
+                toggleOption={toggleSetting}
               />
             </div>
           ))
