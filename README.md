@@ -34,7 +34,7 @@ A Plugin is a Folder which contains the following files:
 - Dockerfile.dev (optional): used for the local development environment
 - metric.py or metric folder for metric plugin or summarizer.py or summarizer folder for summarizer plugin (required)
 - model_setup.py (required): should download all models, can be empty if no external data is needed
-- Pipfile.lock, Pipfile, or requirements (one required, if multiple given the first found is used)
+- Pipfile.lock, Pipfile, or requirements.txt (one required, if multiple given the first found is used)
 
 Following Options can be specify in the `config.yaml`:
 - **version** (required): version string of the plugin
@@ -78,7 +78,7 @@ The `api` and `frontend` containers are available even before the other containe
 Some parts of the applications will only become available over time, because they are busy downloading a model.
 If you worry about the status of the application run `docker-compose ps`.
 If there is no service with state `Exited`, than everything should be fine.
-Alternatively use `docker-comose logs <service>` for troubleshooting.
+Alternatively use `docker-compose logs <service>` for troubleshooting.
 
 
 # Production
