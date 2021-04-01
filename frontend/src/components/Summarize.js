@@ -28,8 +28,8 @@ const withHover = (WrappedComponent, color) => ({ style, ...props }) => {
 const ThumbsUp = withHover(FaThumbsUp, "green");
 const ThumbsDown = withHover(FaThumbsDown, "#B02F2C");
 const Bars = withHover(FaBars, "#B02F2C");
-const EyeOpen = withHover(FaEye, "#B02F2C");
-const EyeClosed = withHover(FaEyeSlash, "#1e87f0");
+const EyeOpen = withHover(FaEye, "#1e87f0");
+const EyeClosed = withHover(FaEyeSlash, "#B02F2C");
 
 const Feedback = ({ summarizer, summary, reference, url }) => {
   const [submitted, setSubmitted] = useState(false);
@@ -211,7 +211,7 @@ const InputDocument = ({ summarize, isComputing }) => {
   );
 };
 
-const Summary = ({ data, onHighlight, showMarkup, showOverlapButton = true }) => {
+const Summary = ({ data, showMarkup }) => {
   const { name, summaryMarkup, summaryText, original, url, statistics } = data;
 
   return (
@@ -219,12 +219,6 @@ const Summary = ({ data, onHighlight, showMarkup, showOverlapButton = true }) =>
       <div className="uk-flex uk-flex-right" style={{ transform: "translate(20px, -20px)" }}>
         <Badge>{`${statistics.numWords} words`}</Badge>
         <Badge>{`${(statistics.percentOverlap * 100).toFixed(0)}% overlap`}</Badge>
-        {showOverlapButton && (
-          <div style={{ marginLeft: "10px" }}>
-            {" "}
-            <ToggleOverlap show={!showMarkup} toggle={onHighlight} />{" "}
-          </div>
-        )}
       </div>
       {summaryMarkup.map((markupedText, i) => (
         <p key={i} style={{ marginTop: 0 }}>
@@ -265,12 +259,8 @@ const Document = ({ markup, showMarkup, clearMarkups }) => (
   </div>
 );
 
-const SummaryTabView = ({ markups, clearMarkups, documentLength }) => {
-  const [markupIndex, highlight] = useReducer(
-    (oldIndex, newIndex) => (oldIndex === newIndex ? null : newIndex),
-    null
-  );
-
+const SummaryTabView = ({ showOverlap, markups, clearMarkups, documentLength }) => {
+  const [summaryIndex, setSummaryIndex] = useState(0)
   const { summarizers } = useContext(SummarizersContext);
 
   return (
@@ -281,18 +271,16 @@ const SummaryTabView = ({ markups, clearMarkups, documentLength }) => {
         </Header>
         <Document
           clearMarkups={clearMarkups}
-          markup={
-            markupIndex !== null ? markups[markupIndex].requestMarkup : markups[0].requestMarkup
-          }
-          showMarkup={markupIndex !== null}
+          markup={markups[summaryIndex].requestMarkup}
+          showMarkup={showOverlap}
         />
       </div>
       <div style={{ flexBasis: "38%", flexGrow: 0 }}>
         <Header>
-          <ul className="uk-tab dark-tab uk-margin" data-uk-tab uk-tab="connect: #summary-display;">
-            {markups.map(({ name }) => (
+          <ul className="uk-tab dark-tab uk-margin" data-uk-tab="connect: #summary-display;">
+            {markups.map(({ name }, index) => (
               <li key={name}>
-                <a className="" style={{ color: "blue", fontSize: "1em" }} href="/#">
+                <a className="" style={{ color: "blue", fontSize: "1em" }} href="/#" onClick={() => setSummaryIndex(index)}>
                   {summarizers[name].readable}
                 </a>
               </li>
@@ -308,8 +296,7 @@ const SummaryTabView = ({ markups, clearMarkups, documentLength }) => {
               <li key={index}>
                 <Summary
                   data={markup}
-                  showMarkup={index === markupIndex}
-                  onHighlight={() => highlight(index)}
+                  showMarkup={showOverlap}
                 />
               </li>
             ))}
@@ -351,7 +338,7 @@ const SummaryCompareView = ({ markups, showOverlap }) => {
                 style={{ maxHeight: "500px", overflow: "auto" }}
                 className="uk-card uk-card-default uk-card-body"
               >
-                <Summary data={markup} showMarkup={showOverlap} showOverlapButton={false} />
+                <Summary data={markup} showMarkup={showOverlap} />
               </div>
             </div>
           ))}
@@ -408,6 +395,7 @@ const SummaryView = ({ markups, clearMarkups, documentLength }) => {
           {showTab ? (
             <SummaryTabView
               documentLength={documentLength}
+              showOverlap={showOverlap}
               markups={markups}
               clearMarkups={clearMarkups}
             />
@@ -424,7 +412,7 @@ const SummaryView = ({ markups, clearMarkups, documentLength }) => {
           style={{ marginLeft: "10px", minWidth: "30px" }}
         >
           <ToggleView showTab={showTab} toggleShowTab={toggleShowTab} />
-          {!showTab && <ToggleOverlap show={!showOverlap} toggle={toggleShowOverlap} />}
+          <ToggleOverlap show={!showOverlap} toggle={toggleShowOverlap} />
         </div>
       </div>
     </div>

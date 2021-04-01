@@ -55,8 +55,8 @@ const Upload = ({ setCalculateResult }) => {
           displayMessage("Internal server error");
         }
       }
-      setIsComputing(false);
     }
+    setIsComputing(false);
   };
 
   return (
