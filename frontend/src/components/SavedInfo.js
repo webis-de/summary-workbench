@@ -1,58 +1,50 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
+import UIkit from "uikit";
 
-import { getCalculationDataRequest } from "../api";
+import { markup } from "../utils/fragcolors";
 import { CompareTable } from "./CompareTable";
 import { ScoreTable } from "./ScoreTable";
 import { DeleteButton } from "./utils/DeleteButton";
-import { Loading } from "./utils/Loading";
 
-let toggleKey = 0;
-
-const SavedInfo = ({ name, scoreInfo, deleteCalculation }) => {
+const SavedInfo = ({ ID, getCalculationScores, getCalculationLines, deleteCalculation }) => {
+  const [scores] = useState(getCalculationScores(ID));
   const [comparisons, setComparisons] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const hasScores = Object.keys(scoreInfo).length > 0;
-
-  const loadComparisons = () => {
-    if (comparisons === null) {
-      setIsLoading(true);
-      getCalculationDataRequest(name)
-        .then((data) => setComparisons(data.comparisons))
-        .finally(() => setIsLoading(false));
-    }
-  };
-  const toggleId = `toggle-saved-calculation-${toggleKey}`;
-  toggleKey += 1;
+  const toggleID = `toggle-saved-calculation-${ID}`;
+  const loadRef = useRef();
+  const showEvent = useCallback(() => {
+    if (comparisons !== null) return;
+    console.log(loadRef.current)
+    if (loadRef.current && loadRef.current.className.includes("uk-active")) {
+      const { hypotheses, references } = getCalculationLines(ID);
+      setComparisons(
+        hypotheses.map((hyp, i) => markup(hyp, references[i])),
+        [hypotheses, references]
+      );
+    } else UIkit.util.once(document, "show", `#${toggleID}`, showEvent);
+  }, [comparisons, getCalculationLines, ID, toggleID]);
+  useEffect(showEvent, [showEvent]);
 
   return (
     <div>
       <div className="uk-flex uk-flex-middle">
         <ul
           className="uk-tab uk-width-expand uk-margin uk-margin-right"
-          data-uk-tab
-          uk-tab={`connect: #${toggleId};`}
+          data-uk-tab={`connect: #${toggleID};`}
         >
           <li>
             <a href="/#">Metrics</a>
           </li>
           <li>
-            <a href="/#" onClick={loadComparisons}>
-              Compare
-            </a>
+            <a href="/#">Compare</a>
           </li>
         </ul>
-        <DeleteButton onClick={() => deleteCalculation(name)} />
+        <DeleteButton onClick={() => deleteCalculation(ID)} />
       </div>
-      <ul id={toggleId} className="uk-switcher">
-        <li>{hasScores ? <ScoreTable scoreInfo={scoreInfo} /> : "no scores were computed"}</li>
+      <ul id={toggleID} className="uk-switcher">
         <li>
-          {isLoading ? (
-            <Loading />
-          ) : (
-            <>{comparisons !== null && <CompareTable comparisons={comparisons} />}</>
-          )}
+          <ScoreTable scores={scores} />
         </li>
+        <li ref={loadRef}>{comparisons && <CompareTable comparisons={comparisons} />}</li>
       </ul>
     </div>
   );

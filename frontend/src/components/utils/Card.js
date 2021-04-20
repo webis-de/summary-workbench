@@ -1,10 +1,15 @@
 import React from "react";
 
-const Card = ({ className, title, children, ...other }) => (
-  <div {...other} className={`uk-card uk-card-default${className ? "" : ` ${className}`}`}>
-    <div className="card-header uk-text-middle">{title}</div>
-    <div className="uk-card-body">{children}</div>
+const Card = ({ className, children, ...props }) => (
+  <div className={`uk-card uk-card-default ${className || ""}`} {...props}>
+    {children}
   </div>
 );
 
-export { Card };
+const CardHeader = ({ children }) => <div className="card-header uk-text-middle">{children}</div>;
+
+const CardBody = ({ children }) => <div className="uk-card-body">{children}</div>;
+
+const CardTitle = ({children}) => <div className="card-title">{children}</div>;
+
+export { Card, CardHeader, CardTitle, CardBody };

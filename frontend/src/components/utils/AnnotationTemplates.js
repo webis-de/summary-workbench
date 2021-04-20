@@ -62,7 +62,7 @@ const ShortText = ({ annotation, onChange }) => {
     <textarea
       className="uk-textarea"
       value={text}
-      onChange={(e) => setText(e.target.value)}
+      onChange={(e) => setText(e.currentTarget.value)}
       rows="3"
       style={{ resize: "none", overflow: "auto" }}
     />

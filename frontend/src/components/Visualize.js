@@ -62,7 +62,7 @@ const ModelModal = ({ isOpen, setIsOpen, models, addModel, otherLines }) => {
         value={name}
         placeholder="name"
         autoFocus
-        onChange={(e) => setName(e.target.value)}
+        onChange={(e) => setName(e.currentTarget.value)}
       />
       <ChooseFile
         className="uk-margin-top"
@@ -101,7 +101,7 @@ const AnnotationDesigner = ({ type, options, addOption, removeOption, alterOptio
             <input
               className="uk-input"
               value={option}
-              onChange={(e) => alterOption(key, e.target.value)}
+              onChange={(e) => alterOption(key, e.currentTarget.value)}
               placeholder="option value"
             />
             <DeleteButton onClick={() => removeOption(key)} />
@@ -212,13 +212,13 @@ const AnnotationModal = ({ isOpen, setIsOpen, addAnnotationTemplate }) => {
         value={question}
         placeholder="question"
         autoFocus
-        onChange={(e) => setQuestion(e.target.value)}
+        onChange={(e) => setQuestion(e.currentTarget.value)}
       />
       <select
         value={type}
         className="uk-select uk-margin-top"
         name="answerType"
-        onChange={(e) => setType(e.target.value)}
+        onChange={(e) => setType(e.currentTarget.value)}
       >
         <option value="" disabled selected hidden>
           answer type
@@ -380,7 +380,7 @@ const VisualizationCreator = ({ abort, save }) => {
                 className="uk-input uk-margin-small"
                 value={name}
                 placeholder="name"
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => setName(e.currentTarget.value)}
               />
               <Button
                 className="uk-margin-small"

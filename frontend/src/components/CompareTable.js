@@ -44,7 +44,7 @@ const CompareTable = ({ comparisons }) => {
             className="uk-input"
             type="text"
             placeholder="jump to page"
-            onKeyDown={(e) => e.keyCode === 13 && setPage(e.target.value)}
+            onKeyDown={(e) => e.keyCode === 13 && setPage(e.currentTarget.value)}
           />
         </div>
         <div>
@@ -52,7 +52,7 @@ const CompareTable = ({ comparisons }) => {
             className="uk-input"
             type="text"
             placeholder="examples per page"
-            onKeyDown={(e) => e.keyCode === 13 && setSize(e.target.value)}
+            onKeyDown={(e) => e.keyCode === 13 && setSize(e.currentTarget.value)}
           />
         </div>
       </div>

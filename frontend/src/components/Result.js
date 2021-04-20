@@ -1,11 +1,9 @@
-import React, { useEffect, useRef } from "react";
-import { FaPen, FaSave, FaCalculator } from "react-icons/fa";
-import {displayMessage} from "../utils/message"
+import React from "react";
+import { FaCalculator, FaPen, FaSave } from "react-icons/fa";
 
-import { saveCalculationRequest } from "../api";
 import { ResultInfo } from "./ResultInfo";
 import { Button } from "./utils/Button";
-import { Card } from "./utils/Card";
+import { Card, CardBody, CardHeader, CardTitle } from "./utils/Card";
 
 const UploadButton = (props) => (
   <Button variant="primary" {...props}>
@@ -13,60 +11,37 @@ const UploadButton = (props) => (
   </Button>
 );
 
-const Result = ({ className, reloadSaved, calculateResult, setCalculateResult, resultRef }) => {
-  const nameRef = useRef();
+const Result = ({ className, calculation, setCalculationName, saveCalculation }) => {
+  const { name, scores, hypotheses, references } = calculation;
 
-  useEffect(() => {
-    if (calculateResult) {
-      resultRef.current.scrollIntoView({ block: "start", behavior: "smooth", alignToTop: true });
-    }
-  }, [calculateResult, resultRef]);
-
-  const upload = () => {
-    const name = nameRef.current.value;
-    if (!name.trim().length) {
-      displayMessage("please enter a name");
-      return;
-    }
-    const scores = calculateResult.scores.metrics;
-    const { comparisons } = calculateResult;
-    saveCalculationRequest(name, scores, comparisons)
-      .then(() => {
-        setCalculateResult(null);
-        reloadSaved();
-      })
-      .catch((e) => displayMessage(e.message));
-  };
-
-  if (calculateResult !== null) {
-    return (
-      <Card
-        title={
-          <div>
-            <p className="card-title">
-              <FaCalculator /> Results
-            </p>
-          </div>
-        }
-        className={className}
-      >
+  return (
+    <Card className={className}>
+      <CardHeader>
+        <CardTitle>
+          <FaCalculator /> Results
+        </CardTitle>
+      </CardHeader>
+      <CardBody>
         <p className="uk-text-primary" style={{ marginTop: "-25px" }}>
           <FaPen /> Rename and save results
         </p>
         <div className="uk-flex uk-width-1-3">
           <input
             className="uk-input"
-            ref={nameRef}
-            defaultValue={calculateResult.name}
-            onKeyDown={(e) => e.keyCode === 13 && upload()}
+            value={name}
+            onChange={e => setCalculationName(e.currentTarget.value)}
+            onKeyDown={(e) => e.keyCode === 13 && saveCalculation()}
           />
-          <UploadButton onClick={upload} />
+          <UploadButton onClick={saveCalculation} />
         </div>
-        <ResultInfo scoreInfo={calculateResult.scores} comparisons={calculateResult.comparisons} />
-      </Card>
-    );
-  }
-  return null;
+        <ResultInfo
+          scores={scores}
+          hypotheses={hypotheses}
+          references={references}
+        />
+      </CardBody>
+    </Card>
+  );
 };
 
 export { Result };

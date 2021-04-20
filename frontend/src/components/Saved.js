@@ -1,45 +1,40 @@
-import React, { useEffect, useState, useContext } from "react";
+import React from "react";
+import { FaQuestionCircle } from "react-icons/fa";
 
-import { MetricsContext } from "../contexts/MetricsContext";
-import { deleteCalculationRequest, getSavedCalculationsRequest } from "../api";
-import { displayMessage } from "../utils/message";
 import { SavedInfo } from "./SavedInfo";
 import { Accordion, AccordionItem } from "./utils/Accordion";
 
-const Saved = ({ className, reloadSaved }) => {
-  const [calculations, setCalculations] = useState([]);
-  const { loading } = useContext(MetricsContext)
-
-  useEffect(() => {
-    getSavedCalculationsRequest().then((data) => setCalculations(data));
-  }, []);
-
-  const deleteCalculation = (name) => {
-    deleteCalculationRequest(name)
-      .then(() => reloadSaved())
-      .catch((e) => displayMessage(e));
-  };
-
-  if (calculations.length > 0) {
-    return (
-      <Accordion className={className}>
-        <AccordionItem text="Saved Calculations" open>
-          <Accordion>
-            {calculations.map(({ name, scores }) => (
-              <AccordionItem
-                key={name}
-                text={name}
-                badges={loading ? null : Object.keys(scores)}
-              >
-                <SavedInfo name={name} scoreInfo={scores} deleteCalculation={deleteCalculation} />
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </AccordionItem>
+const Saved = ({
+  className,
+  calculationIDs,
+  deleteCalculation,
+  getCalculationScores,
+  getCalculationLines,
+}) => {
+  if (!calculationIDs.length) return null;
+  return (
+    <div className={className}>
+      <div className="uk-flex uk-flex-middle uk-margin-bottom">
+        <h3 style={{margin: 0, marginRight: "20px"}}>Saved Calculations</h3>
+        <FaQuestionCircle className="tooltip-icon" data-uk-tooltip="title: the data is stored in the browser; pos: right;"/>
+      </div>
+      <Accordion>
+        {calculationIDs.map((ID) => {
+          const scores = getCalculationScores(ID);
+          return (
+            <AccordionItem key={ID} text={ID} badges={Object.keys(scores)}>
+              <SavedInfo
+                ID={ID}
+                getCalculationScores={getCalculationScores}
+                getCalculationLines={getCalculationLines}
+                deleteCalculation={deleteCalculation}
+              />
+            </AccordionItem>
+          );
+        })}
       </Accordion>
-    );
-  }
-  return null;
+    </div>
+  );
 };
 
 export { Saved };

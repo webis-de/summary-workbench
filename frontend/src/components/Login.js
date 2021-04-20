@@ -24,13 +24,13 @@ const Login = ({ isVisible }) => {
         type="email"
         className="uk-input"
         placeholder="E-mail"
-        onChange={(e) => setEmail(e.target.value)}
+        onChange={(e) => setEmail(e.currentTarget.value)}
       />
       <input
         type="password"
         className="uk-input uk-margin-top"
         placeholder="password"
-        onChange={(e) => setPassword(e.target.value)}
+        onChange={(e) => setPassword(e.currentTarget.value)}
       />
       {infoText && (
         <div className="uk-margin-top uk-text-primary">
@@ -82,25 +82,25 @@ const Register = ({ isVisible }) => {
         type="text"
         className="uk-input"
         placeholder="username"
-        onChange={(e) => setUsername(e.target.value)}
+        onChange={(e) => setUsername(e.currentTarget.value)}
       />
       <input
         type="email"
         className="uk-input uk-margin-top"
         placeholder="E-mail"
-        onChange={(e) => setEmail(e.target.value)}
+        onChange={(e) => setEmail(e.currentTarget.value)}
       />
       <input
         type="password"
         className="uk-input uk-margin-top"
         placeholder="password"
-        onChange={(e) => setPassword(e.target.value)}
+        onChange={(e) => setPassword(e.currentTarget.value)}
       />
       <input
         type="password"
         className="uk-input uk-margin-top"
         placeholder="confirm password"
-        onChange={(e) => setConfirmPassword(e.target.value)}
+        onChange={(e) => setConfirmPassword(e.currentTarget.value)}
       />
       {infoText && (
         <div className="uk-margin-top uk-text-primary">

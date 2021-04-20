@@ -38,3 +38,4 @@ rules:
   jsx-a11y/no-static-element-interactions: 0
   no-constant-condition: 0
   import/no-extraneous-dependencies: 0
+  no-restricted-syntax: 0

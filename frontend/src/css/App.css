@@ -6,156 +6,177 @@ General rules
 */
 /* Styling scrollbar */
 body {
-    scrollbar-width: 10px !important;
-    scrollbar-color: #55A6D1 #9BC4D8;
+  scrollbar-width: 10px !important;
+  scrollbar-color: #55a6d1 #9bc4d8;
+}
+
+.tooltip-icon {
+  width: 20px;
+  color: #55A6D1;
+}
+
+.tooltip-icon:hover {
+  color: blue;
 }
 
 .background {
-  background-color: #B02F2C !important;
+  background-color: #b02f2c !important;
 }
 
 .foreground {
-  color: #B02F2C !important;
+  color: #b02f2c !important;
 }
 
 /* Heading styles */
-.card-header{
-    border-bottom: 2px solid #B02F2C;
-    color: white;
-    background-color: #B02F2C ;
+.card-header {
+  border-bottom: 2px solid #b02f2c;
+  color: white;
+  background-color: #b02f2c;
 }
 
+.card-title {
+  color: white !important;
+  font-weight: 500;
+  font-size: 14pt;
+  padding-top: 10px;
+  padding-left: 12px;
+  margin-bottom: 10px;
+}
 
-.card-title{
-    color: white !important;
-    font-weight: 500;
-    font-size: 14pt;
-    padding-top: 10px;
-    padding-left: 12px;
-    margin-bottom: 10px;
+.metric-layout {
+  display: flex;
+  justify-content: space-between;
+}
+
+.metric-layout > :nth-child(1) {
+  flex-basis: 60%;
+}
+
+.metric-layout > :nth-child(2) {
+  flex-basis: 37%;
+}
+
+.metric-layout > :not(:first-child) {
+  margin-left: 10px;
 }
 
 /* Placeholder text styles */
 input {
-    text-align: center;
-  }
+  text-align: center;
+}
 ::-webkit-input-placeholder {
   text-align: center;
 }
-  ::-moz-placeholder {
-    text-align: center;
-  }
+::-moz-placeholder {
+  text-align: center;
+}
 
- /* Scrollbar styles*/
+/* Scrollbar styles*/
 *::-webkit-scrollbar {
-    width: 10px;
+  width: 10px;
 }
 
 *::-webkit-scrollbar-track {
-    background: #9BC4D8;
+  background: #9bc4d8;
 }
 
 *::-webkit-scrollbar-thumb {
-    background-color: #55A6D1;
-    border-radius: 20px;
-    border: 3px solid #9BC4D8;
+  background-color: #55a6d1;
+  border-radius: 20px;
+  border: 3px solid #9bc4d8;
 }
 
-
 .uk-background-secondary {
-    background-color: #323232 !important;
+  background-color: #323232 !important;
 }
 
 .left-border {
-    border-left: 4px solid #B02F2C;
+  border-left: 4px solid #b02f2c;
 }
 
 .left-border-thin {
-    border-left: 2px solid #B02F2C;
+  border-left: 2px solid #b02f2c;
 }
 .summary-border {
-
-    padding: 10px 10px;
-    border-radius: 20px;
-    border: 2.5px solid #376C47;
-
+  padding: 10px 10px;
+  border-radius: 20px;
+  border: 2.5px solid #376c47;
 }
 .colored-header {
-    color: #376C47;
-    font-weight: 500;
+  color: #376c47;
+  font-weight: 500;
 }
 .underline-border {
-    border-bottom: 3px solid #B02F2C;
+  border-bottom: 3px solid #b02f2c;
 }
 .document-border {
-    border-left: 4px solid #B02F2C;
+  border-left: 4px solid #b02f2c;
 }
 
-.uk-tab>li.uk-active>a {
-    color: #B02F2C !important;
+.uk-tab > li.uk-active > a {
+  color: #b02f2c !important;
 }
 
 .dark-tab a {
   color: #bbb !important;
 }
 
-
 .dark-tab > .uk-active > a {
-    border-color: white !important;
+  border-color: white !important;
 }
 
 .dark-tab::before {
-    border-color: #bbb !important;
+  border-color: #bbb !important;
 }
 
-.uk-tab.dark-tab>.uk-active>a {
+.uk-tab.dark-tab > .uk-active > a {
   color: white !important;
 }
 
 .fragmark1 {
-    background-color: #c2f598;
+  background-color: #c2f598;
 }
 
 .fragmark2 {
-    background-color: #a7c6f2;
+  background-color: #a7c6f2;
 }
 
 .fragmark3 {
-    background-color: #f29f9f;
+  background-color: #f29f9f;
 }
 
 .fragmark4 {
-    background-color: #aff2be;
+  background-color: #aff2be;
 }
 
 .fragmark5 {
-    background-color: #e8a3ff;
+  background-color: #e8a3ff;
 }
 
 .fragmark6 {
-    background-color: #e6e181;
+  background-color: #e6e181;
 }
 
 .fragmark7 {
-    background-color: #b8b8ff;
+  background-color: #b8b8ff;
 }
 
 .fragmark8 {
-    background-color: #f5cf9f;
+  background-color: #f5cf9f;
 }
 
 .fragmark9 {
-    background-color: #a5e6ed;
+  background-color: #a5e6ed;
 }
 
 textarea::placeholder {
-    line-height: 8em;
-    text-align: center;
-    font-size: 1.3em;
+  line-height: 8em;
+  text-align: center;
+  font-size: 1.3em;
 }
 
 .icon-margin > * {
-    margin-bottom: 5px
+  margin-bottom: 5px;
 }
 
 .margin-right:not(:last-child) {

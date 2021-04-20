@@ -95,7 +95,7 @@ router.post(
     try {
       const { metrics, refdata, hypdata } = req.body;
       return res.json({
-        metrics: await evaluate(metrics, refdata, hypdata),
+        scores: await evaluate(metrics, refdata, hypdata),
       });
     } catch (err) {
       return next(err);

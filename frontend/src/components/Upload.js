@@ -1,12 +1,11 @@
 import React, { useContext, useState } from "react";
-import { FaExclamationCircle, FaInfoCircle } from "react-icons/fa";
 
 import { evaluateRequest } from "../api";
 import { MetricsContext } from "../contexts/MetricsContext";
-import { markup } from "../utils/fragcolors";
 import { displayMessage } from "../utils/message";
 import { Button } from "./utils/Button";
 import { ChooseFile, sameLength, useFile } from "./utils/ChooseFile";
+import { InfoText } from "./utils/InfoText";
 import { Loading } from "./utils/Loading";
 
 const getChosenMetrics = (settings) =>
@@ -14,46 +13,40 @@ const getChosenMetrics = (settings) =>
     .filter((e) => e[1])
     .map((e) => e[0]);
 
-const Upload = ({ setCalculateResult }) => {
-  const [hypFileName, setHypFile, hypLines] = useFile(null);
-  const [refFileName, setRefFile, refLines] = useFile(null);
-  const linesAreSame = sameLength([hypLines, refLines]);
+const getMessages = (filesAreInput, linesAreSame, metricIsChoosen) => [
+  [
+    !filesAreInput,
+    "Both files must contain the same number of non-empty lines. Each line is interpreted as a sentence.",
+    false,
+  ],
+  [!linesAreSame, "The files are not valid because they have different number of lines.", true],
+  [!metricIsChoosen, "Select at least one metric.", true],
+];
+
+const Upload = ({ setCalculation }) => {
+  const [hypFileName, setHypFile, hypotheses] = useFile(null);
+  const [refFileName, setRefFile, references] = useFile(null);
 
   const { settings } = useContext(MetricsContext);
 
   const [isComputing, setIsComputing] = useState(false);
 
-  const getComparisons = () => hypLines.map((hypLine, i) => markup(hypLine, refLines[i]));
+  const filesAreInput = hypotheses && references;
+  const linesAreSame = sameLength([hypotheses, references]);
+  const metricIsChoosen = Object.values(settings).some((e) => e);
 
   const compute = async () => {
-    if (!hypLines || !refLines) {
-      displayMessage("No files uploaded yet");
-      return;
-    }
-
-    if (hypLines.length !== refLines.length) {
-      displayMessage("Files must have equal number of lines");
-      return;
-    }
-
     setIsComputing(true);
     const name = `${hypFileName}-${refFileName}`;
-    const comparisons = getComparisons(hypLines, refLines);
     const chosenMetrics = getChosenMetrics(settings);
-    const result = { name, comparisons };
-
-    if (chosenMetrics.length === 0) {
-      setCalculateResult({ scores: { metrics: {} }, ...result });
-    } else {
-      try {
-        const scores = await evaluateRequest(chosenMetrics, hypLines, refLines);
-        setCalculateResult({ scores, ...result });
-      } catch (err) {
-        if (err instanceof TypeError) {
-          displayMessage("Server not available");
-        } else {
-          displayMessage("Internal server error");
-        }
+    try {
+      const { scores } = await evaluateRequest(chosenMetrics, hypotheses, references);
+      setCalculation({ name, scores, hypotheses, references });
+    } catch (err) {
+      if (err instanceof TypeError) {
+        displayMessage("Server not available");
+      } else {
+        displayMessage("Internal server error");
       }
     }
     setIsComputing(false);
@@ -61,17 +54,7 @@ const Upload = ({ setCalculateResult }) => {
 
   return (
     <>
-      {refFileName === null && hypFileName === null ? (
-        <p className="uk-text-primary" style={{ marginTop: "-25px" }}>
-          <FaInfoCircle /> Both files must contain the same number of non-empty lines
-        </p>
-      ) : (
-        linesAreSame === false && (
-          <p className="uk-text-danger" style={{ marginTop: "-25px" }}>
-            <FaExclamationCircle /> Both files must contain the same number of non-empty lines
-          </p>
-        )
-      )}
+      <InfoText messages={getMessages(filesAreInput, linesAreSame, metricIsChoosen)} />
       <div
         className="uk-margin uk-grid uk-grid-small uk-child-width-1-2@s"
         style={{ gridRowGap: "10px" }}
@@ -80,7 +63,7 @@ const Upload = ({ setCalculateResult }) => {
           kind="reference texts"
           fileName={refFileName}
           setFile={setRefFile}
-          lines={refLines}
+          lines={references}
           linesAreSame={linesAreSame}
           name="RefFile"
         />
@@ -88,7 +71,7 @@ const Upload = ({ setCalculateResult }) => {
           kind="generated texts"
           fileName={hypFileName}
           setFile={setHypFile}
-          lines={hypLines}
+          lines={hypotheses}
           linesAreSame={linesAreSame}
           name="HypFile"
         />
@@ -97,7 +80,11 @@ const Upload = ({ setCalculateResult }) => {
         {isComputing ? (
           <Loading />
         ) : (
-          <Button variant="primary" disabled={!linesAreSame} onClick={compute}>
+          <Button
+            variant="primary"
+            disabled={!filesAreInput || !linesAreSame || !metricIsChoosen}
+            onClick={compute}
+          >
             Evaluate
           </Button>
         )}

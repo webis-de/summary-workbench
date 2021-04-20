@@ -1,5 +1,4 @@
 import React, { useContext, useState } from "react";
-import UIkit from "uikit";
 
 import { evaluateRequest } from "../api";
 import { MetricsContext } from "../contexts/MetricsContext";
@@ -8,11 +7,11 @@ import { displayMessage } from "../utils/message";
 import { Markup } from "./Markup";
 import { ScoreTable } from "./ScoreTable";
 import { Button } from "./utils/Button";
+import { InfoText } from "./utils/InfoText";
 import { Loading } from "./utils/Loading";
 
-const OneHypRefResult = ({ className, scoreInfo, hypothesis, reference }) => {
-  const { metrics } = scoreInfo;
-  const hasScores = Object.keys(metrics).length > 0;
+const OneHypRefResult = ({ className, calculation }) => {
+  const { scores, hypothesis, reference } = calculation;
 
   return (
     <div className={className}>
@@ -28,7 +27,7 @@ const OneHypRefResult = ({ className, scoreInfo, hypothesis, reference }) => {
           </tr>
         </tbody>
       </table>
-      {hasScores && <ScoreTable scoreInfo={metrics} />}
+      <ScoreTable scores={scores} />
     </div>
   );
 };
@@ -37,7 +36,7 @@ const TextField = ({ value, setValue, placeholder }) => (
   <textarea
     className="uk-textarea"
     value={value}
-    onChange={(e) => setValue(e.target.value)}
+    onChange={(e) => setValue(e.currentTarget.value)}
     as="textarea"
     rows="5"
     placeholder={placeholder}
@@ -57,16 +56,15 @@ const OneHypRef = () => {
   const [isComputing, setIsComputing] = useState(false);
   const { settings } = useContext(MetricsContext);
 
+  const hasInput = hypText.trim() && refText.trim();
+  const metricIsChoosen = Object.values(settings).some((e) => e);
+
   const compute = () => {
-    if (hypText.trim() === "" || refText.trim() === "") {
-      UIkit.notification({ message: "no hypothesis or reference given", status: "danger" });
-      return;
-    }
     setIsComputing(true);
     evaluateRequest(getChosenMetrics(settings), [hypText], [refText])
-      .then((scores) => {
-        const [hyp, ref] = markup(hypText, refText);
-        setEvaluateResult({ scores, hyp, ref });
+      .then(({ scores }) => {
+        const [hypothesis, reference] = markup(hypText, refText);
+        setEvaluateResult({ scores, hypothesis, reference });
       })
       .catch((e) => displayMessage(e))
       .finally(() => setIsComputing(false));
@@ -74,9 +72,15 @@ const OneHypRef = () => {
 
   return (
     <>
+      <InfoText
+        messages={[
+          [!hasInput, "Enter a hypothesis and a reference.", false],
+          [!metricIsChoosen, "Select at least one metric.", true],
+        ]}
+      />
       <div className="uk-margin uk-child-width-1-2@s">
-        <TextField value={hypText} setValue={setHypText} placeholder="Enter the reference text" />
-        <TextField value={refText} setValue={setRefText} placeholder="Enter the generated text" />
+        <TextField value={refText} setValue={setRefText} placeholder="Enter the reference text" />
+        <TextField value={hypText} setValue={setHypText} placeholder="Enter the generated text" />
       </div>
       <div className="uk-flex uk-flex-between">
         <div className="uk-flex uk-flex-left">
@@ -85,7 +89,7 @@ const OneHypRef = () => {
           ) : (
             <Button
               variant="primary"
-              disabled={!hypText.length || !refText.length}
+              disabled={!hasInput || !metricIsChoosen}
               onClick={() => compute()}
             >
               Evaluate
@@ -102,14 +106,7 @@ const OneHypRef = () => {
           Clear
         </Button>
       </div>
-      {evaluateResult && (
-        <OneHypRefResult
-          className="uk-margin"
-          scoreInfo={evaluateResult.scores}
-          hypothesis={evaluateResult.hyp}
-          reference={evaluateResult.ref}
-        />
-      )}
+      {evaluateResult && <OneHypRefResult className="uk-margin" calculation={evaluateResult} />}
     </>
   );
 };

@@ -26,7 +26,6 @@ const get_free_ports = async (count) => {
   if (!(await port_used(PORT))) dummyServer = getServer(PORT);
   for (let i = 0; i < count; i++) servers.push(getServer(0));
   const ports = servers.map((server) => server.address().port);
-  console.log(`dummyServer ${dummyServer}`);
   if (dummyServer) dummyServer.close();
   servers.forEach((server) => server.close());
   return ports;

@@ -22,61 +22,30 @@ const PrecionField = ({ onChange }) => (
   <input className="uk-input" placeholder="precision" onChange={onChange} />
 );
 
-const ScoreTableDummy = ({ scoreInfo }) => {
+const ScoreTable = ({ scores }) => {
   const flatScores = useMemo(
-    () => Object.values(scoreInfo).reduce((acc, value) => acc.concat(Object.entries(value)), []),
-    [scoreInfo]
+    () => Object.values(scores).reduce((acc, value) => acc.concat(Object.entries(value)), []),
+    [scores]
   );
-  const [allChecked, setAllChecked] = useState(true);
-  const [isChecked, toggleChecked] = useReducer(
-    (state, i) => [...state.slice(0, i), !state[i], ...state.slice(i + 1)],
-    flatScores.map(() => true)
-  );
-  const [currFormat, setCurrFormat] = useState({});
+  const [format, setFormat] = useState(null);
+  useEffect(() => setFormat(null), [scores])
   const [transpose, toggleTranspose] = useReducer((state) => !state, true);
-  const [precision, setPrecision] = useReducer((state, newValue) => {
-    let value = newValue.replace(/\D/g, "");
-    if (value === "") {
-      value = "3";
-    }
-    if (value > 30) {
-      value = 30;
-    }
-    return value;
-  }, "3");
-  const [exportText, updateExportText] = useReducer((oldstate) => {
-    const chosenScores = flatScores.filter((score, i) => isChecked[i]);
-    const { format } = currFormat;
-    try {
-      if (format === "csv") {
-        return toCSV(chosenScores, transpose, precision);
-      }
-      if (format === "latex") {
-        return toLatex(chosenScores, transpose, precision);
-      }
-    } catch (e) {
-      if (!(e instanceof RangeError)) {
-        throw e;
-      }
-    }
-    return oldstate;
-  }, null);
-  useEffect(() => updateExportText(), [currFormat, transpose, precision]);
-  useEffect(() => {
-    if (isChecked.every((a) => a)) {
-      setAllChecked(true);
-    } else {
-      setAllChecked(false);
-    }
-  }, [isChecked]);
-  const allOnClick = (e) => {
-    const { checked } = e.target;
-    isChecked.forEach((value, i) => {
-      if (value !== checked) {
-        toggleChecked(i);
-      }
-    });
+  const [precision, setPrecision] = useState(3);
+  const updatePrecision = (newValue) => {
+    let value = parseInt(newValue.replace(/\D/g, "") || "3", 10);
+    if (value > 30) value = 30;
+    setPrecision(value);
   };
+  const exportText = useMemo(() => {
+    switch (format) {
+      case "csv":
+        return toCSV(flatScores, transpose, precision);
+      case "latex":
+        return toLatex(flatScores, transpose, precision);
+      default:
+        return null;
+    }
+  }, [format, transpose, precision, flatScores]);
   return (
     <>
       <table className="uk-table uk-table-divider uk-table-small uk-table-middle">
@@ -84,30 +53,13 @@ const ScoreTableDummy = ({ scoreInfo }) => {
           <tr>
             <th>Metric</th>
             <th>Score</th>
-            <td>
-              <input
-                checked={allChecked}
-                className="uk-checkbox uk-padding-small"
-                type="checkbox"
-                onChange={allOnClick}
-              />
-            </td>
           </tr>
         </thead>
         <tbody>
-          {flatScores.map(([metric, score], i) => (
+          {flatScores.map(([metric, score]) => (
             <tr key={metric}>
               <td>{metric}</td>
               <td>{score.toFixed(3)}</td>
-              <td>
-                <input
-                  key={i}
-                  checked={isChecked[i]}
-                  className="uk-checkbox uk-padding-small"
-                  type="checkbox"
-                  onChange={() => toggleChecked(i)}
-                />
-              </td>
             </tr>
           ))}
         </tbody>
@@ -118,29 +70,25 @@ const ScoreTableDummy = ({ scoreInfo }) => {
         style={{ gridRowGap: "20px" }}
       >
         <div className="uk-flex">
-          <CSVButton onClick={() => setCurrFormat({ format: "csv" })} />
-          <LatexButton onClick={() => setCurrFormat({ format: "latex" })} />
-        </div>
-
-        <div className="uk-flex">
-          <PrecionField
-            precision={precision}
-            onChange={(e) => {
-              setPrecision(e.target.value);
-            }}
-          />
-          <TransposeButton transpose={transpose} onClick={() => toggleTranspose()} />
+          <CSVButton onClick={() => setFormat("csv")} />
+          <LatexButton onClick={() => setFormat("latex")} />
         </div>
       </div>
-      {exportText !== null && <ExportPreview text={exportText} />}
+      {exportText && (
+        <div>
+          <div className="uk-flex">
+            <PrecionField
+              onChange={(e) => {
+                updatePrecision(e.currentTarget.value);
+              }}
+            />
+            <TransposeButton transpose={transpose} onClick={() => toggleTranspose()} />
+          </div>
+          <ExportPreview text={exportText} />
+        </div>
+      )}
     </>
   );
-};
-
-const ScoreTable = ({ scoreInfo }) => {
-  const [key, reload] = useReducer((state) => !state, true);
-  useEffect(reload, [scoreInfo, reload]);
-  return <ScoreTableDummy key={key} scoreInfo={scoreInfo} />;
 };
 
 export { ScoreTable };

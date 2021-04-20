@@ -51,7 +51,7 @@ const ChooseFile = ({ kind, name, fileName, setFile, lines, linesAreSame, ...oth
     setIsDragged(false);
   };
 
-  const fileSelectOnChange = (e) => setFile(e.target.files[0]);
+  const fileSelectOnChange = (e) => setFile(e.currentTarget.files[0]);
 
   let extraStyle = { backgroundColor: "#f0506e", color: "white" }
   if (linesAreSame === null) {
