@@ -10,6 +10,18 @@ body {
   scrollbar-color: #55a6d1 #9bc4d8;
 }
 
+.hover-green:hover {
+  color: green;
+}
+
+.hover-red:hover {
+  color: #B02F2C;
+}
+
+.hover-blue:hover {
+  color: #1e87f0;
+}
+
 .tooltip-icon {
   width: 20px;
   color: #55A6D1;
@@ -41,6 +53,23 @@ body {
   padding-top: 10px;
   padding-left: 12px;
   margin-bottom: 10px;
+}
+
+.visualization-layout {
+  display: flex;
+  align-items: top;
+}
+
+.visualization-layout > :nth-child(1) {
+  flex-basis: 50%;
+}
+
+.visualization-layout > :nth-child(2) {
+  flex-basis: 50%;
+}
+
+.visualization-layout > :not(:first-child) {
+  margin-left: 10px;
 }
 
 .metric-layout {

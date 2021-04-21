@@ -69,7 +69,7 @@ const useSavedCalculations = () => {
     let { scores } = calculation;
     if (!scores) {
       scores = loadCalculationScores(calculationID);
-      calculationCache.current[calculationID] = { scores, ...calculation };
+      calculationCache.current[calculationID] = { ...calculation, scores };
     }
     return scores;
   }, []);
@@ -79,7 +79,7 @@ const useSavedCalculations = () => {
     let { lines } = calculation;
     if (!lines) {
       lines = loadCalculationLines(calculationID);
-      calculationCache.current[calculationID] = { lines, ...calculation };
+      calculationCache.current[calculationID] = { ...calculation, lines };
     }
     return lines;
   }, []);

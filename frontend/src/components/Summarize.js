@@ -1,6 +1,5 @@
 import isURL from "is-url";
 import React, { useContext, useReducer, useState } from "react";
-import { FaBars, FaEye, FaEyeSlash, FaThumbsDown, FaThumbsUp } from "react-icons/fa";
 import { CSSTransition } from "react-transition-group";
 
 import { feedbackRequest, summarizeRequest } from "../api";
@@ -11,25 +10,8 @@ import { Markup } from "./Markup";
 import { Badge } from "./utils/Badge";
 import { Button } from "./utils/Button";
 import { Checkboxes } from "./utils/Checkboxes";
+import { Bars, EyeClosed, EyeOpen, ThumbsDown, ThumbsUp } from "./utils/Icons";
 import { CenterLoading } from "./utils/Loading";
-
-const withHover = (WrappedComponent, color) => ({ style, ...props }) => {
-  const [hovered, setHovered] = useState(false);
-  return (
-    <WrappedComponent
-      {...props}
-      style={{ color: hovered ? color : "", ...style }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    />
-  );
-};
-
-const ThumbsUp = withHover(FaThumbsUp, "green");
-const ThumbsDown = withHover(FaThumbsDown, "#B02F2C");
-const Bars = withHover(FaBars, "#B02F2C");
-const EyeOpen = withHover(FaEye, "#1e87f0");
-const EyeClosed = withHover(FaEyeSlash, "#B02F2C");
 
 const Feedback = ({ summarizer, summary, reference, url }) => {
   const [submitted, setSubmitted] = useState(false);
@@ -260,7 +242,7 @@ const Document = ({ markup, showMarkup, clearMarkups }) => (
 );
 
 const SummaryTabView = ({ showOverlap, markups, clearMarkups, documentLength }) => {
-  const [summaryIndex, setSummaryIndex] = useState(0)
+  const [summaryIndex, setSummaryIndex] = useState(0);
   const { summarizers } = useContext(SummarizersContext);
 
   return (
@@ -280,7 +262,12 @@ const SummaryTabView = ({ showOverlap, markups, clearMarkups, documentLength }) 
           <ul className="uk-tab dark-tab uk-margin" data-uk-tab="connect: #summary-display;">
             {markups.map(({ name }, index) => (
               <li key={name}>
-                <a className="" style={{ color: "blue", fontSize: "1em" }} href="/#" onClick={() => setSummaryIndex(index)}>
+                <a
+                  className=""
+                  style={{ color: "blue", fontSize: "1em" }}
+                  href="/#"
+                  onClick={() => setSummaryIndex(index)}
+                >
                   {summarizers[name].readable}
                 </a>
               </li>
@@ -294,10 +281,7 @@ const SummaryTabView = ({ showOverlap, markups, clearMarkups, documentLength }) 
           <ul id="summary-display" className="uk-switcher">
             {markups.map((markup, index) => (
               <li key={index}>
-                <Summary
-                  data={markup}
-                  showMarkup={showOverlap}
-                />
+                <Summary data={markup} showMarkup={showOverlap} />
               </li>
             ))}
           </ul>

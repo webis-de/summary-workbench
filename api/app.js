@@ -5,7 +5,6 @@ const helmet = require("helmet");
 const cookieParser = require("cookie-parser");
 
 const apiRouter = require("./routes/api");
-const userRouter = require("./routes/user");
 
 const app = express();
 
@@ -22,7 +21,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json({limit: "30mb"}));
 
 app.use("/api", apiRouter);
-app.use("/api/user", userRouter);
 app.get("/health", (req, res) => res.status(200).end())
 app.use(errorMiddleware);
 

@@ -5,9 +5,7 @@ import { readFile } from "../../utils/readFile";
 
 const sameLength = (elements) => {
   const validElements = elements.filter((e) => e !== null);
-  if (!validElements.length) {
-    return true;
-  }
+  if (!validElements.length) return true;
   const [first, ...other] = validElements;
   return other.every((e) => e.length === first.length);
 };
@@ -71,7 +69,7 @@ const ChooseFile = ({ kind, name, fileName, setFile, lines, linesAreSame, ...oth
         onDragLeave={() => setIsDragged(false)}
         onDrop={(e) => dropHandler(e)}
         onClick={() => uploadRef.current.click()}
-        style={isDragged ? { borderStyle: "solid", borderWidth: "1px" } : {}}
+        style={isDragged ? { outlineStyle: "solid", outlineWidth: "1px" } : {}}
       >
         <input
           className="uk-textarea"

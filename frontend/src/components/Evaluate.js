@@ -62,7 +62,6 @@ const Evaluate = () => {
 
   const saveCalculation = () => {
     const { name, ...data } = calculation;
-    console.log(data);
     addCalculation(name, data);
     setCalculation(null);
   };

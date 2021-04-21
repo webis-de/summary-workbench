@@ -13,7 +13,6 @@ const SavedInfo = ({ ID, getCalculationScores, getCalculationLines, deleteCalcul
   const loadRef = useRef();
   const showEvent = useCallback(() => {
     if (comparisons !== null) return;
-    console.log(loadRef.current)
     if (loadRef.current && loadRef.current.className.includes("uk-active")) {
       const { hypotheses, references } = getCalculationLines(ID);
       setComparisons(
