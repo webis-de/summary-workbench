@@ -6,4 +6,4 @@ class MetricPlugin:
 
     def evaluate(self, hypotheses, references):
         scores = self.rouge.get_scores(hypotheses, references, avg=True)
-        return {score.replace("-", " "): info["f"] for score, info in scores.items()}
+        return {score[-1]: info["f"] for score, info in scores.items()}

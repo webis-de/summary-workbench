@@ -22,13 +22,10 @@ const PrecionField = ({ onChange }) => (
   <input className="uk-input" placeholder="precision" onChange={onChange} />
 );
 
-const ScoreTable = ({ scores }) => {
-  const flatScores = useMemo(
-    () => Object.values(scores).reduce((acc, value) => acc.concat(Object.entries(value)), []),
-    [scores]
-  );
+
+const ScoreTable = ({ flatScores }) => {
   const [format, setFormat] = useState(null);
-  useEffect(() => setFormat(null), [scores])
+  useEffect(() => setFormat(null), [flatScores]);
   const [transpose, toggleTranspose] = useReducer((state) => !state, true);
   const [precision, setPrecision] = useState(3);
   const updatePrecision = (newValue) => {

@@ -1,5 +1,7 @@
-import React, { useMemo } from "react";
+import React, { useContext, useMemo } from "react";
 
+import { MetricsContext } from "../contexts/MetricsContext";
+import { flatten } from "../utils/flatScores";
 import { markup } from "../utils/fragcolors";
 import { CompareTable } from "./CompareTable";
 import { ScoreTable } from "./ScoreTable";
@@ -9,6 +11,10 @@ const ResultInfo = ({ scores, hypotheses, references }) => {
     hypotheses,
     references,
   ]);
+
+  const { metrics } = useContext(MetricsContext);
+  const flatScores = useMemo(() => flatten(scores, metrics), [scores, metrics]);
+  console.log(flatScores)
 
   return (
     <div>
@@ -22,7 +28,7 @@ const ResultInfo = ({ scores, hypotheses, references }) => {
       </ul>
       <ul id="result-display" className="uk-switcher">
         <li>
-          <ScoreTable scores={scores} />
+          <ScoreTable flatScores={flatScores} />
         </li>
         <li>
           <CompareTable comparisons={comparisons} />

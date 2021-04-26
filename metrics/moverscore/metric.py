@@ -15,4 +15,4 @@ class MetricPlugin:
         self.mover_score = MODEL_CLASS()
 
     def evaluate(self, hypotheses, references):
-        return {"moverscore": np.average(self.mover_score.score(references, hypotheses))}
+        return np.average(self.mover_score.score(references, hypotheses))

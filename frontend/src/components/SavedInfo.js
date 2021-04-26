@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useMemo, useCallback, useEffect, useRef, useState } from "react";
 import UIkit from "uikit";
 
 import { markup } from "../utils/fragcolors";
@@ -6,12 +6,24 @@ import { CompareTable } from "./CompareTable";
 import { ScoreTable } from "./ScoreTable";
 import { DeleteButton } from "./utils/DeleteButton";
 
+const flatten = (scores, metrics) => {
+  const flatScores = [];
+  Object.entries(scores).forEach(([metric, value]) => {
+    const { readable } = metrics[metric]
+    if (typeof value === "number") flatScores.push([readable, value]);
+    else
+      Object.entries(value).forEach(([suffix, score]) =>
+        flatScores.push([`${readable} ${suffix}`, score])
+      );
+  });
+  return flatScores;
+};
 
 const SavedInfo = ({ index, ID, getCalculationScores, getCalculationLines, deleteCalculation }) => {
-  console.log(index)
-  const [scores] = useState(getCalculationScores(ID));
+  const { scores, metrics } = getCalculationScores(ID);
+  const flatScores = flatten(scores, metrics);
   const [comparisons, setComparisons] = useState(null);
-  const toggleID = `toggle-saved-calculation-${index}`
+  const toggleID = `toggle-saved-calculation-${index}`;
   const loadRef = useRef();
   const showEvent = useCallback(() => {
     if (comparisons !== null) return;
@@ -43,7 +55,7 @@ const SavedInfo = ({ index, ID, getCalculationScores, getCalculationLines, delet
       </div>
       <ul id={toggleID} className="uk-switcher">
         <li>
-          <ScoreTable scores={scores} />
+          <ScoreTable flatScores={flatScores} />
         </li>
         <li ref={loadRef}>{comparisons && <CompareTable comparisons={comparisons} />}</li>
       </ul>

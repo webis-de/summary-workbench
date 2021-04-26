@@ -13,5 +13,4 @@ class MetricPlugin:
     def evaluate(self, hypotheses, references):
         nlp = self.nlp
         scores = [nlp(h).similarity(nlp(r)) for h, r in zip(hypotheses, references)]
-        score = mean(scores)
-        return {"Cosine Similarity": score}
+        return mean(scores)

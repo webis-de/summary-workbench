@@ -20,4 +20,4 @@ class MetricPlugin:
         self.bleurt = bleurt.score.BleurtScorer(str(self.MODEL_PATH / self.MODEL))
 
     def evaluate(self, hypotheses, references):
-        return {"bleurt": float(np.average(self.bleurt.score(references, hypotheses)))}
+        return float(np.average(self.bleurt.score(references, hypotheses)))

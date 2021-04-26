@@ -9,4 +9,4 @@ class MetricPlugin:
         self.bert = BERTScorer(model_type=MODEL, rescale_with_baseline=True, lang="en")
 
     def evaluate(self, hypotheses, references):
-        return {"bert": float(np.average(self.bert.score(hypotheses, references)[0]))}
+        return float(np.average(self.bert.score(hypotheses, references)[0]))

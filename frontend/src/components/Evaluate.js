@@ -62,7 +62,7 @@ const Evaluate = () => {
 
   const saveCalculation = () => {
     const { name, ...data } = calculation;
-    addCalculation(name, data);
+    addCalculation(name, { ...data, metrics });
     setCalculation(null);
   };
   const scrollRef = useRef();

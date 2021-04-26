@@ -63,4 +63,4 @@ class MetricPlugin:
                 score_source.append((dir1 + dir2) / 2)
             scores.append(score_source)
 
-        return {"greedy_matching": np.max(scores, axis=0).mean()}
+        return np.max(scores, axis=0).mean()

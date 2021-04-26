@@ -18,8 +18,8 @@ const computeUnusedID = (ID, IDs) => {
   return newID;
 };
 
-const saveCalculationData = (calculationID, { scores, hypotheses, references }) => {
-  window.localStorage.setItem(`calculation_scores_${calculationID}`, JSON.stringify(scores));
+const saveCalculationData = (calculationID, { scores, hypotheses, references, metrics }) => {
+  window.localStorage.setItem(`calculation_scores_${calculationID}`, JSON.stringify({ scores, metrics }));
   window.localStorage.setItem(
     `calculation_lines_${calculationID}`,
     JSON.stringify({ hypotheses, references })
@@ -50,7 +50,6 @@ const useSavedCalculations = () => {
     (calculationID, data) => {
       const newCalculationID = computeUnusedID(calculationID, calculationIDs);
       saveCalculationData(newCalculationID, data);
-      calculationCache.current[newCalculationID] = data;
       updateCalculationIDs([newCalculationID, ...calculationIDs]);
     },
     [updateCalculationIDs, calculationIDs]
@@ -67,6 +66,8 @@ const useSavedCalculations = () => {
     let calculation = calculationCache.current[calculationID];
     if (!calculation) calculation = {};
     let { scores } = calculation;
+    console.log(calculationID)
+    console.log(scores)
     if (!scores) {
       scores = loadCalculationScores(calculationID);
       calculationCache.current[calculationID] = { ...calculation, scores };

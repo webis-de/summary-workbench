@@ -1,7 +1,8 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useMemo, useState } from "react";
 
 import { evaluateRequest } from "../api";
 import { MetricsContext } from "../contexts/MetricsContext";
+import { flatten } from "../utils/flatScores";
 import { markup } from "../utils/fragcolors";
 import { displayMessage } from "../utils/message";
 import { Markup } from "./Markup";
@@ -12,6 +13,9 @@ import { Loading } from "./utils/Loading";
 
 const OneHypRefResult = ({ className, calculation }) => {
   const { scores, hypothesis, reference } = calculation;
+
+  const { metrics } = useContext(MetricsContext);
+  const flatScores = useMemo(() => flatten(scores, metrics), [scores, metrics]);
 
   return (
     <div className={className}>
@@ -27,7 +31,7 @@ const OneHypRefResult = ({ className, calculation }) => {
           </tr>
         </tbody>
       </table>
-      <ScoreTable scores={scores} />
+      <ScoreTable flatScores={flatScores} />
     </div>
   );
 };
