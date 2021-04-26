@@ -37,6 +37,7 @@ class SummarizerPluginSchema(PluginSchema):
 
 class GlobalConfigSchema(Schema):
     source = fields.Str(required=True)
+    image_url = fields.Str()
     environment = fields.Dict(missing={})
 
 

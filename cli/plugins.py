@@ -23,12 +23,12 @@ from .utils import (abort, check_attr, dump_yaml, gen_hash, get_config,
 class Plugin(ABC):
     __type__ = None
 
-    WORKING_DIR = "/app"
+    WORKING_DIR = "/tldr_plugin_files"
     BASE_COMMAND = " && ".join(
         [
             "pip install flask",
             "python model_setup.py",
-            "cd /server",
+            "cd /tldr_plugin_server",
             "python wsgi.py",
         ]
     )
@@ -67,7 +67,8 @@ class Plugin(ABC):
         except marshmallow.ValidationError as error:
             abort(error)
         config.update(global_config.get("config", {}))
-        config["global_env"] = global_config.get("environment", {})
+        config["environment"] = global_config.get("environment", {})
+        config["image_url"] = global_config.get("image_url")
         self.config = config
 
         self.docker_username = docker_username
@@ -157,7 +158,7 @@ class Plugin(ABC):
         dockerfile_parts = []
         dockerfile_parts.append(f"FROM {previous_id}")
         dockerfile_parts.extend([f"ENV {env}" for env in self.environment_list])
-        dockerfile_parts.append("WORKDIR /app")
+        dockerfile_parts.append("WORKDIR /tldr_plugin_files")
         dockerfile_parts.append("COPY . .")
         dockerfile_parts.append("RUN python model_setup.py")
         return "\n".join(dockerfile_parts)
@@ -165,7 +166,7 @@ class Plugin(ABC):
     def dockerfile_copy_server(self, previous_id):
         dockerfile_parts = []
         dockerfile_parts.append(f"FROM {previous_id}")
-        dockerfile_parts.append("WORKDIR /server")
+        dockerfile_parts.append("WORKDIR /tldr_plugin_server")
         dockerfile_parts.append("COPY . .")
         dockerfile_parts.append(load_dockerfile_base())
         return "\n".join(dockerfile_parts)
@@ -173,8 +174,8 @@ class Plugin(ABC):
     @property
     def host_volumes(self):
         return {
-            str(Path("./plugin_server").absolute()): "/server",
-            str(self.plugin_path): "/app",
+            str(Path("./plugin_server").absolute()): "/tldr_plugin_server",
+            str(self.plugin_path): "/tldr_plugin_files",
         }
 
     @property
@@ -206,8 +207,9 @@ class Plugin(ABC):
     @property
     def environment(self):
         config = self.config
-        environment = {"PLUGIN_TYPE": self.__type__}
+        environment = {}
         environment.update(config.get("environment", {}))
+        environment["PLUGIN_TYPE"] = self.__type__
         model = self.model
         if model:
             environment["PLUGIN_MODEL"] = model
@@ -277,7 +279,7 @@ class Plugin(ABC):
 
     def build_copy_server(self, previous_id):
         return self._build(
-            self.dockerfile_copy_server(previous_id), Path("./plugin_server").absolute()
+            self.dockerfile_copy_server(previous_id), Path("./tldr_plugin_server").absolute()
         )
 
     def build(self):
@@ -320,7 +322,7 @@ class Plugin(ABC):
 
     @property
     def image_url(self):
-        return f"docker.io/{self.tag}"
+        return self.config.get("image_url") or f"docker.io/{self.tag}"
 
     @property
     def kubernetes_name(self):
@@ -376,7 +378,6 @@ class Plugin(ABC):
         dump_yaml([deployment, service], path, multiple=True)
 
     def to_yaml(self):
-        config = self.config
         service_conf = CommentedMap()
         service_conf["image"] = f"{self.mangled_name}:latest"
         service_conf["build"] = {

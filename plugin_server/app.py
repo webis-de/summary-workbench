@@ -2,7 +2,7 @@ import logging
 from os import environ
 
 import sys
-sys.path.insert(0, "/app")
+sys.path.insert(0, "/tldr_plugin_files")
 
 from flask import Flask, jsonify, request
 
