@@ -279,7 +279,7 @@ class Plugin(ABC):
 
     def build_copy_server(self, previous_id):
         return self._build(
-            self.dockerfile_copy_server(previous_id), Path("./tldr_plugin_server").absolute()
+            self.dockerfile_copy_server(previous_id), Path("./plugin_server").absolute()
         )
 
     def build(self):

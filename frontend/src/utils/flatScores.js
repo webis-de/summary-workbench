@@ -1,6 +1,4 @@
 const flatten = (scores, metrics) => {
-  console.log(scores)
-  console.log(metrics)
   const flatScores = [];
   Object.entries(scores).forEach(([metric, value]) => {
     const { readable } = metrics[metric]
@@ -10,6 +8,7 @@ const flatten = (scores, metrics) => {
         flatScores.push([`${readable} ${suffix}`, score])
       );
   });
+  flatScores.sort();
   return flatScores;
 };
 

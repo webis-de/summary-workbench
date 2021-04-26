@@ -1,23 +1,11 @@
-import React, { useMemo, useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import UIkit from "uikit";
 
+import { flatten } from "../utils/flatScores";
 import { markup } from "../utils/fragcolors";
 import { CompareTable } from "./CompareTable";
 import { ScoreTable } from "./ScoreTable";
 import { DeleteButton } from "./utils/DeleteButton";
-
-const flatten = (scores, metrics) => {
-  const flatScores = [];
-  Object.entries(scores).forEach(([metric, value]) => {
-    const { readable } = metrics[metric]
-    if (typeof value === "number") flatScores.push([readable, value]);
-    else
-      Object.entries(value).forEach(([suffix, score]) =>
-        flatScores.push([`${readable} ${suffix}`, score])
-      );
-  });
-  return flatScores;
-};
 
 const SavedInfo = ({ index, ID, getCalculationScores, getCalculationLines, deleteCalculation }) => {
   const { scores, metrics } = getCalculationScores(ID);

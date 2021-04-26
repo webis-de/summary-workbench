@@ -14,7 +14,6 @@ const ResultInfo = ({ scores, hypotheses, references }) => {
 
   const { metrics } = useContext(MetricsContext);
   const flatScores = useMemo(() => flatten(scores, metrics), [scores, metrics]);
-  console.log(flatScores)
 
   return (
     <div>

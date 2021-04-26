@@ -66,8 +66,6 @@ const useSavedCalculations = () => {
     let calculation = calculationCache.current[calculationID];
     if (!calculation) calculation = {};
     let { scores } = calculation;
-    console.log(calculationID)
-    console.log(scores)
     if (!scores) {
       scores = loadCalculationScores(calculationID);
       calculationCache.current[calculationID] = { ...calculation, scores };
