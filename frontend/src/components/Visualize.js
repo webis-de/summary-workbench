@@ -425,7 +425,7 @@ const VisualizationOverview = () => {
                   remove={() => deleteVisualization(ID)}
                 >
                   <div className="uk-flex uk-flex-between uk-flex-middle">
-                    <h3>Models</h3>
+                    <h3 style={{margin: 0}}>Models</h3>
                     <AddModel
                       getVisualizationData={() => getVisualizationData(ID)}
                       addModel={addModel}

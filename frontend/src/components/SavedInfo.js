@@ -6,10 +6,12 @@ import { CompareTable } from "./CompareTable";
 import { ScoreTable } from "./ScoreTable";
 import { DeleteButton } from "./utils/DeleteButton";
 
-const SavedInfo = ({ ID, getCalculationScores, getCalculationLines, deleteCalculation }) => {
+
+const SavedInfo = ({ index, ID, getCalculationScores, getCalculationLines, deleteCalculation }) => {
+  console.log(index)
   const [scores] = useState(getCalculationScores(ID));
   const [comparisons, setComparisons] = useState(null);
-  const toggleID = `toggle-saved-calculation-${ID}`;
+  const toggleID = `toggle-saved-calculation-${index}`
   const loadRef = useRef();
   const showEvent = useCallback(() => {
     if (comparisons !== null) return;

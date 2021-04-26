@@ -1,0 +1,8 @@
+version: "1.0"
+name: cosine_similarity
+readable: Cosine Similarity
+type: semantic
+model: en_core_web_lg
+sourcecode: https://github.com/explosion/spaCy
+devimage: slim
+deployimage: slim

@@ -19,12 +19,13 @@ const Saved = ({
         <FaQuestionCircle className="tooltip-icon" data-uk-tooltip="title: the data is stored in the browser; pos: right;"/>
       </div>
       <Accordion>
-        {calculationIDs.map((ID) => {
+        {calculationIDs.map((ID, index) => {
           const scores = getCalculationScores(ID);
           return (
             <AccordionItem key={ID} text={ID} badges={Object.keys(scores)}>
               <SavedInfo
                 ID={ID}
+                index={index}
                 getCalculationScores={getCalculationScores}
                 getCalculationLines={getCalculationLines}
                 deleteCalculation={deleteCalculation}
