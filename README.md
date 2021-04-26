@@ -16,7 +16,7 @@ The `manage.py` has the following options:
 | gen-docker-compose | generate a docker-compose.yaml to run the application localy |
 | gen-kubernetes     | generates kubernetes files for the deployment                |
 
-If you want to run the application localy, only `gen-docker-compose` is relevant for you (see [Development / run application localy](#development--run-application-localy)).
+If you want to run the application localy, only `gen-docker-compose` is relevant for you (see [Development / run application localy](#development-run-application-localy)).
 
 ## Application config.yaml
 
@@ -96,12 +96,10 @@ The summarizer.py file should have a class `SummarizerPlugin` with the following
 
 # Development / run application localy
 
-## Setup
-
 **requirements**: install docker and docker-compose on your system and make sure the docker service is running (`sudo systemctl start docker.service`)
 
 Generate a docker-compose file for the local development of the application with `./manage.py gen-docker-compose`.
-Uncomment the services which you don't need in the `config.yaml` to prevent unnecessary RAM usage.
+Comment the services which you don't need in the `config.yaml` to prevent unnecessary RAM usage.
 The application can be accessed via `localhost:3000`.
 
 The `api` and `frontend` containers are available even before the other containers are done initializing.
@@ -127,7 +125,7 @@ api location: `http://<domain>:<port>/api`
 - development: `http://localhost:3000/api`
 - production: `http://<your-domain>:<nodeport>/api`
 
-request evaluation:
+**evaluation request**:
 
 - method: POST
 - location: `http://<domain>:<port>/api/evaluate`
@@ -135,13 +133,13 @@ request evaluation:
 
 ```json
 {
-   "metrics": <list of strings: list of metrics (i.e. ['bleu', 'cider', ...])>,
-   "hypotheses": <list of strings: hypotheses for evaluation>,
-   "references": <list of strings: references for evaluation>
+   "metrics": "<list of strings: list of metrics (i.e. ['bleu', 'cider', ...])>",
+   "hypotheses": "<list of strings: hypotheses for evaluation>",
+   "references": "<list of strings: references for evaluation>"
 }
 ```
 
-request summary:
+**summary request**:
 
 - method: POST
 - location: `http://<domain>:<port>/api/summarize`
@@ -149,9 +147,9 @@ request summary:
 
 ```json
 {
-   "text": <string: text of which the summary has to be generated>,
-   "summarizers": <list of strings: list of summarizers (i.e. ['t5', 'textrank', ...])>,
-   "ratio": <number: between 0 and 1, controls summary length>
+   "text": "<string: text of which the summary has to be generated>",
+   "summarizers": "<list of strings: list of summarizers (i.e. ['t5', 'textrank', ...])>",
+   "ratio": "<number: between 0 and 1, controls summary length>"
 }
 ```
 
