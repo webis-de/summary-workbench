@@ -1,7 +1,10 @@
+import configparser
 import io
 import json
+import re
 import tarfile
 from abc import ABC, abstractmethod
+from json import JSONDecodeError
 from pathlib import Path
 
 import docker
@@ -10,7 +13,6 @@ import giturlparse
 import marshmallow
 from ruamel.yaml.comments import CommentedMap
 from termcolor import colored
-import re
 
 from .config import KUBERNETES_PATH
 from .schema import (GlobalConfigSchema, GlobalMetricConfigSchema,
@@ -235,6 +237,22 @@ class Plugin(ABC):
     def kubernetes_url_env(self):
         return (f"{self.name.upper()}_{self.__type__}_URL", f"{self.kubernetes_url}")
 
+    @property
+    def python_version(self):
+        pipfile = self.plugin_path / "Pipfile"
+        pipfilelock = self.plugin_path / "Pipfile.lock"
+        try:
+            if pipfilelock.exists():
+                with open(pipfilelock) as file:
+                    return json.load(file)["_meta"]["requires"]["python_version"]
+            if pipfile.exists():
+                config_parser = configparser.ConfigParser()
+                config_parser.read(pipfile)
+                return config_parser["requires"]["python_version"].strip('"').strip("'")
+        except (JSONDecodeError, KeyError):
+            pass
+        return None
+
     def named_volumes_to_config(self):
         return {volume: None for volume in self.named_volumes.keys()}
 
@@ -250,14 +268,18 @@ class Plugin(ABC):
         fh.seek(0)
         return fh
 
-    def _build(self, dockerfile, path):
+    def _build(self, dockerfile, path, buildargs=None):
         client = docker.from_env()
         context = self.get_context(dockerfile, path)
         print(colored("--- DOCKERFILE BEGIN ---", "yellow"))
         print(dockerfile)
         print(colored("--- DOCKERFILE END   ---", "yellow"))
         for status in client.api.build(
-            fileobj=context, encoding="gzip", custom_context=True, decode=True
+            fileobj=context,
+            encoding="gzip",
+            custom_context=True,
+            decode=True,
+            buildargs=buildargs,
         ):
             error = status.get("error")
             if error:
@@ -272,7 +294,9 @@ class Plugin(ABC):
         return image.id.split(":")[1]
 
     def build_plugin_image(self):
-        return self._build(self.dockerfile, self.plugin_path)
+        python_version = self.python_version
+        buildargs = {"image_version": python_version} if python_version else None
+        return self._build(self.dockerfile, self.plugin_path, buildargs=buildargs)
 
     def build_copy_plugin(self, previous_id):
         return self._build(self.dockerfile_copy_plugin(previous_id), self.plugin_path)
@@ -336,7 +360,6 @@ class Plugin(ABC):
             port_name = name[:10] + gen_hash(name)[:5]
         return port_name
 
-
     def gen_kubernetes(self):
         name = self.kubernetes_name
         version = self.version
@@ -380,10 +403,14 @@ class Plugin(ABC):
     def to_yaml(self):
         service_conf = CommentedMap()
         service_conf["image"] = f"{self.mangled_name}:latest"
-        service_conf["build"] = {
+        build_dict = {
             "context": str(self.devimage_path.parent),
             "dockerfile": str(self.devimage_path.name),
         }
+        python_version = self.python_version
+        if python_version:
+            build_dict["args"] = {"image_version": python_version}
+        service_conf["build"] = build_dict
         service_conf["working_dir"] = self.WORKING_DIR
         service_conf["volumes"] = list(map(":".join, self.volumes.items()))
         service_conf["command"] = self.command
@@ -466,8 +493,7 @@ class Plugins(ABC):
     def plugin_config(self):
         return {
             self.__type__: {
-                plugin.name: plugin.plugin_config()
-                for plugin in self.plugins.values()
+                plugin.name: plugin.plugin_config() for plugin in self.plugins.values()
             }
         }
 

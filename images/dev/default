@@ -1,3 +1,6 @@
-FROM python:3.8
+ARG image_version=3.8
+ARG image=python:${image_version}
+
+FROM ${image} as lock-stage
 
 RUN pip install pipenv

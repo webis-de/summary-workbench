@@ -1,4 +1,7 @@
-FROM python:3.8
+ARG image_version=3.8
+ARG image=python:${image_version}
+
+FROM ${image} as lock-stage
 
 RUN apt update && apt --yes install default-jre-headless
 RUN pip install pipenv

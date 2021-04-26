@@ -1,4 +1,7 @@
-FROM python:3.8-slim
+ARG image_version=3.8
+ARG image=python:${image_version}-slim
+
+FROM ${image} as lock-stage
 
 RUN apt update && apt install -y git
 RUN pip install pipenv

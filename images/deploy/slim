@@ -1,4 +1,5 @@
-ARG image=python:3.8-slim
+ARG image_version=3.8
+ARG image=python:${image_version}-slim
 
 FROM ${image} as lock-stage
 WORKDIR /app
