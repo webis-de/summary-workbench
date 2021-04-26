@@ -1,7 +1,9 @@
 import os
+
 from .ModelProcessor import BertSummarizer
 
-MODEL = os.environ.get("distilbert-base-uncased") or "distilbert-base-uncased"
+MODEL = os.environ.get("PLUGIN_MODEL") or "distilbert-base-uncased"
+
 
 class SummarizerPlugin:
     def __init__(self):

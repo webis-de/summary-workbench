@@ -3,5 +3,6 @@ name: bertsum
 readable: BERTSummarizer
 type: extractive
 homepage: https://arxiv.org/abs/1906.04165
+model: distilbert-base-uncased
 devimage: slim
 deployimage: slim

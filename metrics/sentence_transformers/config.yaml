@@ -3,5 +3,6 @@ name: sentence_transformers
 readable: Sentence Transformers
 model: roberta-large-nli-stsb-mean-tokens
 type: semantic
+sourcecode: https://github.com/UKPLab/sentence-transformers
 devimage: slim
 deployimage: slim
