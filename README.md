@@ -83,7 +83,7 @@ The metric.py file should have a class `MetricPlugin` with the following methods
   - hypotheses: list of strings
   - references: list of strings
   - len(hypotheses) is equal to len(references)
-  - returns: a dictionary, which contains the computed scores (e.g. {"BERTScore": 0.1})
+  - returns: a number/score or a dictionary, which contains the computed scores (e.g. {"1": 0.1, "l": 0.1}). in the frontend the entries of the dictionary will be combined with the name of the plugin e.g. when the name is `rouge`, the example becomes {"rouge 1": 0.1, "rouge l": 0.1}
 
 ## Summarizer
 
