@@ -64,17 +64,17 @@ const isListOfStrings = (field, validElements) => {
 };
 
 const evaluateValidator = [
-  isListOfStrings(body("hypdata")),
-  isListOfStrings(body("refdata")),
+  isListOfStrings(body("hypotheses")),
+  isListOfStrings(body("references")),
   isListOfStrings(body("metrics"), METRICS),
 ];
 
 const validateHypRefMiddleware = (req, res, next) => {
-  const { refdata, hypdata } = req.body;
-  if (refdata.length !== hypdata.length) {
+  const { references, hypotheses } = req.body;
+  if (references.length !== hypotheses.length) {
     return res
       .status(400)
-      .json({ message: "hypdata and refdata have to be same size" });
+      .json({ message: "hypotheses and references have to be same size" });
   }
   return next();
 };
@@ -86,9 +86,9 @@ router.post(
   validateHypRefMiddleware,
   async (req, res, next) => {
     try {
-      const { metrics, refdata, hypdata } = req.body;
+      const { metrics, references, hypotheses } = req.body;
       return res.json({
-        scores: await evaluate(metrics, refdata, hypdata),
+        scores: await evaluate(metrics, hypotheses, references),
       });
     } catch (err) {
       return next(err);

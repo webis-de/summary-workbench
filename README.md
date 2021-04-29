@@ -122,8 +122,34 @@ Therefore the application can be used without the frontend.
 
 api location: `http://<domain>:<port>/api`
 
-- development: `http://localhost:3000/api`
+- development: `http://localhost:5000/api`
 - production: `http://<your-domain>:<nodeport>/api`
+
+**get information about all available metrics**:
+
+- method: GET
+- location: `http://<domain>:<port>/api/metrics`
+- returns:
+
+```json
+{
+  "<metric 1>": "<dict: dictionary with information e.g. homepage, version, type, ...>",
+  "<metric 2>": "<dict: dictionary with information e.g. homepage, version, type, ...>"
+}
+```
+
+**get information about all available summarizers**:
+
+- method: GET
+- location: `http://<domain>:<port>/api/summarizers`
+- returns:
+
+```json
+{
+  "<summarizer 1>": "<dict: dictionary with information e.g. homepage, version, type, ...>",
+  "<summarizer 2>": "<dict: dictionary with information e.g. homepage, version, type, ...>"
+}
+```
 
 **evaluation request**:
 
@@ -133,9 +159,20 @@ api location: `http://<domain>:<port>/api`
 
 ```json
 {
-   "metrics": "<list of strings: list of metrics (i.e. ['bleu', 'cider', ...])>",
-   "hypotheses": "<list of strings: hypotheses for evaluation>",
-   "references": "<list of strings: references for evaluation>"
+  "metrics": "<list of strings: list of metrics (i.e. ['bleu', 'cider', ...])>",
+  "hypotheses": "<list of strings: hypotheses for evaluation>",
+  "references": "<list of strings: references for evaluation>"
+}
+```
+
+- returns:
+
+```json
+{
+    "scores": {
+        "<metric 1>": "<float or dictionary of subscores>",
+        "<metric 2>": "<float or dictionary of subscores>"
+    }
 }
 ```
 
@@ -147,9 +184,21 @@ api location: `http://<domain>:<port>/api`
 
 ```json
 {
-   "text": "<string: text of which the summary has to be generated>",
-   "summarizers": "<list of strings: list of summarizers (i.e. ['t5', 'textrank', ...])>",
-   "ratio": "<number: between 0 and 1, controls summary length>"
+  "text": "<string: text of which the summary has to be generated or url where the text is found>",
+  "summarizers": "<list of strings: list of summarizers (i.e. ['t5', 'textrank', ...])>",
+  "ratio": "<number: between 0 and 1, controls summary length>"
+}
+```
+
+- returns:
+
+```json
+{
+    "original": "<original text from which the summaries where generated>",
+    "summaries": {
+        "<summarizer 1>": "<list of sentences>",
+        "<summarizer 2>": "<list of sentences>"
+    }
 }
 ```
 

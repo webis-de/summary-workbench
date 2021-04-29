@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useReducer, useState } from "react";
 
-import { get } from "../request";
+import { getSummarizersRequest } from "../api";
 import { displayMessage } from "../utils/message";
 
 const saveSetting = (summarizer, status) =>
@@ -27,7 +27,7 @@ const useSummarizers = () => {
 
   useEffect(() => {
     setLoading(true);
-    get("/api/summarizers")
+    getSummarizersRequest()
       .then((data) => setSummarizers(data))
       .catch(() => {
         setSummarizers(null);

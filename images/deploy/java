@@ -1,7 +1,7 @@
 ARG image_version=3.8
 ARG image=python:${image_version}
 
-FROM pyhton:${image} as lock-stage
+FROM ${image} as lock-stage
 WORKDIR /app
 COPY . .
 RUN [ -f Pipfile.lock -o -f Pipfile ] && pip install pipenv && pipenv lock --requirements > requirements.txt

@@ -18,16 +18,16 @@ def construct_metric():
         try:
             request_json = request.json
 
-            hyps = request_json["hyps"]
-            refs = request_json["refs"]
+            hypotheses = request_json["hypotheses"]
+            references = request_json["references"]
 
-            if isinstance(hyps, str):
-                hyps = [hyps]
+            if isinstance(hypotheses, str):
+                hypotheses = [hypotheses]
 
-            if isinstance(refs, str):
-                refs = [refs]
+            if isinstance(references, str):
+                references = [references]
 
-            score = plugin.evaluate(hyps, refs)
+            score = plugin.evaluate(hypotheses, references)
 
             headers = {"Content-Type": "application/json"}
             return jsonify({"score": score}), 200, headers

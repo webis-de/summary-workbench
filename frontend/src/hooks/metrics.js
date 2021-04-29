@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useReducer, useState } from "react";
 
-import { get } from "../request";
+import { getMetricsRequest } from "../api";
 import { displayMessage } from "../utils/message";
 
 const saveSetting = (metric, status) =>
@@ -27,7 +27,7 @@ const useMetrics = () => {
 
   useEffect(() => {
     setLoading(true);
-    get("/api/metrics")
+    getMetricsRequest()
       .then((data) => setMetrics(data))
       .catch(() => {
         setMetrics(null);

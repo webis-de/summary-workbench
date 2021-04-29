@@ -1,19 +1,13 @@
-import { del, get, post } from "./request";
+import { get, post } from "./request";
 
-const evaluateRequest = (metrics, hypdata, refdata) =>
-  post("/api/evaluate", { metrics, hypdata, refdata });
+const getMetricsRequest = () => get("/api/metrics");
+const getSummarizersRequest = () => get("/api/summarizers");
 
-export { evaluateRequest };
-
-const saveCalculationRequest = (name, scores, comparisons) =>
-  post("/api/calculations", { name, scores, comparisons });
-
-export { saveCalculationRequest };
+const evaluateRequest = (metrics, hypotheses, references) =>
+  post("/api/evaluate", { metrics, hypotheses, references });
 
 const summarizeRequest = (text, summarizers, ratio) =>
   post("/api/summarize", { text, summarizers, ratio });
-
-export { summarizeRequest };
 
 const feedbackRequest = (summarizer, summary, reference, url, feedback) => {
   let json = { summarizer, summary, reference, feedback };
@@ -21,4 +15,10 @@ const feedbackRequest = (summarizer, summary, reference, url, feedback) => {
   return post("/api/feedback", json);
 };
 
-export { feedbackRequest };
+export {
+  getMetricsRequest,
+  getSummarizersRequest,
+  evaluateRequest,
+  summarizeRequest,
+  feedbackRequest,
+};
