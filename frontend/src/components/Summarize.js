@@ -1,10 +1,11 @@
 import isURL from "is-url";
-import React, { useContext, useReducer, useState } from "react";
+import React, { useEffect, useMemo, useContext, useReducer, useState } from "react";
 import { CSSTransition } from "react-transition-group";
 
 import { feedbackRequest, summarizeRequest } from "../api";
 import { SummarizersContext } from "../contexts/SummarizersContext";
 import { markup as genMarkup } from "../utils/fragcolors";
+import { markup as genMarkupV2, colorMarkup } from "../utils/fragcolorsV2";
 import { displayMessage } from "../utils/message";
 import { Markup } from "./Markup";
 import { Badge } from "./utils/Badge";
@@ -67,17 +68,81 @@ const getSetModels = (models) =>
 
 const Loading = () => <div data-uk-spinner />;
 
-const sampleText = `Alan Mathison Turing was an English mathematician, computer scientist, logician, cryptanalyst, philosopher, and theoretical biologist. Turing was highly influential in the development of theoretical computer science, providing a formalisation of the concepts of algorithm and computation with the Turing machine, which can be considered a model of a general-purpose computer. Turing is widely considered to be the father of theoretical computer science and artificial intelligence. Despite these accomplishments, he was never fully recognised in his home country, if only because much of his work was covered by the Official Secrets Act.
-During the Second World War, Turing worked for the Government Code and Cypher School (GC&CS) at Bletchley Park, Britain's codebreaking centre that produced Ultra intelligence. For a time he led Hut 8, the section that was responsible for German naval cryptanalysis. Here, he devised a number of techniques for speeding the breaking of German ciphers, including improvements to the pre-war Polish bombe method, an electromechanical machine that could find settings for the Enigma machine.
-Turing played a crucial role in cracking intercepted coded messages that enabled the Allies to defeat the Nazis in many crucial engagements, including the Battle of the Atlantic. Due to the problems of counterfactual history, it is hard to estimate the precise effect Ultra intelligence had on the war, but Professor Jack Copeland has estimated that this work shortened the war in Europe by more than two years and saved over 14 million lives.
-After the war, Turing worked at the National Physical Laboratory, where he designed the Automatic Computing Engine. The Automatic Computing Engine was one of the first designs for a stored-program computer. In 1948, Turing joined Max Newman's Computing Machine Laboratory, at the Victoria University of Manchester, where he helped develop the Manchester computers and became interested in mathematical biology. He wrote a paper on the chemical basis of morphogenesis and predicted oscillating chemical reactions such as the Belousov–Zhabotinsky reaction, first observed in the 1960s.
-Turing was prosecuted in 1952 for homosexual acts; the Labouchere Amendment of 1885 had mandated that "gross indecency" was a criminal offence in the UK. He accepted chemical castration treatment, with DES, as an alternative to prison. Turing died in 1954, 16 days before his 42nd birthday, from cyanide poisoning. An inquest determined his death as a suicide, but it has been noted that the known evidence is also consistent with accidental poisoning.
-In 2009, following an Internet campaign, British Prime Minister Gordon Brown made an official public apology on behalf of the British government for "the appalling way he was treated". Queen Elizabeth II granted Turing a posthumous pardon in 2013. The "Alan Turing law" is now an informal term for a 2017 law in the United Kingdom that retroactively pardoned men cautioned or convicted under historical legislation that outlawed homosexual acts.`;
+// const sampleText = `Alan Mathison Turing was an English mathematician, computer scientist, logician, cryptanalyst, philosopher, and theoretical biologist. Turing was highly influential in the development of theoretical computer science, providing a formalisation of the concepts of algorithm and computation with the Turing machine, which can be considered a model of a general-purpose computer. Turing is widely considered to be the father of theoretical computer science and artificial intelligence. Despite these accomplishments, he was never fully recognised in his home country, if only because much of his work was covered by the Official Secrets Act.
+// During the Second World War, Turing worked for the Government Code and Cypher School (GC&CS) at Bletchley Park, Britain's codebreaking centre that produced Ultra intelligence. For a time he led Hut 8, the section that was responsible for German naval cryptanalysis. Here, he devised a number of techniques for speeding the breaking of German ciphers, including improvements to the pre-war Polish bombe method, an electromechanical machine that could find settings for the Enigma machine.
+// Turing played a crucial role in cracking intercepted coded messages that enabled the Allies to defeat the Nazis in many crucial engagements, including the Battle of the Atlantic. Due to the problems of counterfactual history, it is hard to estimate the precise effect Ultra intelligence had on the war, but Professor Jack Copeland has estimated that this work shortened the war in Europe by more than two years and saved over 14 million lives.
+// After the war, Turing worked at the National Physical Laboratory, where he designed the Automatic Computing Engine. The Automatic Computing Engine was one of the first designs for a stored-program computer. In 1948, Turing joined Max Newman's Computing Machine Laboratory, at the Victoria University of Manchester, where he helped develop the Manchester computers and became interested in mathematical biology. He wrote a paper on the chemical basis of morphogenesis and predicted oscillating chemical reactions such as the Belousov–Zhabotinsky reaction, first observed in the 1960s.
+// Turing was prosecuted in 1952 for homosexual acts; the Labouchere Amendment of 1885 had mandated that "gross indecency" was a criminal offence in the UK. He accepted chemical castration treatment, with DES, as an alternative to prison. Turing died in 1954, 16 days before his 42nd birthday, from cyanide poisoning. An inquest determined his death as a suicide, but it has been noted that the known evidence is also consistent with accidental poisoning.
+// In 2009, following an Internet campaign, British Prime Minister Gordon Brown made an official public apology on behalf of the British government for "the appalling way he was treated". Queen Elizabeth II granted Turing a posthumous pardon in 2013. The "Alan Turing law" is now an informal term for a 2017 law in the United Kingdom that retroactively pardoned men cautioned or convicted under historical legislation that outlawed homosexual acts.`;
+
+// const summary = `Alan Mathison Turing was an English mathematician, computer scientist, logician, cryptanalyst, philosopher, and theoretical biologist. Turing is widely considered to be the father of theoretical computer science and artificial intelligence. Here, he devised a number of techniques for speeding the breaking of German ciphers, including improvements to the pre-war Polish bombe method, an electromechanical machine that could find settings for the Enigma machine.
+// Turing died in 1954, 16 days before his 42nd birthday, from cyanide poisoning`;
+
+const sampleText = `Alan Mathison Turing was an English mathematician, computer scientist, logician, cryptanalyst, philosopher, and theoretical biologist`
+const summary = `Alan Mathison Turing was an English mathematician, computer scientist, logician, cryptanalyst, philosopher, and theoretical biologist Mathison Turing was an English mathematician, computer scientist, logician, cryptanalyst, philosopher was an English mathematician, computer scientist, logician, cryptanalyst`;
+
+
+class EventEmitter {
+  constructor() {
+    this.events = {};
+  }
+
+  on = (event, listener) => {
+    if (!this.events[event]) this.events[event] = [];
+    this.events[event].push(listener);
+  }
+
+  removeListener = (event, listener) => {
+      const listeners = this.events[event]
+      if (listeners) this.events[event] = listeners.filter((l) => l !== listener)
+  }
+
+  emit = (event) => {
+      const listeners = this.events[event]
+      console.log(`emitting ${event}`)
+      if (listeners) listeners.forEach(listener => listener())
+  }
+}
+
+
+
+const useMarkup = (text, sum) => {
+  const [textMarkup, summaryMarkup] = useMemo(() => genMarkupV2(text, sum), [text, sum]);
+  const listener = useMemo(() => new EventEmitter(), [text, sum])
+  return [textMarkup, summaryMarkup, listener]
+}
+
+const TaggedMarkup = ({content, tag, hash, listener, showMarkup}) => {
+    const [bgcolor, fgcolor] = colorMarkup(hash)
+    const [hovered, setHovered] = useState(false)
+    let style = {}
+    if (hovered) style = {background: "yellow", color: "black", display: "relative", padding: "2px", margin: "3px", borderRadius: "10px"}
+    else if (showMarkup) style = {backgroundColor: bgcolor, color: fgcolor, padding: "5px", borderRadius: "10px"}
+    useEffect(() => {
+      listener.on(`${tag}_over`, () => setHovered(true))
+      listener.on(`${tag}_out`, () => setHovered(false))
+    }, [listener])
+    const onMouseOver = showMarkup ? () => listener.emit(`${tag}_over`) : null
+    const onMouseOut = showMarkup ? () => listener.emit(`${tag}_out`) : null
+    return <span onMouseOver={onMouseOver} onFocus={onMouseOver} onBlur={onMouseOut} onMouseOut={onMouseOut} style={style}>
+      <TestMarkup markups={content} listener={listener} showMarkup={false}/>
+    </span>
+}
+
+const TestMarkup = ({ markups, listener, showMarkup = true }) => <>
+    {markups.map((child, i) => {
+      if (typeof child === "string") return <span key={i}>{child}</span>
+      const [content, tag, hash] = child;
+      return <TaggedMarkup key={i} content={content} listener={listener} tag={tag} hash={hash} showMarkup={showMarkup} />
+    })}
+  </>
 
 const InputDocument = ({ summarize, isComputing }) => {
   const [documentText, setDocumentText] = useState("");
   const { summarizers, summarizerTypes, settings, toggleSetting } = useContext(SummarizersContext);
   const [percentage, setPercentage] = useState("15");
+  const [r, s, listener] = useMarkup(sampleText, summary)
+  const [t, setT] = useState(false)
 
   const anyModelSet = () => Object.values(settings).some((isSet) => isSet);
 
@@ -88,6 +153,15 @@ const InputDocument = ({ summarize, isComputing }) => {
 
   return (
     <div className="uk-container uk-container-expand uk-margin-medium-top@s uk-margin-large-top@l">
+      <div className="uk-flex">
+        <div style={{lineHeight: "2.1em"}}>
+          <TestMarkup markups={r} listener={listener} showMarkup />
+        </div>
+        <div style={{lineHeight: "2.1em"}}>
+          <TestMarkup markups={s} listener={listener} showMarkup />
+        </div>
+      </div>
+      <Button onClick={() => setT(e => !e)}>{t.toString()}</Button>
       <div className="uk-flex uk-flex-between" style={{ minHeight: "60vh" }}>
         {/* Start Document container */}
         <div className="uk-flex uk-flex-column" style={{ flexBasis: "60%" }}>
