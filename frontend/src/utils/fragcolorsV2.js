@@ -171,8 +171,8 @@ const translate = (coll_markups, wstokens) => {
     const sub_tokens = wstokens.slice(first_token_pos, last_token_pos);
     const hash = hashCode(sub_tokens.filter((_, i) => i % 2 == 0).map(clean).join(""))
     // markup children or convert to string
-    if (children) result.push([translate(children, sub_tokens), tag, hash]);
-    else result.push([[sub_tokens.join("")], tag, hash]);
+    if (children) result.push([translate(children, sub_tokens), tag, ...colorMarkup(hash)]);
+    else result.push([[sub_tokens.join("")], tag, ...colorMarkup(hash)]);
     last_end = last_token_pos;
   });
   // extract umarked end

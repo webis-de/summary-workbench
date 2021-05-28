@@ -133,7 +133,8 @@ input {
 }
 .colored-header {
   color: #376c47;
-  font-weight: 500;
+  font-size: 14pt;
+  font-weight: bold;
 }
 .underline-border {
   border-bottom: 3px solid #b02f2c;

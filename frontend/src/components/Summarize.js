@@ -97,9 +97,8 @@ class EventEmitter {
       if (listeners) this.events[event] = listeners.filter((l) => l !== listener)
   }
 
-  emit = (event) => {
+  emit = async (event) => {
       const listeners = this.events[event]
-      console.log(`emitting ${event}`)
       if (listeners) listeners.forEach(listener => listener())
   }
 }
@@ -108,32 +107,30 @@ class EventEmitter {
 
 const useMarkup = (text, sum) => {
   const [textMarkup, summaryMarkup] = useMemo(() => genMarkupV2(text, sum), [text, sum]);
-  const listener = useMemo(() => new EventEmitter(), [text, sum])
-  return [textMarkup, summaryMarkup, listener]
+  const [currMarkup, setCurrMarkup] = useState(null)
+  return [textMarkup, summaryMarkup, { currMarkup, setCurrMarkup } ]
 }
 
-const TaggedMarkup = ({content, tag, hash, listener, showMarkup}) => {
-    const [bgcolor, fgcolor] = colorMarkup(hash)
-    const [hovered, setHovered] = useState(false)
+const innerHoverStyle = {background: "yellow", color: "black", display: "relative"}
+const baseMarkupStyle = {padding: "5px", borderRadius: "10px"}
+const outerHoverStyle = {...baseMarkupStyle, ...innerHoverStyle}
+const TaggedMarkup = ({markup, markupState, showMarkup}) => {
+    const { currMarkup, setCurrMarkup } = markupState
+    const [content, tag, bgcolor, fgcolor] = markup;
     let style = {}
-    if (hovered) style = {background: "yellow", color: "black", display: "relative", padding: "2px", margin: "3px", borderRadius: "10px"}
-    else if (showMarkup) style = {backgroundColor: bgcolor, color: fgcolor, padding: "5px", borderRadius: "10px"}
-    useEffect(() => {
-      listener.on(`${tag}_over`, () => setHovered(true))
-      listener.on(`${tag}_out`, () => setHovered(false))
-    }, [listener])
-    const onMouseOver = showMarkup ? () => listener.emit(`${tag}_over`) : null
-    const onMouseOut = showMarkup ? () => listener.emit(`${tag}_out`) : null
-    return <span onMouseOver={onMouseOver} onFocus={onMouseOver} onBlur={onMouseOut} onMouseOut={onMouseOut} style={style}>
-      <TestMarkup markups={content} listener={listener} showMarkup={false}/>
+    if (tag === currMarkup) style = showMarkup ? outerHoverStyle : innerHoverStyle
+    else if (showMarkup) style = {...baseMarkupStyle, background: bgcolor, color: fgcolor}
+    const onMouseEnter = showMarkup ? () => setCurrMarkup(tag) : null
+    const onMouseLeave = showMarkup ? () => setCurrMarkup(null) : null
+    return <span onMouseEnter={onMouseEnter} onFocus={onMouseEnter} onBlur={onMouseLeave} onMouseLeave={onMouseLeave} style={style}>
+      <TestMarkup markups={content} markupState={markupState} showMarkup={false}/>
     </span>
 }
 
-const TestMarkup = ({ markups, listener, showMarkup = true }) => <>
+const TestMarkup = ({ markups, markupState, showMarkup = true }) => <>
     {markups.map((child, i) => {
-      if (typeof child === "string") return <span key={i}>{child}</span>
-      const [content, tag, hash] = child;
-      return <TaggedMarkup key={i} content={content} listener={listener} tag={tag} hash={hash} showMarkup={showMarkup} />
+      if (typeof child === "string") return <span key={i} style={{}}>{child}</span>
+      return <TaggedMarkup key={i} markup={child} markupState={markupState} showMarkup={showMarkup} />
     })}
   </>
 
@@ -141,7 +138,7 @@ const InputDocument = ({ summarize, isComputing }) => {
   const [documentText, setDocumentText] = useState("");
   const { summarizers, summarizerTypes, settings, toggleSetting } = useContext(SummarizersContext);
   const [percentage, setPercentage] = useState("15");
-  const [r, s, listener] = useMarkup(sampleText, summary)
+  const [r, s, markupState] = useMarkup(sampleText, summary)
   const [t, setT] = useState(false)
 
   const anyModelSet = () => Object.values(settings).some((isSet) => isSet);
@@ -155,10 +152,10 @@ const InputDocument = ({ summarize, isComputing }) => {
     <div className="uk-container uk-container-expand uk-margin-medium-top@s uk-margin-large-top@l">
       <div className="uk-flex">
         <div style={{lineHeight: "2.1em"}}>
-          <TestMarkup markups={r} listener={listener} showMarkup />
+          <TestMarkup markups={r} markupState={markupState} showMarkup />
         </div>
         <div style={{lineHeight: "2.1em"}}>
-          <TestMarkup markups={s} listener={listener} showMarkup />
+          <TestMarkup markups={s} markupState={markupState} showMarkup />
         </div>
       </div>
       <Button onClick={() => setT(e => !e)}>{t.toString()}</Button>
@@ -218,31 +215,31 @@ const InputDocument = ({ summarize, isComputing }) => {
             {/* End model checkbox lists */}
 
             {/*  Start summary options container */}
-            <div className="uk-margin-small-top">
-              <div className="uk-flex uk-flex-column uk-width-1-1 uk-margin">
-                <div style={{ flex: "1" }}>
-                  <h4 className="colored-header" style={{ display: "inline-flex" }}>
-                    Summary Length
-                  </h4>
-                  <span
-                    className="uk-flex uk-flex-center uk-flex-middle uk-label"
-                    style={{
-                      width: "35px",
-                      height: "30px",
-                      marginLeft: "10px",
-                      float: "right",
-                    }}
-                  >
-                    {`${percentage}%`}
-                  </span>
-                </div>
+            <div>
+              <div className="uk-flex uk-flex-row" style={{marginTop: "10px", marginBottom: "40px"}}>
+                <span className="colored-header">
+                  Summary Length
+                </span>
                 <input
                   type="range"
-                  min="5"
-                  max="25"
+                  min="10"
+                  max="50"
+                  step="5"
                   defaultValue={percentage}
+                  style={{flex: "1 0", minWidth: "100px", marginLeft: "15px", marginRight: "15px"}}
                   onChange={(e) => setPercentage(e.currentTarget.value)}
                 />
+                <span
+                  className="uk-flex uk-label"
+                  style={{
+                    alignItems: "center",
+                    justifyContent: "right",
+                    width: "30px",
+                    height: "30px",
+                  }}
+                >
+                  {`${percentage}%`}
+                </span>
               </div>
               <div className="uk-flex uk-flex-center">
                 {isComputing ? (
