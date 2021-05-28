@@ -5,9 +5,9 @@ import { useKeycode } from "../hooks/keycode";
 import { useList } from "../hooks/list";
 import { usePagination } from "../hooks/pagination";
 import { useSavedVisualizations } from "../hooks/savedVisualizations";
-import { markup } from "../utils/fragcolors";
+import { computeMarkup } from "../utils/markup";
 import { displayMessage } from "../utils/message";
-import { Markup } from "./Markup";
+import { Markup } from "./utils/Markup";
 import { Accordion, AccordionItem } from "./utils/Accordion";
 import { Button } from "./utils/Button";
 import { Card, CardBody, CardHeader, CardTitle } from "./utils/Card";
@@ -23,9 +23,7 @@ const ModelModal = ({ isOpen, setIsOpen, models, addModel, otherLines, forceSame
   const [fileName, setFile, lines] = useFile(null);
   const linesAreSame = sameLength([lines, ...otherLines]);
 
-  const close = () => {
-    setIsOpen(false);
-  };
+  const close = () => setIsOpen(false);
   const modelIsValid = () => !Object.values(models).some((model) => model.name === name);
   const accept = () => {
     if (!name) {
@@ -252,9 +250,9 @@ const useMarkup = (doc, reference, models) => {
       case null:
         return [];
       case "reference":
-        return markup(doc, reference);
+        return computeMarkup(doc, reference);
       default:
-        return markup(doc, models[slot][1]);
+        return computeMarkup(doc, models[slot][1]);
     }
   }, [slot, doc, reference, models]);
   return [docMarkup, refMarkup, slot, toggleSlot];
@@ -273,7 +271,7 @@ const VisualizeContent = ({ doc, reference, models }) => {
           <CardHeader>
             <CardTitle>Document</CardTitle>
           </CardHeader>
-          <CardBody>{docMarkup ? <Markup markupedText={docMarkup} /> : doc}</CardBody>
+          <CardBody>{docMarkup ? <Markup markups={docMarkup} /> : doc}</CardBody>
         </Card>
       </div>
       <div>
@@ -290,7 +288,7 @@ const VisualizeContent = ({ doc, reference, models }) => {
               </div>
             </CardTitle>
           </CardHeader>
-          <CardBody>{referenceSelected ? <Markup markupedText={refMarkup} /> : reference}</CardBody>
+          <CardBody>{referenceSelected ? <Markup markups={refMarkup} /> : reference}</CardBody>
         </Card>
         {models.map(([name, modelLine], i) => {
           const modelSelected = slot === i;
@@ -309,7 +307,7 @@ const VisualizeContent = ({ doc, reference, models }) => {
                   </div>
                 </CardTitle>
               </CardHeader>
-              <CardBody>{modelSelected ? <Markup markupedText={refMarkup} /> : modelLine}</CardBody>
+              <CardBody>{modelSelected ? <Markup markups={refMarkup} /> : modelLine}</CardBody>
             </Card>
           );
         })}

@@ -2,12 +2,12 @@ import React, { useContext, useMemo } from "react";
 
 import { MetricsContext } from "../contexts/MetricsContext";
 import { flatten } from "../utils/flatScores";
-import { markup } from "../utils/fragcolors";
+import { computeMarkup } from "../utils/markup";
 import { CompareTable } from "./CompareTable";
 import { ScoreTable } from "./ScoreTable";
 
 const ResultInfo = ({ scores, hypotheses, references }) => {
-  const comparisons = useMemo(() => hypotheses.map((hyp, i) => markup(hyp, references[i])), [
+  const comparisons = useMemo(() => hypotheses.map((hyp, i) => computeMarkup(hyp, references[i])), [
     hypotheses,
     references,
   ]);

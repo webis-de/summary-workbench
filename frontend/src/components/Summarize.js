@@ -4,10 +4,9 @@ import { CSSTransition } from "react-transition-group";
 
 import { feedbackRequest, summarizeRequest } from "../api";
 import { SummarizersContext } from "../contexts/SummarizersContext";
-import { markup as genMarkup } from "../utils/fragcolors";
-import { markup as genMarkupV2, colorMarkup } from "../utils/fragcolorsV2";
 import { displayMessage } from "../utils/message";
-import { Markup } from "./Markup";
+import { Markup, useMarkup } from "./utils/Markup";
+import { computeMarkup } from "../utils/markup"
 import { Badge } from "./utils/Badge";
 import { Button } from "./utils/Button";
 import { Checkboxes } from "./utils/Checkboxes";
@@ -16,10 +15,8 @@ import { CenterLoading } from "./utils/Loading";
 
 const Feedback = ({ summarizer, summary, reference, url }) => {
   const [submitted, setSubmitted] = useState(false);
-  return submitted ? (
-    <>Thanks for the Feedback!</>
-  ) : (
-    <div className="uk-small">
+  if (submitted) return <>Thanks for the Feedback!</>
+  return <div className="uk-small">
       <span className="colored-header"> Good Summary?</span>
       <ThumbsUp
         className="uk-margin-left"
@@ -38,7 +35,6 @@ const Feedback = ({ summarizer, summary, reference, url }) => {
         }
       />
     </div>
-  );
 };
 
 const Header = ({ text, fontSize, backgroundColor = "#B02F2C", children, style }) => (
@@ -68,78 +64,17 @@ const getSetModels = (models) =>
 
 const Loading = () => <div data-uk-spinner />;
 
-// const sampleText = `Alan Mathison Turing was an English mathematician, computer scientist, logician, cryptanalyst, philosopher, and theoretical biologist. Turing was highly influential in the development of theoretical computer science, providing a formalisation of the concepts of algorithm and computation with the Turing machine, which can be considered a model of a general-purpose computer. Turing is widely considered to be the father of theoretical computer science and artificial intelligence. Despite these accomplishments, he was never fully recognised in his home country, if only because much of his work was covered by the Official Secrets Act.
-// During the Second World War, Turing worked for the Government Code and Cypher School (GC&CS) at Bletchley Park, Britain's codebreaking centre that produced Ultra intelligence. For a time he led Hut 8, the section that was responsible for German naval cryptanalysis. Here, he devised a number of techniques for speeding the breaking of German ciphers, including improvements to the pre-war Polish bombe method, an electromechanical machine that could find settings for the Enigma machine.
-// Turing played a crucial role in cracking intercepted coded messages that enabled the Allies to defeat the Nazis in many crucial engagements, including the Battle of the Atlantic. Due to the problems of counterfactual history, it is hard to estimate the precise effect Ultra intelligence had on the war, but Professor Jack Copeland has estimated that this work shortened the war in Europe by more than two years and saved over 14 million lives.
-// After the war, Turing worked at the National Physical Laboratory, where he designed the Automatic Computing Engine. The Automatic Computing Engine was one of the first designs for a stored-program computer. In 1948, Turing joined Max Newman's Computing Machine Laboratory, at the Victoria University of Manchester, where he helped develop the Manchester computers and became interested in mathematical biology. He wrote a paper on the chemical basis of morphogenesis and predicted oscillating chemical reactions such as the Belousov–Zhabotinsky reaction, first observed in the 1960s.
-// Turing was prosecuted in 1952 for homosexual acts; the Labouchere Amendment of 1885 had mandated that "gross indecency" was a criminal offence in the UK. He accepted chemical castration treatment, with DES, as an alternative to prison. Turing died in 1954, 16 days before his 42nd birthday, from cyanide poisoning. An inquest determined his death as a suicide, but it has been noted that the known evidence is also consistent with accidental poisoning.
-// In 2009, following an Internet campaign, British Prime Minister Gordon Brown made an official public apology on behalf of the British government for "the appalling way he was treated". Queen Elizabeth II granted Turing a posthumous pardon in 2013. The "Alan Turing law" is now an informal term for a 2017 law in the United Kingdom that retroactively pardoned men cautioned or convicted under historical legislation that outlawed homosexual acts.`;
-
-// const summary = `Alan Mathison Turing was an English mathematician, computer scientist, logician, cryptanalyst, philosopher, and theoretical biologist. Turing is widely considered to be the father of theoretical computer science and artificial intelligence. Here, he devised a number of techniques for speeding the breaking of German ciphers, including improvements to the pre-war Polish bombe method, an electromechanical machine that could find settings for the Enigma machine.
-// Turing died in 1954, 16 days before his 42nd birthday, from cyanide poisoning`;
-
-const sampleText = `Alan Mathison Turing was an English mathematician, computer scientist, logician, cryptanalyst, philosopher, and theoretical biologist`
-const summary = `Alan Mathison Turing was an English mathematician, computer scientist, logician, cryptanalyst, philosopher, and theoretical biologist Mathison Turing was an English mathematician, computer scientist, logician, cryptanalyst, philosopher was an English mathematician, computer scientist, logician, cryptanalyst`;
-
-
-class EventEmitter {
-  constructor() {
-    this.events = {};
-  }
-
-  on = (event, listener) => {
-    if (!this.events[event]) this.events[event] = [];
-    this.events[event].push(listener);
-  }
-
-  removeListener = (event, listener) => {
-      const listeners = this.events[event]
-      if (listeners) this.events[event] = listeners.filter((l) => l !== listener)
-  }
-
-  emit = async (event) => {
-      const listeners = this.events[event]
-      if (listeners) listeners.forEach(listener => listener())
-  }
-}
-
-
-
-const useMarkup = (text, sum) => {
-  const [textMarkup, summaryMarkup] = useMemo(() => genMarkupV2(text, sum), [text, sum]);
-  const [currMarkup, setCurrMarkup] = useState(null)
-  return [textMarkup, summaryMarkup, { currMarkup, setCurrMarkup } ]
-}
-
-const innerHoverStyle = {background: "yellow", color: "black", display: "relative"}
-const baseMarkupStyle = {padding: "5px", borderRadius: "10px"}
-const outerHoverStyle = {...baseMarkupStyle, ...innerHoverStyle}
-const TaggedMarkup = ({markup, markupState, showMarkup}) => {
-    const { currMarkup, setCurrMarkup } = markupState
-    const [content, tag, bgcolor, fgcolor] = markup;
-    let style = {}
-    if (tag === currMarkup) style = showMarkup ? outerHoverStyle : innerHoverStyle
-    else if (showMarkup) style = {...baseMarkupStyle, background: bgcolor, color: fgcolor}
-    const onMouseEnter = showMarkup ? () => setCurrMarkup(tag) : null
-    const onMouseLeave = showMarkup ? () => setCurrMarkup(null) : null
-    return <span onMouseEnter={onMouseEnter} onFocus={onMouseEnter} onBlur={onMouseLeave} onMouseLeave={onMouseLeave} style={style}>
-      <TestMarkup markups={content} markupState={markupState} showMarkup={false}/>
-    </span>
-}
-
-const TestMarkup = ({ markups, markupState, showMarkup = true }) => <>
-    {markups.map((child, i) => {
-      if (typeof child === "string") return <span key={i} style={{}}>{child}</span>
-      return <TaggedMarkup key={i} markup={child} markupState={markupState} showMarkup={showMarkup} />
-    })}
-  </>
+const sampleText = `Alan Mathison Turing was an English mathematician, computer scientist, logician, cryptanalyst, philosopher, and theoretical biologist. Turing was highly influential in the development of theoretical computer science, providing a formalisation of the concepts of algorithm and computation with the Turing machine, which can be considered a model of a general-purpose computer. Turing is widely considered to be the father of theoretical computer science and artificial intelligence. Despite these accomplishments, he was never fully recognised in his home country, if only because much of his work was covered by the Official Secrets Act.
+During the Second World War, Turing worked for the Government Code and Cypher School (GC&CS) at Bletchley Park, Britain's codebreaking centre that produced Ultra intelligence. For a time he led Hut 8, the section that was responsible for German naval cryptanalysis. Here, he devised a number of techniques for speeding the breaking of German ciphers, including improvements to the pre-war Polish bombe method, an electromechanical machine that could find settings for the Enigma machine.
+Turing played a crucial role in cracking intercepted coded messages that enabled the Allies to defeat the Nazis in many crucial engagements, including the Battle of the Atlantic. Due to the problems of counterfactual history, it is hard to estimate the precise effect Ultra intelligence had on the war, but Professor Jack Copeland has estimated that this work shortened the war in Europe by more than two years and saved over 14 million lives.
+After the war, Turing worked at the National Physical Laboratory, where he designed the Automatic Computing Engine. The Automatic Computing Engine was one of the first designs for a stored-program computer. In 1948, Turing joined Max Newman's Computing Machine Laboratory, at the Victoria University of Manchester, where he helped develop the Manchester computers and became interested in mathematical biology. He wrote a paper on the chemical basis of morphogenesis and predicted oscillating chemical reactions such as the Belousov–Zhabotinsky reaction, first observed in the 1960s.
+Turing was prosecuted in 1952 for homosexual acts; the Labouchere Amendment of 1885 had mandated that "gross indecency" was a criminal offence in the UK. He accepted chemical castration treatment, with DES, as an alternative to prison. Turing died in 1954, 16 days before his 42nd birthday, from cyanide poisoning. An inquest determined his death as a suicide, but it has been noted that the known evidence is also consistent with accidental poisoning.
+In 2009, following an Internet campaign, British Prime Minister Gordon Brown made an official public apology on behalf of the British government for "the appalling way he was treated". Queen Elizabeth II granted Turing a posthumous pardon in 2013. The "Alan Turing law" is now an informal term for a 2017 law in the United Kingdom that retroactively pardoned men cautioned or convicted under historical legislation that outlawed homosexual acts.`;
 
 const InputDocument = ({ summarize, isComputing }) => {
   const [documentText, setDocumentText] = useState("");
   const { summarizers, summarizerTypes, settings, toggleSetting } = useContext(SummarizersContext);
   const [percentage, setPercentage] = useState("15");
-  const [r, s, markupState] = useMarkup(sampleText, summary)
-  const [t, setT] = useState(false)
 
   const anyModelSet = () => Object.values(settings).some((isSet) => isSet);
 
@@ -150,15 +85,6 @@ const InputDocument = ({ summarize, isComputing }) => {
 
   return (
     <div className="uk-container uk-container-expand uk-margin-medium-top@s uk-margin-large-top@l">
-      <div className="uk-flex">
-        <div style={{lineHeight: "2.1em"}}>
-          <TestMarkup markups={r} markupState={markupState} showMarkup />
-        </div>
-        <div style={{lineHeight: "2.1em"}}>
-          <TestMarkup markups={s} markupState={markupState} showMarkup />
-        </div>
-      </div>
-      <Button onClick={() => setT(e => !e)}>{t.toString()}</Button>
       <div className="uk-flex uk-flex-between" style={{ minHeight: "60vh" }}>
         {/* Start Document container */}
         <div className="uk-flex uk-flex-column" style={{ flexBasis: "60%" }}>
@@ -264,7 +190,7 @@ const InputDocument = ({ summarize, isComputing }) => {
   );
 };
 
-const Summary = ({ data, showMarkup }) => {
+const Summary = ({ data, markupState, showMarkup }) => {
   const { name, summaryMarkup, summaryText, original, url, statistics } = data;
 
   return (
@@ -273,11 +199,7 @@ const Summary = ({ data, showMarkup }) => {
         <Badge>{`${statistics.numWords} words`}</Badge>
         <Badge>{`${(statistics.percentOverlap * 100).toFixed(0)}% overlap`}</Badge>
       </div>
-      {summaryMarkup.map((markupedText, i) => (
-        <p key={i} style={{ marginTop: 0 }}>
-          <Markup markupedText={markupedText} showMarkup={showMarkup} />
-        </p>
-      ))}
+      <Markup markups={summaryMarkup} markupState={markupState} showMarkup={showMarkup} />
       <div className="uk-flex uk-flex-right">
         <Feedback
           key={summaryText}
@@ -291,30 +213,25 @@ const Summary = ({ data, showMarkup }) => {
   );
 };
 // Processed document
-const Document = ({ markup, showMarkup, clearMarkups }) => (
-  <div>
-    <div
-      className="uk-card uk-card-default uk-card-body"
-      style={{ height: "60vh", width: "auto", overflow: "auto", padding: "20px" }}
-    >
-      {markup.map((markupedText, i) => (
-        <p key={i}>
-          <Markup markupedText={markupedText} showMarkup={showMarkup} />
-        </p>
-      ))}
-    </div>
-    <button
-      className=" uk-button uk-button-primary uk-margin-top uk-width-1-1"
-      onClick={clearMarkups}
-    >
-      Clear
-    </button>
-  </div>
-);
+const Document = ({ markup, markupState, showMarkup, clearMarkups }) => <div>
+<div
+className="uk-card uk-card-default uk-card-body"
+style={{ height: "60vh", width: "auto", overflow: "auto", padding: "20px" }}
+>
+<Markup markups={markup} markupState={markupState} showMarkup={showMarkup} />
+</div>
+<button
+className=" uk-button uk-button-primary uk-margin-top uk-width-1-1"
+onClick={clearMarkups}
+>
+Clear
+</button>
+</div>;
 
 const SummaryTabView = ({ showOverlap, markups, clearMarkups, documentLength }) => {
   const [summaryIndex, setSummaryIndex] = useState(0);
   const { summarizers } = useContext(SummarizersContext);
+  const markupState = useState(null)
 
   return (
     <div className="uk-flex uk-flex-between">
@@ -325,6 +242,7 @@ const SummaryTabView = ({ showOverlap, markups, clearMarkups, documentLength }) 
         <Document
           clearMarkups={clearMarkups}
           markup={markups[summaryIndex].requestMarkup}
+          markupState={markupState}
           showMarkup={showOverlap}
         />
       </div>
@@ -352,7 +270,7 @@ const SummaryTabView = ({ showOverlap, markups, clearMarkups, documentLength }) 
           <ul id="summary-display" className="uk-switcher">
             {markups.map((markup, index) => (
               <li key={index}>
-                <Summary data={markup} showMarkup={showOverlap} />
+                <Summary data={markup} showMarkup={showOverlap} markupState={markupState} />
               </li>
             ))}
           </ul>
@@ -440,8 +358,8 @@ const ToggleOverlap = ({ show, toggle }) => (
 );
 
 const SummaryView = ({ markups, clearMarkups, documentLength }) => {
-  const [showTab, toggleShowTab] = useReducer((oldState) => !oldState, true);
-  const [showOverlap, toggleShowOverlap] = useReducer((oldState) => !oldState, false);
+  const [showTab, toggleShowTab] = useReducer((e) => !e, true);
+  const [showOverlap, toggleShowOverlap] = useReducer((e) => !e, false);
 
   return (
     <div className="uk-container uk-container-expand">
@@ -474,39 +392,29 @@ const SummaryView = ({ markups, clearMarkups, documentLength }) => {
   );
 };
 
-const generateParagraphs = (markupedText) => {
-  const paragraphedText = [];
-  let currParagraph = [];
-  markupedText.forEach(([text, classes]) => {
-    const splits = text.split("\n\n");
-    while (true) {
-      currParagraph.push([splits.shift(), classes]);
-      if (splits.length === 0) {
-        break;
-      }
-      paragraphedText.push(currParagraph);
-      currParagraph = [];
-    }
-  });
-  if (currParagraph.length > 0) {
-    paragraphedText.push(currParagraph);
-  }
-  return paragraphedText;
-};
-
 const computeNumWords = (text) => [...text.matchAll(/[a-zA-Z]+/g)].length;
 
 const generateStatistics = (text, summaryMarkup) => {
   const numWords = computeNumWords(text);
-  const numMarkupedWords = summaryMarkup.reduce(
-    (a, [words, fragmark]) => a + (fragmark.length ? computeNumWords(words) : 0),
-    0
-  );
+  let numMarkupedWords = numWords;
+  summaryMarkup.forEach((subtext) => {
+    if (typeof subtext === "string") numMarkupedWords -= computeNumWords(subtext)
+  });
   return {
     numWords,
-    percentOverlap: numMarkupedWords / numWords,
+    percentOverlap: numWords ? numMarkupedWords / numWords : 0,
   };
 };
+
+const paragraphSize = 3;
+const computeParagraphs = (text) => {
+  const paragraphs = [];
+  for (let index = 0; index < text.length; index += paragraphSize) {
+    const paragraph = text.slice(index, index + paragraphSize);
+    paragraphs.push(paragraph.join(" "));
+  }
+  return paragraphs.join("\n\n");
+}
 
 const Summarize = () => {
   const [markups, setMarkups] = useState(null);
@@ -514,78 +422,52 @@ const Summarize = () => {
   const [documentLength, setDocumentLength] = useState(0);
   const { summarizers, loading, reload } = useContext(SummarizersContext);
 
-  const summarize = (rawText, models, percentage) => {
+  const summarize = async (rawText, models, percentage) => {
     const text = rawText.trim();
     const ratio = parseInt(percentage, 10) / 100;
 
     if (!models.length) {
       displayMessage("No summarizer selected");
-    } else if (!text) {
-      displayMessage("Please enter some text.");
-    } else {
-      setComputing(true);
-      summarizeRequest(text, models, ratio)
-        .then(({ summaries, original }) => {
-          if (Object.values(summaries).every((summarySentences) => !summarySentences.length)) {
-            displayMessage("No summaries could be generated. The input is probably too short.");
-          } else {
-            const newMarkups = [];
-            Object.entries(summaries).forEach(([name, summarySentences]) => {
-              const paragraphs = [];
-              const paragraphSize = 3;
-              for (let index = 0; index < summarySentences.length; index += paragraphSize) {
-                const paragraph = summarySentences.slice(index, index + paragraphSize);
-                paragraphs.push(paragraph.join(" "));
-              }
-              const summaryText = paragraphs.join("\n\n");
-              const [requestMarkup, summaryMarkup] = genMarkup(original, summaryText);
-              newMarkups.push({
-                name,
-                original,
-                summaryText,
-                summaryMarkup: generateParagraphs(summaryMarkup),
-                requestMarkup: generateParagraphs(requestMarkup),
-                statistics: generateStatistics(summaryText, summaryMarkup),
-                url: isURL(text) ? text : null,
-              });
-            });
-            newMarkups.sort((a, b) => a.name > b.name);
-            setMarkups(newMarkups);
-            setDocumentLength([...original.matchAll(/[a-zA-Z]+/g)].length);
-          }
-        })
-        .finally(() => setComputing(false))
-        .catch((error) => displayMessage(JSON.stringify(error)));
+      return
     }
-  };
+    if (!text) {
+      displayMessage("Please enter some text.");
+      return
+    }
+    setComputing(true);
+    try {
+      const { summaries, original } = await summarizeRequest(text, models, ratio)
+      if (Object.values(summaries).every((summarySentences) => !summarySentences.length)) {
+        throw new Error("No summaries could be generated. The input is probably too short.");
+      }
+      const originalText = computeParagraphs(original)
+      const newMarkups = Object.entries(summaries).map(([name, summarySentences]) => {
+        const summaryText = computeParagraphs(summarySentences)
+        const [requestMarkup, summaryMarkup] = computeMarkup(originalText, summaryText);
+        const statistics = generateStatistics(summaryText, summaryMarkup)
+        return {
+          name,
+          original,
+          summaryText,
+          summaryMarkup,
+          requestMarkup,
+          statistics,
+          url: isURL(text) ? text : null,
+        };
+      });
+      newMarkups.sort((a, b) => a.name > b.name);
+      setMarkups(newMarkups);
+      setDocumentLength(computeNumWords(originalText));
+    } catch(error) {
+      displayMessage(JSON.stringify(error));
+    }
+    setComputing(false)
+  }
 
-  return (
-    <>
-      {loading ? (
-        <CenterLoading />
-      ) : (
-        <>
-          {!summarizers ? (
-            <Button className="uk-container" onClick={reload}>
-              Retry
-            </Button>
-          ) : (
-            <>
-              {markups ? (
-                <SummaryView
-                  documentLength={documentLength}
-                  markups={markups}
-                  clearMarkups={() => setMarkups(null)}
-                />
-              ) : (
-                <InputDocument summarize={summarize} isComputing={computing} />
-              )}
-            </>
-          )}
-        </>
-      )}
-    </>
-  );
+  if (loading) return <CenterLoading />
+  if (!summarizers) return <Button className="uk-container" onClick={reload}>Retry</Button>
+  if (markups) return <SummaryView documentLength={documentLength} markups={markups} clearMarkups={() => setMarkups(null)} />
+  return <InputDocument summarize={summarize} isComputing={computing} />
 };
 
 export { Summarize };

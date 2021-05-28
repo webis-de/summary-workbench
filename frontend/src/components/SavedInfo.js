@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import UIkit from "uikit";
 
 import { flatten } from "../utils/flatScores";
-import { markup } from "../utils/fragcolors";
+import { computeMarkup } from "../utils/markup";
 import { CompareTable } from "./CompareTable";
 import { ScoreTable } from "./ScoreTable";
 import { DeleteButton } from "./utils/DeleteButton";
@@ -18,7 +18,7 @@ const SavedInfo = ({ index, ID, getCalculationScores, getCalculationLines, delet
     if (loadRef.current && loadRef.current.className.includes("uk-active")) {
       const { hypotheses, references } = getCalculationLines(ID);
       setComparisons(
-        hypotheses.map((hyp, i) => markup(hyp, references[i])),
+        hypotheses.map((hyp, i) => computeMarkup(hyp, references[i])),
         [hypotheses, references]
       );
     } else UIkit.util.once(document, "show", `#${toggleID}`, showEvent);

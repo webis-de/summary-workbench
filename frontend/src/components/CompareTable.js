@@ -1,8 +1,23 @@
-import React from "react";
+import React, { useState } from "react";
 
 import { usePagination } from "../hooks/pagination";
-import { Markup } from "./Markup";
+import { Markup } from "./utils/Markup";
 import { Pagination } from "./utils/Pagination";
+
+const MarkupEntry = ({ row, hypothesis, reference }) => {
+  const markupState = useState();
+  return (
+    <tr>
+      <td>{row}</td>
+      <td>
+        <Markup markups={reference} markupState={markupState} />
+      </td>
+      <td>
+        <Markup markups={hypothesis} markupState={markupState} />
+      </td>
+    </tr>
+  );
+};
 
 const ComparisonDisplay = ({ page, size, comparisons }) => (
   <table className="uk-table uk-table-divider uk-table-small uk-table-middle">
@@ -14,16 +29,8 @@ const ComparisonDisplay = ({ page, size, comparisons }) => (
       </tr>
     </thead>
     <tbody>
-      {comparisons.slice((page - 1) * size, page * size).map(([index, hyp, ref]) => (
-        <tr key={index}>
-          <td>{index}</td>
-          <td>
-            <Markup markupedText={ref} />
-          </td>
-          <td>
-            <Markup markupedText={hyp} />
-          </td>
-        </tr>
+      {comparisons.slice((page - 1) * size, page * size).map(([index, hypothesis, reference]) => (
+        <MarkupEntry key={index} row={index} hypothesis={hypothesis} reference={reference} />
       ))}
     </tbody>
   </table>

@@ -4,6 +4,37 @@
    Licensed under GNU General Public License v3 or later.
    Modified by Dominik Schwabe @ University of Leipzig 2020 */
 
+const hashCode = (str) => {
+  let hash = 0;
+  let i = str.length;
+  while (i--) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  return hash;
+};
+
+const intToRGB = (i) => {
+  const c = (i & 0xffffff).toString(16).toUpperCase();
+  return "00000".substring(0, 6 - c.length) + c;
+};
+
+const hexToRgb = (hex) => {
+    const bigint = parseInt(hex, 16);
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+    return [r, g, b]
+}
+
+const foregroundColor = (backgroundColor) => {
+  const [r, g, b] = hexToRgb(backgroundColor)
+  return ((r*0.299 + g*0.587 + b*0.114) > 150) ? "000000" : "ffffff"
+}
+
+const colorMarkup = (num) => {
+  const bgcolor = intToRGB(num)
+  const fgcolor = foregroundColor(bgcolor)
+  return [`#${bgcolor}`, `#${fgcolor}`]
+}
+
 /* Text comparison.  */
 const cmp_text = (documents, min_run_length) => {
   const no_self_similarities = true;
@@ -132,15 +163,29 @@ const comp = (a, b) => {
   return 0;
 };
 
+const insert_pos = (left, right, tag, color, nodes) => {
+  let index = 0;
+  while(index < nodes.length) {
+    const [curr_left, curr_right] = nodes[index]
+    if (left > curr_left || (left == curr_left && right < curr_right)) index++
+    else break
+  }
+  nodes.splice(index, 0, [left, right, tag, color])
+}
+
 const _collapse = (nodes, lower, upper) => {
   const results = [];
   while (nodes.length) {
-    const [left, right, tag] = nodes[0];
+    const [left, right, tag, color] = nodes[0];
     if (left <= upper) {
-      if (right > upper) throw new Error("overlapping ranges");
-      nodes.shift();
+      nodes.shift()
+      if (right > upper) {
+        insert_pos(upper + 1, right, tag, color, nodes)
+        nodes.unshift([left, upper, tag, color])
+        continue
+      }
       const children = _collapse(nodes, left, right);
-      const range = [left - lower, right - lower, tag];
+      const range = [left - lower, right - lower, tag, color];
       if (children.length) range.push(children);
       results.push(range);
     } else return results;
@@ -151,9 +196,9 @@ const _collapse = (nodes, lower, upper) => {
 const collapse = (nodes) => {
   const results = [];
   while (nodes.length) {
-    const [left, right, tag] = nodes.shift();
+    const range = nodes.shift();
+    const [left, right] = range
     const children = _collapse(nodes, left, right);
-    const range = [left, right, tag];
     if (children.length) range.push(children);
     results.push(range);
   }
@@ -163,16 +208,15 @@ const collapse = (nodes) => {
 const translate = (coll_markups, wstokens) => {
   const result = [];
   let last_end = 0;
-  coll_markups.forEach(([start, end, tag, children]) => {
+  coll_markups.forEach(([start, end, tag, color, children]) => {
     const first_token_pos = 2 * start;
     const last_token_pos = 2 * end + 1;
     // extract unmarked beginning or between
     if (start > 0) result.push(wstokens.slice(last_end, first_token_pos).join(""));
     const sub_tokens = wstokens.slice(first_token_pos, last_token_pos);
-    const hash = hashCode(sub_tokens.filter((_, i) => i % 2 == 0).map(clean).join(""))
     // markup children or convert to string
-    if (children) result.push([translate(children, sub_tokens), tag, ...colorMarkup(hash)]);
-    else result.push([[sub_tokens.join("")], tag, ...colorMarkup(hash)]);
+    if (children) result.push([translate(children, sub_tokens), tag, ...color]);
+    else result.push([[sub_tokens.join("")], tag, ...color]);
     last_end = last_token_pos;
   });
   // extract umarked end
@@ -192,14 +236,15 @@ class Textblock {
     this.markups = [];
   }
 
-  apply_class = (start, end, tag) => {
+  apply_class = (start, end, tag, color) => {
     if (end === start && this.words[end].match(stopword_re)) return;
-    this.markups.push([start, end, tag]);
+    this.markups.push([start, end, tag, color]);
   };
 
   markup = () => {
     this.markups.sort(comp);
     const coll_markups = collapse(this.markups);
+    console.log(coll_markups)
     const translated = translate(coll_markups, this.wstokens);
     // add first_whitespace if present
     if (this.first_whitespace) {
@@ -233,69 +278,44 @@ const clean_list = (words) => {
   return [tokens, ids];
 };
 
-const markup = (ref, hyp) => {
+const len = 2;
+const computeMarkup = (ref, hyp) => {
   const refTextblock = new Textblock(ref);
   const hypTextblock = new Textblock(hyp);
 
   const [hypDoc, hypIds] = clean_list(hypTextblock.words);
   const [refDoc, refIds] = clean_list(refTextblock.words);
+  const clean_words1 = hypTextblock.words.map(clean)
 
   const textblocks = [refTextblock, hypTextblock];
   const docs = [refDoc, hypDoc];
   const ids = [refIds, hypIds];
 
-  const len = 3;
   const sims = cmp_text(docs, len);
 
   const nr_col = 9;
-  let col = 0;
+  let tag = 0;
 
-  for (const [doc_1, start_1, doc_2, start_2, length] of sims) {
+  sims.forEach(([doc_1, start_1, doc_2, start_2, length]) => {
+    const start = ids[doc_1][start_1]
+    const end = ids[doc_1][start_1 + length - 1] + 1
+    const color = colorMarkup(hashCode(clean_words1.slice(start, end).join("")))
     textblocks[doc_1].apply_class(
       ids[doc_1][start_1],
       ids[doc_1][start_1 + length - 1],
-      col
+      tag,
+      color
     );
     textblocks[doc_2].apply_class(
       ids[doc_2][start_2],
       ids[doc_2][start_2 + length - 1],
-      col
+      tag,
+      color
     );
-    col++;
-  }
+    tag++;
+  })
 
   return [refTextblock.markup(), hypTextblock.markup()];
 };
 
-const hashCode = (str) => {
-  let hash = 0;
-  let i = str.length;
-  while (i--) hash = str.charCodeAt(i) + ((hash << 5) - hash);
-  return hash;
-};
-
-const intToRGB = (i) => {
-  const c = (i & 0xffffff).toString(16).toUpperCase();
-  return "00000".substring(0, 6 - c.length) + c;
-};
-
-const hexToRgb = (hex) => {
-    const bigint = parseInt(hex, 16);
-    const r = (bigint >> 16) & 255;
-    const g = (bigint >> 8) & 255;
-    const b = bigint & 255;
-    return [r, g, b]
-}
-
-const foregroundColor = (backgroundColor) => {
-  const [r, g, b] = hexToRgb(backgroundColor)
-  return ((r*0.299 + g*0.587 + b*0.114) > 150) ? "000000" : "ffffff"
-}
-
-const colorMarkup = (num) => {
-  const bgcolor = intToRGB(num)
-  const fgcolor = foregroundColor(bgcolor)
-  return [`#${bgcolor}`, `#${fgcolor}`]
-}
-
-export {markup, colorMarkup}
+export { computeMarkup }

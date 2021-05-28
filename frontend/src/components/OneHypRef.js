@@ -3,9 +3,9 @@ import React, { useContext, useMemo, useState } from "react";
 import { evaluateRequest } from "../api";
 import { MetricsContext } from "../contexts/MetricsContext";
 import { flatten } from "../utils/flatScores";
-import { markup } from "../utils/fragcolors";
+import { computeMarkup } from "../utils/markup";
 import { displayMessage } from "../utils/message";
-import { Markup } from "./Markup";
+import { Markup } from "./utils/Markup";
 import { ScoreTable } from "./ScoreTable";
 import { Button } from "./utils/Button";
 import { InfoText } from "./utils/InfoText";
@@ -23,10 +23,10 @@ const OneHypRefResult = ({ className, calculation }) => {
         <tbody>
           <tr>
             <td>
-              <Markup markupedText={hypothesis} />
+              <Markup markups={hypothesis} />
             </td>
             <td>
-              <Markup markupedText={reference} />
+              <Markup markups={reference} />
             </td>
           </tr>
         </tbody>
@@ -67,7 +67,7 @@ const OneHypRef = () => {
     setIsComputing(true);
     evaluateRequest(getChosenMetrics(settings), [hypText], [refText])
       .then(({ scores }) => {
-        const [hypothesis, reference] = markup(hypText, refText);
+        const [hypothesis, reference] = computeMarkup(hypText, refText);
         setEvaluateResult({ scores, hypothesis, reference });
       })
       .catch((e) => displayMessage(e))
