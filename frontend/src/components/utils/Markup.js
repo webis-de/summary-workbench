@@ -35,7 +35,7 @@ const Markup = ({ markups, markupState, showMarkup = true }) => (
       ) : (
         <TaggedMarkup key={i} markup={child} markupState={markupState} showMarkup={showMarkup} />
       )
-    )}{" "}
+    )}
   </>
 );
 

@@ -29,8 +29,8 @@ const ComparisonDisplay = ({ page, size, comparisons }) => (
       </tr>
     </thead>
     <tbody>
-      {comparisons.slice((page - 1) * size, page * size).map(([index, hypothesis, reference]) => (
-        <MarkupEntry key={index} row={index} hypothesis={hypothesis} reference={reference} />
+      {comparisons.slice((page - 1) * size, page * size).map(([index, reference, hypothesis]) => (
+        <MarkupEntry key={index} row={index} reference={reference} hypothesis={hypothesis} />
       ))}
     </tbody>
   </table>
