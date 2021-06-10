@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 
 import { computeMarkup } from "../../utils/markup";
 
-const useMarkup = (text, sum) => useMemo(() => computeMarkup(text, sum), [text, sum]);
+const useMarkup = (text, sum) => useMemo(() => computeMarkup([text, sum]), [text, sum]);
 
 const innerHoverStyle = { background: "yellow", color: "black", display: "relative" };
 const baseMarkupStyle = { padding: "2px", borderRadius: "0px" };
@@ -11,7 +11,7 @@ const outerHoverStyle = { ...baseMarkupStyle, ...innerHoverStyle };
 const TaggedMarkup = ({ markup, markupState, showMarkup }) => {
   let props = {};
   let style = {};
-  const [content, tag, bgcolor, fgcolor] = markup;
+  const [content, [tag, bgcolor, fgcolor]] = markup;
   if (showMarkup) style = { ...baseMarkupStyle, background: bgcolor, color: fgcolor };
   if (markupState) {
     const [currMarkup, setCurrMarkup] = markupState;

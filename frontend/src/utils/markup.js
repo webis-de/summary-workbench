@@ -1,5 +1,6 @@
 /* eslint-disable */
 
+"use strict";
 const hashCode = (str) => {
   let hash = 0;
   let i = str.length;
@@ -31,100 +32,222 @@ const colorMarkup = (num) => {
   return [`#${bgcolor}`, `#${fgcolor}`];
 };
 
-const build_inverted_index = (doc) => {
-  const index = new Map();
-  doc.forEach((token, pos) => {
-    const entry = index.get(token);
-    if (entry) entry.push(pos);
-    else index.set(token, [pos]);
+const compute_ranks = (doc) => {
+  const rank_map = new Map();
+  let rank = 1;
+  doc.forEach((word) => {
+    if (!rank_map.has(word)) rank_map.set(word, rank++);
   });
-  return index;
+  return rank_map;
 };
 
-const compute_matches = (doc1, doc2) => {
-  const inverted_index = build_inverted_index(doc2);
-  const longest_match = new Map();
-  doc1.forEach((token, pos) => {
-    const matches = inverted_index.get(token);
-    if (matches) {
-      const match_map = new Map();
-      matches.forEach((pos) => match_map.set(pos, 1));
-      longest_match.set(pos, match_map);
-    }
-  });
-  let changed_pos = [...longest_match.keys()];
-  while (changed_pos.length) {
-    changed_pos = changed_pos.filter((source_pos) => {
-      let add_pos = false;
-      const matches = longest_match.get(source_pos);
-      matches.forEach((match_len, target_pos) => {
-        const next_source_pos = source_pos + match_len;
-        const next_target_pos = target_pos + match_len;
-        const match_map = longest_match.get(next_source_pos);
-        if (match_map) {
-          const extend_len = match_map.get(next_target_pos);
-          if (extend_len) {
-            longest_match
-              .get(source_pos)
-              .set(target_pos, extend_len + match_len);
-            add_pos = true;
-          }
-        }
-      });
-      return add_pos;
-    });
-  }
-  return longest_match;
-};
-
-const space_chars = String.raw`\s-,.`;
-const space_re = new RegExp(`^[${space_chars}]*$`);
-const tokenzie_re = new RegExp(`[^${space_chars}]+|[${space_chars}]+`, "g");
-
-const wordspaceTokens = (text) => {
-  const wstokens =
-    text
-      .replace(/ ?n['`’]t/g, "n't")
-      .replace(/ ?['`’']s/g, "'s")
-      .replace(/ ?['`’']m/g, "'m")
-      .match(tokenzie_re) || [];
-  let first_whitespace = null;
-  if (wstokens.length && wstokens[0].match(space_re))
-    first_whitespace = wstokens.shift();
-  return [first_whitespace, wstokens];
-};
-
-const comp = (a, b) => {
+const pair_comp = (a, b) => {
   if (a[0] < b[0]) return -1;
-  else if (a[0] > b[0]) return 1;
-  else if (a[1] < b[1]) return 1;
-  else if (a[1] > b[1]) return -1;
+  if (a[0] > b[0]) return 1;
+  if (a[1] < b[1]) return -1;
+  if (a[1] > b[1]) return 1;
   return 0;
 };
 
-const insert_pos = (left, right, tag, color, nodes) => {
+const get_rank = (pairs) => {
+  const tmp = pairs.map(() => 0);
+  const sort_pairs = pairs.map((pair, i) => [pair, i]);
+  sort_pairs.sort((a, b) => pair_comp(a[0], b[0]));
+  for (let i = 0; i < pairs.length; i++) tmp[sort_pairs[i][1]] = i;
+  const ranks = pairs.map(() => 0);
+  let rank = 0;
+  for (let i = 1; i < pairs.length; i++) {
+    if (pair_comp(sort_pairs[i - 1][0], sort_pairs[i][0]) !== 0) rank++;
+    ranks[sort_pairs[i][1]] = rank;
+  }
+  return ranks;
+};
+
+// prefix doubling in O(n log^2 (n))
+const build_suffix_array = (doc) => {
+  if (!doc.length) return [];
+  const n = doc.length;
+  const max_n = 2 * n;
+  const rank_map = compute_ranks(doc);
+  let rank = doc.map((token) => rank_map.get(token));
+  let k = 1;
+  do {
+    const pairs = [];
+    for (let i = 0; i < n; i++) {
+      const next_ind = i + k;
+      pairs.push([rank[i], next_ind < n ? rank[next_ind] : -1]);
+    }
+    rank = get_rank(pairs);
+    k *= 2;
+  } while (k < max_n);
+  const suffix_array = doc.map(() => 0);
+  for (let i = 0; i < n; i++) suffix_array[rank[i]] = i;
+  return suffix_array;
+};
+
+const build_inverse_suffix_array = (suffix_array) => {
+  const inverse_suffix_array = suffix_array.map(() => 0);
+  for (let i = 0; i < suffix_array.length; i++) inverse_suffix_array[suffix_array[i]] = i;
+  return inverse_suffix_array;
+};
+
+// kasai's algorithm in O(n)
+const build_lcp_array = (doc, suffix_array, inverse_suffix_array) => {
+  const n = suffix_array.length;
+  const lcp = suffix_array.map(() => 0);
+
+  let h = 0;
+  for (let i = 0; i < n; i++) {
+    if (inverse_suffix_array[i] === 0) continue;
+    const k = suffix_array[inverse_suffix_array[i] - 1];
+    while (doc[i + h] === doc[k + h]) h++;
+    lcp[inverse_suffix_array[i]] = h;
+    if (h > 0) h--;
+  }
+  return lcp;
+};
+
+const build_longest_match_array = (lcp_array) => {
+  const longest_match_array = [...lcp_array];
+  for (let i = 1; i < longest_match_array.length; i++) {
+    longest_match_array[i - 1] = Math.max(longest_match_array[i - 1], longest_match_array[i]);
+  }
+  return longest_match_array;
+};
+
+const combine_documents = (docs) => {
+  const first_doc = docs[0];
+  const document_vector = first_doc.map(() => 0);
+  const rest_docs = [];
+  for (let i = 1; i < docs.length; i++) {
+    rest_docs.push([i]);
+    document_vector.push(i);
+    rest_docs.push(docs[i]);
+    docs[i].forEach(() => document_vector.push(i));
+  }
+  const offsets = [0];
+  let last = 0;
+  docs.forEach((doc) => {
+    last += doc.length + 1;
+    offsets.push(last);
+  });
+  return [first_doc.concat(...rest_docs), document_vector, offsets];
+};
+
+const build_should_be_shown_array = (
+  longest_match_array,
+  suffix_array,
+  inverse_suffix_array,
+  min_length
+) => longest_match_array.map((longest_match, i) => {
+    if (longest_match >= min_length) {
+      if (suffix_array[i] === 0) return true;
+      const longest_match_before = longest_match_array[inverse_suffix_array[suffix_array[i] - 1]];
+      if (longest_match_before < longest_match + 1) return true;
+    }
+    return false;
+  });
+
+const compute_matches = (docs, min_length, min_num_doc_matches = 2) => {
+  const [combined_doc, document_vector, offsets] = combine_documents(docs);
+  const suffix_array = build_suffix_array(combined_doc);
+  //   print_suffix_array(combined_doc, suffix_array)
+  const inverse_suffix_array = build_inverse_suffix_array(suffix_array);
+  const lcp_array = build_lcp_array(combined_doc, suffix_array, inverse_suffix_array);
+  const longest_match_array = build_longest_match_array(lcp_array);
+  const should_be_shown = build_should_be_shown_array(
+    longest_match_array,
+    suffix_array,
+    inverse_suffix_array,
+    min_length
+  );
+  lcp_array.shift();
+  lcp_array.push(0);
+  const match_groups = [];
+  const start = [];
+  const depth = [];
+  const is_relevant = [];
+  let curr_start = 0;
+  let curr_depth = 0;
+  let curr_is_relevant = false;
+  let i = 0;
+
+  while (i < lcp_array.length) {
+    if (lcp_array[i] > curr_depth) {
+      start.push(curr_start);
+      depth.push(curr_depth);
+      is_relevant.push(curr_is_relevant);
+      curr_depth = lcp_array[i];
+      curr_start = i;
+      curr_is_relevant = should_be_shown[i];
+    } else if (lcp_array[i] < curr_depth) {
+      if (curr_is_relevant) match_groups.push([curr_start, curr_depth, i]);
+      const prev_depth = depth[depth.length - 1];
+      if (prev_depth < lcp_array[i]) {
+        start.push(curr_start);
+        depth.push(lcp_array[i]);
+        is_relevant.push(false);
+      }
+      curr_start = start.pop();
+      curr_depth = depth.pop();
+      curr_is_relevant = is_relevant.pop();
+      continue;
+    } else if (curr_depth === longest_match_array[i + 1]) {
+      curr_is_relevant = curr_is_relevant || should_be_shown[i + 1];
+    }
+    i++;
+  }
+
+  const matches = [];
+  match_groups.forEach(([index, match_length, end]) => {
+    const curr_matches = docs.map(() => []);
+    let pos = suffix_array[index];
+    let doc_idx = document_vector[pos];
+    let doc_start = pos - offsets[doc_idx];
+    curr_matches[doc_idx].push(doc_start);
+    const text = combined_doc.slice(doc_start, doc_start + match_length).join("");
+    for (let j = index + 1; j <= end; j++) {
+      pos = suffix_array[j];
+      doc_idx = document_vector[pos];
+      doc_start = pos - offsets[doc_idx];
+      curr_matches[doc_idx].push(doc_start);
+    }
+    matches.push([match_length, text, curr_matches]);
+  });
+  return matches;
+};
+
+const markup_comp = (a, b) => {
+  if (a[0] < b[0]) return -1;
+  if (a[0] > b[0]) return 1;
+  if (a[1] < b[1]) return 1;
+  if (a[1] > b[1]) return -1;
+  return 0;
+};
+
+const insert_pos = (left, right, information, nodes) => {
   let index = 0;
   while (index < nodes.length) {
     const [curr_left, curr_right] = nodes[index];
-    if (left > curr_left || (left == curr_left && right < curr_right)) index++;
+    if (left > curr_left || (left === curr_left && right < curr_right)) index++;
     else break;
   }
-  nodes.splice(index, 0, [left, right, tag, color]);
+  nodes.splice(index, 0, [left, right, information]);
 };
 
 const _collapse = (nodes, lower, upper) => {
   const results = [];
   while (nodes.length) {
-    const [left, right, tag, color] = nodes[0];
+    const [left, right, information] = nodes[0];
     if (left <= upper) {
       nodes.shift();
       if (right > upper) {
-        insert_pos(upper + 1, right, tag, color, nodes);
-        nodes.unshift([left, upper, tag, color]);
+        insert_pos(upper + 1, right, information, nodes);
+        nodes.unshift([left, upper, information]);
         continue;
       }
       const children = _collapse(nodes, left, right);
-      const range = [left - lower, right - lower, tag, color];
+      const range = [left - lower, right - lower, information];
       if (children.length) range.push(children);
       results.push(range);
     } else return results;
@@ -147,16 +270,15 @@ const collapse = (nodes) => {
 const translate = (coll_markups, wstokens) => {
   const result = [];
   let last_end = 0;
-  coll_markups.forEach(([start, end, tag, color, children]) => {
+  coll_markups.forEach(([start, end, information, children]) => {
     const first_token_pos = 2 * start;
     const last_token_pos = 2 * end + 1;
     // extract unmarked beginning or between
-    if (start > 0)
-      result.push(wstokens.slice(last_end, first_token_pos).join(""));
+    if (start > 0) result.push(wstokens.slice(last_end, first_token_pos).join(""));
     const sub_tokens = wstokens.slice(first_token_pos, last_token_pos);
     // markup children or convert to string
-    if (children) result.push([translate(children, sub_tokens), tag, ...color]);
-    else result.push([[sub_tokens.join("")], tag, ...color]);
+    if (children) result.push([translate(children, sub_tokens), information]);
+    else result.push([[sub_tokens.join("")], information]);
     last_end = last_token_pos;
   });
   // extract umarked end
@@ -165,24 +287,32 @@ const translate = (coll_markups, wstokens) => {
   return result;
 };
 
+const space_chars = String.raw`\s-,.`;
+const space_re = new RegExp(`^[${space_chars}]*$`);
+const tokenzie_re = new RegExp(`[^${space_chars}]+|[${space_chars}]+`, "g");
 const stopword_re = /\b(a|about|above|after|again|against|all|am|an|and|any|are|as|at|be|because|been|before|being|below|between|both|but|by|can|did|do|does|doing|don|down|during|each|few|for|from|further|had|has|have|having|he|her|here|hers|herself|him|himself|his|how|i|if|in|into|is|it|its|itself|just|me|more|most|my|myself|no|nor|not|now|of|off|on|once|only|or|other|our|ours|ourselves|out|over|own|s|same|she|should|so|some|such|t|than|that|the|their|theirs|them|themselves|then|there|these|they|this|those|through|to|too|under|until|up|very|was|we|were|what|when|where|which|while|who|whom|why|will|with|you|your|yours|yourself|yourselves)\b/;
+
+const wordspaceTokens = (text) => {
+  const wstokens = text.match(tokenzie_re) || [];
+  let first_whitespace = null;
+  if (wstokens.length && wstokens[0].match(space_re)) first_whitespace = wstokens.shift();
+  return [first_whitespace, wstokens];
+};
 
 class Textblock {
   constructor(text) {
     [this.first_whitespace, this.wstokens] = wordspaceTokens(text);
-    this.words = this.wstokens
-      .filter((_, i) => i % 2 == 0)
-      .map((word) => word.toLowerCase());
+    this.words = this.wstokens.filter((_, i) => i % 2 === 0);
     this.markups = [];
   }
 
-  apply_class = (start, end, tag, color) => {
-    if (end === start && this.words[end].match(stopword_re)) return;
-    this.markups.push([start, end, tag, color]);
+  add_range = (start, end, information) => {
+    if (start === end && this.words[start].match(stopword_re)) return;
+    this.markups.push([start, end, information]);
   };
 
   markup = () => {
-    this.markups.sort(comp);
+    this.markups.sort(markup_comp);
     const coll_markups = collapse(this.markups);
     const translated = translate(coll_markups, this.wstokens);
     // add first_whitespace if present
@@ -197,145 +327,47 @@ class Textblock {
 
 const clean = (word) => {
   word = word.replace("ß", "ss");
-  word = word.replace(/[^a-zäöüA-ZÄÖÜ0-9\u0410-\u044F-]/g, "");
+  word = word.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  word = word.replace(/[^a-zA-Z0-9\u0410-\u044F-]/g, "");
   word = word.toLowerCase();
   return word;
 };
-/* Extract a cleaned up list. */
+
 const clean_list = (words) => {
   const tokens = [];
-  const ids = [];
-
+  const idx = [];
   words.forEach((word, i) => {
     word = clean(word);
-    if (word !== "") {
+    if (word) {
       tokens.push(word);
-      ids.push(i);
+      idx.push(i);
     }
   });
-
-  return [tokens, ids];
+  return [tokens, idx];
 };
 
-const remove_short_matches = (matches, min_length) => {
-  const long_matches = new Map();
-  matches.forEach((match_map, source_pos) => {
-    const entries = [];
-    match_map.forEach((match_length, target_pos) => {
-      if (match_length >= min_length) entries.push([target_pos, match_length]);
-    });
-    if (entries.length) {
-      const filtered_map = new Map();
-      entries.forEach(([target_pos, match_length]) =>
-        filtered_map.set(target_pos, match_length)
-      );
-      long_matches.set(source_pos, filtered_map);
-    }
-  });
-  return long_matches;
-};
-
-const remove_nested_matches = (matches) => {
-  matches.forEach((match_map, source_pos) => {
-    match_map.forEach((match_len, target_pos) => {
-      for (let i = 1; i < match_len; i++)
-        matches.get(source_pos + i).delete(target_pos + i);
-    });
-  });
-  return matches;
-};
-
-const group_matches = (matches) => {
-  if (!matches.size) return [];
-  const group_list = [];
-  matches.forEach((match_map, source_pos) => {
-    const extract_map = new Map();
-    match_map.forEach((match_length, target_pos) => {
-      const min_pos = extract_map.get(match_length);
-      if (!min_pos || min_pos > target_pos)
-        extract_map.set(match_length, target_pos);
-    });
-    extract_map.forEach((target_pos, match_length) =>
-      group_list.push([match_length, target_pos, source_pos])
-    );
-  });
-  group_list.sort(comp);
-  const groups = [];
-  let [last_group_length, last_group_target, source_pos] = group_list[0];
-  let curr_group = [last_group_length, [source_pos]];
-  group_list
-    .slice(1)
-    .forEach(([curr_group_length, curr_group_target, source_pos]) => {
-      if (
-        last_group_length !== curr_group_length ||
-        last_group_target !== curr_group_target
-      ) {
-        groups.push(curr_group);
-        curr_group = [curr_group_length, []];
-      }
-      curr_group[1].push(source_pos);
-      last_group_length = curr_group_length;
-      last_group_target = curr_group_target;
-    });
-  if (curr_group.length) groups.push(curr_group);
-  const final_groups = [];
-  groups.forEach(([match_length, source_elements]) => {
-    const target_elements = [];
-    matches.get(source_elements[0]).forEach((length, element) => {
-      if (length === match_length) target_elements.push(element);
-    });
-    final_groups.push([match_length, source_elements, target_elements]);
-  });
-  return final_groups;
-};
-
-const extract_matches = (matches, min_length) => {
-  matches = remove_nested_matches(matches);
-  matches = remove_short_matches(matches, min_length);
-  return group_matches(matches);
-};
-
-const len = 2;
-const computeMarkup = (source_document, target_document) => {
-  const source_textblock = new Textblock(source_document);
-  const target_textblock = new Textblock(target_document);
-
-  const [target_doc, target_ids] = clean_list(target_textblock.words);
-  const [source_doc, source_ids] = clean_list(source_textblock.words);
-
-  const clean_words1 = target_textblock.words.map(clean);
-
-  const textblocks = [source_textblock, target_textblock];
-
-  let matches = extract_matches(compute_matches(source_doc, target_doc), len);
+const computeMarkup = (docs, min_length = 3) => {
+  const textblocks = docs.map((doc) => new Textblock(doc));
+  const clean_docs_idx = textblocks.map((textblock) => clean_list(textblock.words));
+  const matches = compute_matches(
+    clean_docs_idx.map(([clean_docs]) => clean_docs),
+    min_length
+  );
 
   let tag = 0;
-
-  matches.forEach(([match_length, source_group, target_group]) => {
-    const start = source_group[0];
-    const end = start + match_length - 1
-    const color = colorMarkup(hashCode(clean_words1.slice(start, end).join(""))
+  matches.forEach(([match_length, text, groups]) => {
+    const color = colorMarkup(hashCode(text));
+    groups.forEach((group, i) =>
+      group.forEach((start) => {
+        const map_start = clean_docs_idx[i][1][start];
+        const map_end = clean_docs_idx[i][1][start + match_length - 1];
+        textblocks[i].add_range(map_start, map_end, [tag, ...color]);
+      })
     );
-    source_group.forEach((source) => {
-      source_textblock.apply_class(
-        source,
-        source + match_length - 1,
-        tag,
-        color
-      );
-    });
-    target_group.forEach((target) => {
-      target_textblock.apply_class(
-        target,
-        target + match_length - 1,
-        tag,
-        color
-      );
-    });
     tag++;
   });
 
-  return [source_textblock.markup(), target_textblock.markup()];
+  return textblocks.map((textblock) => textblock.markup());
 };
 
-export {computeMarkup}
+export { computeMarkup };

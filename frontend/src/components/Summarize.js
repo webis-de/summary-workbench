@@ -443,7 +443,7 @@ const Summarize = () => {
       const originalText = computeParagraphs(original)
       const newMarkups = Object.entries(summaries).map(([name, summarySentences]) => {
         const summaryText = computeParagraphs(summarySentences)
-        const [requestMarkup, summaryMarkup] = computeMarkup(originalText, summaryText);
+        const [requestMarkup, summaryMarkup] = computeMarkup([originalText, summaryText]);
         const statistics = generateStatistics(summaryText, summaryMarkup)
         return {
           name,

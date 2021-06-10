@@ -67,7 +67,7 @@ const OneHypRef = () => {
     setIsComputing(true);
     evaluateRequest(getChosenMetrics(settings), [hypText], [refText])
       .then(({ scores }) => {
-        const [hypothesis, reference] = computeMarkup(hypText, refText);
+        const [hypothesis, reference] = computeMarkup([hypText, refText]);
         setEvaluateResult({ scores, hypothesis, reference });
       })
       .catch((e) => displayMessage(e))

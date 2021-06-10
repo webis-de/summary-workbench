@@ -7,7 +7,7 @@ import { CompareTable } from "./CompareTable";
 import { ScoreTable } from "./ScoreTable";
 
 const ResultInfo = ({ scores, references, hypotheses }) => {
-  const comparisons = useMemo(() => hypotheses.map((hyp, i) => computeMarkup(hyp, references[i])), [
+  const comparisons = useMemo(() => hypotheses.map((hyp, i) => computeMarkup([hyp, references[i]])), [
     hypotheses,
     references,
   ]);

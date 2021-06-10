@@ -250,9 +250,9 @@ const useMarkup = (doc, reference, models) => {
       case null:
         return [];
       case "reference":
-        return computeMarkup(doc, reference);
+        return computeMarkup([doc, reference]);
       default:
-        return computeMarkup(doc, models[slot][1]);
+        return computeMarkup([doc, models[slot][1]]);
     }
   }, [slot, doc, reference, models]);
   return [docMarkup, refMarkup, slot, toggleSlot];

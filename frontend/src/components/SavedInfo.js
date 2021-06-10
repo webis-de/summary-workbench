@@ -18,7 +18,7 @@ const SavedInfo = ({ index, ID, getCalculationScores, getCalculationLines, delet
     if (loadRef.current && loadRef.current.className.includes("uk-active")) {
       const { hypotheses, references } = getCalculationLines(ID);
       setComparisons(
-        hypotheses.map((hyp, i) => computeMarkup(hyp, references[i])),
+        hypotheses.map((hyp, i) => computeMarkup([hyp, references[i]])),
         [hypotheses, references]
       );
     } else UIkit.util.once(document, "show", `#${toggleID}`, showEvent);

@@ -5,6 +5,7 @@ const Badge = ({ children, emphasis = true }) => (
     className={`uk-badge uk-padding-small uk-margin-small-left uk-text-bold ${
       emphasis ? "uk-background-primary" : "uk-background-default uk-text-muted"
     }`}
+    style={{whiteSpace: "nowrap"}}
   >
     {children}
   </span>
