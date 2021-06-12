@@ -114,13 +114,13 @@ router.post(
       const { summarizers, text, ratio } = req.body;
       let original = isURL(text)
         ? await articleDownloader.download(text)
-        : text;
-      let summariesText = await summarize(summarizers, original, ratio);
+        : { text };
+      let summariesText = await summarize(summarizers, original.text, ratio);
       summaries = {};
       for (const [metric, result] of Object.entries(summariesText)) {
         summaries[metric] = await sentenceSplitter.split(result);
       }
-      original = await sentenceSplitter.split(original)
+      original["text"] = await sentenceSplitter.split(original["text"]);
       return res.json({ original, summaries });
     } catch (err) {
       return next(err);

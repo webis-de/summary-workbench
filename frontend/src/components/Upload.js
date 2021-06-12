@@ -37,11 +37,11 @@ const Upload = ({ setCalculation }) => {
 
   const compute = async () => {
     setIsComputing(true);
-    const name = `${hypFileName}-${refFileName}`;
+    const id = `${hypFileName}-${refFileName}`;
     const chosenMetrics = getChosenMetrics(settings);
     try {
       const { scores } = await evaluateRequest(chosenMetrics, hypotheses, references);
-      setCalculation({ name, scores, hypotheses, references });
+      setCalculation({ id, scores, hypotheses, references });
     } catch (err) {
       if (err instanceof TypeError) {
         displayMessage("Server not available");

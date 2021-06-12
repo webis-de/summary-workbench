@@ -4,7 +4,7 @@ import { FaInfoCircle, FaTrash } from "react-icons/fa";
 import { useKeycode } from "../hooks/keycode";
 import { useList } from "../hooks/list";
 import { usePagination } from "../hooks/pagination";
-import { useSavedVisualizations } from "../hooks/savedVisualizations";
+import { useVisualizations } from "../hooks/visualizations";
 import { computeMarkup } from "../utils/markup";
 import { displayMessage } from "../utils/message";
 import { Markup } from "./utils/Markup";
@@ -83,9 +83,8 @@ const ModelModal = ({ isOpen, setIsOpen, models, addModel, otherLines, forceSame
   );
 };
 
-const ModelList = ({ models, removeModel }) => (
-  <ul className="uk-list uk-list-striped uk-list-primary">
-    {models.map((name) => (
+const ModelList = ({ models, removeModel }) => <ul className="uk-list uk-list-striped uk-list-primary">
+    {models.map(({name}) => (
       <li className="uk-flex uk-flex-between" key={name}>
         <span>{name}</span>
         <DeleteButton onClick={() => removeModel(name)}>
@@ -94,7 +93,6 @@ const ModelList = ({ models, removeModel }) => (
       </li>
     ))}
   </ul>
-);
 
 const ModelTable = ({ models, linesAreSame = true, removeModel }) => (
   <table className="uk-table uk-table-divider uk-table-small uk-table-middle">
@@ -204,7 +202,8 @@ const VisualizationCreator = ({ back, addVisualization }) => {
                 className="uk-margin-small"
                 variant="primary"
                 onClick={() => {
-                  addVisualization(name, {
+                  addVisualization({
+                    id: name,
                     documents: docFileLines,
                     references: refFileLines,
                     models: Object.values(models),
@@ -352,30 +351,19 @@ const Visualize = ({ visualization, clear }) => {
   );
 };
 
-const AddModelDialog = ({ getVisualizationData, setIsOpen, addModel }) => {
-  const { models, documents } = getVisualizationData();
-  return (
-    <ModelModal
-      isOpen
-      models={models}
-      addModel={addModel}
-      setIsOpen={setIsOpen}
-      otherLines={[documents]}
-      forceSameLine
-    />
-  );
-};
-
-const AddModel = ({ getVisualizationData, addModel }) => {
+const AddModel = ({ visualization, addModel }) => {
   const [modelModalIsOpen, setModelModalOpen] = useState(false);
   return (
     <>
       <Button onClick={() => setModelModalOpen(true)}>Add Model</Button>
       {modelModalIsOpen && (
-        <AddModelDialog
-          getVisualizationData={getVisualizationData}
-          setIsOpen={setModelModalOpen}
+        <ModelModal
+          isOpen
+          models={visualization.models}
           addModel={addModel}
+          setIsOpen={setModelModalOpen}
+          otherLines={[visualization.documents]}
+          forceSameLine
         />
       )}
     </>
@@ -384,22 +372,21 @@ const AddModel = ({ getVisualizationData, addModel }) => {
 
 const VisualizationOverview = () => {
   const {
-    visualizationIDs,
+    visualizations,
     addVisualization,
+    putVisualization,
     deleteVisualization,
-    getVisualizationModels,
-    getVisualizationData,
-  } = useSavedVisualizations();
-  const [visID, setVisID] = useState(null);
+  } = useVisualizations();
+  const [currVisualization, setCurrVisualization] = useState(null);
   const [showOverview, setShowOverview] = useState(true);
 
-  if (visID !== null)
+  if (currVisualization !== null)
     return (
       <div className="uk-container">
-        <Visualize visualization={getVisualizationData(visID)} clear={() => setVisID(null)} />
+        <Visualize visualization={currVisualization} clear={() => setCurrVisualization(null)} />
       </div>
     );
-  return (
+  if (visualizations) return (
     <div className="uk-container">
       {showOverview ? (
         <div className="uk-flex uk-flex-top">
@@ -408,38 +395,32 @@ const VisualizationOverview = () => {
           </Button>
           <div style={{ width: "20px" }} />
           <Accordion>
-            {visualizationIDs.map((ID) => {
-              const models = getVisualizationModels(ID);
-              const addModel = (model) => {
-                const v = getVisualizationData(ID);
-                v.models = [...v.models, model];
-                addVisualization(ID, v, true);
-              };
+            {visualizations.map((visualization) => {
+              const { id, models } = visualization
+              const addModel = (model) => putVisualization({...visualization, models: {...models, model}});
               return (
                 <AccordionItem
-                  key={ID}
-                  text={ID}
-                  buttons={[["visualize", () => setVisID(ID)]]}
-                  remove={() => deleteVisualization(ID)}
+                  key={id}
+                  text={id}
+                  buttons={[["visualize", () => setCurrVisualization(visualization)]]}
+                  remove={() => deleteVisualization(id)}
                 >
                   <div className="uk-flex uk-flex-between uk-flex-middle">
                     <h3 style={{margin: 0}}>Models</h3>
                     <AddModel
-                      getVisualizationData={() => getVisualizationData(ID)}
+                      visualization={visualization}
                       addModel={addModel}
                     />
                   </div>
                   <ModelList
                     models={models}
                     removeModel={(modelName) => {
-                      const v = getVisualizationData(ID);
-                      const newModels = v.models.filter(({ name }) => name !== modelName);
+                      const newModels = visualization.models.filter(({ name }) => name !== modelName);
                       if (!newModels.length) {
                         displayMessage("can not remove last model");
                         return;
                       }
-                      v.models = newModels;
-                      addVisualization(ID, v, true);
+                      putVisualization({visualization, models: newModels});
                     }}
                   />
                 </AccordionItem>
@@ -450,14 +431,15 @@ const VisualizationOverview = () => {
       ) : (
         <VisualizationCreator
           back={() => setShowOverview((v) => !v)}
-          addVisualization={(ID, data) => {
-            addVisualization(ID, data);
-            setVisID(ID);
+          addVisualization={(data) => {
+            addVisualization(data);
+            setCurrVisualization(data);
           }}
         />
       )}
     </div>
   );
+  return null
 };
 
 export { VisualizationOverview };

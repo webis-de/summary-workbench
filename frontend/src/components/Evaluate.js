@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { FaRegFile } from "react-icons/fa";
 
 import { MetricsContext } from "../contexts/MetricsContext";
-import { useSavedCalculations } from "../hooks/savedCalculations";
+import { useCalculations } from "../hooks/calculations";
 import { OneHypRef } from "./OneHypRef";
 import { Result } from "./Result";
 import { Saved } from "./Saved";
@@ -48,21 +48,18 @@ const FileInput = ({ setCalculation }) => (
 
 const Evaluate = () => {
   const [calculation, setCalculation] = useState(null);
-  const setCalculationName = (name) => setCalculation((calc) => ({ ...calc, name }));
+  const setCalculationID = (id) => setCalculation((calc) => ({ ...calc, id }));
   const [scroll, setScroll] = useState(false);
 
   const { loading, metrics, reload } = useContext(MetricsContext);
   const {
-    calculationIDs,
+    calculations,
     addCalculation,
     deleteCalculation,
-    getCalculationScores,
-    getCalculationLines,
-  } = useSavedCalculations();
+  } = useCalculations();
 
   const saveCalculation = () => {
-    const { name, ...data } = calculation;
-    addCalculation(name, { ...data, metrics });
+    addCalculation({...calculation, metrics });
     setCalculation(null);
   };
   const scrollRef = useRef();
@@ -89,7 +86,6 @@ const Evaluate = () => {
         Retry
       </Button>
     );
-
   return (
     <div className="uk-container uk-container-expand uk-margin-medium-top uk-margin-large-top@l ">
       <div className="metric-layout">
@@ -105,18 +101,18 @@ const Evaluate = () => {
         <Result
           className="uk-margin"
           calculation={calculation}
-          setCalculationName={setCalculationName}
+          setCalculationID={setCalculationID}
           saveCalculation={saveCalculation}
           saveFunction={() => addCalculation(calculation)}
         />
       )}
-      <Saved
-        className="uk-margin"
-        calculationIDs={calculationIDs}
-        getCalculationScores={getCalculationScores}
-        getCalculationLines={getCalculationLines}
-        deleteCalculation={deleteCalculation}
-      />
+      {calculations &&
+        <Saved
+          className="uk-margin"
+          calculations={calculations}
+          deleteCalculation={deleteCalculation}
+        />
+      }
     </div>
   );
 };

@@ -194,7 +194,10 @@ api location: `http://<domain>:<port>/api`
 
 ```json
 {
-    "original": "<original text from which the summaries where generated>",
+    "original": {
+        "text": "<list of sentences: original text from which the summaries where generated>",
+        "title": "<(only if url was used) string: title of the article"
+    },
     "summaries": {
         "<summarizer 1>": "<list of sentences>",
         "<summarizer 2>": "<list of sentences>"

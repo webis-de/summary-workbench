@@ -72,7 +72,7 @@ class ArticleDownloader extends Subservice {
   download(url) {
     return axios
       .post(`http://localhost:${this.port}/`, { url })
-      .then((response) => response.data.text);
+      .then((response) => response.data);
   }
 }
 

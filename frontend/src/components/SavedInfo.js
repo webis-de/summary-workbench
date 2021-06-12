@@ -7,8 +7,8 @@ import { CompareTable } from "./CompareTable";
 import { ScoreTable } from "./ScoreTable";
 import { DeleteButton } from "./utils/DeleteButton";
 
-const SavedInfo = ({ index, ID, getCalculationScores, getCalculationLines, deleteCalculation }) => {
-  const { scores, metrics } = getCalculationScores(ID);
+const SavedInfo = ({ index, calculation, deleteCalculation }) => {
+  const {scores, metrics, hypotheses, references} = calculation
   const flatScores = flatten(scores, metrics);
   const [comparisons, setComparisons] = useState(null);
   const toggleID = `toggle-saved-calculation-${index}`;
@@ -16,13 +16,12 @@ const SavedInfo = ({ index, ID, getCalculationScores, getCalculationLines, delet
   const showEvent = useCallback(() => {
     if (comparisons !== null) return;
     if (loadRef.current && loadRef.current.className.includes("uk-active")) {
-      const { hypotheses, references } = getCalculationLines(ID);
       setComparisons(
         hypotheses.map((hyp, i) => computeMarkup([hyp, references[i]])),
         [hypotheses, references]
       );
     } else UIkit.util.once(document, "show", `#${toggleID}`, showEvent);
-  }, [comparisons, getCalculationLines, ID, toggleID]);
+  }, [comparisons, toggleID]);
   useEffect(showEvent, [showEvent]);
 
   return (
@@ -39,7 +38,7 @@ const SavedInfo = ({ index, ID, getCalculationScores, getCalculationLines, delet
             <a href="/#">Compare</a>
           </li>
         </ul>
-        <DeleteButton onClick={() => deleteCalculation(ID)} />
+        <DeleteButton onClick={deleteCalculation} />
       </div>
       <ul id={toggleID} className="uk-switcher">
         <li>

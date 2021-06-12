@@ -1,41 +1,30 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { FaQuestionCircle } from "react-icons/fa";
 
 import { SavedInfo } from "./SavedInfo";
 import { Accordion, AccordionItem } from "./utils/Accordion";
 
-const Saved = ({
-  className,
-  calculationIDs,
-  deleteCalculation,
-  getCalculationScores,
-  getCalculationLines,
-}) => {
-  if (!calculationIDs.length) return null;
-  return (
-    <div className={className}>
-      <div className="uk-flex uk-flex-middle uk-margin-bottom">
-        <h3 style={{margin: 0, marginRight: "20px"}}>Saved Calculations</h3>
-        <FaQuestionCircle className="tooltip-icon" data-uk-tooltip="title: the data is stored in the browser; pos: right;"/>
-      </div>
-      <Accordion>
-        {calculationIDs.map((ID, index) => {
-          const scores = getCalculationScores(ID);
-          return (
-            <AccordionItem key={ID} text={ID} badges={Object.keys(scores)}>
-              <SavedInfo
-                ID={ID}
-                index={index}
-                getCalculationScores={getCalculationScores}
-                getCalculationLines={getCalculationLines}
-                deleteCalculation={deleteCalculation}
-              />
-            </AccordionItem>
-          );
-        })}
-      </Accordion>
+const Saved = ({ className, calculations, deleteCalculation }) => (
+  <div className={className}>
+    <div className="uk-flex uk-flex-middle uk-margin-bottom">
+      <h3 style={{ margin: 0, marginRight: "20px" }}>Saved Calculations</h3>
+      <FaQuestionCircle
+        className="tooltip-icon"
+        data-uk-tooltip="title: the data is stored in the browser; pos: right;"
+      />
     </div>
-  );
-};
+    <Accordion>
+      {calculations.map((calculation, index) => (
+        <AccordionItem key={calculation.id} text={calculation.id} badges={Object.keys(calculation.scores)}>
+          <SavedInfo
+            index={index}
+            calculation={calculation}
+            deleteCalculation={() => deleteCalculation(calculation.id)}
+          />
+        </AccordionItem>
+      ))}
+    </Accordion>
+  </div>
+);
 
 export { Saved };

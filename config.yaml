@@ -18,6 +18,7 @@ summarizers:
   - ./summarizers/bertsum
   - ./summarizers/textrank
   - ./summarizers/newspaper3k
+  - ./summarizers/pytextrank
   - source: ./summarizers/neuralsum
     config:
       name: t5

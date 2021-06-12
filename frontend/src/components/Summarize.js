@@ -440,14 +440,15 @@ const Summarize = () => {
       if (Object.values(summaries).every((summarySentences) => !summarySentences.length)) {
         throw new Error("No summaries could be generated. The input is probably too short.");
       }
-      const originalText = computeParagraphs(original)
+      const originalText = computeParagraphs(original.text)
+      console.log(originalText)
       const newMarkups = Object.entries(summaries).map(([name, summarySentences]) => {
         const summaryText = computeParagraphs(summarySentences)
         const [requestMarkup, summaryMarkup] = computeMarkup([originalText, summaryText]);
         const statistics = generateStatistics(summaryText, summaryMarkup)
         return {
           name,
-          original,
+          original: originalText,
           summaryText,
           summaryMarkup,
           requestMarkup,

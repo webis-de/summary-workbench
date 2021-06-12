@@ -11,8 +11,8 @@ const UploadButton = (props) => (
   </Button>
 );
 
-const Result = ({ className, calculation, setCalculationName, saveCalculation }) => {
-  const { name, scores, hypotheses, references } = calculation;
+const Result = ({ className, calculation, setCalculationID, saveCalculation }) => {
+  const { id, scores, hypotheses, references } = calculation;
 
   return (
     <Card className={className}>
@@ -28,8 +28,8 @@ const Result = ({ className, calculation, setCalculationName, saveCalculation })
         <div className="uk-flex uk-width-1-3">
           <input
             className="uk-input"
-            value={name}
-            onChange={e => setCalculationName(e.currentTarget.value)}
+            value={id}
+            onChange={e => setCalculationID(e.currentTarget.value)}
             onKeyDown={(e) => e.keyCode === 13 && saveCalculation()}
           />
           <UploadButton onClick={saveCalculation} />

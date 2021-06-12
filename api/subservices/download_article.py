@@ -13,7 +13,8 @@ def score_route():
         article.download()
         article.parse()
         text = article.text
-        return {"text": text}, 200, {"Content-Type": "application/json"}
+        title = article.title
+        return {"text": text, "title": title}, 200, {"Content-Type": "application/json"}
     except Exception:
         return {}, 400, {"Content-Type": "application/json"}
 

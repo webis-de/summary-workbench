@@ -1,0 +1,8 @@
+version: "1.0"
+name: pytextrank
+readable: PyTextRank
+type: extractive
+homepage: https://www.aclweb.org/anthology/W04-3252/
+sourcecode: https://github.com/DerwenAI/pytextrank
+devimage: slim
+deployimage: slim
