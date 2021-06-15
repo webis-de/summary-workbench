@@ -5,8 +5,8 @@ import { useKeycode } from "../hooks/keycode";
 import { useList } from "../hooks/list";
 import { usePagination } from "../hooks/pagination";
 import { useVisualizations } from "../hooks/visualizations";
-import { computeMarkup } from "../utils/markup";
 import { displayMessage } from "../utils/message";
+import { useMarkup } from "../hooks/markup"
 import { Markup } from "./utils/Markup";
 import { Accordion, AccordionItem } from "./utils/Accordion";
 import { Button } from "./utils/Button";
@@ -239,32 +239,21 @@ const VisualizationCreator = ({ back, addVisualization }) => {
   );
 };
 
-const useMarkup = (doc, reference, models) => {
-  const [slot, toggleSlot] = useReducer((state, newSlot) => {
-    if (state === newSlot) return null;
-    return newSlot;
-  }, null);
-  const [docMarkup, refMarkup] = useMemo(() => {
-    switch (slot) {
-      case null:
-        return [];
-      case "reference":
-        return computeMarkup([doc, reference]);
-      default:
-        return computeMarkup([doc, models[slot][1]]);
-    }
-  }, [slot, doc, reference, models]);
-  return [docMarkup, refMarkup, slot, toggleSlot];
-};
-
 const VisualizeContent = ({ doc, reference, models }) => {
-  const [docMarkup, refMarkup, slot, toggleSlot] = useMarkup(doc, reference, models);
-
+  const [slot, toggleSlot] = useReducer((state, newSlot) => state !== newSlot ? newSlot : null, null);
   const referenceSelected = slot === "reference";
+  const ref = useMemo(() => {
+    if (slot === null) return null
+    if (referenceSelected) return reference
+    return models[slot][1]
+  }, [slot])
+
+  const [docMarkup, refMarkup] = useMarkup(doc, ref)
+
   const ReferenceEye = referenceSelected ? EyeClosed : EyeOpen;
 
   return (
-    <div className="visualization-layout">
+    <div className="visualization-layout margin-between-10">
       <div>
         <Card>
           <CardHeader>

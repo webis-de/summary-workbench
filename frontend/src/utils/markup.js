@@ -1,6 +1,5 @@
 /* eslint-disable */
 
-"use strict";
 const hashCode = (str) => {
   let hash = 0;
   let i = str.length;

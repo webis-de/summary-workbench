@@ -1,27 +1,30 @@
 import isURL from "is-url";
-import React, { useEffect, useMemo, useContext, useReducer, useState } from "react";
+import React, { useContext, useEffect, useMemo, useReducer, useState } from "react";
 import { CSSTransition } from "react-transition-group";
 
 import { feedbackRequest, summarizeRequest } from "../api";
 import { SummarizersContext } from "../contexts/SummarizersContext";
+import { useMarkups } from "../hooks/markup";
 import { displayMessage } from "../utils/message";
-import { Markup, useMarkup } from "./utils/Markup";
-import { computeMarkup } from "../utils/markup"
 import { Badge } from "./utils/Badge";
 import { Button } from "./utils/Button";
 import { Checkboxes } from "./utils/Checkboxes";
 import { Bars, EyeClosed, EyeOpen, ThumbsDown, ThumbsUp } from "./utils/Icons";
 import { CenterLoading } from "./utils/Loading";
+import { Markup } from "./utils/Markup";
 
-const Feedback = ({ summarizer, summary, reference, url }) => {
+const Feedback = ({ summary }) => {
+  const { name, summaryText, original, url } = summary;
+  const sendFeedback = (feedback) => feedbackRequest(name, summaryText, original, url, feedback);
   const [submitted, setSubmitted] = useState(false);
-  if (submitted) return <>Thanks for the Feedback!</>
-  return <div className="uk-small">
+  if (submitted) return <>Thanks for the Feedback!</>;
+  return (
+    <div className="uk-small">
       <span className="colored-header"> Good Summary?</span>
       <ThumbsUp
         className="uk-margin-left"
         onClick={() =>
-          feedbackRequest(summarizer, summary, reference, url, "good")
+          sendFeedback("good")
             .then(() => setSubmitted(true))
             .catch((e) => displayMessage(e.message))
         }
@@ -29,12 +32,13 @@ const Feedback = ({ summarizer, summary, reference, url }) => {
       <ThumbsDown
         className="uk-margin-small-left"
         onClick={() =>
-          feedbackRequest(summarizer, summary, reference, url, "bad")
+          sendFeedback("bad")
             .then(() => setSubmitted(true))
             .catch((e) => displayMessage(e.message))
         }
       />
     </div>
+  );
 };
 
 const Header = ({ text, fontSize, backgroundColor = "#B02F2C", children, style }) => (
@@ -142,17 +146,23 @@ const InputDocument = ({ summarize, isComputing }) => {
 
             {/*  Start summary options container */}
             <div>
-              <div className="uk-flex uk-flex-row" style={{marginTop: "10px", marginBottom: "40px"}}>
-                <span className="colored-header">
-                  Summary Length
-                </span>
+              <div
+                className="uk-flex uk-flex-row"
+                style={{ marginTop: "10px", marginBottom: "40px" }}
+              >
+                <span className="colored-header">Summary Length</span>
                 <input
                   type="range"
                   min="10"
                   max="50"
                   step="5"
                   defaultValue={percentage}
-                  style={{flex: "1 0", minWidth: "100px", marginLeft: "15px", marginRight: "15px"}}
+                  style={{
+                    flex: "1 0",
+                    minWidth: "100px",
+                    marginLeft: "15px",
+                    marginRight: "15px",
+                  }}
                   onChange={(e) => setPercentage(e.currentTarget.value)}
                 />
                 <span
@@ -190,48 +200,59 @@ const InputDocument = ({ summarize, isComputing }) => {
   );
 };
 
-const Summary = ({ data, markupState, showMarkup }) => {
-  const { name, summaryMarkup, summaryText, original, url, statistics } = data;
+const computeNumWords = (text) => [...text.matchAll(/[a-zA-Z]+/g)].length;
+
+const generateStatistics = (text, summaryMarkup) => {
+  const numWords = computeNumWords(text);
+  let numMarkupedWords = numWords;
+  summaryMarkup.forEach((subtext) => {
+    if (typeof subtext === "string") numMarkupedWords -= computeNumWords(subtext);
+  });
+  return {
+    numWords,
+    percentOverlap: numWords ? numMarkupedWords / numWords : 0,
+  };
+};
+
+const Summary = ({ markup, summary, markupState, showMarkup }) => {
+  const { originalText, summaryText } = summary;
+  const { numWords, percentOverlap } = generateStatistics(originalText, markup[1]);
 
   return (
     <div>
       <div className="uk-flex uk-flex-right" style={{ transform: "translate(20px, -20px)" }}>
-        <Badge>{`${statistics.numWords} words`}</Badge>
-        <Badge>{`${(statistics.percentOverlap * 100).toFixed(0)}% overlap`}</Badge>
+        <Badge>{`${numWords} words`}</Badge>
+        <Badge>{`${(percentOverlap * 100).toFixed(0)}% overlap`}</Badge>
       </div>
-      <Markup markups={summaryMarkup} markupState={markupState} showMarkup={showMarkup} />
+      <Markup markups={markup[1]} markupState={markupState} showMarkup={showMarkup} />
       <div className="uk-flex uk-flex-right">
-        <Feedback
-          key={summaryText}
-          summarizer={name}
-          summary={summaryText}
-          reference={original}
-          url={url}
-        />
+        <Feedback summary={summary} />
       </div>
     </div>
   );
 };
 // Processed document
-const Document = ({ markup, markupState, showMarkup, clearMarkups }) => <div>
-<div
-className="uk-card uk-card-default uk-card-body"
-style={{ height: "60vh", width: "auto", overflow: "auto", padding: "20px" }}
->
-<Markup markups={markup} markupState={markupState} showMarkup={showMarkup} />
-</div>
-<button
-className=" uk-button uk-button-primary uk-margin-top uk-width-1-1"
-onClick={clearMarkups}
->
-Clear
-</button>
-</div>;
+const Document = ({ markup, markupState, showMarkup, clearMarkups }) => (
+  <div>
+    <div
+      className="uk-card uk-card-default uk-card-body"
+      style={{ height: "60vh", width: "auto", overflow: "auto", padding: "20px" }}
+    >
+      <Markup markups={markup} markupState={markupState} showMarkup={showMarkup} />
+    </div>
+    <button
+      className=" uk-button uk-button-primary uk-margin-top uk-width-1-1"
+      onClick={clearMarkups}
+    >
+      Clear
+    </button>
+  </div>
+);
 
-const SummaryTabView = ({ showOverlap, markups, clearMarkups, documentLength }) => {
+const SummaryTabView = ({ showOverlap, summaries, markups, clearMarkups, documentLength }) => {
   const [summaryIndex, setSummaryIndex] = useState(0);
   const { summarizers } = useContext(SummarizersContext);
-  const markupState = useState(null)
+  const markupState = useState(null);
 
   return (
     <div className="uk-flex uk-flex-between">
@@ -241,7 +262,7 @@ const SummaryTabView = ({ showOverlap, markups, clearMarkups, documentLength }) 
         </Header>
         <Document
           clearMarkups={clearMarkups}
-          markup={markups[summaryIndex].requestMarkup}
+          markup={markups[summaryIndex][0]}
           markupState={markupState}
           showMarkup={showOverlap}
         />
@@ -249,7 +270,7 @@ const SummaryTabView = ({ showOverlap, markups, clearMarkups, documentLength }) 
       <div style={{ flexBasis: "38%", flexGrow: 0 }}>
         <Header>
           <ul className="uk-tab dark-tab uk-margin" data-uk-tab="connect: #summary-display;">
-            {markups.map(({ name }, index) => (
+            {summaries.map(({ name }, index) => (
               <li key={name}>
                 <a
                   className=""
@@ -270,7 +291,12 @@ const SummaryTabView = ({ showOverlap, markups, clearMarkups, documentLength }) 
           <ul id="summary-display" className="uk-switcher">
             {markups.map((markup, index) => (
               <li key={index}>
-                <Summary data={markup} showMarkup={showOverlap} markupState={markupState} />
+                <Summary
+                  markup={markup}
+                  summary={summaries[index]}
+                  showMarkup={showOverlap}
+                  markupState={markupState}
+                />
               </li>
             ))}
           </ul>
@@ -285,9 +311,7 @@ const buildGrids = (list) => {
   let grid = null;
   for (let i = 0; i < list.length; i++) {
     if (i % 3 === 0) {
-      if (grid) {
-        grids.push(grid);
-      }
+      if (grid) grids.push(grid);
       grid = [];
     }
     grid.push(list[i]);
@@ -296,22 +320,22 @@ const buildGrids = (list) => {
   return grids;
 };
 
-const SummaryCompareView = ({ markups, showOverlap }) => {
-  const grids = buildGrids(markups);
+const SummaryCompareView = ({ summaries, markups, showOverlap }) => {
+  const grids = buildGrids(markups.map((markup, index) => [markup, summaries[index]]));
 
   const { summarizers } = useContext(SummarizersContext);
   return (
     <>
       {grids.map((grid, gridIndex) => (
         <div key={gridIndex} className="uk-margin uk-grid uk-child-width-expand@s">
-          {grid.map((markup, markupIndex) => (
+          {grid.map(([markup, summary], markupIndex) => (
             <div key={markupIndex}>
-              <Header text={summarizers[markup.name].readable} fontSize="16pt" />
+              <Header text={summarizers[summary.name].readable} fontSize="16pt" />
               <div
                 style={{ maxHeight: "500px", overflow: "auto" }}
                 className="uk-card uk-card-default uk-card-body"
               >
-                <Summary data={markup} showMarkup={showOverlap} />
+                <Summary markup={markup} summary={summary} showMarkup={showOverlap} />
               </div>
             </div>
           ))}
@@ -357,9 +381,12 @@ const ToggleOverlap = ({ show, toggle }) => (
   />
 );
 
-const SummaryView = ({ markups, clearMarkups, documentLength }) => {
+const SummaryView = ({ summaries, clearSummaries, documentLength }) => {
   const [showTab, toggleShowTab] = useReducer((e) => !e, true);
   const [showOverlap, toggleShowOverlap] = useReducer((e) => !e, false);
+  const hypotheses = useMemo(() => summaries.map(({ summaryText }) => summaryText), [summaries]);
+  const references = useMemo(() => summaries.map(({ originalText }) => originalText), [summaries]);
+  const markups = useMarkups(references, hypotheses);
 
   return (
     <div className="uk-container uk-container-expand">
@@ -369,15 +396,12 @@ const SummaryView = ({ markups, clearMarkups, documentLength }) => {
             <SummaryTabView
               documentLength={documentLength}
               showOverlap={showOverlap}
+              summaries={summaries}
               markups={markups}
-              clearMarkups={clearMarkups}
+              clearSummaries={clearSummaries}
             />
           ) : (
-            <SummaryCompareView
-              showOverlap={showOverlap}
-              markups={markups}
-              clearMarkups={clearMarkups}
-            />
+            <SummaryCompareView showOverlap={showOverlap} summaries={summaries} markups={markups} />
           )}
         </div>
         <div
@@ -392,20 +416,6 @@ const SummaryView = ({ markups, clearMarkups, documentLength }) => {
   );
 };
 
-const computeNumWords = (text) => [...text.matchAll(/[a-zA-Z]+/g)].length;
-
-const generateStatistics = (text, summaryMarkup) => {
-  const numWords = computeNumWords(text);
-  let numMarkupedWords = numWords;
-  summaryMarkup.forEach((subtext) => {
-    if (typeof subtext === "string") numMarkupedWords -= computeNumWords(subtext)
-  });
-  return {
-    numWords,
-    percentOverlap: numWords ? numMarkupedWords / numWords : 0,
-  };
-};
-
 const paragraphSize = 3;
 const computeParagraphs = (text) => {
   const paragraphs = [];
@@ -414,10 +424,10 @@ const computeParagraphs = (text) => {
     paragraphs.push(paragraph.join(" "));
   }
   return paragraphs.join("\n\n");
-}
+};
 
 const Summarize = () => {
-  const [markups, setMarkups] = useState(null);
+  const [results, setResults] = useState(null);
   const [computing, setComputing] = useState(null);
   const [documentLength, setDocumentLength] = useState(0);
   const { summarizers, loading, reload } = useContext(SummarizersContext);
@@ -428,47 +438,55 @@ const Summarize = () => {
 
     if (!models.length) {
       displayMessage("No summarizer selected");
-      return
+      return;
     }
     if (!text) {
       displayMessage("Please enter some text.");
-      return
+      return;
     }
     setComputing(true);
     try {
-      const { summaries, original } = await summarizeRequest(text, models, ratio)
+      const { summaries, original } = await summarizeRequest(text, models, ratio);
       if (Object.values(summaries).every((summarySentences) => !summarySentences.length)) {
         throw new Error("No summaries could be generated. The input is probably too short.");
       }
-      const originalText = computeParagraphs(original.text)
-      console.log(originalText)
-      const newMarkups = Object.entries(summaries).map(([name, summarySentences]) => {
-        const summaryText = computeParagraphs(summarySentences)
-        const [requestMarkup, summaryMarkup] = computeMarkup([originalText, summaryText]);
-        const statistics = generateStatistics(summaryText, summaryMarkup)
+      const originalText = computeParagraphs(original.text);
+      const url = isURL(text) ? text : null;
+      const newSummaries = Object.entries(summaries).map(([name, summarySentences]) => {
+        const summaryText = computeParagraphs(summarySentences);
         return {
           name,
-          original: originalText,
+          originalText,
           summaryText,
-          summaryMarkup,
-          requestMarkup,
-          statistics,
-          url: isURL(text) ? text : null,
+          url,
         };
       });
-      newMarkups.sort((a, b) => a.name > b.name);
-      setMarkups(newMarkups);
+      newSummaries.sort((a, b) => a.name > b.name);
+      setResults(newSummaries);
       setDocumentLength(computeNumWords(originalText));
-    } catch(error) {
+    } catch (error) {
       displayMessage(JSON.stringify(error));
+    } finally {
+      setComputing(false);
     }
-    setComputing(false)
-  }
+  };
 
-  if (loading) return <CenterLoading />
-  if (!summarizers) return <Button className="uk-container" onClick={reload}>Retry</Button>
-  if (markups) return <SummaryView documentLength={documentLength} markups={markups} clearMarkups={() => setMarkups(null)} />
-  return <InputDocument summarize={summarize} isComputing={computing} />
+  if (loading) return <CenterLoading />;
+  if (!summarizers)
+    return (
+      <Button className="uk-container" onClick={reload}>
+        Retry
+      </Button>
+    );
+  if (results)
+    return (
+      <SummaryView
+        documentLength={documentLength}
+        summaries={results}
+        clearSummaries={() => setResults(null)}
+      />
+    );
+  return <InputDocument summarize={summarize} isComputing={computing} />;
 };
 
 export { Summarize };

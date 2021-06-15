@@ -2,20 +2,22 @@ import React, { useContext, useMemo, useState } from "react";
 
 import { evaluateRequest } from "../api";
 import { MetricsContext } from "../contexts/MetricsContext";
+import { useMarkup } from "../hooks/markup";
 import { flatten } from "../utils/flatScores";
-import { computeMarkup } from "../utils/markup";
 import { displayMessage } from "../utils/message";
-import { Markup } from "./utils/Markup";
 import { ScoreTable } from "./ScoreTable";
 import { Button } from "./utils/Button";
 import { InfoText } from "./utils/InfoText";
 import { Loading } from "./utils/Loading";
+import { Markup } from "./utils/Markup";
 
 const OneHypRefResult = ({ className, calculation }) => {
-  const { scores, hypothesis, reference } = calculation;
+  const { scores, hypText, refText } = calculation;
+  const [hypothesis, reference] = useMarkup(hypText, refText);
 
   const { metrics } = useContext(MetricsContext);
   const flatScores = useMemo(() => flatten(scores, metrics), [scores, metrics]);
+  const markupState = useState()
 
   return (
     <div className={className}>
@@ -23,10 +25,10 @@ const OneHypRefResult = ({ className, calculation }) => {
         <tbody>
           <tr>
             <td>
-              <Markup markups={hypothesis} />
+              <Markup markups={hypothesis} markupState={markupState} />
             </td>
             <td>
-              <Markup markups={reference} />
+              <Markup markups={reference} markupState={markupState} />
             </td>
           </tr>
         </tbody>
@@ -67,8 +69,7 @@ const OneHypRef = () => {
     setIsComputing(true);
     evaluateRequest(getChosenMetrics(settings), [hypText], [refText])
       .then(({ scores }) => {
-        const [hypothesis, reference] = computeMarkup([hypText, refText]);
-        setEvaluateResult({ scores, hypothesis, reference });
+        setEvaluateResult({ scores, hypText, refText });
       })
       .catch((e) => displayMessage(e))
       .finally(() => setIsComputing(false));

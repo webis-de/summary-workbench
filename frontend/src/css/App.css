@@ -22,6 +22,10 @@ body {
   color: #1e87f0;
 }
 
+.hover-gray:hover {
+  color: gray;
+}
+
 .tooltip-icon {
   width: 20px;
   color: #55A6D1;
@@ -68,8 +72,12 @@ body {
   flex-basis: 50%;
 }
 
-.visualization-layout > :not(:first-child) {
+.margin-between-10 > :not(:first-child) {
   margin-left: 10px;
+}
+
+.margin-between-20 > :not(:first-child) {
+  margin-left: 20px;
 }
 
 .metric-layout {

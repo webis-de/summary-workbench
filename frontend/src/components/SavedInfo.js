@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import UIkit from "uikit";
 
 import { flatten } from "../utils/flatScores";
-import { computeMarkup } from "../utils/markup";
+import { useMarkups } from "../hooks/markup";
 import { CompareTable } from "./CompareTable";
 import { ScoreTable } from "./ScoreTable";
 import { DeleteButton } from "./utils/DeleteButton";
@@ -10,16 +10,14 @@ import { DeleteButton } from "./utils/DeleteButton";
 const SavedInfo = ({ index, calculation, deleteCalculation }) => {
   const {scores, metrics, hypotheses, references} = calculation
   const flatScores = flatten(scores, metrics);
-  const [comparisons, setComparisons] = useState(null);
   const toggleID = `toggle-saved-calculation-${index}`;
   const loadRef = useRef();
+  const [showMarkups, setShowMarkups] = useState(false)
+  const comparisons = useMarkups(showMarkups && hypotheses, references)
   const showEvent = useCallback(() => {
-    if (comparisons !== null) return;
+    if (comparisons.length) return;
     if (loadRef.current && loadRef.current.className.includes("uk-active")) {
-      setComparisons(
-        hypotheses.map((hyp, i) => computeMarkup([hyp, references[i]])),
-        [hypotheses, references]
-      );
+      setShowMarkups(true)
     } else UIkit.util.once(document, "show", `#${toggleID}`, showEvent);
   }, [comparisons, toggleID]);
   useEffect(showEvent, [showEvent]);
@@ -44,7 +42,7 @@ const SavedInfo = ({ index, calculation, deleteCalculation }) => {
         <li>
           <ScoreTable flatScores={flatScores} />
         </li>
-        <li ref={loadRef}>{comparisons && <CompareTable comparisons={comparisons} />}</li>
+        <li ref={loadRef}>{comparisons.length && <CompareTable comparisons={comparisons} />}</li>
       </ul>
     </div>
   );
