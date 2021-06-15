@@ -112,7 +112,8 @@ router.post(
   async (req, res, next) => {
     try {
       const { summarizers, text, ratio } = req.body;
-      let original = isURL(text)
+      const textIsURL = isURL(text)
+      const original = textIsURL
         ? await articleDownloader.download(text)
         : { text };
       let summariesText = await summarize(summarizers, original.text, ratio);
@@ -121,7 +122,9 @@ router.post(
         summaries[metric] = await sentenceSplitter.split(result);
       }
       original["text"] = await sentenceSplitter.split(original["text"]);
-      return res.json({ original, summaries });
+      response = { original, summaries }
+      if (textIsURL) response["url"] = text
+      return res.json(response);
     } catch (err) {
       return next(err);
     }

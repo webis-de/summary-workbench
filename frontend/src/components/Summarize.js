@@ -14,8 +14,8 @@ import { CenterLoading } from "./utils/Loading";
 import { Markup } from "./utils/Markup";
 
 const Feedback = ({ summary }) => {
-  const { name, summaryText, original, url } = summary;
-  const sendFeedback = (feedback) => feedbackRequest(name, summaryText, original, url, feedback);
+  const { name, summaryText, originalText, url } = summary;
+  const sendFeedback = (feedback) => feedbackRequest(name, summaryText, originalText, url, feedback);
   const [submitted, setSubmitted] = useState(false);
   if (submitted) return <>Thanks for the Feedback!</>;
   return (
@@ -108,10 +108,10 @@ const InputDocument = ({ summarize, isComputing }) => {
         </div>
         {/*  End Document container */}
 
-        <div style={{ minWidth: "10px" }} />
+        <div style={{ minWidth: "20px" }} />
 
         {/*  Start model lists container */}
-        <div className="uk-flex uk-flex-column" style={{ flexBasis: "37%" }}>
+        <div className="uk-flex uk-flex-column" style={{ flexBasis: "40%" }}>
           <Header text="Models" fontSize="14pt" />
           <div
             className="uk-card uk-card-default uk-card-body uk-flex-stretch"
@@ -232,8 +232,9 @@ const Summary = ({ markup, summary, markupState, showMarkup }) => {
   );
 };
 // Processed document
-const Document = ({ markup, markupState, showMarkup, clearMarkups }) => (
+const Document = ({ title, markup, markupState, showMarkup, clearMarkups }) => <>
   <div>
+    <h4 style={{margin: "10px", marginBottom: "0"}}>{title}</h4>
     <div
       className="uk-card uk-card-default uk-card-body"
       style={{ height: "60vh", width: "auto", overflow: "auto", padding: "20px" }}
@@ -247,27 +248,29 @@ const Document = ({ markup, markupState, showMarkup, clearMarkups }) => (
       Clear
     </button>
   </div>
-);
+</>;
 
-const SummaryTabView = ({ showOverlap, summaries, markups, clearMarkups, documentLength }) => {
+const SummaryTabView = ({ title, showOverlap, summaries, markups, clearMarkups, documentLength }) => {
   const [summaryIndex, setSummaryIndex] = useState(0);
   const { summarizers } = useContext(SummarizersContext);
   const markupState = useState(null);
 
   return (
-    <div className="uk-flex uk-flex-between">
-      <div style={{ flexBasis: "60%", flexGrow: 0 }}>
+    <div className="uk-flex">
+      <div style={{ flexBasis: "60%"}}>
         <Header text="Document" fontSize="16pt">
           <span style={{ fontSize: "12pt" }}>{documentLength} words</span>
         </Header>
         <Document
           clearMarkups={clearMarkups}
+          title={title}
           markup={markups[summaryIndex][0]}
           markupState={markupState}
           showMarkup={showOverlap}
         />
       </div>
-      <div style={{ flexBasis: "38%", flexGrow: 0 }}>
+      <div style={{ minWidth: "20px" }} />
+      <div style={{ flexBasis: "40%" }}>
         <Header>
           <ul className="uk-tab dark-tab uk-margin" data-uk-tab="connect: #summary-display;">
             {summaries.map(({ name }, index) => (
@@ -381,7 +384,7 @@ const ToggleOverlap = ({ show, toggle }) => (
   />
 );
 
-const SummaryView = ({ summaries, clearSummaries, documentLength }) => {
+const SummaryView = ({ title, summaries, clearSummaries, documentLength }) => {
   const [showTab, toggleShowTab] = useReducer((e) => !e, true);
   const [showOverlap, toggleShowOverlap] = useReducer((e) => !e, false);
   const hypotheses = useMemo(() => summaries.map(({ summaryText }) => summaryText), [summaries]);
@@ -391,14 +394,15 @@ const SummaryView = ({ summaries, clearSummaries, documentLength }) => {
   return (
     <div className="uk-container uk-container-expand">
       <div className="uk-flex">
-        <div style={{ flexGrow: 1 }}>
+        <div>
           {showTab ? (
             <SummaryTabView
               documentLength={documentLength}
               showOverlap={showOverlap}
               summaries={summaries}
+              title={title}
               markups={markups}
-              clearSummaries={clearSummaries}
+              clearMarkups={clearSummaries}
             />
           ) : (
             <SummaryCompareView showOverlap={showOverlap} summaries={summaries} markups={markups} />
@@ -428,30 +432,30 @@ const computeParagraphs = (text) => {
 
 const Summarize = () => {
   const [results, setResults] = useState(null);
+  const [title, setTitle] = useState(null)
   const [computing, setComputing] = useState(null);
   const [documentLength, setDocumentLength] = useState(0);
   const { summarizers, loading, reload } = useContext(SummarizersContext);
 
   const summarize = async (rawText, models, percentage) => {
-    const text = rawText.trim();
+    const requestText = rawText.trim();
     const ratio = parseInt(percentage, 10) / 100;
 
     if (!models.length) {
       displayMessage("No summarizer selected");
       return;
     }
-    if (!text) {
+    if (!requestText) {
       displayMessage("Please enter some text.");
       return;
     }
     setComputing(true);
     try {
-      const { summaries, original } = await summarizeRequest(text, models, ratio);
+      const { summaries, original, url } = await summarizeRequest(requestText, models, ratio);
       if (Object.values(summaries).every((summarySentences) => !summarySentences.length)) {
         throw new Error("No summaries could be generated. The input is probably too short.");
       }
       const originalText = computeParagraphs(original.text);
-      const url = isURL(text) ? text : null;
       const newSummaries = Object.entries(summaries).map(([name, summarySentences]) => {
         const summaryText = computeParagraphs(summarySentences);
         return {
@@ -463,9 +467,10 @@ const Summarize = () => {
       });
       newSummaries.sort((a, b) => a.name > b.name);
       setResults(newSummaries);
+      setTitle(original.title)
       setDocumentLength(computeNumWords(originalText));
-    } catch (error) {
-      displayMessage(JSON.stringify(error));
+    } catch (err) {
+      displayMessage(err.message);
     } finally {
       setComputing(false);
     }
@@ -483,6 +488,7 @@ const Summarize = () => {
       <SummaryView
         documentLength={documentLength}
         summaries={results}
+        title={title}
         clearSummaries={() => setResults(null)}
       />
     );
