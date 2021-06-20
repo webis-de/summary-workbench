@@ -32,7 +32,7 @@ const Content = () => {
   ];
 
   const location = useLocation();
-  const {minOverlap, setMinOverlap} = useContext(SettingsContext)
+  const {minOverlap, setMinOverlap, allowSelfSimilarities, toggleAllowSelfSimilarities} = useContext(SettingsContext)
   return (
     <>
       <div className="uk-background-secondary global-nav uk-flex" data-uk-sticky>
@@ -57,14 +57,33 @@ const Content = () => {
         <div className="uk-flex uk-flex-center" style={{ marginLeft: "0px", marginRight: "50px" }}>
           <FaCog className="hover-gray" style={{ minWidth: "20px" }} />
           <div uk-dropdown="mode: click; pos:  bottom-left">
-            <h4>minimal overlap</h4>
-            <div className="margin-between-20">
-              {[1, 2, 3, 4, 5].map((num) => (
-                <label key={num} style={{ whiteSpace: "nowrap" }}>
-                  {num}
-                  <input type="radio" value={num} checked={num === minOverlap} onChange={(e) => setMinOverlap(e.target.value)} />
-                </label>
-              ))}
+            <h3>Highlighting</h3>
+            <div className="uk-flex">
+              <div style={{width: "20px"}} />
+              <div>
+            <div className="uk-margin">
+              <h4>minimal overlap</h4>
+              <div className="margin-between-20">
+                {[1, 2, 3, 4, 5].map((num) => (
+                  <label key={num} style={{ whiteSpace: "nowrap" }}>
+                    {num}
+                    <input type="radio" value={num} checked={num === minOverlap} onChange={(e) => setMinOverlap(e.target.value)} />
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div className="uk-flex uk-flex-middle">
+              <h4 style={{margin: "0", marginRight: "20px"}}>allow self-similarities</h4>
+              <input
+                style={{margin:"0"}}
+                className="uk-checkbox"
+                checked={allowSelfSimilarities}
+                readOnly
+                onClick={toggleAllowSelfSimilarities}
+                type="checkbox"
+              />
+            </div>
+            </div>
             </div>
           </div>
         </div>

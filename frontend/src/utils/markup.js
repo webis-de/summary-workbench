@@ -1,36 +1,5 @@
 /* eslint-disable */
 
-const hashCode = (str) => {
-  let hash = 0;
-  let i = str.length;
-  while (i--) hash = str.charCodeAt(i) + ((hash << 5) - hash);
-  return hash;
-};
-
-const intToRGB = (i) => {
-  const c = (i & 0xffffff).toString(16).toUpperCase();
-  return "00000".substring(0, 6 - c.length) + c;
-};
-
-const hexToRgb = (hex) => {
-  const bigint = parseInt(hex, 16);
-  const r = (bigint >> 16) & 255;
-  const g = (bigint >> 8) & 255;
-  const b = bigint & 255;
-  return [r, g, b];
-};
-
-const foregroundColor = (backgroundColor) => {
-  const [r, g, b] = hexToRgb(backgroundColor);
-  return r * 0.299 + g * 0.587 + b * 0.114 > 150 ? "000000" : "ffffff";
-};
-
-const colorMarkup = (num) => {
-  const bgcolor = intToRGB(num);
-  const fgcolor = foregroundColor(bgcolor);
-  return [`#${bgcolor}`, `#${fgcolor}`];
-};
-
 const compute_ranks = (doc) => {
   const rank_map = new Map();
   let rank = 1;
@@ -106,14 +75,6 @@ const build_lcp_array = (doc, suffix_array, inverse_suffix_array) => {
   return lcp;
 };
 
-const build_longest_match_array = (lcp_array) => {
-  const longest_match_array = [...lcp_array];
-  for (let i = 1; i < longest_match_array.length; i++) {
-    longest_match_array[i - 1] = Math.max(longest_match_array[i - 1], longest_match_array[i]);
-  }
-  return longest_match_array;
-};
-
 const combine_documents = (docs) => {
   const first_doc = docs[0];
   const document_vector = first_doc.map(() => 0);
@@ -133,78 +94,71 @@ const combine_documents = (docs) => {
   return [first_doc.concat(...rest_docs), document_vector, offsets];
 };
 
-const build_should_be_shown_array = (
-  longest_match_array,
-  suffix_array,
-  inverse_suffix_array,
-  min_length
-) => longest_match_array.map((longest_match, i) => {
-    if (longest_match >= min_length) {
-      if (suffix_array[i] === 0) return true;
-      const longest_match_before = longest_match_array[inverse_suffix_array[suffix_array[i] - 1]];
-      if (longest_match_before < longest_match + 1) return true;
-    }
-    return false;
-  });
+const is_self_similar = (start, end, document_vector, suffix_array) => {
+  for (let i = start; i < end; i++) if (document_vector[suffix_array[i]] !== document_vector[suffix_array[i+1]] ) return false
+  return true
+}
 
-const compute_matches = (docs, min_length, min_num_doc_matches = 2) => {
+const update_longest_match = (start, end, match_length, longest_match_array) => {
+  for (let i = start; i <= end; i++) if (longest_match_array[i] < match_length) longest_match_array[i] = match_length
+}
+
+const is_nested = (start, end, match_length, suffix_array, inverse_suffix_array, longest_match_array) => {
+  for (let i = start; i <= end; i++) {
+    if (longest_match_array[i] === match_length && suffix_array[i] !== 0) {
+      const longest_match_before = longest_match_array[inverse_suffix_array[suffix_array[i] - 1]];
+      if (longest_match_before < match_length + 1) return false
+    }
+  }
+  return true
+}
+
+const compute_matches = (docs, min_length, allow_self_similarities) => {
   const [combined_doc, document_vector, offsets] = combine_documents(docs);
   const suffix_array = build_suffix_array(combined_doc);
-  //   print_suffix_array(combined_doc, suffix_array)
   const inverse_suffix_array = build_inverse_suffix_array(suffix_array);
   const lcp_array = build_lcp_array(combined_doc, suffix_array, inverse_suffix_array);
-  const longest_match_array = build_longest_match_array(lcp_array);
-  const should_be_shown = build_should_be_shown_array(
-    longest_match_array,
-    suffix_array,
-    inverse_suffix_array,
-    min_length
-  );
+  const longest_match_array = Array(lcp_array.length).fill(0)
   lcp_array.shift();
   lcp_array.push(0);
   const match_groups = [];
   const start = [];
   const depth = [];
-  const is_relevant = [];
   let curr_start = 0;
   let curr_depth = 0;
-  let curr_is_relevant = false;
-  let i = 0;
 
-  while (i < lcp_array.length) {
+  for (let i = 0; i < lcp_array.length; i++) {
     if (lcp_array[i] > curr_depth) {
       start.push(curr_start);
       depth.push(curr_depth);
-      is_relevant.push(curr_is_relevant);
       curr_depth = lcp_array[i];
       curr_start = i;
-      curr_is_relevant = should_be_shown[i];
     } else if (lcp_array[i] < curr_depth) {
-      if (curr_is_relevant) match_groups.push([curr_start, curr_depth, i]);
+      if (curr_depth >= min_length) {
+        if (allow_self_similarities || !is_self_similar(curr_start, i, document_vector, suffix_array)) {
+          match_groups.push([curr_start, curr_depth, i]);
+          update_longest_match(curr_start, i, curr_depth, longest_match_array)
+        }
+      }
       const prev_depth = depth[depth.length - 1];
       if (prev_depth < lcp_array[i]) {
-        start.push(curr_start);
-        depth.push(lcp_array[i]);
-        is_relevant.push(false);
+        curr_depth = lcp_array[i];
+      } else {
+        curr_start = start.pop();
+        curr_depth = depth.pop();
       }
-      curr_start = start.pop();
-      curr_depth = depth.pop();
-      curr_is_relevant = is_relevant.pop();
-      continue;
-    } else if (curr_depth === longest_match_array[i + 1]) {
-      curr_is_relevant = curr_is_relevant || should_be_shown[i + 1];
     }
-    i++;
   }
 
   const matches = [];
   match_groups.forEach(([index, match_length, end]) => {
+    if (is_nested(index, end, match_length, suffix_array, inverse_suffix_array, longest_match_array)) return
     const curr_matches = docs.map(() => []);
     let pos = suffix_array[index];
     let doc_idx = document_vector[pos];
     let doc_start = pos - offsets[doc_idx];
     curr_matches[doc_idx].push(doc_start);
-    const text = combined_doc.slice(doc_start, doc_start + match_length).join("");
+    const text = combined_doc.slice(pos, pos + match_length).join("");
     for (let j = index + 1; j <= end; j++) {
       pos = suffix_array[j];
       doc_idx = document_vector[pos];
@@ -337,7 +291,7 @@ const clean_list = (words) => {
   const idx = [];
   words.forEach((word, i) => {
     word = clean(word);
-    if (word) {
+    if (word && !word.match(stopword_re)) {
       tokens.push(word);
       idx.push(i);
     }
@@ -345,24 +299,64 @@ const clean_list = (words) => {
   return [tokens, idx];
 };
 
-const computeMarkup = (docs, min_length = 3) => {
+const cyrb53 = function(str, seed = 0) {
+    let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
+    for (let i = 0, ch; i < str.length; i++) {
+        ch = str.charCodeAt(i);
+        h1 = Math.imul(h1 ^ ch, 2654435761);
+        h2 = Math.imul(h2 ^ ch, 1597334677);
+    }
+    h1 = Math.imul(h1 ^ (h1>>>16), 2246822507) ^ Math.imul(h2 ^ (h2>>>13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2>>>16), 2246822507) ^ Math.imul(h1 ^ (h1>>>13), 3266489909);
+    return 4294967296 * (2097151 & h2) + (h1>>>0);
+};
+
+const intToRGB = (i) => {
+  const c = (i & 0xffffff).toString(16).toUpperCase();
+  return "00000".substring(0, 6 - c.length) + c;
+};
+
+const hexToRgb = (hex) => {
+  const bigint = parseInt(hex, 16);
+  const r = (bigint >> 16) & 255;
+  const g = (bigint >> 8) & 255;
+  const b = bigint & 255;
+  return [r, g, b];
+};
+
+const foregroundColor = (backgroundColor) => {
+  const [r, g, b] = hexToRgb(backgroundColor);
+  return r * 0.299 + g * 0.587 + b * 0.114 > 150 ? "000000" : "ffffff";
+};
+
+const colorMarkup = (num) => {
+  const bgcolor = intToRGB(num);
+  const fgcolor = foregroundColor(bgcolor);
+  return [`#${bgcolor}`, `#${fgcolor}`];
+};
+
+const computeMarkup = (docs, min_length, allow_self_similarities) => {
   const textblocks = docs.map((doc) => new Textblock(doc));
   const clean_docs_idx = textblocks.map((textblock) => clean_list(textblock.words));
+
   const matches = compute_matches(
     clean_docs_idx.map(([clean_docs]) => clean_docs),
-    min_length
+    min_length,
+    allow_self_similarities
   );
 
   let tag = 0;
   matches.forEach(([match_length, text, groups]) => {
-    const color = colorMarkup(hashCode(text));
-    groups.forEach((group, i) =>
-      group.forEach((start) => {
+    const color = colorMarkup(cyrb53(text));
+    const groupSizes = groups.map(start => start.length)
+    groups.forEach((group, i) => {
+      group.sort()
+      return group.forEach((start, j) => {
         const map_start = clean_docs_idx[i][1][start];
         const map_end = clean_docs_idx[i][1][start + match_length - 1];
-        textblocks[i].add_range(map_start, map_end, [tag, ...color]);
+        textblocks[i].add_range(map_start, map_end, [tag, ...color, j, groupSizes]);
       })
-    );
+    });
     tag++;
   });
 

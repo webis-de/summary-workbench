@@ -32,13 +32,13 @@ const StringContent = memo(({content}) => {
   </span>
 })
 
-const Markup = ({ markups, markupState, showMarkup = true }) => (
+const Markup = ({ markups, markupState, matchState, showMarkup = true }) => (
   <>
     {markups.map((child, i) =>
       typeof child === "string" ? (
         <StringContent key={i} content={child} />
       ) : (
-        <TaggedMarkup key={i} markup={child} markupState={markupState} showMarkup={showMarkup} />
+        <TaggedMarkup key={i} markup={child} markupState={markupState} showMarkup={showMarkup} matchState={matchState} />
       )
     )}
   </>

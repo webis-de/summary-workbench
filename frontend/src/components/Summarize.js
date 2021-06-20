@@ -1,6 +1,7 @@
 import isURL from "is-url";
 import React, { useContext, useEffect, useMemo, useReducer, useState } from "react";
 import { CSSTransition } from "react-transition-group";
+import { Checkboxes } from "./utils/Checkboxes"
 
 import { feedbackRequest, summarizeRequest } from "../api";
 import { SummarizersContext } from "../contexts/SummarizersContext";
@@ -8,14 +9,14 @@ import { useMarkups } from "../hooks/markup";
 import { displayMessage } from "../utils/message";
 import { Badge } from "./utils/Badge";
 import { Button } from "./utils/Button";
-import { Checkboxes } from "./utils/Checkboxes";
 import { Bars, EyeClosed, EyeOpen, ThumbsDown, ThumbsUp } from "./utils/Icons";
 import { CenterLoading } from "./utils/Loading";
 import { Markup } from "./utils/Markup";
 
 const Feedback = ({ summary }) => {
   const { name, summaryText, originalText, url } = summary;
-  const sendFeedback = (feedback) => feedbackRequest(name, summaryText, originalText, url, feedback);
+  const sendFeedback = (feedback) =>
+    feedbackRequest(name, summaryText, originalText, url, feedback);
   const [submitted, setSubmitted] = useState(false);
   if (submitted) return <>Thanks for the Feedback!</>;
   return (
@@ -232,32 +233,41 @@ const Summary = ({ markup, summary, markupState, showMarkup }) => {
   );
 };
 // Processed document
-const Document = ({ title, markup, markupState, showMarkup, clearMarkups }) => <>
-  <div>
-    <h4 style={{margin: "10px", marginBottom: "0"}}>{title}</h4>
-    <div
-      className="uk-card uk-card-default uk-card-body"
-      style={{ height: "60vh", width: "auto", overflow: "auto", padding: "20px" }}
-    >
-      <Markup markups={markup} markupState={markupState} showMarkup={showMarkup} />
+const Document = ({ title, markup, markupState, showMarkup, clearMarkups }) => (
+  <>
+    <div>
+      <h4 style={{ margin: "10px", marginBottom: "0" }}>{title}</h4>
+      <div
+        className="uk-card uk-card-default uk-card-body"
+        style={{ height: "60vh", width: "auto", overflow: "auto", padding: "20px" }}
+      >
+        <Markup markups={markup} markupState={markupState} showMarkup={showMarkup} />
+      </div>
+      <button
+        className=" uk-button uk-button-primary uk-margin-top uk-width-1-1"
+        onClick={clearMarkups}
+      >
+        Clear
+      </button>
     </div>
-    <button
-      className=" uk-button uk-button-primary uk-margin-top uk-width-1-1"
-      onClick={clearMarkups}
-    >
-      Clear
-    </button>
-  </div>
-</>;
+  </>
+);
 
-const SummaryTabView = ({ title, showOverlap, summaries, markups, clearMarkups, documentLength }) => {
+const SummaryTabView = ({
+  title,
+  showOverlap,
+  summaries,
+  markups,
+  clearMarkups,
+  documentLength,
+}) => {
   const [summaryIndex, setSummaryIndex] = useState(0);
   const { summarizers } = useContext(SummarizersContext);
   const markupState = useState(null);
 
   return (
     <div className="uk-flex">
-      <div style={{ flexBasis: "60%"}}>
+      <div style={{ flexBasis: "60%" }}>
         <Header text="Document" fontSize="16pt">
           <span style={{ fontSize: "12pt" }}>{documentLength} words</span>
         </Header>
@@ -432,10 +442,15 @@ const computeParagraphs = (text) => {
 
 const Summarize = () => {
   const [results, setResults] = useState(null);
-  const [title, setTitle] = useState(null)
+  const [title, setTitle] = useState(null);
   const [computing, setComputing] = useState(null);
   const [documentLength, setDocumentLength] = useState(0);
   const { summarizers, loading, reload } = useContext(SummarizersContext);
+
+  const clearSummaries = () => {
+    setResults(null);
+    setTitle(null);
+  };
 
   const summarize = async (rawText, models, percentage) => {
     const requestText = rawText.trim();
@@ -467,7 +482,7 @@ const Summarize = () => {
       });
       newSummaries.sort((a, b) => a.name > b.name);
       setResults(newSummaries);
-      setTitle(original.title)
+      setTitle(original.title);
       setDocumentLength(computeNumWords(originalText));
     } catch (err) {
       displayMessage(err.message);
@@ -489,7 +504,7 @@ const Summarize = () => {
         documentLength={documentLength}
         summaries={results}
         title={title}
-        clearSummaries={() => setResults(null)}
+        clearSummaries={clearSummaries}
       />
     );
   return <InputDocument summarize={summarize} isComputing={computing} />;
