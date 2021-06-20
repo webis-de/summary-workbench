@@ -25,10 +25,10 @@ const OneHypRefResult = ({ className, calculation }) => {
         <tbody>
           <tr>
             <td>
-              <Markup markups={hypothesis} markupState={markupState} />
+              <Markup markups={reference} markupState={markupState} />
             </td>
             <td>
-              <Markup markups={reference} markupState={markupState} />
+              <Markup markups={hypothesis} markupState={markupState} />
             </td>
           </tr>
         </tbody>

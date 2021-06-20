@@ -87,7 +87,7 @@ const Evaluate = () => {
       </Button>
     );
   return (
-    <div className="uk-container uk-container-expand uk-margin-medium-top uk-margin-large-top@l ">
+    <div className="uk-container uk-container-expand">
       <div className="metric-layout">
         <div>
           <FileInput setCalculation={setComputedCalculation} />

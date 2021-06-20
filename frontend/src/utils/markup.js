@@ -127,7 +127,8 @@ const compute_matches = (docs, min_length, allow_self_similarities) => {
   let curr_start = 0;
   let curr_depth = 0;
 
-  for (let i = 0; i < lcp_array.length; i++) {
+  let i = 0
+  while (i < lcp_array.length) {
     if (lcp_array[i] > curr_depth) {
       start.push(curr_start);
       depth.push(curr_depth);
@@ -147,7 +148,7 @@ const compute_matches = (docs, min_length, allow_self_similarities) => {
         curr_start = start.pop();
         curr_depth = depth.pop();
       }
-    }
+    } else i++
   }
 
   const matches = [];
