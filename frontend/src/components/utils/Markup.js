@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { Fragment, memo, useCallback, useEffect, useRef, useState } from "react";
 
 const innerHoverStyle = { background: "yellow", color: "black", display: "relative" };
 const baseMarkupStyle = {
@@ -12,7 +12,7 @@ const outerHoverStyle = { ...baseMarkupStyle, ...innerHoverStyle };
 const initScrollState = [null, null, null];
 const useMarkupScroll = () => {
   const [scrollState, setScrollState] = useState(initScrollState);
-  const resetScrollState = useCallback(() => setScrollState(initScrollState));
+  const resetScrollState = useCallback(() => setScrollState(initScrollState), [setScrollState]);
   return [scrollState, setScrollState, resetScrollState];
 };
 
@@ -31,7 +31,7 @@ const Scroll = ({ docIndex, matchOrder, groupSizes, tag, scrollState, allowScrol
     if (docIndex === scrollMarkup[0] && tag === scrollMarkup[1] && matchOrder === scrollMarkup[2]) {
       scrollRef.current.scrollIntoView({ block: "center", behavior: "smooth", inline: "start" });
     }
-  }, [scrollMarkup, docIndex, matchOrder]);
+  }, [tag, scrollMarkup, docIndex, matchOrder]);
   return (
     <span ref={scrollRef} onClick={scrollNext}>
       {children}
@@ -84,11 +84,11 @@ const StringContent = memo(({ content }) => {
   return (
     <span>
       <>{lines[0]}</>
-      {lines.slice(1).map((line) => (
-        <>
+      {lines.slice(1).map((line, i) => (
+        <Fragment key={i}>
           <br />
           {line}
-        </>
+        </Fragment>
       ))}
     </span>
   );
@@ -96,10 +96,9 @@ const StringContent = memo(({ content }) => {
 
 const MarkupRoot = ({ markups, markupState, scrollState, allowScroll, showMarkup }) => (
   <>
-    {markups.map((child, i) =>
-      typeof child === "string" ? (
-        <StringContent key={i} content={child} />
-      ) : (
+    {markups.map((child, i) => {
+      if (typeof child === "string") return <StringContent key={i} content={child} />;
+      return (
         <TaggedMarkup
           key={i}
           markup={child}
@@ -108,8 +107,8 @@ const MarkupRoot = ({ markups, markupState, scrollState, allowScroll, showMarkup
           allowScroll={allowScroll}
           showMarkup={showMarkup}
         />
-      )
-    )}
+      );
+    })}
   </>
 );
 

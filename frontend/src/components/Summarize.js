@@ -1,5 +1,4 @@
-import isURL from "is-url";
-import React, { useCallback, useContext, useEffect, useMemo, useReducer, useState } from "react";
+import React, { useCallback, useContext, useMemo, useReducer, useState } from "react";
 import { CSSTransition } from "react-transition-group";
 
 import { feedbackRequest, summarizeRequest } from "../api";
@@ -216,7 +215,7 @@ const generateStatistics = (text, summaryMarkup) => {
 };
 
 const Summary = ({ markup, summary, markupState, scrollState, showMarkup }) => {
-  const { originalText, summaryText } = summary;
+  const { originalText } = summary;
   const { numWords, percentOverlap } = generateStatistics(originalText, markup[1]);
 
   return (

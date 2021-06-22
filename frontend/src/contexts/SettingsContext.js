@@ -14,12 +14,12 @@ const SettingsProvider = ({ children }) => {
     const newValue = !allowSelfSimilarities
     setAllowSelfSimilarities(newValue);
     storeAllowSelfSimilarities(newValue);
-  });
+  }, [allowSelfSimilarities, setAllowSelfSimilarities]);
   const setMinOverlap = useCallback((overlap) => {
     const newOverlap = typeof overlap === "string" ? parseInt(overlap, 10) : overlap
     _setMinOverlap(newOverlap);
     storeMinOverlap(newOverlap);
-  });
+  }, [_setMinOverlap]);
   return (
     <SettingsContext.Provider value={{ minOverlap, setMinOverlap, allowSelfSimilarities, toggleAllowSelfSimilarities }}>
       {children}

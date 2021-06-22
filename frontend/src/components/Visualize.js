@@ -246,7 +246,7 @@ const VisualizeContent = ({ doc, reference, models }) => {
     if (slot === null) return null
     if (referenceSelected) return reference
     return models[slot][1]
-  }, [slot])
+  }, [slot, models, reference, referenceSelected])
 
   const [docMarkup, refMarkup] = useMarkup(doc, ref)
   const markupState = useState(null);

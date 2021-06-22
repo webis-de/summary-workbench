@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { FaQuestionCircle } from "react-icons/fa";
 
 import { SavedInfo } from "./SavedInfo";
