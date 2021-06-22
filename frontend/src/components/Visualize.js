@@ -249,6 +249,7 @@ const VisualizeContent = ({ doc, reference, models }) => {
   }, [slot])
 
   const [docMarkup, refMarkup] = useMarkup(doc, ref)
+  const markupState = useState(null);
 
   const ReferenceEye = referenceSelected ? EyeClosed : EyeOpen;
 
@@ -259,7 +260,7 @@ const VisualizeContent = ({ doc, reference, models }) => {
           <CardHeader>
             <CardTitle>Document</CardTitle>
           </CardHeader>
-          <CardBody>{docMarkup ? <Markup markups={docMarkup} /> : doc}</CardBody>
+          <CardBody>{docMarkup ? <Markup markups={docMarkup} markupState={markupState} /> : doc}</CardBody>
         </Card>
       </div>
       <div>
@@ -276,7 +277,7 @@ const VisualizeContent = ({ doc, reference, models }) => {
               </div>
             </CardTitle>
           </CardHeader>
-          <CardBody>{referenceSelected ? <Markup markups={refMarkup} /> : reference}</CardBody>
+          <CardBody>{referenceSelected ? <Markup markups={refMarkup} markupState={markupState} /> : reference}</CardBody>
         </Card>
         {models.map(([name, modelLine], i) => {
           const modelSelected = slot === i;
@@ -295,7 +296,7 @@ const VisualizeContent = ({ doc, reference, models }) => {
                   </div>
                 </CardTitle>
               </CardHeader>
-              <CardBody>{modelSelected ? <Markup markups={refMarkup} /> : modelLine}</CardBody>
+              <CardBody>{modelSelected ? <Markup markups={refMarkup} markupState={markupState} /> : modelLine}</CardBody>
             </Card>
           );
         })}

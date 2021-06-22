@@ -1,7 +1,6 @@
 import isURL from "is-url";
-import React, { useContext, useEffect, useMemo, useReducer, useState } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useReducer, useState } from "react";
 import { CSSTransition } from "react-transition-group";
-import { Checkboxes } from "./utils/Checkboxes"
 
 import { feedbackRequest, summarizeRequest } from "../api";
 import { SummarizersContext } from "../contexts/SummarizersContext";
@@ -9,6 +8,7 @@ import { useMarkups } from "../hooks/markup";
 import { displayMessage } from "../utils/message";
 import { Badge } from "./utils/Badge";
 import { Button } from "./utils/Button";
+import { Checkboxes } from "./utils/Checkboxes";
 import { Bars, EyeClosed, EyeOpen, ThumbsDown, ThumbsUp } from "./utils/Icons";
 import { CenterLoading } from "./utils/Loading";
 import { Markup, useMarkupScroll } from "./utils/Markup";
@@ -225,7 +225,12 @@ const Summary = ({ markup, summary, markupState, scrollState, showMarkup }) => {
         <Badge>{`${numWords} words`}</Badge>
         <Badge>{`${(percentOverlap * 100).toFixed(0)}% overlap`}</Badge>
       </div>
-      <Markup markups={markup[1]} markupState={markupState} scrollState={scrollState} showMarkup={showMarkup} />
+      <Markup
+        markups={markup[1]}
+        markupState={markupState}
+        scrollState={scrollState}
+        showMarkup={showMarkup}
+      />
       <div className="uk-flex uk-flex-right">
         <Feedback summary={summary} />
       </div>
@@ -241,7 +246,12 @@ const Document = ({ title, markup, markupState, scrollState, showMarkup, clearMa
         className="uk-card uk-card-default uk-card-body"
         style={{ height: "60vh", width: "auto", overflow: "auto", padding: "20px" }}
       >
-        <Markup markups={markup} markupState={markupState} scrollState={scrollState} showMarkup={showMarkup} />
+        <Markup
+          markups={markup}
+          markupState={markupState}
+          scrollState={scrollState}
+          showMarkup={showMarkup}
+        />
       </div>
       <button
         className=" uk-button uk-button-primary uk-margin-top uk-width-1-1"
@@ -261,10 +271,18 @@ const SummaryTabView = ({
   clearMarkups,
   documentLength,
 }) => {
-  const [summaryIndex, setSummaryIndex] = useState(0);
+  const [summaryIndex, _setSummaryIndex] = useState(0);
   const { summarizers } = useContext(SummarizersContext);
   const markupState = useState(null);
   const scrollState = useMarkupScroll();
+  const resetScroll = scrollState[2];
+  const setSummaryIndex = useCallback(
+    (state) => {
+      _setSummaryIndex(state);
+      resetScroll();
+    },
+    [_setSummaryIndex, resetScroll]
+  );
 
   return (
     <div className="uk-flex">

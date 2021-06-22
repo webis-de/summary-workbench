@@ -7,13 +7,11 @@ const initDatabase = (collectionName, fields) => {
   });
   const add = async (data) => {
     const extendedData = { ...data, _timestamp: Date.now() };
-    console.log(extendedData)
     const ID = extendedData.id;
     let suffix = 2;
     while (true) {
       try {
         /* eslint-disable no-await-in-loop */
-        console.log(extendedData)
         await db[collectionName].add(extendedData)
         break;
       } catch (err) {

@@ -1,18 +1,30 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const innerHoverStyle = { background: "yellow", color: "black", display: "relative" };
-const baseMarkupStyle = { padding: "1px", borderRadius: "0px" };
+const baseMarkupStyle = {
+  padding: "0px",
+  paddingTop: "2px",
+  paddingBottom: "2px",
+  borderRadius: "0px",
+};
 const outerHoverStyle = { ...baseMarkupStyle, ...innerHoverStyle };
 
-const useMarkupScroll = () => useState([null, null, null]);
+const initScrollState = [null, null, null];
+const useMarkupScroll = () => {
+  const [scrollState, setScrollState] = useState(initScrollState);
+  const resetScrollState = useCallback(() => setScrollState(initScrollState));
+  return [scrollState, setScrollState, resetScrollState];
+};
 
 const Scroll = ({ docIndex, matchOrder, groupSizes, tag, scrollState, allowScroll, children }) => {
   const [scrollMarkup, setScrollMarkup] = scrollState;
   const [scrollDoc, scrollTag, scrollOrder] = scrollMarkup;
   const scrollNext = () => {
-    if (allowScroll && scrollTag === tag && scrollDoc === 1 - docIndex)
-      setScrollMarkup([scrollDoc, scrollTag, (scrollOrder + 1) % groupSizes[scrollDoc]]);
-    else setScrollMarkup([1 - docIndex, tag, 0]);
+    if (allowScroll) {
+      if (scrollTag === tag && scrollDoc === 1 - docIndex)
+        setScrollMarkup([scrollDoc, scrollTag, (scrollOrder + 1) % groupSizes[scrollDoc]]);
+      else setScrollMarkup([1 - docIndex, tag, 0]);
+    }
   };
   const scrollRef = useRef();
   useEffect(() => {
@@ -82,9 +94,7 @@ const StringContent = memo(({ content }) => {
   );
 });
 
-const MarkupRoot = ({ markups, markupState, scrollState, allowScroll, showMarkup }) => {
-  console.log(scrollState)
-  return (
+const MarkupRoot = ({ markups, markupState, scrollState, allowScroll, showMarkup }) => (
   <>
     {markups.map((child, i) =>
       typeof child === "string" ? (
@@ -101,7 +111,7 @@ const MarkupRoot = ({ markups, markupState, scrollState, allowScroll, showMarkup
       )
     )}
   </>
-)};
+);
 
 const Markup = ({ markups, markupState, scrollState, showMarkup = true }) => (
   <MarkupRoot
