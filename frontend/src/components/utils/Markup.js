@@ -1,14 +1,37 @@
-import React, { useMemo, useState, memo } from "react";
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const innerHoverStyle = { background: "yellow", color: "black", display: "relative" };
-const baseMarkupStyle = { padding: "2px", borderRadius: "0px" };
+const baseMarkupStyle = { padding: "1px", borderRadius: "0px" };
 const outerHoverStyle = { ...baseMarkupStyle, ...innerHoverStyle };
 
-const TaggedMarkup = ({ markup, markupState, showMarkup }) => {
+const useMarkupScroll = () => useState([null, null, null]);
+
+const Scroll = ({ docIndex, matchOrder, groupSizes, tag, scrollState, allowScroll, children }) => {
+  const [scrollMarkup, setScrollMarkup] = scrollState;
+  const [scrollDoc, scrollTag, scrollOrder] = scrollMarkup;
+  const scrollNext = () => {
+    if (allowScroll && scrollTag === tag && scrollDoc === 1 - docIndex)
+      setScrollMarkup([scrollDoc, scrollTag, (scrollOrder + 1) % groupSizes[scrollDoc]]);
+    else setScrollMarkup([1 - docIndex, tag, 0]);
+  };
+  const scrollRef = useRef();
+  useEffect(() => {
+    if (docIndex === scrollMarkup[0] && tag === scrollMarkup[1] && matchOrder === scrollMarkup[2]) {
+      scrollRef.current.scrollIntoView({ block: "center", behavior: "smooth", inline: "start" });
+    }
+  }, [scrollMarkup, docIndex, matchOrder]);
+  return (
+    <span ref={scrollRef} onClick={scrollNext}>
+      {children}
+    </span>
+  );
+};
+
+const TaggedMarkup = ({ markup, markupState, scrollState, allowScroll, showMarkup }) => {
   let props = {};
   let style = {};
   const [content, information] = markup;
-  const [tag, bgcolor, fgcolor] = information
+  const [tag, bgcolor, fgcolor, docIndex, matchOrder, groupSizes] = information;
   if (showMarkup) style = { ...baseMarkupStyle, background: bgcolor, color: fgcolor };
   if (markupState) {
     const [currMarkup, setCurrMarkup] = markupState;
@@ -17,31 +40,77 @@ const TaggedMarkup = ({ markup, markupState, showMarkup }) => {
     const onMouseLeave = showMarkup ? () => setCurrMarkup(null) : null;
     props = { onMouseEnter, onMouseLeave };
   }
-  return (
+  const markupContent = (
     <span {...props} style={style}>
-      <Markup markups={content} markupState={markupState} showMarkup={false} />
+      <MarkupRoot
+        markups={content}
+        markupState={markupState}
+        scrollState={scrollState}
+        showMarkup={false}
+      />
     </span>
   );
+  if (scrollState)
+    return (
+      <Scroll
+        tag={tag}
+        docIndex={docIndex}
+        matchOrder={matchOrder}
+        groupSizes={groupSizes}
+        markup={content}
+        scrollState={scrollState}
+        allowScroll={allowScroll}
+      >
+        {markupContent}
+      </Scroll>
+    );
+  return markupContent;
 };
 
-const StringContent = memo(({content}) => {
-  const lines = content.split("\n")
-  return <span>
-    <>{lines[0]}</>
-    {lines.slice(1).map(line => <><br/>{line}</>)}
-  </span>
-})
+const StringContent = memo(({ content }) => {
+  const lines = content.split("\n");
+  return (
+    <span>
+      <>{lines[0]}</>
+      {lines.slice(1).map((line) => (
+        <>
+          <br />
+          {line}
+        </>
+      ))}
+    </span>
+  );
+});
 
-const Markup = ({ markups, markupState, matchState, showMarkup = true }) => (
+const MarkupRoot = ({ markups, markupState, scrollState, allowScroll, showMarkup }) => {
+  console.log(scrollState)
+  return (
   <>
     {markups.map((child, i) =>
       typeof child === "string" ? (
         <StringContent key={i} content={child} />
       ) : (
-        <TaggedMarkup key={i} markup={child} markupState={markupState} showMarkup={showMarkup} matchState={matchState} />
+        <TaggedMarkup
+          key={i}
+          markup={child}
+          markupState={markupState}
+          scrollState={scrollState}
+          allowScroll={allowScroll}
+          showMarkup={showMarkup}
+        />
       )
     )}
   </>
+)};
+
+const Markup = ({ markups, markupState, scrollState, showMarkup = true }) => (
+  <MarkupRoot
+    markups={markups}
+    markupState={markupState}
+    scrollState={scrollState}
+    allowScroll={showMarkup}
+    showMarkup={showMarkup}
+  />
 );
 
-export { Markup };
+export { Markup, useMarkupScroll };

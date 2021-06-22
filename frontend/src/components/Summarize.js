@@ -11,7 +11,7 @@ import { Badge } from "./utils/Badge";
 import { Button } from "./utils/Button";
 import { Bars, EyeClosed, EyeOpen, ThumbsDown, ThumbsUp } from "./utils/Icons";
 import { CenterLoading } from "./utils/Loading";
-import { Markup } from "./utils/Markup";
+import { Markup, useMarkupScroll } from "./utils/Markup";
 
 const Feedback = ({ summary }) => {
   const { name, summaryText, originalText, url } = summary;
@@ -215,7 +215,7 @@ const generateStatistics = (text, summaryMarkup) => {
   };
 };
 
-const Summary = ({ markup, summary, markupState, showMarkup }) => {
+const Summary = ({ markup, summary, markupState, scrollState, showMarkup }) => {
   const { originalText, summaryText } = summary;
   const { numWords, percentOverlap } = generateStatistics(originalText, markup[1]);
 
@@ -225,7 +225,7 @@ const Summary = ({ markup, summary, markupState, showMarkup }) => {
         <Badge>{`${numWords} words`}</Badge>
         <Badge>{`${(percentOverlap * 100).toFixed(0)}% overlap`}</Badge>
       </div>
-      <Markup markups={markup[1]} markupState={markupState} showMarkup={showMarkup} />
+      <Markup markups={markup[1]} markupState={markupState} scrollState={scrollState} showMarkup={showMarkup} />
       <div className="uk-flex uk-flex-right">
         <Feedback summary={summary} />
       </div>
@@ -233,7 +233,7 @@ const Summary = ({ markup, summary, markupState, showMarkup }) => {
   );
 };
 // Processed document
-const Document = ({ title, markup, markupState, showMarkup, clearMarkups }) => (
+const Document = ({ title, markup, markupState, scrollState, showMarkup, clearMarkups }) => (
   <>
     <div>
       <h4 style={{ margin: "10px", marginBottom: "0" }}>{title}</h4>
@@ -241,7 +241,7 @@ const Document = ({ title, markup, markupState, showMarkup, clearMarkups }) => (
         className="uk-card uk-card-default uk-card-body"
         style={{ height: "60vh", width: "auto", overflow: "auto", padding: "20px" }}
       >
-        <Markup markups={markup} markupState={markupState} showMarkup={showMarkup} />
+        <Markup markups={markup} markupState={markupState} scrollState={scrollState} showMarkup={showMarkup} />
       </div>
       <button
         className=" uk-button uk-button-primary uk-margin-top uk-width-1-1"
@@ -264,6 +264,7 @@ const SummaryTabView = ({
   const [summaryIndex, setSummaryIndex] = useState(0);
   const { summarizers } = useContext(SummarizersContext);
   const markupState = useState(null);
+  const scrollState = useMarkupScroll();
 
   return (
     <div className="uk-flex">
@@ -276,6 +277,7 @@ const SummaryTabView = ({
           title={title}
           markup={markups[summaryIndex][0]}
           markupState={markupState}
+          scrollState={scrollState}
           showMarkup={showOverlap}
         />
       </div>
@@ -309,6 +311,7 @@ const SummaryTabView = ({
                   summary={summaries[index]}
                   showMarkup={showOverlap}
                   markupState={markupState}
+                  scrollState={scrollState}
                 />
               </li>
             ))}

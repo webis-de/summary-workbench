@@ -95,30 +95,39 @@ const combine_documents = (docs) => {
 };
 
 const is_self_similar = (start, end, document_vector, suffix_array) => {
-  for (let i = start; i < end; i++) if (document_vector[suffix_array[i]] !== document_vector[suffix_array[i+1]] ) return false
-  return true
-}
+  for (let i = start; i < end; i++)
+    if (document_vector[suffix_array[i]] !== document_vector[suffix_array[i + 1]]) return false;
+  return true;
+};
 
 const update_longest_match = (start, end, match_length, longest_match_array) => {
-  for (let i = start; i <= end; i++) if (longest_match_array[i] < match_length) longest_match_array[i] = match_length
-}
+  for (let i = start; i <= end; i++)
+    if (longest_match_array[i] < match_length) longest_match_array[i] = match_length;
+};
 
-const is_nested = (start, end, match_length, suffix_array, inverse_suffix_array, longest_match_array) => {
+const is_nested = (
+  start,
+  end,
+  match_length,
+  suffix_array,
+  inverse_suffix_array,
+  longest_match_array
+) => {
   for (let i = start; i <= end; i++) {
     if (longest_match_array[i] === match_length && suffix_array[i] !== 0) {
       const longest_match_before = longest_match_array[inverse_suffix_array[suffix_array[i] - 1]];
-      if (longest_match_before < match_length + 1) return false
+      if (longest_match_before < match_length + 1) return false;
     }
   }
-  return true
-}
+  return true;
+};
 
 const compute_matches = (docs, min_length, allow_self_similarities) => {
   const [combined_doc, document_vector, offsets] = combine_documents(docs);
   const suffix_array = build_suffix_array(combined_doc);
   const inverse_suffix_array = build_inverse_suffix_array(suffix_array);
   const lcp_array = build_lcp_array(combined_doc, suffix_array, inverse_suffix_array);
-  const longest_match_array = Array(lcp_array.length).fill(0)
+  const longest_match_array = Array(lcp_array.length).fill(0);
   lcp_array.shift();
   lcp_array.push(0);
   const match_groups = [];
@@ -127,7 +136,7 @@ const compute_matches = (docs, min_length, allow_self_similarities) => {
   let curr_start = 0;
   let curr_depth = 0;
 
-  let i = 0
+  let i = 0;
   while (i < lcp_array.length) {
     if (lcp_array[i] > curr_depth) {
       start.push(curr_start);
@@ -136,9 +145,12 @@ const compute_matches = (docs, min_length, allow_self_similarities) => {
       curr_start = i;
     } else if (lcp_array[i] < curr_depth) {
       if (curr_depth >= min_length) {
-        if (allow_self_similarities || !is_self_similar(curr_start, i, document_vector, suffix_array)) {
+        if (
+          allow_self_similarities ||
+          !is_self_similar(curr_start, i, document_vector, suffix_array)
+        ) {
           match_groups.push([curr_start, curr_depth, i]);
-          update_longest_match(curr_start, i, curr_depth, longest_match_array)
+          update_longest_match(curr_start, i, curr_depth, longest_match_array);
         }
       }
       const prev_depth = depth[depth.length - 1];
@@ -148,12 +160,15 @@ const compute_matches = (docs, min_length, allow_self_similarities) => {
         curr_start = start.pop();
         curr_depth = depth.pop();
       }
-    } else i++
+    } else i++;
   }
 
   const matches = [];
   match_groups.forEach(([index, match_length, end]) => {
-    if (is_nested(index, end, match_length, suffix_array, inverse_suffix_array, longest_match_array)) return
+    if (
+      is_nested(index, end, match_length, suffix_array, inverse_suffix_array, longest_match_array)
+    )
+      return;
     const curr_matches = docs.map(() => []);
     let pos = suffix_array[index];
     let doc_idx = document_vector[pos];
@@ -189,6 +204,12 @@ const insert_pos = (left, right, information, nodes) => {
   nodes.splice(index, 0, [left, right, information]);
 };
 
+const nullify_tag_order = (information) => {
+  const newInformation = [...information];
+  newInformation[4] = null;
+  return newInformation;
+};
+
 const _collapse = (nodes, lower, upper) => {
   const results = [];
   while (nodes.length) {
@@ -197,7 +218,7 @@ const _collapse = (nodes, lower, upper) => {
       nodes.shift();
       if (right > upper) {
         insert_pos(upper + 1, right, information, nodes);
-        nodes.unshift([left, upper, information]);
+        nodes.unshift([left, upper, nullify_tag_order(information)]);
         continue;
       }
       const children = _collapse(nodes, left, right);
@@ -209,11 +230,13 @@ const _collapse = (nodes, lower, upper) => {
   return results;
 };
 
-const collapse = (nodes) => {
+// nest markups
+const collapse = (nodes, max_tag) => {
+  let tag_array = max_tag ? Array(max_tag).fill(0) : null;
   const results = [];
   while (nodes.length) {
     const range = nodes.shift();
-    const [left, right] = range;
+    const [left, right, information] = range;
     const children = _collapse(nodes, left, right);
     if (children.length) range.push(children);
     results.push(range);
@@ -221,6 +244,7 @@ const collapse = (nodes) => {
   return results;
 };
 
+// resolve markup positions to words
 const translate = (coll_markups, wstokens) => {
   const result = [];
   let last_end = 0;
@@ -300,16 +324,17 @@ const clean_list = (words) => {
   return [tokens, idx];
 };
 
-const cyrb53 = function(str, seed = 0) {
-    let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
-    for (let i = 0, ch; i < str.length; i++) {
-        ch = str.charCodeAt(i);
-        h1 = Math.imul(h1 ^ ch, 2654435761);
-        h2 = Math.imul(h2 ^ ch, 1597334677);
-    }
-    h1 = Math.imul(h1 ^ (h1>>>16), 2246822507) ^ Math.imul(h2 ^ (h2>>>13), 3266489909);
-    h2 = Math.imul(h2 ^ (h2>>>16), 2246822507) ^ Math.imul(h1 ^ (h1>>>13), 3266489909);
-    return 4294967296 * (2097151 & h2) + (h1>>>0);
+const cyrb53 = function (str, seed = 0) {
+  let h1 = 0xdeadbeef ^ seed,
+    h2 = 0x41c6ce57 ^ seed;
+  for (let i = 0, ch; i < str.length; i++) {
+    ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return 4294967296 * (2097151 & h2) + (h1 >>> 0);
 };
 
 const intToRGB = (i) => {
@@ -336,7 +361,7 @@ const colorMarkup = (num) => {
   return [`#${bgcolor}`, `#${fgcolor}`];
 };
 
-const computeMarkup = (docs, min_length, allow_self_similarities) => {
+const computeMarkup = (docs, min_length = 3, allow_self_similarities = false) => {
   const textblocks = docs.map((doc) => new Textblock(doc));
   const clean_docs_idx = textblocks.map((textblock) => clean_list(textblock.words));
 
@@ -349,14 +374,14 @@ const computeMarkup = (docs, min_length, allow_self_similarities) => {
   let tag = 0;
   matches.forEach(([match_length, text, groups]) => {
     const color = colorMarkup(cyrb53(text));
-    const groupSizes = groups.map(start => start.length)
+    const groupSizes = groups.map((start) => start.length);
     groups.forEach((group, i) => {
-      group.sort()
+      group.sort((a, b) => a - b);
       return group.forEach((start, j) => {
         const map_start = clean_docs_idx[i][1][start];
         const map_end = clean_docs_idx[i][1][start + match_length - 1];
-        textblocks[i].add_range(map_start, map_end, [tag, ...color, j, groupSizes]);
-      })
+        textblocks[i].add_range(map_start, map_end, [tag, ...color, i, j, groupSizes]);
+      });
     });
     tag++;
   });
