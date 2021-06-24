@@ -142,6 +142,16 @@ class Service(ABC):
             return _nodeport
 
     @property
+    def host(self):
+        try:
+            return self._host
+        except AttributeError:
+            deploy = self.config.get("deploy")
+            _host = deploy.get("host") if deploy else None
+            self._host = _host
+            return _host
+
+    @property
     def path(self):
         raise NotImplementedError()
 
@@ -239,6 +249,20 @@ class Frontend(Service):
         path = Path(self.__deploy_path__ / f"{self.__type__}.yaml")
         path.parent.mkdir(exist_ok=True, parents=True)
         dump_yaml(docs, path, multiple=True)
+
+class Ingress(Service):
+    __type__ = "ingress"
+
+    def gen_kubernetes(self):
+        if not self.host:
+            return
+        ingress = load_yaml(
+            f"./templates/kubernetes/basic/{self.__type__}.yaml"
+        )
+        ingress["spec"]["rules"][0]["host"] = self.host
+        path = Path(self.__deploy_path__ / f"{self.__type__}.yaml")
+        path.parent.mkdir(exist_ok=True, parents=True)
+        dump_yaml(ingress, path)
 
 
 class MongoDB(Service):
@@ -393,6 +417,7 @@ def _gen_kubernetes():
     Frontend().gen_kubernetes()
     MongoDB().gen_kubernetes()
     Proxy().gen_kubernetes()
+    Ingress().gen_kubernetes()
     shutil.copyfile(
         f"./templates/kubernetes/volumes.yaml",
         KUBERNETES_PATH / "volumes.yaml",

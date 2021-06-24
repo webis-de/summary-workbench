@@ -49,31 +49,31 @@ spec:
         tier: proxy
     spec:
       volumes:
-        - name: configs
+        - name: nginx-config
           configMap:
             name: summarizer-proxy
       containers:
         - name: proxy
           image: nginx:alpine
           ports:
-            - name: proxy-port
+            - name: tldr-port
               containerPort: 80
               protocol: TCP
           volumeMounts:
-            - name: configs
+            - name: nginx-config
               subPath: nginx.conf
               mountPath: "/etc/nginx/nginx.conf"
               readOnly: true
           readinessProbe:
             httpGet:
               path: /
-              port: proxy-port
+              port: tldr-port
       restartPolicy: Always
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: summarizer-proxy
+  name: tldr
 spec:
   type: NodePort
   selector:
@@ -81,5 +81,5 @@ spec:
     tier: proxy
   ports:
     - port: 80
-      targetPort: proxy-port
+      targetPort: tldr-port
       nodePort:

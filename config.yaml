@@ -1,6 +1,7 @@
 docker_username: ds40bamo
 deploy:
   nodeport: 30900
+  host: tldr.demo.webis.de
 
 metrics:
   - ./metrics/bert
