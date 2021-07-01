@@ -1,14 +1,56 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <title>Webis Demo TL;DR</title>
+    <meta charset="utf-8" />
+    <meta name="description" content="Short description of the Demo" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="copyright" content="&copy; 2021 Webis" />
+    <link rel="icon" type="image/png" href="https://assets.webis.de/img/favicon.png" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
-    <title>Summarization</title>
-    <script>
-      window.addEventListener("dragover", (e) => e.preventDefault(), false);
-      window.addEventListener("drop", (e) => e.preventDefault(), false);
-    </script>
+    <link rel="stylesheet" href="https://assets.webis.de/css/style.css?1624547108" />
   </head>
+  <script>
+    window.addEventListener("dragover", (e) => e.preventDefault(), false);
+    window.addEventListener("drop", (e) => e.preventDefault(), false);
+  </script>
+  <script type="application/ld+json">
+    {
+      "@context": "http://schema.org/",
+      "@type": "Demo",
+      "name": "*name of the demo",
+      "description": "*synopsis, short description of the demo",
+      "text": "*demo, any other text",
+      "url": "*link that leads to this HTML web page.",
+      "sameAs": "*is there an id link, e.g. from zenodo?",
+      "keywords": ["*some", "*key", "*words", "*to describe the demo"],
+      "creator": [
+        {
+          "@type": "Organization",
+          "url": "https://webis.de/",
+          "name": "The Web Technology & Information Systems Network",
+          "alternateName": "Webis"
+        },
+        {
+          "@id": "*orcid id if available",
+          "@type": "Person",
+          "url": "*https://www.uni-weimar.de/en/media/chairs/computer-science-department/webis/people/#name",
+          "affiliation": "*Bauhaus-Universit\u00e4t Weimar",
+          "name": "*last name, first name"
+        },
+        {
+          "@id": "*orcid id if available",
+          "@type": "Person",
+          "url": "*https://www.uni-weimar.de/en/media/chairs/computer-science-department/webis/people/#name",
+          "affiliation": "*Bauhaus-Universit\u00e4t Weimar",
+          "name": "*last name, first name"
+        }
+      ],
+      "includedInDataCatalog": {},
+      "distribution": []
+    }
+  </script>
   <body>
     <div id="root"></div>
   </body>
