@@ -5,6 +5,12 @@ General rules
 
 */
 /* Styling scrollbar */
+
+html {
+  min-height: 100%;
+  position: relative;
+}
+
 body {
   scrollbar-width: 10px !important;
   scrollbar-color: #55a6d1 #9bc4d8;

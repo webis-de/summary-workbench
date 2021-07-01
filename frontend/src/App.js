@@ -19,30 +19,36 @@ const routes = [
 ];
 
 const Footer = () => (
-  <footer className="uk-section uk-section-muted footer-section" style={{ paddingBottom: "30px" }}>
-    <div className="uk-container">
-      <div className="uk-grid uk-grid-small uk-margin-top">
-        <div className="uk-width-expand uk-visible@s" />
-        <div>
-          &copy; 2021 <a href="https://webis.de/">Webis Group</a>{" "}
-          <span className="uk-padding-small">&bull;</span>
-          <a href="https://github.com/webis-de" style={{ paddingRight: "5px" }}>
-            <FaGithub style={{ width: "15px" }} />
-          </a>
-          <a href="https://twitter.com/webis_de" style={{ paddingRight: "5px" }}>
-            <FaTwitter style={{ width: "15px" }} />
-          </a>
-          <a href="https://www.youtube.com/webis">
-            <FaYoutube style={{ width: "15px" }} />
-          </a>
-          <span className="uk-padding-small">&bull;</span>
-          <a href="https://webis.de/people.html">Contact</a>{" "}
-          <span className="uk-padding-small">&bull;</span>
-          <a href="https://webis.de/legal.html">Impressum / Terms / Privacy</a>
+  <>
+    <div style={{ marginBottom: "143px" }} />
+    <footer
+      className="uk-section uk-section-muted footer-section"
+      style={{ paddingBottom: "30px", position: "absolute", left: 0, bottom: 0, right: 0 }}
+    >
+      <div className="uk-container">
+        <div className="uk-grid uk-grid-small uk-margin-top">
+          <div className="uk-width-expand uk-visible@s" />
+          <div>
+            &copy; 2021 <a href="https://webis.de/">Webis Group</a>{" "}
+            <span className="uk-padding-small">&bull;</span>
+            <a href="https://github.com/webis-de" style={{ paddingRight: "5px" }}>
+              <FaGithub style={{ width: "15px" }} />
+            </a>
+            <a href="https://twitter.com/webis_de" style={{ paddingRight: "5px" }}>
+              <FaTwitter style={{ width: "15px" }} />
+            </a>
+            <a href="https://www.youtube.com/webis">
+              <FaYoutube style={{ width: "15px" }} />
+            </a>
+            <span className="uk-padding-small">&bull;</span>
+            <a href="https://webis.de/people.html">Contact</a>{" "}
+            <span className="uk-padding-small">&bull;</span>
+            <a href="https://webis.de/legal.html">Impressum / Terms / Privacy</a>
+          </div>
         </div>
       </div>
-    </div>
-  </footer>
+    </footer>
+  </>
 );
 
 const NavbarLogo = () => (
