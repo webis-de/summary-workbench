@@ -49,7 +49,6 @@ const FileInput = ({ setCalculation }) => (
 const Evaluate = () => {
   const [calculation, setCalculation] = useState(null);
   const setCalculationID = (id) => setCalculation((calc) => ({ ...calc, id }));
-  const [scroll, setScroll] = useState(false);
 
   const { loading, metrics, reload } = useContext(MetricsContext);
   const {
@@ -64,20 +63,14 @@ const Evaluate = () => {
   };
   const scrollRef = useRef();
 
-  const setComputedCalculation = (calc) => {
-    setCalculation(calc);
-    setScroll(true);
-  };
+  const setComputedCalculation = (calc) => setCalculation(calc);
 
   useEffect(() => {
-    if (!scroll) return null;
     const timeout = setTimeout(() => {
-      if (scrollRef.current)
-        scrollRef.current.scrollIntoView({ block: "start", behavior: "smooth", alignToTop: true });
-      setScroll(false);
+      if (calculation && scrollRef.current) scrollRef.current.scrollIntoView({ block: "start", behavior: "smooth", alignToTop: true });
     }, 20);
     return () => clearTimeout(timeout);
-  }, [scroll, setScroll]);
+  }, [calculation]);
 
   if (loading) return <CenterLoading />;
   if (!metrics)
@@ -96,7 +89,7 @@ const Evaluate = () => {
           <Settings className="uk-margin" />
         </div>
       </div>
-      <div ref={scrollRef} style={{ scrollMarginTop: "80px" }} className="uk-margin-large-top" />
+      <div ref={scrollRef} style={{ scrollMarginTop: "100px" }} className="uk-margin-large-top" />
       {calculation && (
         <Result
           className="uk-margin"

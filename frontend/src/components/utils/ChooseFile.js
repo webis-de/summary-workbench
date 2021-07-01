@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { displayMessage } from "../../utils/message";
+import { displayError } from "../../utils/message";
 import { readFile } from "../../utils/readFile";
 
 const sameLength = (elements) => {
@@ -22,7 +22,7 @@ const useFile = () => {
           setLines(text.split("\n").map((line) => line.trim()));
           setFileName(file.name);
         })
-        .catch((err) => displayMessage(err.message));
+        .catch(displayError);
     } else {
       setLines(null);
       setFileName(null);

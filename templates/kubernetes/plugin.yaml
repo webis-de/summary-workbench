@@ -3,18 +3,18 @@ kind: Deployment
 metadata:
   name:
   labels:
-    app: summarizer
+    app: tldr
     tier:
     version:
 spec:
   selector:
     matchLabels:
-      app: summarizer
+      app: tldr
       tier:
   template:
     metadata:
       labels:
-        app: summarizer
+        app: tldr
         tier:
         version:
     spec:
@@ -24,13 +24,13 @@ spec:
           imagePullPolicy: Always
           env: []
           ports:
-            - name:
+            - name: defaultport
               containerPort: 5000
               protocol: TCP
           readinessProbe:
             httpGet:
               path: /health
-              port:
+              port: defaultport
             periodSeconds: 60
             timeoutSeconds: 60
       restartPolicy: Always
@@ -38,12 +38,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: summarizer-bartcnn
+  name:
 spec:
   selector:
-    app: summarizer
+    app: tldr
     tier:
     version:
   ports:
     - port: 5000
-      targetPort: bartcnn-port
+      targetPort: defaultport

@@ -1,9 +1,9 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: summarizer-mongodb-data
+  name: tldr-mongodb-data
   labels:
-    app: summarizer
+    app: tldr
     tier: mongodb
 spec:
   accessModes:

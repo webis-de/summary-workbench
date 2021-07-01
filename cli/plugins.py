@@ -196,7 +196,7 @@ class Plugin(ABC):
 
     @property
     def mangled_name(self):
-        return f"{self.__type__.lower()}_{self.name}"
+        return f"tldr-{self.__type__.lower()}-{self.name}"
 
     @property
     def url(self):
@@ -204,7 +204,7 @@ class Plugin(ABC):
 
     @property
     def kubernetes_url(self):
-        return f"http://summarizer-{self.kubernetes_name}:5000"
+        return f"http://tldr-{self.kubernetes_name}:5000"
 
     @property
     def environment(self):
@@ -352,19 +352,10 @@ class Plugin(ABC):
     def kubernetes_name(self):
         return self.__type__.lower() + "-" + self.name.replace("_", "-")
 
-    @property
-    def port_name(self):
-        name = self.kubernetes_name
-        port_name = name
-        if len(port_name) > 15:
-            port_name = name[:10] + gen_hash(name)[:5]
-        return port_name
-
     def gen_kubernetes(self):
         name = self.kubernetes_name
         version = self.version
-        deployment_name = f"summarizer-{name}"
-        port_name = self.port_name
+        deployment_name = f"tldr-{name}"
         env = list(dict(zip(("name", "value"), env)) for env in self.environment)
         image_url = self.image_url
         deployment, service = load_yaml(
@@ -387,15 +378,12 @@ class Plugin(ABC):
         container["name"] = name
         container["image"] = image_url
         container["env"] = env
-        container["ports"][0]["name"] = port_name
-        container["readinessProbe"]["httpGet"]["port"] = port_name
 
         service["metadata"]["name"] = deployment_name
         spec = service["spec"]
         selector = spec["selector"]
         selector["tier"] = name
         selector["version"] = version
-        spec["ports"][0]["targetPort"] = port_name
         path = Path(KUBERNETES_PATH / f"{self.__type__.lower()}/{self.name}.yaml")
         path.parent.mkdir(parents=True, exist_ok=True)
         dump_yaml([deployment, service], path, multiple=True)

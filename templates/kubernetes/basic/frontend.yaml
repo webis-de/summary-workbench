@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: summarizer-frontend
+  name: tldr-frontend
   labels:
-    app: summarizer
+    app: tldr
     tier: frontend
 spec:
   selector:
     matchLabels:
-      app: summarizer
+      app: tldr
       tier: frontend
   template:
     metadata:
       labels:
-        app: summarizer
+        app: tldr
         tier: frontend
     spec:
       containers:
@@ -35,10 +35,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: summarizer-frontend
+  name: tldr-frontend
 spec:
   selector:
-    app: summarizer
+    app: tldr
     tier: frontend
   ports:
     - port: 80

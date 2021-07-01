@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: summarizer-proxy
+  name: tldr-proxy
 data:
   nginx.conf: |-
     worker_processes 1;
@@ -15,7 +15,7 @@ data:
             listen 80;
 
             location / {
-                proxy_pass http://summarizer-frontend:80;
+                proxy_pass http://tldr-frontend:80;
             }
 
             location /api/ {
@@ -25,7 +25,7 @@ data:
                 proxy_read_timeout 3000;
                 send_timeout 3000;
 
-                proxy_pass http://summarizer-api:5000;
+                proxy_pass http://tldr-api:5000;
             }
         }
     }
@@ -33,25 +33,25 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: summarizer-proxy
+  name: tldr-proxy
   labels:
-    app: summarizer
+    app: tldr
     tier: proxy
 spec:
   selector:
     matchLabels:
-      app: summarizer
+      app: tldr
       tier: proxy
   template:
     metadata:
       labels:
-        app: summarizer
+        app: tldr
         tier: proxy
     spec:
       volumes:
         - name: nginx-config
           configMap:
-            name: summarizer-proxy
+            name: tldr-proxy
       containers:
         - name: proxy
           image: nginx:alpine
@@ -77,7 +77,7 @@ metadata:
 spec:
   type: NodePort
   selector:
-    app: summarizer
+    app: tldr
     tier: proxy
   ports:
     - port: 80

@@ -4,7 +4,7 @@ import { evaluateRequest } from "../api";
 import { MetricsContext } from "../contexts/MetricsContext";
 import { useMarkup } from "../hooks/markup";
 import { flatten } from "../utils/flatScores";
-import { displayMessage } from "../utils/message";
+import { displayError } from "../utils/message";
 import { ScoreTable } from "./ScoreTable";
 import { Button } from "./utils/Button";
 import { InfoText } from "./utils/InfoText";
@@ -71,7 +71,7 @@ const OneHypRef = () => {
       .then(({ scores }) => {
         setEvaluateResult({ scores, hypText, refText });
       })
-      .catch((e) => displayMessage(e))
+      .catch(displayError)
       .finally(() => setIsComputing(false));
   };
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-import { displayMessage } from "../../utils/message";
+import { displayError } from "../../utils/message";
 import { readFile } from "../../utils/readFile";
 
 const numberOfLines = (string) => {
@@ -21,7 +21,7 @@ const useFile = (file) => {
       readFile(file)
         .then((text) => text.trim())
         .then((text) => setNumLines(numberOfLines(text)))
-        .catch((err) => displayMessage(err.message));
+        .catch(displayError);
     }
   }, [file]);
 

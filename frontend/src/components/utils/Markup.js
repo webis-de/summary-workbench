@@ -3,8 +3,8 @@ import React, { Fragment, memo, useCallback, useEffect, useRef, useState } from 
 const innerHoverStyle = { background: "yellow", color: "black", display: "relative" };
 const baseMarkupStyle = {
   padding: "0px",
-  paddingTop: "2px",
-  paddingBottom: "2px",
+  paddingTop: "2.5px",
+  paddingBottom: "2.5px",
   borderRadius: "0px",
 };
 const outerHoverStyle = { ...baseMarkupStyle, ...innerHoverStyle };
@@ -29,7 +29,7 @@ const Scroll = ({ docIndex, matchOrder, groupSizes, tag, scrollState, allowScrol
   const scrollRef = useRef();
   useEffect(() => {
     if (docIndex === scrollMarkup[0] && tag === scrollMarkup[1] && matchOrder === scrollMarkup[2]) {
-      scrollRef.current.scrollIntoView({ block: "center", behavior: "smooth", inline: "start" });
+      scrollRef.current.scrollIntoView({ block: "nearest", behavior: "smooth", inline: "start" });
     }
   }, [tag, scrollMarkup, docIndex, matchOrder]);
   return (

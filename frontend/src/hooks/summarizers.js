@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useReducer, useState } from "react";
 
 import { getSummarizersRequest } from "../api";
-import { displayMessage } from "../utils/message";
+import { displayError } from "../utils/message";
 
 const saveSetting = (summarizer, status) =>
   window.localStorage.setItem(summarizer, status ? "true" : "false");
@@ -29,10 +29,10 @@ const useSummarizers = () => {
     setLoading(true);
     getSummarizersRequest()
       .then((data) => setSummarizers(data))
-      .catch(() => {
+      .catch((err) => {
         setSummarizers(null);
         setLoading(false);
-        displayMessage("error fetching summarizers");
+        displayError(err)
       });
   }, [setLoading, setSummarizers, reloading]);
   useEffect(() => {

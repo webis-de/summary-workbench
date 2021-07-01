@@ -1,25 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: summarizer-mongodb
+  name: tldr-mongodb
   labels:
-    app: summarizer
+    app: tldr
     tier: mongodb
 spec:
   selector:
     matchLabels:
-      app: summarizer
+      app: tldr
       tier: mongodb
   template:
     metadata:
       labels:
-        app: summarizer
+        app: tldr
         tier: mongodb
     spec:
       volumes:
         - name: mongodata
           persistentVolumeClaim:
-            claimName: summarizer-mongodb-data
+            claimName: tldr-mongodb-data
       containers:
         - name: mongodb
           image: mongo:latest
@@ -40,10 +40,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: summarizer-mongodb
+  name: tldr-mongodb
 spec:
   selector:
-    app: summarizer
+    app: tldr
     tier: mongodb
   ports:
     - port: 27017

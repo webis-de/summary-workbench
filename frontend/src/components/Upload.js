@@ -2,7 +2,7 @@ import React, { useContext, useState } from "react";
 
 import { evaluateRequest } from "../api";
 import { MetricsContext } from "../contexts/MetricsContext";
-import { displayMessage } from "../utils/message";
+import { displayError } from "../utils/message";
 import { Button } from "./utils/Button";
 import { ChooseFile, sameLength, useFile } from "./utils/ChooseFile";
 import { InfoText } from "./utils/InfoText";
@@ -43,11 +43,7 @@ const Upload = ({ setCalculation }) => {
       const { scores } = await evaluateRequest(chosenMetrics, hypotheses, references);
       setCalculation({ id, scores, hypotheses, references });
     } catch (err) {
-      if (err instanceof TypeError) {
-        displayMessage("Server not available");
-      } else {
-        displayMessage("Internal server error");
-      }
+      displayError(err)
     }
     setIsComputing(false);
   };
