@@ -48,7 +48,7 @@ const CompareTable = ({ comparisons }) => {
       >
         <div>
           <input
-            className="uk-input"
+            className="uk-input align-center"
             type="text"
             placeholder="jump to page"
             onKeyDown={(e) => e.keyCode === 13 && setPage(e.currentTarget.value)}
@@ -56,7 +56,7 @@ const CompareTable = ({ comparisons }) => {
         </div>
         <div>
           <input
-            className="uk-input"
+            className="uk-input align-center"
             type="text"
             placeholder="examples per page"
             onKeyDown={(e) => e.keyCode === 13 && setSize(e.currentTarget.value)}

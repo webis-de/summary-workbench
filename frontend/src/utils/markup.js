@@ -1,5 +1,7 @@
 /* eslint-disable */
 
+import { textToColor } from "./color";
+
 const compute_ranks = (doc) => {
   const rank_map = new Map();
   let rank = 1;
@@ -268,7 +270,8 @@ const translate = (coll_markups, wstokens) => {
 const space_chars = String.raw`\s-,.`;
 const space_re = new RegExp(`^[${space_chars}]*$`);
 const tokenzie_re = new RegExp(`[^${space_chars}]+|[${space_chars}]+`, "g");
-const stopword_re = /\b(a|about|above|after|again|against|all|am|an|and|any|are|as|at|be|because|been|before|being|below|between|both|but|by|can|did|do|does|doing|don|down|during|each|few|for|from|further|had|has|have|having|he|her|here|hers|herself|him|himself|his|how|i|if|in|into|is|it|its|itself|just|me|more|most|my|myself|no|nor|not|now|of|off|on|once|only|or|other|our|ours|ourselves|out|over|own|s|same|she|should|so|some|such|t|than|that|the|their|theirs|them|themselves|then|there|these|they|this|those|through|to|too|under|until|up|very|was|we|were|what|when|where|which|while|who|whom|why|will|with|you|your|yours|yourself|yourselves)\b/;
+const stopword_re =
+  /\b(a|about|above|after|again|against|all|am|an|and|any|are|as|at|be|because|been|before|being|below|between|both|but|by|can|did|do|does|doing|don|down|during|each|few|for|from|further|had|has|have|having|he|her|here|hers|herself|him|himself|his|how|i|if|in|into|is|it|its|itself|just|me|more|most|my|myself|no|nor|not|now|of|off|on|once|only|or|other|our|ours|ourselves|out|over|own|s|same|she|should|so|some|such|t|than|that|the|their|theirs|them|themselves|then|there|these|they|this|those|through|to|too|under|until|up|very|was|we|were|what|when|where|which|while|who|whom|why|will|with|you|your|yours|yourself|yourselves)\b/;
 
 const wordspaceTokens = (text) => {
   const wstokens = text.match(tokenzie_re) || [];
@@ -324,43 +327,6 @@ const clean_list = (words) => {
   return [tokens, idx];
 };
 
-const cyrb53 = function (str, seed = 0) {
-  let h1 = 0xdeadbeef ^ seed,
-    h2 = 0x41c6ce57 ^ seed;
-  for (let i = 0, ch; i < str.length; i++) {
-    ch = str.charCodeAt(i);
-    h1 = Math.imul(h1 ^ ch, 2654435761);
-    h2 = Math.imul(h2 ^ ch, 1597334677);
-  }
-  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
-  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
-  return 4294967296 * (2097151 & h2) + (h1 >>> 0);
-};
-
-const intToRGB = (i) => {
-  const c = (i & 0xffffff).toString(16).toUpperCase();
-  return "00000".substring(0, 6 - c.length) + c;
-};
-
-const hexToRgb = (hex) => {
-  const bigint = parseInt(hex, 16);
-  const r = (bigint >> 16) & 255;
-  const g = (bigint >> 8) & 255;
-  const b = bigint & 255;
-  return [r, g, b];
-};
-
-const foregroundColor = (backgroundColor) => {
-  const [r, g, b] = hexToRgb(backgroundColor);
-  return r * 0.299 + g * 0.587 + b * 0.114 > 150 ? "000000" : "ffffff";
-};
-
-const colorMarkup = (num) => {
-  const bgcolor = intToRGB(num);
-  const fgcolor = foregroundColor(bgcolor);
-  return [`#${bgcolor}`, `#${fgcolor}`];
-};
-
 const computeMarkup = (docs, min_length = 3, allow_self_similarities = false) => {
   const textblocks = docs.map((doc) => new Textblock(doc));
   const clean_docs_idx = textblocks.map((textblock) => clean_list(textblock.words));
@@ -373,7 +339,7 @@ const computeMarkup = (docs, min_length = 3, allow_self_similarities = false) =>
 
   let tag = 0;
   matches.forEach(([match_length, text, groups]) => {
-    const color = colorMarkup(cyrb53(text));
+    const color = textToColor(text);
     const groupSizes = groups.map((start) => start.length);
     groups.forEach((group, i) => {
       group.sort((a, b) => a - b);

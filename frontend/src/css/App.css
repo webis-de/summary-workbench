@@ -16,6 +16,16 @@ body {
   scrollbar-color: #55a6d1 #9bc4d8;
 }
 
+a.nostyle:link {
+    text-decoration: inherit;
+    color: inherit;
+}
+
+a.nostyle:visited {
+    text-decoration: inherit;
+    color: inherit;
+}
+
 .hover-green:hover {
   color: green;
 }
@@ -78,6 +88,10 @@ body {
   flex-basis: 50%;
 }
 
+.margin-between-5 > :not(:first-child) {
+  margin-left: 5px;
+}
+
 .margin-between-10 > :not(:first-child) {
   margin-left: 10px;
 }
@@ -104,13 +118,13 @@ body {
 }
 
 /* Placeholder text styles */
-input {
+.align-center {
   text-align: center;
 }
-::-webkit-input-placeholder {
+.align-center::-webkit-input-placeholder {
   text-align: center;
 }
-::-moz-placeholder {
+.align-center::-moz-placeholder {
   text-align: center;
 }
 

@@ -145,7 +145,7 @@ router.post(
   async (req, res, next) => {
     try {
       await Feedbacks.insert(req.body);
-      return res.status(200).end();
+      return res.json({sucess: true});
     } catch (err) {
       return next(err);
     }

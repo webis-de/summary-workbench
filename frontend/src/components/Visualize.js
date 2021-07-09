@@ -50,7 +50,7 @@ const ModelModal = ({ isOpen, setIsOpen, models, addModel, otherLines, forceSame
   return (
     <Modal isOpen={isOpen} onRequestClose={close}>
       <input
-        className="uk-input"
+        className="uk-input align-center"
         type="text"
         value={name}
         placeholder="name"
@@ -185,7 +185,7 @@ const VisualizationCreator = ({ back, addVisualization }) => {
             <>
               <input
                 type="text"
-                className="uk-input uk-margin-small"
+                className="uk-input uk-margin-small align-center"
                 value={name}
                 placeholder="name"
                 onChange={(e) => setName(e.currentTarget.value)}

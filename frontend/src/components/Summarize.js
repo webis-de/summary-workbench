@@ -13,10 +13,13 @@ import { feedbackRequest, summarizeRequest } from "../api";
 import { SummarizersContext } from "../contexts/SummarizersContext";
 import { useMarkups } from "../hooks/markup";
 import { displayError, displayMessage } from "../utils/message";
-import { Badge } from "./utils/Badge";
+import { PluginCard } from "./About";
+import { Model } from "./Model";
+import { Badge, DismissableBadge } from "./utils/Badge";
 import { Button } from "./utils/Button";
 import { Checkboxes } from "./utils/Checkboxes";
 import { Bars, EyeClosed, EyeOpen, ThumbsDown, ThumbsUp } from "./utils/Icons";
+import { LiveSearch, useFilter } from "./utils/FuzzySearch";
 import { CenterLoading } from "./utils/Loading";
 import { Markup, useMarkupScroll } from "./utils/Markup";
 
@@ -51,7 +54,7 @@ const Feedback = ({ summary }) => {
 
 const Header = ({ text, fontSize, backgroundColor = "#B02F2C", children, style }) => (
   <div
-    className="uk-flex uk-flex-between uk-flex-middle"
+    className="uk-flex uk-flex-between uk-flex-middle margin-between-20"
     style={{
       paddingLeft: "20px",
       paddingRight: "10px",
@@ -69,7 +72,7 @@ const Header = ({ text, fontSize, backgroundColor = "#B02F2C", children, style }
   </div>
 );
 
-const getSetModels = (models) =>
+const getChosenModels = (models) =>
   Object.entries(models)
     .filter((e) => e[1])
     .map((e) => e[0]);
@@ -87,8 +90,19 @@ const InputDocument = ({ summarize, isComputing }) => {
   const [documentText, setDocumentText] = useState("");
   const { summarizers, summarizerTypes, settings, toggleSetting } = useContext(SummarizersContext);
   const [percentage, setPercentage] = useState("15");
+  const summarizerKeys = useMemo(() => Object.keys(summarizers).sort(), [summarizers]);
+  const { query, setQuery, filteredKeys } = useFilter(summarizerKeys);
+  const [selectedSummarizer, setSelectedSummarizer] = useState(null);
+  const selectSummarizer = (key) => {
+    toggleSetting(key);
+    if (selectedSummarizer === key) setSelectedSummarizer(null);
+  };
+  const unselectSummarizer = (key) => {
+    toggleSetting(key);
+    if (selectedSummarizer === key) setSelectedSummarizer(null);
+  };
 
-  const anyModelSet = () => Object.values(settings).some((isSet) => isSet);
+  const chosenModels = getChosenModels(settings);
 
   const insertSampleText = () => {
     setDocumentText(sampleText);
@@ -98,7 +112,6 @@ const InputDocument = ({ summarize, isComputing }) => {
   return (
     <div className="uk-container uk-container-expand uk-margin-medium-top@s uk-margin-large-top@l">
       <div className="uk-flex uk-flex-between" style={{ minHeight: "60vh" }}>
-        {/* Start Document container */}
         <div className="uk-flex uk-flex-column" style={{ flexBasis: "60%" }}>
           <Header text="Document" fontSize="14pt">
             <Button variant="primary" onClick={insertSampleText}>
@@ -114,45 +127,56 @@ const InputDocument = ({ summarize, isComputing }) => {
             style={{ height: "100%", padding: "20px", resize: "none", overflow: "auto" }}
           />
         </div>
-        {/*  End Document container */}
 
         <div style={{ minWidth: "20px" }} />
 
-        {/*  Start model lists container */}
         <div className="uk-flex uk-flex-column" style={{ flexBasis: "40%" }}>
-          <Header text="Models" fontSize="14pt" />
+          <Header text="Models" fontSize="14pt">
+            <LiveSearch query={query} setQuery={setQuery} />
+          </Header>
           <div
             className="uk-card uk-card-default uk-card-body uk-flex-stretch"
             style={{ height: "100%" }}
           >
-            {/* Start model checkbox lists */}
-            <div className="uk-flex" style={{ marginTop: "-25px" }}>
-              {Object.keys(summarizerTypes).length ? (
-                Object.entries(summarizerTypes).map(([key, value]) => (
-                  <div key={key} style={{ flex: "1" }} className="margin-right">
-                    <h4
-                      className="underline-border uk-text-left colored-header"
-                      style={{ textTransform: "capitalize" }}
-                    >
-                      {key}
-                    </h4>
-                    <Checkboxes
-                      options={value.map((summarizer) => [
-                        summarizer,
-                        summarizers[summarizer].readable,
-                        settings[summarizer],
-                      ])}
-                      toggleOption={toggleSetting}
-                    />
-                  </div>
+            <div className="margin-between-10">
+              {Object.values(summarizers).length ? (
+                filteredKeys.map((key) => (
+                  <Model
+                    key={key}
+                    info={summarizers[key]}
+                    onClick={() => selectSummarizer(key)}
+                    isSet={settings[key]}
+                  />
                 ))
               ) : (
                 <div>no summarizers configured</div>
               )}
             </div>
-            {/* End model checkbox lists */}
-
-            {/*  Start summary options container */}
+            <div className="colored-header" style={{ marginTop: "30px" }}>
+              Selected Summarizers
+            </div>
+            <div className="margin-between-5" style={{ marginLeft: "20px", marginBottom: "10px" }}>
+              {chosenModels.map((model) => {
+                const name = summarizers[model].readable;
+                return (
+                  <DismissableBadge onClick={() => unselectSummarizer(model)} key={model}>
+                    <a
+                      href="/#"
+                      className="nostyle"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setSelectedSummarizer(model);
+                      }}
+                    >
+                      {name}
+                    </a>
+                  </DismissableBadge>
+                );
+              })}
+            </div>
+            {selectedSummarizer && (
+              <PluginCard plugin={summarizers[selectedSummarizer]} inline={false} />
+            )}
             <div>
               <div
                 className="uk-flex uk-flex-row"
@@ -191,18 +215,16 @@ const InputDocument = ({ summarize, isComputing }) => {
                 ) : (
                   <button
                     className="uk-button uk-button-primary"
-                    disabled={!documentText || !anyModelSet()}
-                    onClick={() => summarize(documentText, getSetModels(settings), percentage)}
+                    disabled={!documentText || !chosenModels.length}
+                    onClick={() => summarize(documentText, chosenModels, percentage)}
                   >
                     Summarize
                   </button>
                 )}
               </div>
             </div>
-            {/*  End summary options container */}
           </div>
         </div>
-        {/*  End model lists container */}
       </div>
     </div>
   );
@@ -491,7 +513,7 @@ const Summarize = () => {
     setComputing(true);
     try {
       const response = await summarizeRequest(requestText, models, ratio);
-      const { summaries, original, url } = response
+      const { summaries, original, url } = response;
       if (Object.values(summaries).every((summarySentences) => !summarySentences.length)) {
         throw new Error("No summaries could be generated. The input is probably too short.");
       }

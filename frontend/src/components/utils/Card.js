@@ -10,6 +10,6 @@ const CardHeader = ({ children }) => <div className="card-header uk-text-middle"
 
 const CardBody = ({ children }) => <div className="uk-card-body">{children}</div>;
 
-const CardTitle = ({children}) => <div className="card-title">{children}</div>;
+const CardTitle = ({children, style}) => <div className="card-title" style={style} >{children}</div>;
 
 export { Card, CardHeader, CardTitle, CardBody };

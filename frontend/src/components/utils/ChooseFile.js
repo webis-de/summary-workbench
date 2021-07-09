@@ -72,7 +72,7 @@ const ChooseFile = ({ kind, name, fileName, setFile, lines, linesAreSame, ...oth
         style={isDragged ? { outlineStyle: "solid", outlineWidth: "1px" } : {}}
       >
         <input
-          className="uk-textarea"
+          className="uk-textarea align-center"
           type="text"
           value={fileName || ""}
           placeholder={`Upload file with ${kind}`}

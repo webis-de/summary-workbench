@@ -6,4 +6,14 @@ const Button = ({ children, size = "medium", variant = "default", className = ""
   </button>
 );
 
-export { Button };
+const BadgeButton = ({ children, onClick, style }) => (
+  <button
+    onClick={onClick}
+    className="uk-badge uk-text-bold"
+    style={{ cursor: "pointer", ...style }}
+  >
+    {children}
+  </button>
+);
+
+export { Button, BadgeButton };

@@ -16,7 +16,7 @@ const AddModel = ({ style, file, setFile, lines, linesAreSame, addModel }) => {
       className="uk-flex uk-flex-column"
       style={{ padding: "10px", border: "1px solid", ...style }}
     >
-      <input ref={inputRef} className="uk-input" type="text" placeholder="Name" />
+      <input ref={inputRef} className="uk-input align-center" type="text" placeholder="Name" />
       <ChooseFile
         className="uk-margin-small"
         placeholder="Upload Predictions"
