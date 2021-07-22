@@ -21,32 +21,20 @@ summarizers:
   - ./summarizers/newspaper3k
   - ./summarizers/pytextrank
   - source: ./summarizers/neuralsum
-    config:
-      name: t5
-      readable: T5
+    environment:
       model: T5
   - source: ./summarizers/neuralsum
-    config:
-      name: bartcnn
-      readable: BART-CNN
+    environment:
       model: BART-CNN
   - source: ./summarizers/neuralsum
-    config:
-      name: bartxsum
-      readable: BART-XSum
+    environment:
       model: BART-XSum
   - source: ./summarizers/neuralsum
-    config:
-      name: pegasuscnn
-      readable: Pegasus-CNN
+    environment:
       model: Pegasus-CNN
   - source: ./summarizers/neuralsum
-    config:
-      name: pegasusxsum
-      readable: Pegasus-XSum
+    environment:
       model: Pegasus-XSum
   - source: ./summarizers/neuralsum
-    config:
-      name: longformer2roberta
-      readable: Longformer2Roberta
+    environment:
       model: Longformer2Roberta

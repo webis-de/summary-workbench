@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "./Button";
 
-const RadioButton = ({ radioKey, activeKey, readable, setActiveKey }) => {
+const RadioButton = ({ radioKey, activeKey, text, setActiveKey }) => {
   const isActive = radioKey === activeKey;
   return (
     <Button
       variant={(isActive ? "primary" : "default")}
       onClick={() => !isActive && setActiveKey(radioKey)}
     >
-      {readable}
+      {text}
     </Button>
   );
 };
@@ -19,12 +19,12 @@ const RadioButtons = ({ className, buttonList, onChange, defaultIndex=0 }) => {
   return (
     <div className={className}>
       <div className="uk-button-group">
-        {buttonList.map(([radioKey, readable]) => (
+        {buttonList.map(([radioKey, text]) => (
           <RadioButton
             key={radioKey}
             activeKey={activeKey}
             radioKey={radioKey}
-            readable={readable}
+            text={text}
             setActiveKey={setActiveKey}
           />
         ))}

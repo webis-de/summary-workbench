@@ -11,19 +11,22 @@ const extractGithubUser = (url) => gh(url).repo || url;
 
 const isLink = (text) => text.match(/^https?:\/\//);
 
-const Link = ({ Icon, link, title }) =>
-  link && (
-    <a className="nostyle" href={link} title={title}>
-      <Icon />
-    </a>
-  );
+const Link = ({ Icon, link, title }) => {
+  if (link)
+    return (
+      <a className="nostyle" href={link} title={title}>
+        <Icon />
+      </a>
+    );
+  return null;
+};
 const withIcon = (Icon, title) => (props) => <Link Icon={Icon} title={title} {...props} />;
 
 const SourceCode = withIcon(FaCode, "sourcecode");
 const HomePage = withIcon(FaLink, "homepage");
 
 const PluginCard = ({ plugin, inline = true }) => {
-  const { readable, sourcecode, homepage } = plugin;
+  const { name, sourcecode, homepage } = plugin;
   return (
     <div
       style={{
@@ -44,7 +47,7 @@ const PluginCard = ({ plugin, inline = true }) => {
           color: "white",
         }}
       >
-        <div>{readable}</div>
+        <div>{name}</div>
         <div
           className="margin-between-10"
           style={{ marginLeft: "30px", marginBottom: "4px", paddingRight: "4px" }}

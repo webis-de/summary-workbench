@@ -1,7 +1,7 @@
 version: "1.0"
-name: bleurt
-readable: BLEURT
-type: semantic
-model: bleurt-base-128
+name: BLEURT
 devimage: slim
 deployimage: slim
+metadata:
+  type: semantic
+  model: bleurt-base-128

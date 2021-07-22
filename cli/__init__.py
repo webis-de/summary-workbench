@@ -13,8 +13,7 @@ from ruamel.yaml.comments import CommentedMap
 from termcolor import colored
 
 from .config import CONFIG_PATH, KUBERNETES_PATH
-from .plugins import (MetricPlugin, MetricPlugins, SummarizerPlugin,
-                      SummarizerPlugins)
+from .plugins import (Plugin, Plugins)
 from .utils import (abort, add_newlines, dump_yaml, get_config, load_yaml,
                     remove_comments)
 
@@ -36,17 +35,8 @@ class Volumes:
 
 
 def get_plugins():
-    config = get_config()
-    docker_username = config.get("docker_username")
-    metrics = config.get("metrics") or []
-    summarizers = config.get("summarizers") or []
-    metric_plugins = MetricPlugins(
-        MetricPlugin(metric, docker_username=docker_username) for metric in metrics
-    )
-    summarizer_plugins = SummarizerPlugins(
-        SummarizerPlugin(summarizer, docker_username=docker_username)
-        for summarizer in summarizers
-    )
+    metric_plugins = Plugins.load("METRIC")
+    summarizer_plugins = Plugins.load("SUMMARIZER")
     return metric_plugins, summarizer_plugins
 
 
@@ -99,76 +89,38 @@ class Service(ABC):
     __deploy_path__ = KUBERNETES_PATH / "basic"
 
     def __init__(self):
+        if not self.__type__:
+            abort("trying to instantiate abstract service")
         self.config = get_config()
+        self.path = f"./{self.__type__}/"
+        self.name = self.__type__
+        with open(f"./{self.__type__}/package.json") as file:
+            self.version= json.load(file)["version"]
+        self.host = self.config.get("deploy", {}).get("host")
 
-    @property
-    def name(self):
-        return self.__type__
-
-    @property
-    def version(self):
-        try:
-            return self._version
-        except AttributeError:
-            with open(f"./{self.__type__}/package.json") as file:
-                _version = json.load(file)["version"]
-            self._version = _version
-            return _version
-
-    @property
     def docker_username(self):
         try:
-            return self._docker_username
+            return self.config["docker_username"]
         except AttributeError:
-            _docker_username = self.config.get("docker_username")
-            if not _docker_username:
-                abort(
-                    "docker_username needs to be defined for tagging the image",
-                    self.name,
-                )
-            self._docker_username = _docker_username
-            return _docker_username
+            abort("docker_username needs to be defined for tagging the image", self.name())
 
-    @property
     def nodeport(self):
         try:
-            return self._nodeport
+            return self.config["deploy"]["nodeport"]
         except AttributeError:
-            deploy = self.config.get("deploy")
-            _nodeport = deploy.get("nodeport") if deploy else None
-            if not _nodeport:
-                abort("deploy nodeport needs to be defined", "kubernetes")
-            self._nodeport = _nodeport
-            return _nodeport
+            abort("deploy nodeport needs to be defined", "kubernetes")
 
-    @property
-    def host(self):
-        try:
-            return self._host
-        except AttributeError:
-            deploy = self.config.get("deploy")
-            _host = deploy.get("host") if deploy else None
-            self._host = _host
-            return _host
-
-    @property
-    def path(self):
-        raise NotImplementedError()
-
-    @property
     def repository(self):
-        return f"{self.docker_username}/tldr-{self.name}"
+        return f"{self.docker_username()}/tldr-{self.name}"
 
-    @property
     def tag(self):
-        return f"{self.repository}:{self.version}"
+        return f"{self.repository()}:{self.version}"
 
-    @property
     def image_url(self):
-        return f"docker.io/{self.tag}"
+        return f"docker.io/{self.tag()}"
 
     def build(self):
-        colored_tag = colored(self.tag, "green")
+        colored_tag = colored(self.tag(), "green")
         print(f"building " + colored_tag)
 
         with open(Path(self.path) / "Dockerfile", "r") as file:
@@ -185,14 +137,14 @@ class Service(ABC):
             if stream:
                 print(stream, end="")
         image = client.images.build(path=self.path)[0]
-        image.tag(self.tag)
+        image.tag(self.tag())
         print(f"done building " + colored_tag)
 
     def push(self):
-        colored_tag = colored(self.tag, "green")
+        colored_tag = colored(self.tag(), "green")
         print(f"pushing " + colored_tag)
         for line in docker.from_env().images.push(
-            repository=self.repository, tag=self.version, stream=True
+            repository=self.repository(), tag=self.version, stream=True
         ):
             if b"error" in line:
                 status = json.loads(line)
@@ -210,10 +162,6 @@ class Service(ABC):
 class Api(Service):
     __type__ = "api"
 
-    @property
-    def path(self):
-        return "./api/"
-
     def gen_kubernetes(self, plugin_envs, plugin_config):
         docs = load_yaml(
             f"./templates/kubernetes/basic/{self.__type__}.yaml", multiple=True
@@ -224,7 +172,7 @@ class Api(Service):
             )
         }
         container = docs[1]["spec"]["template"]["spec"]["containers"][0]
-        container["image"] = self.image_url
+        container["image"] = self.image_url()
         container["env"].extend(plugin_envs)
 
         path = Path(self.__deploy_path__ / f"{self.__type__}.yaml")
@@ -235,16 +183,12 @@ class Api(Service):
 class Frontend(Service):
     __type__ = "frontend"
 
-    @property
-    def path(self):
-        return "./frontend/"
-
     def gen_kubernetes(self):
         docs = load_yaml(
             f"./templates/kubernetes/basic/{self.__type__}.yaml", multiple=True
         )
         container = docs[0]["spec"]["template"]["spec"]["containers"][0]
-        container["image"] = self.image_url
+        container["image"] = self.image_url()
 
         path = Path(self.__deploy_path__ / f"{self.__type__}.yaml")
         path.parent.mkdir(exist_ok=True, parents=True)
@@ -254,12 +198,12 @@ class Ingress(Service):
     __type__ = "ingress"
 
     def gen_kubernetes(self):
-        if not self.host:
+        if not self.host():
             return
         ingress = load_yaml(
             f"./templates/kubernetes/basic/{self.__type__}.yaml"
         )
-        ingress["spec"]["rules"][0]["host"] = self.host
+        ingress["spec"]["rules"][0]["host"] = self.host()
         path = Path(self.__deploy_path__ / f"{self.__type__}.yaml")
         path.parent.mkdir(exist_ok=True, parents=True)
         dump_yaml(ingress, path)
@@ -283,7 +227,7 @@ class Proxy(Service):
             f"./templates/kubernetes/basic/{self.__type__}.yaml", multiple=True
         )
         port = docs[2]["spec"]["ports"][0]
-        port["nodePort"] = self.nodeport
+        port["nodePort"] = self.nodeport()
 
         path = Path(self.__deploy_path__ / f"{self.__type__}.yaml")
         path.parent.mkdir(exist_ok=True, parents=True)
@@ -298,27 +242,18 @@ class BaseServices(dict):
     def __iter__(self):
         return iter(self.values())
 
-    @classmethod
-    def load(cls):
-        return cls()
-
 
 class Docker:
-    service_types = {
-        "base": BaseServices,
-        "metric": MetricPlugins,
-        "summarizer": SummarizerPlugins,
-    }
-
     def __init__(self):
         try:
             self.client = docker.from_env()
         except docker.errors.DockerException:
             abort("the docker service is not running", "docker")
-        services = {}
-        for key, value in self.service_types.items():
-            services[key] = value.load()
-        self.services = services
+        self.services = {
+            "base": BaseServices(),
+            "metric": Plugins.load("METRIC"),
+            "summarizer": Plugins.load("SUMMARIZER"),
+        }
 
     def print_images(self, service_type):
         print(colored(service_type, "green"))
@@ -352,8 +287,8 @@ class Docker:
         return found_service
 
     def list_images(self):
-        for service_type in self.service_types:
-            self.print_images(service_type)
+        for key in self.services.keys():
+            self.print_images(key)
 
     def exists(self, image):
         try:
@@ -366,8 +301,8 @@ class Docker:
         service = self.get_service(name)
         if not service:
             abort(f"service '{name}' does not exit", "build")
-        if not force and self.exists(service.tag):
-            service_tag = colored(service.tag, "green")
+        if not force and self.exists(service.tag()):
+            service_tag = colored(service.tag(), "green")
             print(f"image {service_tag} already present")
         else:
             service.build()

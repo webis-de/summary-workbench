@@ -1,9 +1,9 @@
 version: "1.0"
-name: moverscore
-readable: MoverScore
-type: semantic
-model: MoverScoreV1
-homepage: https://arxiv.org/pdf/1909.02622.pdf
-sourcecode: https://github.com/AIPHES/emnlp19-moverscore
+name: MoverScore
 devimage: default
 deployimage: default
+metadata:
+  type: semantic
+  model: MoverScoreV1
+  homepage: https://arxiv.org/pdf/1909.02622.pdf
+  sourcecode: https://github.com/AIPHES/emnlp19-moverscore

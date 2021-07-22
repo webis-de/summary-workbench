@@ -8,7 +8,7 @@ import bleurt.score
 
 
 class MetricPlugin:
-    MODEL = os.environ.get("PLUGIN_MODEL") or "bleurt-base-128"
+    MODEL = os.environ.get("model") or "bleurt-base-128"
     MODEL_BASE_URL = "https://storage.googleapis.com/bleurt-oss/"
     MODEL_PATH = Path("~/.cache/bleurt/").expanduser()
 

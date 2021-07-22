@@ -1,8 +1,8 @@
 version: "1.0"
-name: meteor
-readable: METEOR
-type: lexical
-homepage: https://www.aclweb.org/anthology/W05-0909.pdf
-sourcecode: https://github.com/Maluuba/nlg-eval
+name: METEOR
 devimage: java
 deployimage: java
+metadata:
+  type: lexical
+  homepage: https://www.aclweb.org/anthology/W05-0909.pdf
+  sourcecode: https://github.com/Maluuba/nlg-eval

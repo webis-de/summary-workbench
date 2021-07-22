@@ -57,23 +57,20 @@ const Settings = () => {
           Selected Metrics
         </div>
         <div className="margin-between-5" style={{ marginLeft: "20px", marginBottom: "10px" }}>
-          {chosenMetrics.map((model) => {
-            const name = metrics[model].readable;
-            return (
-              <DismissableBadge onClick={() => unselectMetric(model)} key={model}>
-                <a
-                  href="/#"
-                  className="nostyle"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setSelectedMetric(model);
-                  }}
-                >
-                  {name}
-                </a>
-              </DismissableBadge>
-            );
-          })}
+          {chosenMetrics.map((model) => (
+            <DismissableBadge onClick={() => unselectMetric(model)} key={model}>
+              <a
+                href="/#"
+                className="nostyle"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setSelectedMetric(model);
+                }}
+              >
+                {metrics[model].name}
+              </a>
+            </DismissableBadge>
+          ))}
         </div>
         {selectedMetric && <PluginCard plugin={metrics[selectedMetric]} inline={false} />}
       </CardBody>

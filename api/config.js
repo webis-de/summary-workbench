@@ -25,13 +25,15 @@ SUMMARIZERS = Object.keys(SUMMARIZERS_INFO)
 console.log("Metrics: ", METRICS);
 console.log("Summarizers: ", SUMMARIZERS);
 
+const to_envvar = (name) => name.toUpperCase().replace(/-/g, "_")
+
 const METRIC_URLS = METRICS.reduce((acc, val) => {
-  url = `${val.toUpperCase()}_METRIC_URL`;
+  url = `${to_envvar(val)}_METRIC_URL`;
   return { [val]: process.env[url], ...acc };
 }, {});
 
 const SUMMARIZER_URLS = SUMMARIZERS.reduce((acc, val) => {
-  const url = `${val.toUpperCase()}_SUMMARIZER_URL`;
+  const url = `${to_envvar(val)}_SUMMARIZER_URL`;
   return { [val]: process.env[url], ...acc };
 }, {});
 

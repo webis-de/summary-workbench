@@ -156,9 +156,7 @@ const InputDocument = ({ summarize, isComputing }) => {
               Selected Summarizers
             </div>
             <div className="margin-between-5" style={{ marginLeft: "20px", marginBottom: "10px" }}>
-              {chosenModels.map((model) => {
-                const name = summarizers[model].readable;
-                return (
+              {chosenModels.map((model) => (
                   <DismissableBadge onClick={() => unselectSummarizer(model)} key={model}>
                     <a
                       href="/#"
@@ -168,11 +166,10 @@ const InputDocument = ({ summarize, isComputing }) => {
                         setSelectedSummarizer(model);
                       }}
                     >
-                      {name}
+                      {summarizers[model].name}
                     </a>
                   </DismissableBadge>
-                );
-              })}
+                ))}
             </div>
             {selectedSummarizer && (
               <PluginCard plugin={summarizers[selectedSummarizer]} inline={false} />
@@ -329,7 +326,7 @@ const SummaryTabView = ({ title, showOverlap, summaries, markups, documentLength
                   href="/#"
                   onClick={() => setSummaryIndex(index)}
                 >
-                  {summarizers[name].readable}
+                  {summarizers[name].name}
                 </a>
               </li>
             ))}
@@ -382,7 +379,7 @@ const SummaryCompareView = ({ summaries, markups, showOverlap }) => {
         <div key={gridIndex} className="uk-margin uk-grid uk-child-width-expand@s">
           {grid.map(([markup, summary], markupIndex) => (
             <div key={markupIndex}>
-              <Header text={summarizers[summary.name].readable} fontSize="16pt" />
+              <Header text={summarizers[summary.name].name} fontSize="16pt" />
               <div
                 style={{ maxHeight: "500px", overflow: "auto" }}
                 className="uk-card uk-card-default uk-card-body"

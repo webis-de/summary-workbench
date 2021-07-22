@@ -1,9 +1,9 @@
 version: "1.0"
-name: bert
-readable: BERTScore
-type: semantic
-model: roberta-large-mnli
-homepage: https://arxiv.org/pdf/1904.09675.pdf
-sourcecode: https://github.com/Tiiiger/bert_score
+name: BERTScore
 devimage: slim
 deployimage: slim
+metadata:
+  type: semantic
+  model: roberta-large-mnli
+  homepage: https://arxiv.org/pdf/1904.09675.pdf
+  sourcecode: https://github.com/Tiiiger/bert_score

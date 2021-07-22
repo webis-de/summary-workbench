@@ -1,7 +1,7 @@
 version: "1.0"
-name: textrank
-readable: TextRank
-type: extractive
-homepage: https://www.aclweb.org/anthology/W04-3252/
+name: TextRank
 devimage: slim
 deployimage: slim
+metadata:
+  type: extractive
+  homepage: https://www.aclweb.org/anthology/W04-3252/

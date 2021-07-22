@@ -3,7 +3,7 @@ import os
 from transformers import (AutoModelForSeq2SeqLM, AutoTokenizer,
                           EncoderDecoderModel, LongformerTokenizer, pipeline)
 
-MODEL = os.environ["PLUGIN_MODEL"]
+MODEL = os.environ["model"]
 
 
 class NeuralSummarizer(object):

@@ -8,13 +8,29 @@
 //   [255, 192, 192],
 // ];
 
+// const colorMap = [
+// [188,255,194],
+// [188,226,255],
+// [255,188,221],
+// [255,214,188],
+// [204,170,255],
+// ]
+
 const colorMap = [
-[115,58,135],
-[30,77,90],
-[231,63,35],
-[255,192,0],
-[154,200,60],
-]
+  [161,104,249],
+  [158,197,226],
+  [225,225,225],
+  [200,164,233],
+  [246,192,248],
+];
+
+// const colorMap = [
+//   [115, 58, 135],
+//   [30, 77, 90],
+//   [231, 63, 35],
+//   [255, 192, 0],
+//   [154, 200, 60],
+// ];
 
 const cyrb53 = (str, seed = 0) => {
   let h1 = 0xdeadbeef ^ seed;
@@ -42,22 +58,26 @@ const hexToRGB = (hex) => {
   return [r, g, b];
 };
 
-const RGBToHex = (r, g, b) => [r, g, b].map(c => c.toString(16).padStart(2, "0")).join("")
+const RGBToHex = (r, g, b) => [r, g, b].map((c) => c.toString(16).padStart(2, "0")).join("");
 
 const foregroundColor = (backgroundColor) => {
   const [r, g, b] = hexToRGB(backgroundColor);
   return r * 0.299 + g * 0.587 + b * 0.114 > 150 ? "000000" : "ffffff";
 };
 
-const interpolate = (c1, c2, fraction) => ((c2 - c1) * fraction + c1) | 0
+const interpolate = (c1, c2, fraction) => ((c2 - c1) * fraction + c1) | 0;
 
 const randomColorFromColorMap = (num) => {
-  const colorIndex = num % (colorMap.length - 1)
-  const [r1, g1, b1] = colorMap[colorIndex]
-  const [r2, g2, b2] = colorMap[colorIndex + 1]
-  const fraction = (num % 1001)/1000
-  return RGBToHex(interpolate(r1, r2, fraction), interpolate(g1, g2, fraction), interpolate(b1, b2, fraction))
-}
+  const colorIndex = num % (colorMap.length - 1);
+  const [r1, g1, b1] = colorMap[colorIndex];
+  const [r2, g2, b2] = colorMap[colorIndex + 1];
+  const fraction = (num % 1001) / 1000;
+  return RGBToHex(
+    interpolate(r1, r2, fraction),
+    interpolate(g1, g2, fraction),
+    interpolate(b1, b2, fraction)
+  );
+};
 
 const colorMarkup = (num) => {
   const bgcolor = randomColorFromColorMap(num);

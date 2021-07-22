@@ -2,7 +2,7 @@ from bert_score import BERTScorer
 import numpy as np
 import os
 
-MODEL = os.environ.get("PLUGIN_MODEL") or "roberta-large-mnli"
+MODEL = os.environ.get("model") or "roberta-large-mnli"
 
 class MetricPlugin:
     def __init__(self):

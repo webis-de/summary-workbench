@@ -3,7 +3,7 @@ from statistics import mean
 
 import spacy
 
-MODEL = os.environ["PLUGIN_MODEL"]
+MODEL = os.environ["model"]
 
 
 class MetricPlugin:

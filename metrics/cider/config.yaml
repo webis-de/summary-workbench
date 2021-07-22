@@ -1,8 +1,8 @@
 version: "1.0"
-name: cider
-readable: CIDEr
-type: lexical
-homepage: https://arxiv.org/pdf/1411.5726.pdf
-sourcecode: https://github.com/Maluuba/nlg-eval
+name: CIDEr
 devimage: slim
 deployimage: slim
+metadata:
+  type: lexical
+  homepage: https://arxiv.org/pdf/1411.5726.pdf
+  sourcecode: https://github.com/Maluuba/nlg-eval

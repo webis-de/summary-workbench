@@ -1,9 +1,9 @@
 version: "1.0"
-name: greedy_matching
-readable: Greedy Matching
-type: lexical
-model: glove.6B.300d
-homepage: https://www.aclweb.org/anthology/W12-2018.pdf
-sourcecode: https://github.com/Maluuba/nlg-eval
+name: Greedy Matching
 devimage: slim
 deployimage: slim
+metadata:
+  type: lexical
+  model: glove.6B.300d
+  homepage: https://www.aclweb.org/anthology/W12-2018.pdf
+  sourcecode: https://github.com/Maluuba/nlg-eval

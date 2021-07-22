@@ -5,7 +5,7 @@ import numpy as np
 
 MODELS = {"MoverScoreV1": MoverScore, "MoverScoreV2": MoverScoreV2}
 
-MODEL = os.environ.get("PLUGIN_MODEL") or "MoverScoreV2"
+MODEL = os.environ.get("model") or "MoverScoreV2"
 
 MODEL_CLASS = MODELS[MODEL]
 

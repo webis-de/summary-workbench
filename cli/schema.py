@@ -1,49 +1,52 @@
+import re
 from pathlib import Path
-from marshmallow import Schema, fields, validate
+from marshmallow import Schema, fields, validate, ValidationError
+from .config import DEV_IMAGES, DEPLOY_IMAGES
+from .utils import abort
 
-def validate_name(name):
-    return name.replace("_", "").isalnum()
+
+key_pattern = "_A-Za-z"
+
+
+def validate_key(key):
+    return re.match(f"^[{key_pattern}]+$", key)
+
 
 class PluginSchema(Schema):
-    name = fields.Str(
-        validate=validate_name,
-        error_messages={"validator_failed": "only alphanumeric signs and '_' allowed"},
+    version = fields.Str(required=True)
+    name = fields.Str(required=True)
+    devimage = fields.Str(validate=validate.OneOf(DEV_IMAGES))
+    deployimage = fields.Str(validate=validate.OneOf(DEPLOY_IMAGES))
+    metadata = fields.Dict(
+        fields.String(
+            validate=validate_key,
+            error_messages={"validator_failed": f"only {key_pattern} allowed"},
+        ),
+        fields.Raw(),
+        missing={},
     )
-    readable = fields.Str()
-    volumes = fields.List(fields.Str())
-    model = fields.Str()
-    version = fields.Str()
-    devimage = fields.Str(
-        validate=validate.OneOf(
-            [path.name for path in Path("./images/dev").glob("*")]
-        )
-    )
-    deployimage = fields.Str(
-        validate=validate.OneOf(
-            [path.name for path in Path("./images/deploy").glob("*")]
-        )
-    )
-    homepage = fields.Url()
-    sourcecode = fields.Url()
 
-
-class MetricPluginSchema(PluginSchema):
-    type = fields.Str(validate=validate.OneOf(["lexical", "semantic"]))
-
-
-class SummarizerPluginSchema(PluginSchema):
-    type = fields.Str(validate=validate.OneOf(["abstractive", "extractive"]))
+    def load(self, data):
+        try:
+            return super().load(data)
+        except ValidationError as error:
+            abort(error)
 
 
 class GlobalConfigSchema(Schema):
     source = fields.Str(required=True)
     image_url = fields.Str()
-    environment = fields.Dict(missing={})
+    environment = fields.Dict(
+        fields.String(
+            validate=validate_key,
+            error_messages={"validator_failed": f"only {key_pattern} allowed"},
+        ),
+        fields.Raw(),
+        missing={},
+    )
 
-
-class GlobalMetricConfigSchema(GlobalConfigSchema):
-    config = fields.Nested(MetricPluginSchema)
-
-
-class GlobalSummarizerConfigSchema(GlobalConfigSchema):
-    config = fields.Nested(SummarizerPluginSchema)
+    def load(self, data):
+        try:
+            return super().load(data)
+        except ValidationError as error:
+            abort(error)

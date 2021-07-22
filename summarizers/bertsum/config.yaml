@@ -1,8 +1,8 @@
 version: "1.0"
-name: bertsum
-readable: BERTSummarizer
-type: extractive
-homepage: https://arxiv.org/abs/1906.04165
-model: distilbert-base-uncased
+name: BERTSummarizer
 devimage: slim
 deployimage: slim
+metadata:
+  type: extractive
+  homepage: https://arxiv.org/abs/1906.04165
+  model: distilbert-base-uncased

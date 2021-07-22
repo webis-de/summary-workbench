@@ -30,7 +30,7 @@ const Model = ({ info, onClick, isSet }) => (
       backgroundColor: isSet ? "#ffcccb" : "white",
     }}
   >
-    {info.readable}
+    {info.name}
   </BadgeButton>
 );
 

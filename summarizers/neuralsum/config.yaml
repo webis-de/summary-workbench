@@ -1,4 +1,6 @@
 version: "1.0"
-type: abstractive
+name: "{model}"
 devimage: slim
 deployimage: slim
+metadata:
+  type: abstractive

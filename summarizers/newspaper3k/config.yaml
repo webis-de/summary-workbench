@@ -1,8 +1,8 @@
 version: "1.0"
-name: newspaper3k
-readable: Newspaper3k
-type: extractive
-homepage: https://newspaper.readthedocs.io/en/latest/
-sourcecode: https://github.com/codelucas/newspaper/
+name: Newspaper3k
 devimage: slim
 deployimage: slim
+metadata:
+  type: extractive
+  homepage: https://newspaper.readthedocs.io/en/latest/
+  sourcecode: https://github.com/codelucas/newspaper/
