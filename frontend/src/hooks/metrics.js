@@ -5,7 +5,11 @@ import { displayMessage } from "../utils/message";
 
 const saveSetting = (metric, status) =>
   window.localStorage.setItem(metric, status ? "true" : "false");
-const loadSetting = (metric) => window.localStorage.getItem(metric) === "true";
+const loadSetting = (metric) => {
+  const setting = window.localStorage.getItem(metric);
+  if (setting === null && metric === "anonymous-rouge") return true;
+  return setting === "true"
+}
 
 const useMetrics = () => {
   const [metrics, setMetrics] = useState(null);

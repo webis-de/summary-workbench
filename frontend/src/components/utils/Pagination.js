@@ -71,22 +71,21 @@ const PaginationAfter = ({ activePage, lastPage, itemsAfter, onClickFrom }) => {
 const Pagination = ({ activePage, size, numItems, onChange, pageRange = 5 }) => {
   const itemsLeftRight = Math.floor(pageRange / 2);
   const lastPage = Math.ceil(numItems / size);
+  const nop = (e) => e.preventDefault();
   const onClickFrom = (el) => (e) => {
     e.preventDefault();
     onChange(el);
   };
+  const prevDisabled = activePage <= 1;
+  const nextDisabled = activePage >= lastPage;
   return (
-    <div className="uk-flex uk-flex-center">
-      <div className="uk-flex uk-flex-middle">
-        <Button
-          size="small"
-          variant={activePage <= 1 ? "default" : "primary"}
-          disabled={activePage <= 1}
-          onClick={onClickFrom(activePage - 1)}
-        >
-          prev
-        </Button>
-      </div>
+    <div className="uk-flex uk-flex-middle uk-flex-center">
+      <a
+        href="/#"
+        className={`uk-slidenav ${prevDisabled ? "uk-disabled" : ""}`}
+        data-uk-slidenav-previous
+        onClick={prevDisabled ? nop : onClickFrom(activePage - 1)}
+      />
       <ul className="uk-pagination uk-flex-center" data-uk-margin style={{ width: "400px" }}>
         <PaginationBefore
           activePage={activePage}
@@ -103,16 +102,13 @@ const Pagination = ({ activePage, size, numItems, onChange, pageRange = 5 }) => 
           onClickFrom={onClickFrom}
         />
       </ul>
-      <div className="uk-flex uk-flex-middle">
-        <Button
-          size="small"
-          variant={activePage >= lastPage ? "default" : "primary"}
-          disabled={activePage >= lastPage}
-          onClick={onClickFrom(activePage + 1)}
-        >
-          next
-        </Button>
-      </div>
+      <a
+        href="/#"
+        className={`uk-slidenav ${nextDisabled ? "uk-disabled" : ""}`}
+        data-uk-slidenav-next
+        disabled={nextDisabled}
+        onClick={nextDisabled ? nop : onClickFrom(activePage + 1)}
+      />
     </div>
   );
 };

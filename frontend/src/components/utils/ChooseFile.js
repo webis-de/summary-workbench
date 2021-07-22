@@ -32,7 +32,7 @@ const useFile = () => {
   return [fileName, setFile, lines];
 };
 
-const ChooseFile = ({ kind, name, fileName, setFile, lines, linesAreSame, ...other }) => {
+const ChooseFile = ({ kind, fileName, setFile, lines, linesAreSame, ...other }) => {
   const uploadRef = useRef();
   const [isDragged, setIsDragged] = useState(false);
   const dropHandler = (e) => {
@@ -75,7 +75,7 @@ const ChooseFile = ({ kind, name, fileName, setFile, lines, linesAreSame, ...oth
           className="uk-textarea align-center"
           type="text"
           value={fileName || ""}
-          placeholder={`Upload file with ${kind}`}
+          placeholder={`Upload ${kind}`}
           readOnly
           style={{ borderColor: "lightgrey" }}
         />

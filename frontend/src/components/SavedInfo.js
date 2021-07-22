@@ -24,11 +24,8 @@ const SavedInfo = ({ index, calculation, deleteCalculation }) => {
 
   return (
     <div>
-      <div className="uk-flex uk-flex-middle">
-        <ul
-          className="uk-tab uk-width-expand uk-margin uk-margin-right"
-          data-uk-tab={`connect: #${toggleID};`}
-        >
+      <div className="uk-flex uk-flex-middle uk-margin">
+        <ul className="uk-subnav uk-subnav-pill uk-margin uk-margin-right uk-width-expand uk-flex-middle" data-uk-switcher={`connect: #${toggleID};`} style={{marginBottom: "0"}}>
           <li>
             <a href="/#">Metrics</a>
           </li>

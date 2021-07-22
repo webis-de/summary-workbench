@@ -56,20 +56,18 @@ const Upload = ({ setCalculation }) => {
         style={{ gridRowGap: "10px" }}
       >
         <ChooseFile
-          kind="reference texts"
+          kind="references"
           fileName={refFileName}
           setFile={setRefFile}
           lines={references}
           linesAreSame={linesAreSame}
-          name="RefFile"
         />
         <ChooseFile
-          kind="generated texts"
+          kind="predictions"
           fileName={hypFileName}
           setFile={setHypFile}
           lines={hypotheses}
           linesAreSame={linesAreSame}
-          name="HypFile"
         />
       </div>
       <div className="uk-flex uk-flex-left">

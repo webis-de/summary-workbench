@@ -133,7 +133,7 @@ const NavbarOptions = () => {
           <div style={{ width: "20px" }} />
           <div>
             <div className="uk-margin">
-              <h4>minimal overlap</h4>
+              <h4>Minimum Overlap</h4>
               <div className="margin-between-20">
                 {[1, 2, 3, 4, 5].map((num) => (
                   <label key={num} style={{ whiteSpace: "nowrap" }}>
@@ -149,7 +149,7 @@ const NavbarOptions = () => {
               </div>
             </div>
             <div className="uk-flex uk-flex-middle">
-              <h4 style={{ margin: "0", marginRight: "20px" }}>allow self-similarities</h4>
+              <h4 style={{ margin: "0", marginRight: "20px" }}>Show Redundancy</h4>
               <input
                 style={{ margin: "0" }}
                 className="uk-checkbox"

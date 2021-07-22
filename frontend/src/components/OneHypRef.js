@@ -85,7 +85,7 @@ const OneHypRef = () => {
       />
       <div className="uk-margin uk-child-width-1-2@s">
         <TextField value={refText} setValue={setRefText} placeholder="Enter the reference text" />
-        <TextField value={hypText} setValue={setHypText} placeholder="Enter the generated text" />
+        <TextField value={hypText} setValue={setHypText} placeholder="Enter the predicted text" />
       </div>
       <div className="uk-flex uk-flex-between">
         <div className="uk-flex uk-flex-left">

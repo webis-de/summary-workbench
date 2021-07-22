@@ -106,7 +106,7 @@ const InputDocument = ({ summarize, isComputing }) => {
 
   const insertSampleText = () => {
     setDocumentText(sampleText);
-    if (settings.textrank !== undefined && !settings.textrank) toggleSetting("textrank");
+    if (settings["anonymous-textrank"] !== undefined && !settings["anonymous-textrank"]) toggleSetting("anonymous-textrank");
   };
 
   return (

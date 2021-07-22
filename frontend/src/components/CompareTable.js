@@ -24,8 +24,8 @@ const ComparisonDisplay = ({ page, size, comparisons }) => (
     <thead>
       <tr>
         <th />
-        <th>reference</th>
-        <th>hypothesis</th>
+        <th>references</th>
+        <th>predictions</th>
       </tr>
     </thead>
     <tbody>
