@@ -170,7 +170,7 @@ const Content = () => {
   const location = useLocation();
   return (
     <main className="uk-section uk-section-default">
-      <div className="uk-container">
+      <div className="uk-container uk-container-expand">
         <h3>TL;DR</h3>
         <Switch>
           {routes.map(([path, , component]) => (

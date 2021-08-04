@@ -371,13 +371,9 @@ const VisualizationOverview = () => {
   const [showOverview, setShowOverview] = useState(true);
 
   if (currVisualization !== null)
-    return (
-      <div className="uk-container">
-        <Visualize visualization={currVisualization} clear={() => setCurrVisualization(null)} />
-      </div>
-    );
+    return (<Visualize visualization={currVisualization} clear={() => setCurrVisualization(null)} />);
   if (visualizations) return (
-    <div className="uk-container">
+    <div>
       {showOverview ? (
         <div className="uk-flex uk-flex-top">
           <Button onClick={() => setShowOverview((v) => !v)} variant="primary">

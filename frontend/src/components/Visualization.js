@@ -52,7 +52,7 @@ const Visualization = () => {
 
   return (
     <>
-      <div className="uk-container uk-container-expand uk-margin-medium-top@s uk-margin-large-top@l">
+      <div className="uk-margin-medium-top@s uk-margin-large-top@l">
         <div className="uk-flex">
           <div style={{ width: "40%" }}>
             <div className="uk-flex uk-flex-column" style={{ display: "inline-flex" }}>

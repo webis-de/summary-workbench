@@ -90,7 +90,7 @@ const About = () => {
   const { metrics, loading: metricsLoading, reload: metricsReload } = useContext(MetricsContext);
 
   return (
-    <article className="uk-container">
+    <article>
       <div style={{ marginBottom: "1.5em" }} className="uk-text-meta">
         Evaluate a single hypothesis against the reference or upload hypothesis and reference files.
         Results can be saved and exported as LaTeX and CSV.
@@ -113,7 +113,7 @@ const About = () => {
             ) : (
               <>
                 {!summarizers ? (
-                  <Button className="uk-container" onClick={summarizersReload}>
+                  <Button onClick={summarizersReload}>
                     Retry
                   </Button>
                 ) : (
@@ -133,7 +133,7 @@ const About = () => {
             ) : (
               <>
                 {!metrics ? (
-                  <Button className="uk-container" onClick={metricsReload}>
+                  <Button onClick={metricsReload}>
                     Retry
                   </Button>
                 ) : (

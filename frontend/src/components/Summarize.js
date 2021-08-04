@@ -110,7 +110,7 @@ const InputDocument = ({ summarize, isComputing }) => {
   };
 
   return (
-    <div className="uk-container uk-container-expand uk-margin-medium-top@s uk-margin-large-top@l">
+    <div className="uk-margin-medium-top@s uk-margin-large-top@l">
       <div className="uk-flex uk-flex-between" style={{ minHeight: "60vh" }}>
         <div className="uk-flex uk-flex-column" style={{ flexBasis: "60%" }}>
           <Header text="Document" fontSize="14pt">
@@ -449,7 +449,6 @@ const SummaryView = ({ title, summaries, documentLength }) => {
   return (
     <div
       ref={scrollRef}
-      className="uk-container uk-container-expand"
       style={{ scrollMarginTop: "100px" }}
     >
       <div className="uk-flex">
@@ -538,7 +537,7 @@ const Summarize = () => {
   if (loading) return <CenterLoading />;
   if (!summarizers)
     return (
-      <Button className="uk-container" onClick={reload}>
+      <Button onClick={reload}>
         Retry
       </Button>
     );

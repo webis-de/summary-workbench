@@ -75,12 +75,12 @@ const Evaluate = () => {
   if (loading) return <CenterLoading />;
   if (!metrics)
     return (
-      <Button className="uk-container" onClick={reload}>
+      <Button onClick={reload}>
         Retry
       </Button>
     );
   return (
-    <div className="uk-container uk-container-expand">
+    <div>
       <div className="metric-layout">
         <div>
           <FileInput setCalculation={setComputedCalculation} />
