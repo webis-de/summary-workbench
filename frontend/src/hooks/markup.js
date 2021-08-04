@@ -4,22 +4,22 @@ import { SettingsContext } from "../contexts/SettingsContext";
 import { computeMarkup } from "../utils/markup";
 
 const useMarkup = (hypothese, reference) => {
-  const { minOverlap, allowSelfSimilarities } = useContext(SettingsContext);
+  const { minOverlap, allowSelfSimilarities, colorMap } = useContext(SettingsContext);
   return useMemo(() => {
-    if (hypothese && reference) return computeMarkup([hypothese, reference], minOverlap, allowSelfSimilarities);
+    if (hypothese && reference) return computeMarkup([hypothese, reference], colorMap, minOverlap, allowSelfSimilarities);
     return [];
-  }, [hypothese, reference, minOverlap, allowSelfSimilarities]);
+  }, [hypothese, reference, minOverlap, allowSelfSimilarities, colorMap]);
 };
 const useMarkups = (hypotheses, references) => {
-  const { minOverlap, allowSelfSimilarities } = useContext(SettingsContext);
+  const { minOverlap, allowSelfSimilarities, colorMap } = useContext(SettingsContext);
   return useMemo(() => {
     if (hypotheses && references) {
       return hypotheses.map((hypothese, index) =>
-        computeMarkup([hypothese, references[index]], minOverlap, allowSelfSimilarities)
+        computeMarkup([hypothese, references[index]], colorMap, minOverlap, allowSelfSimilarities)
       );
     }
     return [];
-  }, [hypotheses, references, minOverlap, allowSelfSimilarities]);
+  }, [hypotheses, references, minOverlap, allowSelfSimilarities, colorMap]);
 };
 
 export { useMarkup, useMarkups };

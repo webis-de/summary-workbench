@@ -88,16 +88,16 @@ a.nostyle:visited {
   flex-basis: 50%;
 }
 
-.margin-between-5 > :not(:first-child) {
-  margin-left: 5px;
+.margin-between-5 > :not(:last-child) {
+  margin-right: 5px;
 }
 
-.margin-between-10 > :not(:first-child) {
-  margin-left: 10px;
+.margin-between-10 > :not(:last-child) {
+  margin-right: 10px;
 }
 
-.margin-between-20 > :not(:first-child) {
-  margin-left: 20px;
+.margin-between-20 > :not(:last-child) {
+  margin-right: 20px;
 }
 
 .metric-layout {

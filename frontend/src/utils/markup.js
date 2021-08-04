@@ -1,7 +1,5 @@
 /* eslint-disable */
 
-import { textToColor } from "./color";
-
 const compute_ranks = (doc) => {
   const rank_map = new Map();
   let rank = 1;
@@ -327,7 +325,7 @@ const clean_list = (words) => {
   return [tokens, idx];
 };
 
-const computeMarkup = (docs, min_length = 3, allow_self_similarities = false) => {
+const computeMarkup = (docs, colorMap, min_length = 3, allow_self_similarities = false) => {
   const textblocks = docs.map((doc) => new Textblock(doc));
   const clean_docs_idx = textblocks.map((textblock) => clean_list(textblock.words));
 
@@ -339,7 +337,7 @@ const computeMarkup = (docs, min_length = 3, allow_self_similarities = false) =>
 
   let tag = 0;
   matches.forEach(([match_length, text, groups]) => {
-    const color = textToColor(text);
+    const color = colorMap.textToColor(text);
     const groupSizes = groups.map((start) => start.length);
     groups.forEach((group, i) => {
       group.sort((a, b) => a - b);

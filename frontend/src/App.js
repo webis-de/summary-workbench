@@ -5,11 +5,13 @@ import { Link, Redirect, Route, Router, Switch, useLocation } from "react-router
 import { About } from "./components/About";
 import { Evaluate } from "./components/Evaluate";
 import { Summarize } from "./components/Summarize";
+import { Button } from "./components/utils/Button";
 import { VisualizationOverview } from "./components/Visualize";
 import { MetricsProvider } from "./contexts/MetricsContext";
 import { SettingsContext, SettingsProvider } from "./contexts/SettingsContext";
 import { SummarizersProvider } from "./contexts/SummarizersContext";
 import history from "./history";
+import { colorschemes } from "./utils/color";
 
 const routes = [
   ["/summarize", "Summarize", Summarize],
@@ -121,9 +123,28 @@ const Navbar = () => (
   </>
 );
 
+const ColorschemeSetting = ({colorMap, setColorMap}) => (
+  <div className="uk-margin">
+    <h4>Colorscheme</h4>
+    <div className="uk-flex uk-flex-wrap" style={{gap: "10px", width: "400px"}}>
+      {colorschemes.map((colorscheme) => (
+        <Button key={colorscheme} size="small" onClick={() => setColorMap(colorscheme)} variant={colorscheme === colorMap.colorscheme ? "primary" : "default"}>
+          {colorscheme}
+        </Button>
+      ))}
+    </div>
+  </div>
+);
+
 const NavbarOptions = () => {
-  const { minOverlap, setMinOverlap, allowSelfSimilarities, toggleAllowSelfSimilarities } =
-    useContext(SettingsContext);
+  const {
+    minOverlap,
+    setMinOverlap,
+    allowSelfSimilarities,
+    toggleAllowSelfSimilarities,
+    colorMap,
+    setColorMap
+  } = useContext(SettingsContext);
   return (
     <div className="uk-flex uk-flex-center" style={{ marginLeft: "30px" }}>
       <FaCog className="hover-gray" style={{ minWidth: "20px" }} />
@@ -132,6 +153,7 @@ const NavbarOptions = () => {
         <div className="uk-flex">
           <div style={{ width: "20px" }} />
           <div>
+            <ColorschemeSetting colorMap={colorMap} setColorMap={setColorMap} />
             <div className="uk-margin">
               <h4>Minimum Overlap</h4>
               <div className="margin-between-20">
@@ -171,7 +193,6 @@ const Content = () => {
   return (
     <main className="uk-section uk-section-default">
       <div className="uk-container uk-container-expand">
-        <h3>TL;DR</h3>
         <Switch>
           {routes.map(([path, , component]) => (
             <Route key={location.key} path={path} component={component} />

@@ -1,6 +1,6 @@
 import React from "react";
 
-import { textToColor } from "../utils/color";
+import { randomColor, RGBToHex } from "../utils/color";
 import { BadgeButton } from "./utils/Button";
 
 const typeToColor = (type) => {
@@ -14,7 +14,7 @@ const typeToColor = (type) => {
     case "abstractive":
       return "green";
     default:
-      return textToColor(type)[0];
+      return RGBToHex(randomColor());
   }
 };
 

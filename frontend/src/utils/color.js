@@ -1,36 +1,57 @@
 /* eslint-disable */
 
-// const colorPoints = [
-//   [255, 245, 198],
-//   [255, 243, 184],
-//   [255, 214, 214],
-//   [255, 201, 201],
-//   [255, 192, 192],
-// ];
-
-// const colorPoints = [
-//   [188,255,194],
-//   [188,226,255],
-//   [255,188,221],
-//   [255,214,188],
-//   [204,170,255],
-// ]
-
-// const colorPoints = [
-//   [161, 104, 249],
-//   [158, 197, 226],
-//   [225, 225, 225],
-//   [200, 164, 233],
-//   [246, 192, 248],
-// ];
-
-const colorPoints = [
-  [115, 58, 135],
-  [30, 77, 90],
-  [231, 63, 35],
-  [255, 192, 0],
-  [154, 200, 60],
+const soft = [
+  [188, 255, 194],
+  [188, 226, 255],
+  [255, 188, 221],
+  [255, 214, 188],
+  [204, 170, 255],
 ];
+
+const ibm = [
+  [100, 143, 255],
+  [120, 94, 240],
+  [220, 38, 127],
+  [254, 97, 0],
+  [255, 176, 0],
+];
+
+const wong = [
+  [0, 0, 0],
+  [230, 159, 0],
+  [86, 180, 233],
+  [0, 158, 115],
+  [240, 228, 66],
+  [0, 114, 178],
+  [213, 94, 0],
+  [204, 121, 167],
+];
+
+const tol = [
+  [51, 34, 136],
+  [17, 119, 51],
+  [68, 170, 153],
+  [136, 204, 238],
+  [221, 204, 119],
+  [204, 102, 119],
+  [170, 68, 153],
+  [136, 34, 85],
+];
+
+const viridis = [
+  [68, 1, 84],
+  [58, 82, 139],
+  [32, 144, 140],
+  [94, 201, 97],
+  [253, 231, 36],
+];
+
+const grayscale = [
+  [0,0,0],
+  [204,204,204]
+]
+
+const colorPoints = { ibm, wong, tol, soft, viridis, grayscale};
 
 const distance = (vector1, vector2) =>
   Math.sqrt(vector1.map((x, i) => (x - vector2[i]) ** 2).reduce((sum, x) => sum + x));
@@ -77,42 +98,60 @@ const foregroundColor = (r, g, b) =>
 
 const interpolate = (c1, c2, fraction) => ((c2 - c1) * fraction + c1) | 0;
 
+const randomColor = (text) => {
+  const num = cyrb53(text);
+  return [(num >> 8) & 0xff, (num >> 16) & 0xff, (num >> 24) & 0xff];
+};
+
 class ColorMap {
-  constructor(points) {
-    this.points = points;
-    this.cdf = compute_cdf(points);
-    console.log(this.cdf);
+  constructor(colorscheme, fallbackOnErr = false) {
+    this.useColorscheme(colorscheme, fallbackOnErr);
+  }
+
+  useColorscheme(colorscheme, fallbackOnErr = false) {
+    if (colorscheme in colorPoints) {
+      this.colorscheme = colorscheme;
+      const points = colorPoints[colorscheme];
+      const cdf = compute_cdf(points);
+      this.colorInfo = { points, cdf };
+    } else if (colorscheme === "colorfull" || fallbackOnErr) {
+      this.colorscheme = "colorfull";
+      this.colorInfo = null;
+    } else throw new Error(`unknown colorscheme ${colorscheme}`);
   }
 
   findBand(prop) {
-    for (let i = 0, len = this.cdf.length; i < len; i++) {
-      if (prop <= this.cdf[i]) return i;
+    const { cdf } = this.colorInfo;
+    for (let i = 0, len = cdf.length; i < len; i++) {
+      if (prop <= cdf[i]) return i;
     }
   }
 
   colorFromText(text) {
+    if (this.colorscheme === "colorfull") return randomColor(text);
     const num = cyrb53(text);
+    const { cdf, points } = this.colorInfo;
     const prop = toProp(num, 11593);
     const bandIndex = this.findBand(prop);
-    const prefValue = this.cdf[bandIndex - 1] || 0;
-    const fraction = (prop - prefValue) / (this.cdf[bandIndex] - prefValue);
-    const [r1, g1, b1] = this.points[bandIndex];
-    const [r2, g2, b2] = this.points[bandIndex + 1];
+    const prefValue = cdf[bandIndex - 1] || 0;
+    const fraction = (prop - prefValue) / (cdf[bandIndex] - prefValue);
+    const [r1, g1, b1] = points[bandIndex];
+    const [r2, g2, b2] = points[bandIndex + 1];
     return [
       interpolate(r1, r2, fraction),
       interpolate(g1, g2, fraction),
       interpolate(b1, b2, fraction),
     ];
   }
+
+  textToColor(text) {
+    const [r, g, b] = this.colorFromText(text);
+    const bgcolor = RGBToHex(r, g, b);
+    const fgcolor = foregroundColor(r, g, b);
+    return [`#${bgcolor}`, `#${fgcolor}`];
+  }
 }
 
-const colorMap = new ColorMap(colorPoints);
+const colorschemes = ["colorfull", ...Object.keys(colorPoints)];
 
-const textToColor = (text) => {
-  const [r, g, b] = colorMap.colorFromText(text);
-  const bgcolor = RGBToHex(r, g, b);
-  const fgcolor = foregroundColor(r, g, b);
-  return [`#${bgcolor}`, `#${fgcolor}`];
-};
-
-export { textToColor };
+export { ColorMap, colorschemes, randomColor, RGBToHex };

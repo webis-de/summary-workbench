@@ -111,7 +111,7 @@ const InputDocument = ({ summarize, isComputing }) => {
 
   return (
     <div className="uk-margin-medium-top@s uk-margin-large-top@l">
-      <div className="uk-flex uk-flex-between" style={{ minHeight: "60vh" }}>
+      <div className="uk-flex uk-flex-between" style={{ minHeight: "400px" }}>
         <div className="uk-flex uk-flex-column" style={{ flexBasis: "60%" }}>
           <Header text="Document" fontSize="14pt">
             <Button variant="primary" onClick={insertSampleText}>
