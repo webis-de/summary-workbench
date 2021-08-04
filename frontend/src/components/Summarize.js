@@ -10,6 +10,7 @@ import React, {
 import { CSSTransition } from "react-transition-group";
 
 import { feedbackRequest, summarizeRequest } from "../api";
+import { SettingsContext } from "../contexts/SettingsContext";
 import { SummarizersContext } from "../contexts/SummarizersContext";
 import { useMarkups } from "../hooks/markup";
 import { displayError, displayMessage } from "../utils/message";
@@ -18,8 +19,8 @@ import { Model } from "./Model";
 import { Badge, DismissableBadge } from "./utils/Badge";
 import { Button } from "./utils/Button";
 import { Checkboxes } from "./utils/Checkboxes";
-import { Bars, EyeClosed, EyeOpen, ThumbsDown, ThumbsUp } from "./utils/Icons";
 import { LiveSearch, useFilter } from "./utils/FuzzySearch";
+import { Bars, EyeClosed, EyeOpen, ThumbsDown, ThumbsUp } from "./utils/Icons";
 import { CenterLoading } from "./utils/Loading";
 import { Markup, useMarkupScroll } from "./utils/Markup";
 
@@ -89,7 +90,7 @@ In 2009, following an Internet campaign, British Prime Minister Gordon Brown mad
 const InputDocument = ({ summarize, isComputing }) => {
   const [documentText, setDocumentText] = useState("");
   const { summarizers, summarizerTypes, settings, toggleSetting } = useContext(SummarizersContext);
-  const [percentage, setPercentage] = useState("15");
+  const { summaryLength, setSummaryLength } = useContext(SettingsContext);
   const summarizerKeys = useMemo(() => Object.keys(summarizers).sort(), [summarizers]);
   const { query, setQuery, filteredKeys } = useFilter(summarizerKeys);
   const [selectedSummarizer, setSelectedSummarizer] = useState(null);
@@ -106,7 +107,8 @@ const InputDocument = ({ summarize, isComputing }) => {
 
   const insertSampleText = () => {
     setDocumentText(sampleText);
-    if (settings["anonymous-textrank"] !== undefined && !settings["anonymous-textrank"]) toggleSetting("anonymous-textrank");
+    if (settings["anonymous-textrank"] !== undefined && !settings["anonymous-textrank"])
+      toggleSetting("anonymous-textrank");
   };
 
   return (
@@ -157,68 +159,35 @@ const InputDocument = ({ summarize, isComputing }) => {
             </div>
             <div className="margin-between-5" style={{ marginLeft: "20px", marginBottom: "10px" }}>
               {chosenModels.map((model) => (
-                  <DismissableBadge onClick={() => unselectSummarizer(model)} key={model}>
-                    <a
-                      href="/#"
-                      className="nostyle"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setSelectedSummarizer(model);
-                      }}
-                    >
-                      {summarizers[model].name}
-                    </a>
-                  </DismissableBadge>
-                ))}
+                <DismissableBadge onClick={() => unselectSummarizer(model)} key={model}>
+                  <a
+                    href="/#"
+                    className="nostyle"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setSelectedSummarizer(model);
+                    }}
+                  >
+                    {summarizers[model].name}
+                  </a>
+                </DismissableBadge>
+              ))}
             </div>
             {selectedSummarizer && (
               <PluginCard plugin={summarizers[selectedSummarizer]} inline={false} />
             )}
-            <div>
-              <div
-                className="uk-flex uk-flex-row"
-                style={{ marginTop: "10px", marginBottom: "40px" }}
-              >
-                <span className="colored-header">Summary Length</span>
-                <input
-                  type="range"
-                  min="10"
-                  max="50"
-                  step="5"
-                  defaultValue={percentage}
-                  style={{
-                    flex: "1 0",
-                    minWidth: "100px",
-                    marginLeft: "15px",
-                    marginRight: "15px",
-                  }}
-                  onChange={(e) => setPercentage(e.currentTarget.value)}
-                />
-                <span
-                  className="uk-flex uk-label"
-                  style={{
-                    alignItems: "center",
-                    justifyContent: "right",
-                    width: "30px",
-                    height: "30px",
-                  }}
+            <div className="uk-flex uk-flex-center">
+              {isComputing ? (
+                <Loading />
+              ) : (
+                <button
+                  className="uk-button uk-button-primary"
+                  disabled={!documentText || !chosenModels.length}
+                  onClick={() => summarize(documentText, chosenModels, summaryLength)}
                 >
-                  {`${percentage}%`}
-                </span>
-              </div>
-              <div className="uk-flex uk-flex-center">
-                {isComputing ? (
-                  <Loading />
-                ) : (
-                  <button
-                    className="uk-button uk-button-primary"
-                    disabled={!documentText || !chosenModels.length}
-                    onClick={() => summarize(documentText, chosenModels, percentage)}
-                  >
-                    Summarize
-                  </button>
-                )}
-              </div>
+                  Summarize
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -287,19 +256,16 @@ const Document = ({ title, markup, markupState, scrollState, showMarkup }) => (
 );
 
 const SummaryTabView = ({ title, showOverlap, summaries, markups, documentLength }) => {
-  const [summaryIndex, _setSummaryIndex] = useState(0);
   const { summarizers } = useContext(SummarizersContext);
   const markupState = useState(null);
   const scrollState = useMarkupScroll();
   const resetScroll = scrollState[2];
-  const setSummaryIndex = useCallback(
-    (state) => {
-      _setSummaryIndex(state);
-      resetScroll();
-    },
-    [_setSummaryIndex, resetScroll]
-  );
+  const [summaryIndex, setSummaryIndex] = useReducer((_, index) => {
+    resetScroll();
+    return index;
+  }, 0);
 
+  if (!markups.length) return <div>some error occured</div>;
   return (
     <div className="uk-flex">
       <div style={{ flexBasis: "60%" }}>
@@ -447,10 +413,7 @@ const SummaryView = ({ title, summaries, documentLength }) => {
   }, [summaries]);
 
   return (
-    <div
-      ref={scrollRef}
-      style={{ scrollMarginTop: "100px" }}
-    >
+    <div ref={scrollRef} style={{ scrollMarginTop: "100px" }}>
       <div className="uk-flex">
         <div>
           {showTab ? (
@@ -494,9 +457,9 @@ const Summarize = () => {
   const [documentLength, setDocumentLength] = useState(0);
   const { summarizers, loading, reload } = useContext(SummarizersContext);
 
-  const summarize = async (rawText, models, percentage) => {
+  const summarize = async (rawText, models, summaryLength) => {
     const requestText = rawText.trim();
-    const ratio = parseInt(percentage, 10) / 100;
+    const ratio = parseInt(summaryLength, 10) / 100;
 
     if (!models.length) {
       displayMessage("No summarizer selected");
@@ -535,12 +498,7 @@ const Summarize = () => {
   };
 
   if (loading) return <CenterLoading />;
-  if (!summarizers)
-    return (
-      <Button onClick={reload}>
-        Retry
-      </Button>
-    );
+  if (!summarizers) return <Button onClick={reload}>Retry</Button>;
   return (
     <>
       <InputDocument summarize={summarize} isComputing={computing} />

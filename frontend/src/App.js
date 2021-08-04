@@ -123,12 +123,17 @@ const Navbar = () => (
   </>
 );
 
-const ColorschemeSetting = ({colorMap, setColorMap}) => (
+const ColorschemeSetting = ({ colorMap, setColorMap }) => (
   <div className="uk-margin">
     <h4>Colorscheme</h4>
-    <div className="uk-flex uk-flex-wrap" style={{gap: "10px", width: "400px"}}>
+    <div className="uk-flex uk-flex-wrap" style={{ gap: "10px", width: "400px" }}>
       {colorschemes.map((colorscheme) => (
-        <Button key={colorscheme} size="small" onClick={() => setColorMap(colorscheme)} variant={colorscheme === colorMap.colorscheme ? "primary" : "default"}>
+        <Button
+          key={colorscheme}
+          size="small"
+          onClick={() => setColorMap(colorscheme)}
+          variant={colorscheme === colorMap.colorscheme ? "primary" : "default"}
+        >
           {colorscheme}
         </Button>
       ))}
@@ -143,7 +148,9 @@ const NavbarOptions = () => {
     allowSelfSimilarities,
     toggleAllowSelfSimilarities,
     colorMap,
-    setColorMap
+    setColorMap,
+    summaryLength,
+    setSummaryLength,
   } = useContext(SettingsContext);
   return (
     <div className="uk-flex uk-flex-center" style={{ marginLeft: "30px" }}>
@@ -181,6 +188,38 @@ const NavbarOptions = () => {
                 type="checkbox"
               />
             </div>
+          </div>
+        </div>
+        <h3>Summarization</h3>
+        <div className="uk-flex">
+          <div style={{ width: "20px" }} />
+          <div className="uk-flex uk-flex-row" style={{ alignItems: "center" }}>
+            <h4 style={{margin: 0}}>Summary Length</h4>
+            <input
+              type="range"
+              min="10"
+              max="50"
+              step="5"
+              defaultValue={summaryLength}
+              style={{
+                flex: "1 0",
+                minWidth: "100px",
+                marginLeft: "15px",
+                marginRight: "15px",
+              }}
+              onChange={(e) => setSummaryLength(e.currentTarget.value)}
+            />
+            <span
+              className="uk-flex uk-label"
+              style={{
+                alignItems: "center",
+                justifyContent: "right",
+                width: "30px",
+                height: "30px",
+              }}
+            >
+              {`${summaryLength}%`}
+            </span>
           </div>
         </div>
       </div>
