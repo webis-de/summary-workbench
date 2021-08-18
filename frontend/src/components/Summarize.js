@@ -18,6 +18,7 @@ import { PluginCard } from "./About";
 import { ModelGrid } from "./Model";
 import { Badge, DismissableBadge } from "./utils/Badge";
 import { Button } from "./utils/Button";
+import { Card, CardBody, CardHeader, CardTitle } from "./utils/Card";
 import { Checkboxes } from "./utils/Checkboxes";
 import { LiveSearch, useFilter } from "./utils/FuzzySearch";
 import { Bars, EyeClosed, EyeOpen, ThumbsDown, ThumbsUp } from "./utils/Icons";
@@ -114,72 +115,85 @@ const InputDocument = ({ summarize, isComputing }) => {
 
   return (
     <div className="uk-margin-medium-top@s uk-margin-large-top@l">
-      <div className="uk-flex uk-flex-between" style={{ minHeight: "400px" }}>
-        <div className="uk-flex uk-flex-column" style={{ flexBasis: "60%" }}>
-          <Header text="Document" fontSize="14pt">
-            <Button variant="primary" onClick={insertSampleText}>
-              sample text
-            </Button>
-          </Header>
-          <textarea
-            value={documentText}
-            onChange={(e) => setDocumentText(e.currentTarget.value)}
-            className="uk-textarea uk-card uk-card-default uk-card-body"
-            rows="8"
-            placeholder="Paste URL or long text"
-            style={{ height: "100%", padding: "20px", resize: "none", overflow: "auto" }}
-          />
+      <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gridGap: "10px" }}>
+        <div>
+          <div className="uk-flex uk-flex-column">
+            <Header text="Document" fontSize="14pt">
+              <Button variant="primary" onClick={insertSampleText}>
+                sample text
+              </Button>
+            </Header>
+            <textarea
+              value={documentText}
+              onChange={(e) => setDocumentText(e.currentTarget.value)}
+              className="uk-textarea uk-card uk-card-default uk-card-body"
+              rows="8"
+              placeholder="Paste URL or long text"
+              style={{ minHeight: "350px", padding: "20px", resize: "none", overflow: "auto" }}
+            />
+          </div>
         </div>
 
-        <div style={{ minWidth: "20px" }} />
-
-        <div className="uk-flex uk-flex-column" style={{ flexBasis: "40%" }}>
-          <Header text="Models" fontSize="14pt">
-            <LiveSearch query={query} setQuery={setQuery} />
-          </Header>
-          <div
-            className="uk-card uk-card-default uk-card-body uk-flex-stretch"
-            style={{ height: "100%" }}
-          >
-            <ModelGrid keys={filteredKeys} models={summarizers} settings={settings} selectModel={selectSummarizer}/>
-            <div className="uk-flex" style={{ alignItems: "center", gap: "5px", marginBottom: "10px", marginTop: "30px" }}>
-              <span className="colored-header">
-                selected:
-              </span >
-              {chosenModels.map((model) => (
-                <DismissableBadge onClick={() => unselectSummarizer(model)} key={model}>
-                  <a
-                    href="/#"
-                    className="nostyle"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setSelectedSummarizer(model);
-                    }}
-                  >
-                    {summarizers[model].name}
-                  </a>
-                </DismissableBadge>
-              ))}
-            </div>
-            {selectedSummarizer && (
-              <div style={{ marginTop: "20px", marginBottom: "20px" }}>
-                <PluginCard plugin={summarizers[selectedSummarizer]} inline={false} />
-              </div>
-            )}
-            <div className="uk-flex uk-flex-center" style={{marginTop: "40px"}}>
-              {isComputing ? (
-                <Loading />
-              ) : (
-                <button
-                  className="uk-button uk-button-primary"
-                  disabled={!documentText || !chosenModels.length}
-                  onClick={() => summarize(documentText, chosenModels, summaryLength)}
+        <div className="uk-flex uk-flex-column">
+          <Card>
+            <CardHeader>
+              <CardTitle style={{ display: "flex", alignItems: "center", marginRight: "10px" }}>
+                <span style={{ marginRight: "10px" }}>Models</span>
+                <LiveSearch query={query} setQuery={setQuery} />
+              </CardTitle>
+            </CardHeader>
+            <CardBody>
+                <ModelGrid
+                  keys={filteredKeys}
+                  models={summarizers}
+                  settings={settings}
+                  selectModel={selectSummarizer}
+                />
+                <div
+                  className="uk-flex"
+                  style={{
+                    alignItems: "center",
+                    gap: "5px",
+                    marginBottom: "10px",
+                    marginTop: "30px",
+                  }}
                 >
-                  Summarize
-                </button>
-              )}
-            </div>
-          </div>
+                  <span className="colored-header">selected:</span>
+                  {chosenModels.map((model) => (
+                    <DismissableBadge onClick={() => unselectSummarizer(model)} key={model}>
+                      <a
+                        href="/#"
+                        className="nostyle"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setSelectedSummarizer(model);
+                        }}
+                      >
+                        {summarizers[model].name}
+                      </a>
+                    </DismissableBadge>
+                  ))}
+                </div>
+                {selectedSummarizer && (
+                  <div style={{ marginTop: "20px", marginBottom: "20px" }}>
+                    <PluginCard plugin={summarizers[selectedSummarizer]} inline={false} />
+                  </div>
+                )}
+                <div className="uk-flex uk-flex-center" style={{ marginTop: "40px" }}>
+                  {isComputing ? (
+                    <Loading />
+                  ) : (
+                    <button
+                      className="uk-button uk-button-primary"
+                      disabled={!documentText || !chosenModels.length}
+                      onClick={() => summarize(documentText, chosenModels, summaryLength)}
+                    >
+                      Summarize
+                    </button>
+                  )}
+                </div>
+            </CardBody>
+          </Card>
         </div>
       </div>
     </div>

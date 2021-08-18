@@ -22,15 +22,17 @@ const SavedInfo = ({ index, calculation, deleteCalculation }) => {
   }, [comparisons, toggleID]);
   useEffect(showEvent, [showEvent]);
 
+  const tabStyle={border: "2px solid #1e87f0"};
+
   return (
     <div>
       <div className="uk-flex uk-flex-middle uk-margin">
         <ul className="uk-subnav uk-subnav-pill uk-margin uk-margin-right uk-width-expand uk-flex-middle" data-uk-switcher={`connect: #${toggleID};`} style={{marginBottom: "0"}}>
           <li>
-            <a href="/#">Metrics</a>
+            <a href="/#" style={tabStyle}>Metrics</a>
           </li>
           <li>
-            <a href="/#">Compare</a>
+            <a href="/#" style={tabStyle}>Compare</a>
           </li>
         </ul>
         <DeleteButton onClick={deleteCalculation} />

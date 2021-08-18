@@ -14,19 +14,25 @@ const Badge = ({ children, emphasis = true }) => (
 
 const DismissableBadge = ({ children, style, onClick }) => (
   <span
-    className="uk-badge uk-text-bold"
-    style={{ padding: "10px", paddingRight: "6px", whiteSpace: "nowrap", ...style }}
+    className="uk-badge uk-text-bold uk-flex"
+    style={{
+      alignItems: "center",
+      padding: "10px",
+      paddingRight: "6px",
+      whiteSpace: "nowrap",
+      ...style,
+    }}
   >
     {children}
     <a
       href="/#"
-      style={{ marginLeft: "3px" }}
+      style={{ display: "flex", marginLeft: "3px" }}
       onClick={(e) => {
         e.preventDefault();
         if (onClick) onClick();
       }}
     >
-      <FaTimes style={{ color: "black" }} />
+      <FaTimes style={{ minWidth: "15px", color: "black" }} />
     </a>
   </span>
 );

@@ -100,23 +100,6 @@ a.nostyle:visited {
   margin-right: 20px;
 }
 
-.metric-layout {
-  display: flex;
-  justify-content: space-between;
-}
-
-.metric-layout > :nth-child(1) {
-  flex-basis: 60%;
-}
-
-.metric-layout > :nth-child(2) {
-  flex-basis: 37%;
-}
-
-.metric-layout > :not(:first-child) {
-  margin-left: 10px;
-}
-
 /* Placeholder text styles */
 .align-center {
   text-align: center;

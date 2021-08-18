@@ -11,15 +11,16 @@ const ResultInfo = ({ scores, references, hypotheses }) => {
 
   const { metrics } = useContext(MetricsContext);
   const flatScores = useMemo(() => flatten(scores, metrics), [scores, metrics]);
+  const tabStyle={border: "2px solid #1e87f0"};
 
   return (
     <div>
       <ul className="uk-subnav uk-subnav-pill" data-uk-switcher="connect: #result-display;">
         <li>
-          <a href="/#">Metrics</a>
+          <a href="/#" style={tabStyle}>Metrics</a>
         </li>
         <li>
-          <a href="/#">Visualize Overlap</a>
+          <a href="/#" style={tabStyle}>Compare</a>
         </li>
       </ul>
       <ul id="result-display" className="uk-switcher">

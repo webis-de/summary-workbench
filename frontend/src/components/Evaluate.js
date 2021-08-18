@@ -81,7 +81,7 @@ const Evaluate = () => {
     );
   return (
     <div>
-      <div className="metric-layout">
+      <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gridGap: "10px" }}>
         <div>
           <FileInput setCalculation={setComputedCalculation} />
         </div>

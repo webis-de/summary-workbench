@@ -47,11 +47,14 @@ const viridis = [
 ];
 
 const grayscale = [
-  [0,0,0],
-  [204,204,204]
-]
+  [0, 0, 0],
+  [204, 204, 204],
+];
 
-const colorPoints = { ibm, wong, tol, soft, viridis, grayscale};
+const generalColorschemes = { soft, viridis };
+const colorblindColorschemes = { ibm, wong, tol, grayscale };
+
+const colorPoints = { ...generalColorschemes, ...colorblindColorschemes };
 
 const distance = (vector1, vector2) =>
   Math.sqrt(vector1.map((x, i) => (x - vector2[i]) ** 2).reduce((sum, x) => sum + x));
@@ -152,6 +155,9 @@ class ColorMap {
   }
 }
 
-const colorschemes = ["colorfull", ...Object.keys(colorPoints)];
+const colorschemes = {
+  general: ["colorfull", ...Object.keys(generalColorschemes)],
+  colorblind: Object.keys(colorblindColorschemes),
+};
 
 export { ColorMap, colorschemes, randomColor, RGBToHex };

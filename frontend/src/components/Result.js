@@ -6,7 +6,7 @@ import { Button } from "./utils/Button";
 import { Card, CardBody, CardHeader, CardTitle } from "./utils/Card";
 
 const UploadButton = (props) => (
-  <Button variant="primary" {...props} style={{whiteSpace: "nowrap"}}>
+  <Button variant="primary" {...props} style={{ whiteSpace: "nowrap" }}>
     Save Results
   </Button>
 );
@@ -22,11 +22,14 @@ const Result = ({ className, calculation, setCalculationID, saveCalculation }) =
         </CardTitle>
       </CardHeader>
       <CardBody>
-        <div className="uk-flex uk-flex-middle" style={{marginTop: "-25px", marginBottom: "20px"}}>
+        <div
+          className="uk-flex uk-flex-middle"
+          style={{ marginTop: "-10px", marginBottom: "20px" }}
+        >
           <p className="uk-text-primary" style={{ margin: "0", marginRight: "10px" }}>
             <FaPen /> Rename and save results
           </p>
-          <div className="uk-flex uk-width-1-3" style={{flexGrow: "1"}}>
+          <div className="uk-flex uk-width-1-3" style={{ flexGrow: "1" }}>
             <input
               className="uk-input"
               value={id}

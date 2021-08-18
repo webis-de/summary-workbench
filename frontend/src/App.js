@@ -1,5 +1,5 @@
-import React, { useContext } from "react";
-import { FaCog, FaGithub, FaTwitter, FaYoutube } from "react-icons/fa";
+import React, { Fragment, useContext, useEffect, useState } from "react";
+import { FaChevronCircleUp, FaCog, FaGithub, FaTwitter, FaYoutube } from "react-icons/fa";
 import { Link, Redirect, Route, Router, Switch, useLocation } from "react-router-dom";
 
 import { About } from "./components/About";
@@ -96,7 +96,7 @@ const WebisPath = () => (
         <a href="https://webis.de/research/tldr.html">TL;DR</a>
       </li>
       <li className="uk-disabled">
-        <a href="/#">Demo</a>
+        <a href="/#">Summarizer</a>
       </li>
     </ul>
   </nav>
@@ -123,21 +123,37 @@ const Navbar = () => (
   </>
 );
 
+const IndentStyle = ({ children }) => (
+  <div className="uk-flex">
+    <div style={{ width: "20px" }} />
+    <div>{children}</div>
+  </div>
+);
+
 const ColorschemeSetting = ({ colorMap, setColorMap }) => (
   <div className="uk-margin">
     <h4>Colorscheme</h4>
-    <div className="uk-flex uk-flex-wrap" style={{ gap: "10px", width: "400px" }}>
-      {colorschemes.map((colorscheme) => (
-        <Button
-          key={colorscheme}
-          size="small"
-          onClick={() => setColorMap(colorscheme)}
-          variant={colorscheme === colorMap.colorscheme ? "primary" : "default"}
-        >
-          {colorscheme}
-        </Button>
-      ))}
-    </div>
+    <IndentStyle>
+      <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", gridGap: "10px" }}>
+        {Object.entries(colorschemes).map(([category, names]) => (
+          <Fragment key={category}>
+            <span>{category}</span>
+            <div style={{ display: "inline-flex", width: "400px" }}>
+              {names.map((name) => (
+                <Button
+                  key={name}
+                  size="small"
+                  onClick={() => setColorMap(name)}
+                  variant={name === colorMap.colorscheme ? "primary" : "default"}
+                >
+                  {name}
+                </Button>
+              ))}
+            </div>
+          </Fragment>
+        ))}
+      </div>
+    </IndentStyle>
   </div>
 );
 
@@ -155,46 +171,42 @@ const NavbarOptions = () => {
   return (
     <div className="uk-flex uk-flex-center" style={{ marginLeft: "30px" }}>
       <FaCog className="hover-gray" style={{ minWidth: "20px" }} />
-      <div uk-dropdown="mode: click; pos:  bottom-left">
+      <div uk-dropdown="mode: click; pos: bottom-left">
         <h3>Highlighting</h3>
-        <div className="uk-flex">
-          <div style={{ width: "20px" }} />
-          <div>
-            <ColorschemeSetting colorMap={colorMap} setColorMap={setColorMap} />
-            <div className="uk-margin">
-              <h4>Minimum Overlap</h4>
-              <div className="margin-between-20">
-                {[1, 2, 3, 4, 5].map((num) => (
-                  <label key={num} style={{ whiteSpace: "nowrap" }}>
-                    {num}
-                    <input
-                      type="radio"
-                      value={num}
-                      checked={num === minOverlap}
-                      onChange={(e) => setMinOverlap(e.target.value)}
-                    />
-                  </label>
-                ))}
-              </div>
-            </div>
-            <div className="uk-flex uk-flex-middle">
-              <h4 style={{ margin: "0", marginRight: "20px" }}>Show Redundancy</h4>
-              <input
-                style={{ margin: "0" }}
-                className="uk-checkbox"
-                checked={allowSelfSimilarities}
-                readOnly
-                onClick={toggleAllowSelfSimilarities}
-                type="checkbox"
-              />
+        <IndentStyle>
+          <ColorschemeSetting colorMap={colorMap} setColorMap={setColorMap} />
+          <div className="uk-flex uk-flex-middle uk-margin">
+            <h4 style={{ margin: "0", marginRight: "20px" }}>Minimum Word Overlap</h4>
+            <div className="margin-between-20" style={{ display: "inline-block" }}>
+              {[1, 2, 3, 4, 5].map((num) => (
+                <label key={num} style={{ whiteSpace: "nowrap" }}>
+                  {num}
+                  <input
+                    type="radio"
+                    value={num}
+                    checked={num === minOverlap}
+                    onChange={(e) => setMinOverlap(e.target.value)}
+                  />
+                </label>
+              ))}
             </div>
           </div>
-        </div>
+          <div className="uk-flex uk-flex-middle">
+            <h4 style={{ margin: "0", marginRight: "20px" }}>Show Redundancy</h4>
+            <input
+              style={{ margin: "0" }}
+              className="uk-checkbox"
+              checked={allowSelfSimilarities}
+              readOnly
+              onClick={toggleAllowSelfSimilarities}
+              type="checkbox"
+            />
+          </div>
+        </IndentStyle>
         <h3>Summarization</h3>
-        <div className="uk-flex">
-          <div style={{ width: "20px" }} />
+        <IndentStyle>
           <div className="uk-flex uk-flex-row" style={{ alignItems: "center" }}>
-            <h4 style={{margin: 0}}>Summary Length</h4>
+            <h4 style={{ margin: 0 }}>Summary Length</h4>
             <input
               type="range"
               min="10"
@@ -221,25 +233,58 @@ const NavbarOptions = () => {
               {`${summaryLength}%`}
             </span>
           </div>
-        </div>
+        </IndentStyle>
       </div>
     </div>
+  );
+};
+
+const ScrollToTopButton = () => {
+  const getVisibleState = () => document.documentElement.scrollTop > 300;
+  const [visible, setVisible] = useState(getVisibleState);
+
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
+
+  useEffect(() => {
+    const listener = () => setVisible(getVisibleState());
+    window.addEventListener("scroll", listener);
+    return () => window.removeEventListener("scoll", listener);
+  }, [setVisible]);
+
+  return (
+    <FaChevronCircleUp
+      title="scoll to top"
+      style={{
+        cursor: "pointer",
+        position: "fixed",
+        display: visible ? "block" : "none",
+        zIndex: 99,
+        bottom: "20px",
+        right: "15px",
+        width: "38px",
+        color: "#000",
+      }}
+      onClick={scrollToTop}
+    />
   );
 };
 
 const Content = () => {
   const location = useLocation();
   return (
-    <main className="uk-section uk-section-default">
-      <div className="uk-container uk-container-expand">
-        <Switch>
-          {routes.map(([path, , component]) => (
-            <Route key={location.key} path={path} component={component} />
-          ))}
-          <Redirect to={routes[0][0]} />
-        </Switch>
-      </div>
-    </main>
+    <>
+      <ScrollToTopButton />
+      <main className="uk-section uk-section-default">
+        <div className="uk-container uk-container-expand">
+          <Switch>
+            {routes.map(([path, , component]) => (
+              <Route key={location.key} path={path} component={component} />
+            ))}
+            <Redirect to={routes[0][0]} />
+          </Switch>
+        </div>
+      </main>
+    </>
   );
 };
 
