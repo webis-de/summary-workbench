@@ -6,11 +6,13 @@ import { computeMarkup } from "../utils/markup";
 const useMarkup = (hypothese, reference) => {
   const { minOverlap, allowSelfSimilarities, colorMap } = useContext(SettingsContext);
   return useMemo(() => {
-    if (hypothese && reference) return computeMarkup([hypothese, reference], colorMap, minOverlap, allowSelfSimilarities);
+    if (hypothese && reference)
+      return computeMarkup([hypothese, reference], colorMap, minOverlap, allowSelfSimilarities);
     return [];
   }, [hypothese, reference, minOverlap, allowSelfSimilarities, colorMap]);
 };
-const useMarkups = (hypotheses, references) => {
+
+const usePairwiseMarkups = (hypotheses, references) => {
   const { minOverlap, allowSelfSimilarities, colorMap } = useContext(SettingsContext);
   return useMemo(() => {
     if (hypotheses && references) {
@@ -22,4 +24,12 @@ const useMarkups = (hypotheses, references) => {
   }, [hypotheses, references, minOverlap, allowSelfSimilarities, colorMap]);
 };
 
-export { useMarkup, useMarkups };
+const useMarkups = (texts) => {
+  const { minOverlap, allowSelfSimilarities, colorMap } = useContext(SettingsContext);
+  return useMemo(
+    () => computeMarkup(texts, colorMap, minOverlap, allowSelfSimilarities),
+    [texts, minOverlap, allowSelfSimilarities, colorMap]
+  );
+};
+
+export { useMarkup, useMarkups, usePairwiseMarkups };

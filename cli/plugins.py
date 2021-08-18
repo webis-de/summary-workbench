@@ -403,7 +403,7 @@ class Plugins(ABC):
 
     @property
     def api_kubernetes_env(self):
-        envs = [plugin.url_env() for plugin in self]
+        envs = [plugin.url_env for plugin in self]
         return list(dict(zip(("name", "value"), env)) for env in envs)
 
     def gen_kubernetes(self):

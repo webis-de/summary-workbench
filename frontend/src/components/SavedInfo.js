@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import UIkit from "uikit";
 
 import { flatten } from "../utils/flatScores";
-import { useMarkups } from "../hooks/markup";
+import { usePairwiseMarkups } from "../hooks/markup";
 import { CompareTable } from "./CompareTable";
 import { ScoreTable } from "./ScoreTable";
 import { DeleteButton } from "./utils/DeleteButton";
@@ -13,7 +13,7 @@ const SavedInfo = ({ index, calculation, deleteCalculation }) => {
   const toggleID = `toggle-saved-calculation-${index}`;
   const loadRef = useRef();
   const [showMarkups, setShowMarkups] = useState(false)
-  const comparisons = useMarkups(showMarkups && hypotheses, references)
+  const comparisons = usePairwiseMarkups(showMarkups && hypotheses, references)
   const showEvent = useCallback(() => {
     if (comparisons.length) return;
     if (loadRef.current && loadRef.current.className.includes("uk-active")) {

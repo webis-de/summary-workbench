@@ -1,13 +1,13 @@
 import React, { useContext, useMemo } from "react";
 
 import { MetricsContext } from "../contexts/MetricsContext";
-import { useMarkups } from "../hooks/markup";
+import { usePairwiseMarkups } from "../hooks/markup";
 import { flatten } from "../utils/flatScores";
 import { CompareTable } from "./CompareTable";
 import { ScoreTable } from "./ScoreTable";
 
 const ResultInfo = ({ scores, references, hypotheses }) => {
-  const comparisons = useMarkups(references, hypotheses);
+  const comparisons = usePairwiseMarkups(references, hypotheses);
 
   const { metrics } = useContext(MetricsContext);
   const flatScores = useMemo(() => flatten(scores, metrics), [scores, metrics]);

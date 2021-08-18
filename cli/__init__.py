@@ -94,9 +94,14 @@ class Service(ABC):
         self.config = get_config()
         self.path = f"./{self.__type__}/"
         self.name = self.__type__
-        with open(f"./{self.__type__}/package.json") as file:
-            self.version= json.load(file)["version"]
         self.host = self.config.get("deploy", {}).get("host")
+        self.load_version()
+
+    def load_version(self):
+        package_json_path = Path(f"./{self.__type__}/package.json")
+        if package_json_path.exists():
+            with open(package_json_path) as file:
+                self.version= json.load(file)["version"]
 
     def docker_username(self):
         try:
@@ -198,12 +203,12 @@ class Ingress(Service):
     __type__ = "ingress"
 
     def gen_kubernetes(self):
-        if not self.host():
+        if not self.host:
             return
         ingress = load_yaml(
             f"./templates/kubernetes/basic/{self.__type__}.yaml"
         )
-        ingress["spec"]["rules"][0]["host"] = self.host()
+        ingress["spec"]["rules"][0]["host"] = self.host
         path = Path(self.__deploy_path__ / f"{self.__type__}.yaml")
         path.parent.mkdir(exist_ok=True, parents=True)
         dump_yaml(ingress, path)
@@ -310,8 +315,8 @@ class Docker:
     def build_all(self, force):
         for services in self.services.values():
             for service in services:
-                if not force and self.exists(service.tag):
-                    service_tag = colored(service.tag, "green")
+                if not force and self.exists(service.tag()):
+                    service_tag = colored(service.tag(), "green")
                     print(f"image {service_tag} already present")
                 else:
                     service.build()

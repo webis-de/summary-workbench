@@ -68,7 +68,7 @@ const PaginationAfter = ({ activePage, lastPage, itemsAfter, onClickFrom }) => {
   return null;
 };
 
-const Pagination = ({ activePage, size, numItems, onChange, pageRange = 5 }) => {
+const Pagination = ({ activePage, size, numItems, onChange, pageRange = 5, width = "400px" }) => {
   const itemsLeftRight = Math.floor(pageRange / 2);
   const lastPage = Math.ceil(numItems / size);
   const nop = (e) => e.preventDefault();
@@ -86,7 +86,7 @@ const Pagination = ({ activePage, size, numItems, onChange, pageRange = 5 }) => 
         data-uk-slidenav-previous
         onClick={prevDisabled ? nop : onClickFrom(activePage - 1)}
       />
-      <ul className="uk-pagination uk-flex-center" data-uk-margin style={{ width: "400px" }}>
+      <ul className="uk-pagination uk-flex-center" data-uk-margin style={{ width }}>
         <PaginationBefore
           activePage={activePage}
           itemsBefore={itemsLeftRight}

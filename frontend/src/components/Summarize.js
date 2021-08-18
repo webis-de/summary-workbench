@@ -12,10 +12,10 @@ import { CSSTransition } from "react-transition-group";
 import { feedbackRequest, summarizeRequest } from "../api";
 import { SettingsContext } from "../contexts/SettingsContext";
 import { SummarizersContext } from "../contexts/SummarizersContext";
-import { useMarkups } from "../hooks/markup";
+import { useMarkups, usePairwiseMarkups } from "../hooks/markup";
 import { displayError, displayMessage } from "../utils/message";
 import { PluginCard } from "./About";
-import { Model } from "./Model";
+import { ModelGrid } from "./Model";
 import { Badge, DismissableBadge } from "./utils/Badge";
 import { Button } from "./utils/Button";
 import { Checkboxes } from "./utils/Checkboxes";
@@ -95,8 +95,9 @@ const InputDocument = ({ summarize, isComputing }) => {
   const { query, setQuery, filteredKeys } = useFilter(summarizerKeys);
   const [selectedSummarizer, setSelectedSummarizer] = useState(null);
   const selectSummarizer = (key) => {
+    if (settings[key]) setSelectedSummarizer(null);
+    else setSelectedSummarizer(key);
     toggleSetting(key);
-    if (selectedSummarizer === key) setSelectedSummarizer(null);
   };
   const unselectSummarizer = (key) => {
     toggleSetting(key);
@@ -140,24 +141,11 @@ const InputDocument = ({ summarize, isComputing }) => {
             className="uk-card uk-card-default uk-card-body uk-flex-stretch"
             style={{ height: "100%" }}
           >
-            <div className="margin-between-10">
-              {Object.values(summarizers).length ? (
-                filteredKeys.map((key) => (
-                  <Model
-                    key={key}
-                    info={summarizers[key]}
-                    onClick={() => selectSummarizer(key)}
-                    isSet={settings[key]}
-                  />
-                ))
-              ) : (
-                <div>no summarizers configured</div>
-              )}
-            </div>
-            <div className="colored-header" style={{ marginTop: "30px" }}>
-              Selected Summarizers
-            </div>
-            <div className="margin-between-5" style={{ marginLeft: "20px", marginBottom: "10px" }}>
+            <ModelGrid keys={filteredKeys} models={summarizers} settings={settings} selectModel={selectSummarizer}/>
+            <div className="uk-flex" style={{ alignItems: "center", gap: "5px", marginBottom: "10px", marginTop: "30px" }}>
+              <span className="colored-header">
+                selected:
+              </span >
               {chosenModels.map((model) => (
                 <DismissableBadge onClick={() => unselectSummarizer(model)} key={model}>
                   <a
@@ -174,9 +162,11 @@ const InputDocument = ({ summarize, isComputing }) => {
               ))}
             </div>
             {selectedSummarizer && (
-              <PluginCard plugin={summarizers[selectedSummarizer]} inline={false} />
+              <div style={{ marginTop: "20px", marginBottom: "20px" }}>
+                <PluginCard plugin={summarizers[selectedSummarizer]} inline={false} />
+              </div>
             )}
-            <div className="uk-flex uk-flex-center">
+            <div className="uk-flex uk-flex-center" style={{marginTop: "40px"}}>
               {isComputing ? (
                 <Loading />
               ) : (
@@ -235,11 +225,10 @@ const Summary = ({ markup, summary, markupState, scrollState, showMarkup }) => {
     </div>
   );
 };
-// Processed document
-const Document = ({ title, markup, markupState, scrollState, showMarkup }) => (
+
+const Document = ({ markup, markupState, scrollState, showMarkup }) => (
   <>
     <div>
-      <h4 style={{ margin: "10px", marginBottom: "0" }}>{title}</h4>
       <div
         className="uk-card uk-card-default uk-card-body"
         style={{ height: "60vh", width: "auto", overflow: "auto", padding: "20px" }}
@@ -269,7 +258,7 @@ const SummaryTabView = ({ title, showOverlap, summaries, markups, documentLength
   return (
     <div className="uk-flex">
       <div style={{ flexBasis: "60%" }}>
-        <Header text="Document" fontSize="16pt">
+        <Header text={title || "Document"} fontSize="16pt">
           <span style={{ fontSize: "12pt" }}>{documentLength} words</span>
         </Header>
         <Document
@@ -336,21 +325,23 @@ const buildGrids = (list) => {
 };
 
 const SummaryCompareView = ({ summaries, markups, showOverlap }) => {
-  const grids = buildGrids(markups.map((markup, index) => [markup, summaries[index]]));
-
   const { summarizers } = useContext(SummarizersContext);
+  const grids = buildGrids(
+    markups.map((markup, index) => [markup, summarizers[summaries[index].name].name])
+  );
+
   return (
     <>
       {grids.map((grid, gridIndex) => (
         <div key={gridIndex} className="uk-margin uk-grid uk-child-width-expand@s">
-          {grid.map(([markup, summary], markupIndex) => (
+          {grid.map(([markup, summarizer], markupIndex) => (
             <div key={markupIndex}>
-              <Header text={summarizers[summary.name].name} fontSize="16pt" />
+              <Header text={summarizer} fontSize="16pt" />
               <div
                 style={{ maxHeight: "500px", overflow: "auto" }}
                 className="uk-card uk-card-default uk-card-body"
               >
-                <Summary markup={markup} summary={summary} showMarkup={showOverlap} />
+                <Markup markups={markup} showMarkup={showOverlap} />
               </div>
             </div>
           ))}
@@ -391,17 +382,18 @@ const ToggleOverlap = ({ show, toggle }) => (
     CloseIcon={EyeClosed}
     show={show}
     toggle={toggle}
-    descriptionOpen="show overlap"
-    descriptionClose="hide overlap"
+    descriptionOpen="Show Agreement"
+    descriptionClose="Hide Agreement"
   />
 );
 
 const SummaryView = ({ title, summaries, documentLength }) => {
   const [showTab, toggleShowTab] = useReducer((e) => !e, true);
   const [showOverlap, toggleShowOverlap] = useReducer((e) => !e, false);
-  const hypotheses = useMemo(() => summaries.map(({ summaryText }) => summaryText), [summaries]);
-  const references = useMemo(() => summaries.map(({ originalText }) => originalText), [summaries]);
-  const markups = useMarkups(references, hypotheses);
+  const sums = useMemo(() => summaries.map(({ summaryText }) => summaryText), [summaries]);
+  const originals = useMemo(() => summaries.map(({ originalText }) => originalText), [summaries]);
+  const pairwiseMarkups = usePairwiseMarkups(originals, sums);
+  const summaryMarkups = useMarkups(sums);
   const scrollRef = useRef();
 
   useEffect(() => {
@@ -422,10 +414,14 @@ const SummaryView = ({ title, summaries, documentLength }) => {
               showOverlap={showOverlap}
               summaries={summaries}
               title={title}
-              markups={markups}
+              markups={pairwiseMarkups}
             />
           ) : (
-            <SummaryCompareView showOverlap={showOverlap} summaries={summaries} markups={markups} />
+            <SummaryCompareView
+              showOverlap={showOverlap}
+              summaries={summaries}
+              markups={summaryMarkups}
+            />
           )}
         </div>
         <div

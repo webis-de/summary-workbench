@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useMemo } from "react";
 
-import { randomColor, RGBToHex } from "../utils/color";
+import { usePagination } from "../hooks/pagination";
+import { RGBToHex, randomColor } from "../utils/color";
 import { BadgeButton } from "./utils/Button";
+import { Pagination } from "./utils/Pagination";
 
 const typeToColor = (type) => {
   switch (type) {
@@ -18,7 +20,7 @@ const typeToColor = (type) => {
   }
 };
 
-const Model = ({ info, onClick, isSet }) => (
+const Model = ({ info, onClick, style, isSet }) => (
   <BadgeButton
     onClick={onClick}
     style={{
@@ -28,10 +30,37 @@ const Model = ({ info, onClick, isSet }) => (
       padding: "14px",
       color: "black",
       backgroundColor: isSet ? "#ffcccb" : "white",
+      ...style,
     }}
   >
-    {info.name}
+    <span title={info.name} style={{ overflow: "hidden", textOverflow: "ellipsis" }}>
+      {info.name}
+    </span>
   </BadgeButton>
 );
 
-export { Model };
+const ModelGrid = ({ keys, models, settings, selectModel }) => {
+  const [page, setPage, size, _, numItems] = usePagination(keys.length);
+  return (
+    <div>
+      <div style={{ display: "grid", gridTemplateColumns: "50% 50%", gridGap: "10px" }}>
+        {Object.values(models).length ? (
+          keys.slice((page-1) * size, page * size).map((key) => (
+            <Model
+              key={key}
+              info={models[key]}
+              onClick={() => selectModel(key)}
+              style={{ width: "100%" }}
+              isSet={settings[key]}
+            />
+          ))
+        ) : (
+          <div>no models configured</div>
+        )}
+      </div>
+      {numItems > size && <Pagination activePage={page} size={size} numItems={numItems} onChange={setPage} width="250px" />}
+    </div>
+  );
+};
+
+export { Model, ModelGrid };

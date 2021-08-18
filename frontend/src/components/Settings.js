@@ -2,7 +2,7 @@ import React, { useContext, useMemo, useState } from "react";
 
 import { MetricsContext } from "../contexts/MetricsContext";
 import { PluginCard } from "./About";
-import { Model } from "./Model";
+import { ModelGrid } from "./Model";
 import { DismissableBadge } from "./utils/Badge";
 import { Card, CardBody, CardHeader, CardTitle } from "./utils/Card";
 import { Checkboxes } from "./utils/Checkboxes";
@@ -20,8 +20,9 @@ const Settings = () => {
   const [selectedMetric, setSelectedMetric] = useState(null);
 
   const selectMetric = (key) => {
+    if (settings[key]) setSelectedMetric(null);
+    else setSelectedMetric(key);
     toggleSetting(key);
-    if (selectedMetric === key) setSelectedMetric(null);
   };
   const unselectMetric = (key) => {
     toggleSetting(key);
@@ -39,24 +40,14 @@ const Settings = () => {
         </CardTitle>
       </CardHeader>
       <CardBody>
-        <div className="margin-between-10">
-          {Object.values(metrics).length ? (
-            filteredKeys.map((key) => (
-              <Model
-                key={key}
-                info={metrics[key]}
-                onClick={() => selectMetric(key)}
-                isSet={settings[key]}
-              />
-            ))
-          ) : (
-            <div>no metrics configured</div>
-          )}
-        </div>
-        <div className="colored-header" style={{ marginTop: "30px" }}>
-          Selected Metrics
-        </div>
-        <div className="margin-between-5" style={{ marginLeft: "20px", marginBottom: "10px" }}>
+        <ModelGrid
+          keys={filteredKeys}
+          models={metrics}
+          settings={settings}
+          selectModel={selectMetric}
+        />
+        <div className="uk-flex" style={{ alignItems: "center", gap: "5px", marginTop: "30px" }}>
+          <span className="colored-header">selected:</span>
           {chosenMetrics.map((model) => (
             <DismissableBadge onClick={() => unselectMetric(model)} key={model}>
               <a
@@ -72,7 +63,11 @@ const Settings = () => {
             </DismissableBadge>
           ))}
         </div>
-        {selectedMetric && <PluginCard plugin={metrics[selectedMetric]} inline={false} />}
+        {selectedMetric && (
+          <div style={{ marginTop: "30px" }}>
+            <PluginCard plugin={metrics[selectedMetric]} inline={false} />
+          </div>
+        )}
       </CardBody>
     </Card>
   );
