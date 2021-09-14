@@ -15,7 +15,7 @@ const Saved = ({ className, calculations, deleteCalculation }) => (
     </div>
     <Accordion>
       {calculations.map((calculation, index) => (
-        <AccordionItem key={calculation.id} text={calculation.id} badges={Object.values(calculation.metrics).map(({name}) => name)}>
+        <AccordionItem key={calculation.id} text={calculation.id} badges={Object.keys(calculation.scores).map((name) => calculation.metrics[name].name)}>
           <SavedInfo
             index={index}
             calculation={calculation}

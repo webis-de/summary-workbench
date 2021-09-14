@@ -134,7 +134,14 @@ const ColorschemeSetting = ({ colorMap, setColorMap }) => (
   <div className="uk-margin">
     <h4>Colorscheme</h4>
     <IndentStyle>
-      <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", gridGap: "10px" }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "auto 1fr",
+          gridGap: "10px",
+          alignItems: "center",
+        }}
+      >
         {Object.entries(colorschemes).map(([category, names]) => (
           <Fragment key={category}>
             <span>{category}</span>

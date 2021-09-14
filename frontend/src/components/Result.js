@@ -1,5 +1,5 @@
 import React from "react";
-import { FaCalculator, FaPen, FaSave } from "react-icons/fa";
+import { FaCalculator, FaPen } from "react-icons/fa";
 
 import { ResultInfo } from "./ResultInfo";
 import { Button } from "./utils/Button";

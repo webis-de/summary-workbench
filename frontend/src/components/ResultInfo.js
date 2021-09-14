@@ -7,7 +7,7 @@ import { CompareTable } from "./CompareTable";
 import { ScoreTable } from "./ScoreTable";
 
 const ResultInfo = ({ scores, references, hypotheses }) => {
-  const comparisons = usePairwiseMarkups(references, hypotheses);
+  const comparisons = usePairwiseMarkups(hypotheses, references);
 
   const { metrics } = useContext(MetricsContext);
   const flatScores = useMemo(() => flatten(scores, metrics), [scores, metrics]);

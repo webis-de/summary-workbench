@@ -1,4 +1,4 @@
-import gh from "parse-github-url";
+// import gh from "parse-github-url";
 import React, { useContext } from "react";
 import { FaCode, FaLink } from "react-icons/fa";
 
@@ -7,7 +7,7 @@ import { SummarizersContext } from "../contexts/SummarizersContext";
 import { Button } from "./utils/Button";
 import { CenterLoading } from "./utils/Loading";
 
-const extractGithubUser = (url) => gh(url).repo || url;
+// const extractGithubUser = (url) => gh(url).repo || url;
 
 const isLink = (text) => text.match(/^https?:\/\//);
 

@@ -1,5 +1,4 @@
 import React, {
-  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -19,7 +18,6 @@ import { ModelGrid } from "./Model";
 import { Badge, DismissableBadge } from "./utils/Badge";
 import { Button } from "./utils/Button";
 import { Card, CardBody, CardHeader, CardTitle } from "./utils/Card";
-import { Checkboxes } from "./utils/Checkboxes";
 import { LiveSearch, useFilter } from "./utils/FuzzySearch";
 import { Bars, EyeClosed, EyeOpen, ThumbsDown, ThumbsUp } from "./utils/Icons";
 import { CenterLoading } from "./utils/Loading";
@@ -90,8 +88,8 @@ In 2009, following an Internet campaign, British Prime Minister Gordon Brown mad
 
 const InputDocument = ({ summarize, isComputing }) => {
   const [documentText, setDocumentText] = useState("");
-  const { summarizers, summarizerTypes, settings, toggleSetting } = useContext(SummarizersContext);
-  const { summaryLength, setSummaryLength } = useContext(SettingsContext);
+  const { summarizers, settings, toggleSetting } = useContext(SummarizersContext);
+  const { summaryLength } = useContext(SettingsContext);
   const summarizerKeys = useMemo(() => Object.keys(summarizers).sort(), [summarizers]);
   const { query, setQuery, filteredKeys } = useFilter(summarizerKeys);
   const [selectedSummarizer, setSelectedSummarizer] = useState(null);
@@ -143,55 +141,55 @@ const InputDocument = ({ summarize, isComputing }) => {
               </CardTitle>
             </CardHeader>
             <CardBody>
-                <ModelGrid
-                  keys={filteredKeys}
-                  models={summarizers}
-                  settings={settings}
-                  selectModel={selectSummarizer}
-                />
-                <div
-                  className="uk-flex"
-                  style={{
-                    alignItems: "center",
-                    gap: "5px",
-                    marginBottom: "10px",
-                    marginTop: "30px",
-                  }}
-                >
-                  <span className="colored-header">selected:</span>
-                  {chosenModels.map((model) => (
-                    <DismissableBadge onClick={() => unselectSummarizer(model)} key={model}>
-                      <a
-                        href="/#"
-                        className="nostyle"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setSelectedSummarizer(model);
-                        }}
-                      >
-                        {summarizers[model].name}
-                      </a>
-                    </DismissableBadge>
-                  ))}
-                </div>
-                {selectedSummarizer && (
-                  <div style={{ marginTop: "20px", marginBottom: "20px" }}>
-                    <PluginCard plugin={summarizers[selectedSummarizer]} inline={false} />
-                  </div>
-                )}
-                <div className="uk-flex uk-flex-center" style={{ marginTop: "40px" }}>
-                  {isComputing ? (
-                    <Loading />
-                  ) : (
-                    <button
-                      className="uk-button uk-button-primary"
-                      disabled={!documentText || !chosenModels.length}
-                      onClick={() => summarize(documentText, chosenModels, summaryLength)}
+              <ModelGrid
+                keys={filteredKeys}
+                models={summarizers}
+                settings={settings}
+                selectModel={selectSummarizer}
+              />
+              <div
+                className="uk-flex uk-flex-wrap"
+                style={{
+                  alignItems: "center",
+                  gap: "5px",
+                  marginBottom: "10px",
+                  marginTop: "30px",
+                }}
+              >
+                <span className="colored-header">selected:</span>
+                {chosenModels.map((model) => (
+                  <DismissableBadge onClick={() => unselectSummarizer(model)} key={model}>
+                    <a
+                      href="/#"
+                      className="nostyle"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setSelectedSummarizer(model);
+                      }}
                     >
-                      Summarize
-                    </button>
-                  )}
+                      {summarizers[model].name}
+                    </a>
+                  </DismissableBadge>
+                ))}
+              </div>
+              {selectedSummarizer && (
+                <div style={{ marginTop: "20px", marginBottom: "20px" }}>
+                  <PluginCard plugin={summarizers[selectedSummarizer]} inline={false} />
                 </div>
+              )}
+              <div className="uk-flex uk-flex-center" style={{ marginTop: "40px" }}>
+                {isComputing ? (
+                  <Loading />
+                ) : (
+                  <button
+                    className="uk-button uk-button-primary"
+                    disabled={!documentText || !chosenModels.length}
+                    onClick={() => summarize(documentText, chosenModels, summaryLength)}
+                  >
+                    Summarize
+                  </button>
+                )}
+              </div>
             </CardBody>
           </Card>
         </div>

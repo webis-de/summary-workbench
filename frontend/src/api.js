@@ -12,7 +12,7 @@ const summarizeRequest = (text, summarizers, ratio) =>
 const feedbackRequest = (summarizer, summary, reference, url, feedback) => {
   let json = { summarizer, summary, reference, feedback };
   if (url !== null) json = { url, ...json };
-  return post("/api/feedback", json).catch(e => alert(e));
+  return post("/api/feedback", json);
 };
 
 export {

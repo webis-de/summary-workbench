@@ -68,7 +68,7 @@ const Legend = ({ models }) => {
 };
 
 const ModelGrid = ({ keys, models, settings, selectModel }) => {
-  const [page, setPage, size, _, numItems] = usePagination(keys.length);
+  const [page, setPage, size, , numItems] = usePagination(keys.length);
   return (
     <div style={{ marginTop: "-35px" }}>
       <Legend models={models} />

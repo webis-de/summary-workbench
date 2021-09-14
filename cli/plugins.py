@@ -300,7 +300,7 @@ class Plugin(ABC):
 
     @property
     def kubernetes_name(self):
-        return self.__type__.lower() + "-" + self.name#.replace("_", ".")
+        return f"{self.__type__.lower()}-{self.short_safe_name}"
 
     def gen_kubernetes(self):
         name = self.kubernetes_name

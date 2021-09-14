@@ -1,7 +1,5 @@
 import React from "react";
 
-import { Button } from "./Button";
-
 const range = (from, to) => {
   const size = to - from;
   return size > 0 ? [...Array(size).keys(size)].map((i) => from + i) : [];

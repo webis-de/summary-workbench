@@ -5,7 +5,6 @@ import { PluginCard } from "./About";
 import { ModelGrid } from "./Model";
 import { DismissableBadge } from "./utils/Badge";
 import { Card, CardBody, CardHeader, CardTitle } from "./utils/Card";
-import { Checkboxes } from "./utils/Checkboxes";
 import { LiveSearch, useFilter } from "./utils/FuzzySearch";
 
 const getChosenMetrics = (settings) =>
@@ -14,7 +13,7 @@ const getChosenMetrics = (settings) =>
     .map((e) => e[0]);
 
 const Settings = () => {
-  const { metrics, settings, toggleSetting, metricTypes } = useContext(MetricsContext);
+  const { metrics, settings, toggleSetting } = useContext(MetricsContext);
   const metricKeys = useMemo(() => Object.keys(metrics).sort(), [metrics]);
   const { query, setQuery, filteredKeys } = useFilter(metricKeys);
   const [selectedMetric, setSelectedMetric] = useState(null);
@@ -46,7 +45,10 @@ const Settings = () => {
           settings={settings}
           selectModel={selectMetric}
         />
-        <div className="uk-flex" style={{ alignItems: "center", gap: "5px", marginTop: "30px" }}>
+        <div
+          className="uk-flex uk-flex-wrap"
+          style={{ alignItems: "center", gap: "5px", marginTop: "30px" }}
+        >
           <span className="colored-header">selected:</span>
           {chosenMetrics.map((model) => (
             <DismissableBadge onClick={() => unselectMetric(model)} key={model}>
