@@ -3,9 +3,15 @@ import { useCallback, useEffect, useReducer, useState } from "react";
 import { getSummarizersRequest } from "../api";
 import { displayError } from "../utils/message";
 
+const defaultSummarizers = ["anonymous-textrank", "anonymous-bart-cnn"];
 const saveSetting = (summarizer, status) =>
   window.localStorage.setItem(summarizer, status ? "true" : "false");
-const loadSetting = (summarizer) => window.localStorage.getItem(summarizer) === "true";
+const loadSetting = (summarizer) => {
+  const setting = window.localStorage.getItem(summarizer);
+  console.log(summarizer, setting)
+  if (setting === null && defaultSummarizers.includes(summarizer)) return true;
+  return setting === "true";
+};
 
 const useSummarizers = () => {
   const [summarizers, setSummarizers] = useState(null);
@@ -32,7 +38,7 @@ const useSummarizers = () => {
       .catch((err) => {
         setSummarizers(null);
         setLoading(false);
-        displayError(err)
+        displayError(err);
       });
   }, [setLoading, setSummarizers, reloading]);
   useEffect(() => {

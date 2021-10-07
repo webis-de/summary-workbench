@@ -29,10 +29,10 @@ const SavedInfo = ({ index, calculation, deleteCalculation }) => {
       <div className="uk-flex uk-flex-middle uk-margin">
         <ul className="uk-subnav uk-subnav-pill uk-margin uk-margin-right uk-width-expand uk-flex-middle" data-uk-switcher={`connect: #${toggleID};`} style={{marginBottom: "0"}}>
           <li>
-            <a href="/#" style={tabStyle}>Metrics</a>
+            <a href="/#" style={tabStyle}>Scores</a>
           </li>
           <li>
-            <a href="/#" style={tabStyle}>Compare</a>
+            <a href="/#" style={tabStyle}>Visualize Overlap</a>
           </li>
         </ul>
         <DeleteButton onClick={deleteCalculation} />

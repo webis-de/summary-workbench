@@ -1,7 +1,7 @@
 import React, { useContext, useMemo, useState } from "react";
 
 import { MetricsContext } from "../contexts/MetricsContext";
-import { PluginCard } from "./About";
+import { PluginCard } from "./utils/PluginCard";
 import { ModelGrid } from "./Model";
 import { DismissableBadge } from "./utils/Badge";
 import { Card, CardBody, CardHeader, CardTitle } from "./utils/Card";

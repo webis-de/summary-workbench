@@ -1,11 +1,4 @@
-import React, {
-  useContext,
-  useEffect,
-  useMemo,
-  useReducer,
-  useRef,
-  useState,
-} from "react";
+import React, { useContext, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { CSSTransition } from "react-transition-group";
 
 import { feedbackRequest, summarizeRequest } from "../api";
@@ -13,7 +6,7 @@ import { SettingsContext } from "../contexts/SettingsContext";
 import { SummarizersContext } from "../contexts/SummarizersContext";
 import { useMarkups, usePairwiseMarkups } from "../hooks/markup";
 import { displayError, displayMessage } from "../utils/message";
-import { PluginCard } from "./About";
+import { PluginCard } from "./utils/PluginCard";
 import { ModelGrid } from "./Model";
 import { Badge, DismissableBadge } from "./utils/Badge";
 import { Button } from "./utils/Button";
@@ -107,8 +100,6 @@ const InputDocument = ({ summarize, isComputing }) => {
 
   const insertSampleText = () => {
     setDocumentText(sampleText);
-    if (settings["anonymous-textrank"] !== undefined && !settings["anonymous-textrank"])
-      toggleSetting("anonymous-textrank");
   };
 
   return (
@@ -147,30 +138,30 @@ const InputDocument = ({ summarize, isComputing }) => {
                 settings={settings}
                 selectModel={selectSummarizer}
               />
+              <div style={{marginTop: "30px"}} />
+              <span className="colored-header">summary length:</span> {`${summaryLength} %`}
               <div
                 className="uk-flex uk-flex-wrap"
                 style={{
                   alignItems: "center",
                   gap: "5px",
-                  marginBottom: "10px",
-                  marginTop: "30px",
                 }}
               >
-                <span className="colored-header">selected:</span>
-                {chosenModels.map((model) => (
-                  <DismissableBadge onClick={() => unselectSummarizer(model)} key={model}>
-                    <a
-                      href="/#"
-                      className="nostyle"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setSelectedSummarizer(model);
-                      }}
-                    >
-                      {summarizers[model].name}
-                    </a>
-                  </DismissableBadge>
-                ))}
+                  <span className="colored-header">selected:</span>
+                  {chosenModels.map((model) => (
+                    <DismissableBadge onClick={() => unselectSummarizer(model)} key={model}>
+                      <a
+                        href="/#"
+                        className="nostyle"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setSelectedSummarizer(model);
+                        }}
+                      >
+                        {summarizers[model].name}
+                      </a>
+                    </DismissableBadge>
+                  ))}
               </div>
               {selectedSummarizer && (
                 <div style={{ marginTop: "20px", marginBottom: "20px" }}>
@@ -511,10 +502,9 @@ const Summarize = () => {
     <>
       <InputDocument summarize={summarize} isComputing={computing} />
       {results && (
-        <>
-          <h4>Results</h4>
+        <div style={{marginTop: "40px"}}>
           <SummaryView documentLength={documentLength} summaries={results} title={title} />
-        </>
+        </div>
       )}
     </>
   );

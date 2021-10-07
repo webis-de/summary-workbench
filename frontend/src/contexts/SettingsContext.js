@@ -2,7 +2,7 @@ import React, { useCallback, useReducer, useState } from "react";
 
 import { ColorMap } from "../utils/color";
 
-const loadColorscheme = () => window.localStorage.getItem("colorscheme") || "colorfull";
+const loadColorscheme = () => window.localStorage.getItem("colorscheme") || "soft";
 const storeColorscheme = (colorscheme) => window.localStorage.setItem("colorscheme", colorscheme);
 
 const loadMinOverlap = () => parseInt(window.localStorage.getItem("min_overlap") || "3", 10);
@@ -17,10 +17,16 @@ const loadAllowSelfSimilarities = () =>
 const storeAllowSelfSimilarities = (allowSelfSimilarities) =>
   window.localStorage.setItem("allow_self_similarities", allowSelfSimilarities);
 
+const loadIgnoreStopwords = () =>
+  window.localStorage.getItem("ignore_stopwords") === "true";
+const storeIgnoreStopwords = (ignoreStopwords) =>
+  window.localStorage.setItem("ignore_stopwords", ignoreStopwords);
+
 const SettingsContext = React.createContext();
 
 const SettingsProvider = ({ children }) => {
   const [allowSelfSimilarities, setAllowSelfSimilarities] = useState(loadAllowSelfSimilarities);
+  const [ignoreStopwords, setIgnoreStopwords] = useState(loadIgnoreStopwords);
   const [minOverlap, setMinOverlap] = useReducer((_, overlap) => {
     const newOverlap = typeof overlap === "string" ? parseInt(overlap, 10) : overlap;
     storeMinOverlap(newOverlap);
@@ -39,6 +45,11 @@ const SettingsProvider = ({ children }) => {
       return oldColorMap;
     }
   }, new ColorMap(loadColorscheme(), true));
+  const toggleIgnoreStopwords = useCallback(() => {
+    const newValue = !ignoreStopwords;
+    setIgnoreStopwords(newValue);
+    storeIgnoreStopwords(newValue);
+  }, [ignoreStopwords, setIgnoreStopwords]);
   const toggleAllowSelfSimilarities = useCallback(() => {
     const newValue = !allowSelfSimilarities;
     setAllowSelfSimilarities(newValue);
@@ -48,6 +59,8 @@ const SettingsProvider = ({ children }) => {
     <SettingsContext.Provider
       value={{
         minOverlap,
+        ignoreStopwords,
+        toggleIgnoreStopwords,
         setMinOverlap,
         allowSelfSimilarities,
         toggleAllowSelfSimilarities,

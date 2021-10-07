@@ -2,10 +2,9 @@ import React, { Fragment, memo, useCallback, useEffect, useRef, useState } from 
 
 const innerHoverStyle = { background: "yellow", color: "black", display: "relative" };
 const baseMarkupStyle = {
-  padding: "0px",
-  paddingTop: "2.5px",
-  paddingBottom: "2.5px",
-  borderRadius: "0px",
+  padding: 0,
+  paddingTop: "0.1em",
+  paddingBottom: "0.1em"
 };
 const outerHoverStyle = { ...baseMarkupStyle, ...innerHoverStyle };
 
@@ -113,13 +112,15 @@ const MarkupRoot = ({ markups, markupState, scrollState, allowScroll, showMarkup
 );
 
 const Markup = ({ markups, markupState, scrollState, showMarkup = true }) => (
-  <MarkupRoot
-    markups={markups}
-    markupState={markupState}
-    scrollState={scrollState}
-    allowScroll={showMarkup}
-    showMarkup={showMarkup}
-  />
+  <>
+    <MarkupRoot
+      markups={markups}
+      markupState={markupState}
+      scrollState={scrollState}
+      allowScroll={showMarkup}
+      showMarkup={showMarkup}
+    />
+  </>
 );
 
 export { Markup, useMarkupScroll };

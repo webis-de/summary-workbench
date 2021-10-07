@@ -17,10 +17,10 @@ const ResultInfo = ({ scores, references, hypotheses }) => {
     <div>
       <ul className="uk-subnav uk-subnav-pill" data-uk-switcher="connect: #result-display;">
         <li>
-          <a href="/#" style={tabStyle}>Metrics</a>
+          <a href="/#" style={tabStyle}>Scores</a>
         </li>
         <li>
-          <a href="/#" style={tabStyle}>Compare</a>
+          <a href="/#" style={tabStyle}>Visualize Overlap</a>
         </li>
       </ul>
       <ul id="result-display" className="uk-switcher">

@@ -19,7 +19,6 @@ summarizers:
   - ./summarizers/bertsum
   - ./summarizers/textrank
   - ./summarizers/newspaper3k
-  - ./summarizers/pytextrank
   - source: ./summarizers/neuralsum
     environment:
       model: T5

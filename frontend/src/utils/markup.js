@@ -278,15 +278,35 @@ const wordspaceTokens = (text) => {
   return [first_whitespace, wstokens];
 };
 
+const clean = (word) => {
+  word = word.replace("ß", "ss");
+  word = word.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  word = word.replace(/[^a-zA-Z0-9\u0410-\u044F-]/g, "");
+  word = word.toLowerCase();
+  return word;
+};
+
 class Textblock {
   constructor(text) {
     [this.first_whitespace, this.wstokens] = wordspaceTokens(text);
-    this.words = this.wstokens.filter((_, i) => i % 2 === 0);
+    this.clean_words = this.wstokens.filter((_, i) => i % 2 === 0).map(clean);
     this.markups = [];
   }
 
+  clean_word_list = (ignore_stopwords) => {
+    const tokens = [];
+    const idx = [];
+    this.clean_words.forEach((word, i) => {
+      if (word && (ignore_stopwords || !word.match(stopword_re))) {
+        tokens.push(word);
+        idx.push(i);
+      }
+    });
+    return [tokens, idx];
+  };
+
   add_range = (start, end, information) => {
-    if (start === end && this.words[start].match(stopword_re)) return;
+    if (start === end && this.clean_words[start].match(stopword_re)) return;
     this.markups.push([start, end, information]);
   };
 
@@ -304,30 +324,10 @@ class Textblock {
   };
 }
 
-const clean = (word) => {
-  word = word.replace("ß", "ss");
-  word = word.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  word = word.replace(/[^a-zA-Z0-9\u0410-\u044F-]/g, "");
-  word = word.toLowerCase();
-  return word;
-};
 
-const clean_list = (words) => {
-  const tokens = [];
-  const idx = [];
-  words.forEach((word, i) => {
-    word = clean(word);
-    if (word && !word.match(stopword_re)) {
-      tokens.push(word);
-      idx.push(i);
-    }
-  });
-  return [tokens, idx];
-};
-
-const computeMarkup = (docs, colorMap, min_length = 3, allow_self_similarities = false) => {
+const computeMarkup = (docs, colorMap, min_length = 3, allow_self_similarities = false, ignore_stopwords = true) => {
   const textblocks = docs.map((doc) => new Textblock(doc));
-  const clean_docs_idx = textblocks.map((textblock) => clean_list(textblock.words));
+  const clean_docs_idx = textblocks.map((textblock) => textblock.clean_word_list(ignore_stopwords));
 
   const matches = compute_matches(
     clean_docs_idx.map(([clean_docs]) => clean_docs),

@@ -1,15 +1,13 @@
 [[source]]
-name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
-
-[dev-packages]
+name = "pypi"
 
 [packages]
-spacy = "*"
-scipy = "*"
-syntok = "*"
-networkx = "*"
+pytextrank = "*"
+en-core-web-sm = {file = "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.0.0/en_core_web_sm-3.0.0.tar.gz"}
+
+[dev-packages]
 
 [requires]
 python_version = "3.8"

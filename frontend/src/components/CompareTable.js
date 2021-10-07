@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import {SettingsContext} from "../contexts/SettingsContext"
 
 import { usePagination } from "../hooks/pagination";
 import { Markup } from "./utils/Markup";
@@ -38,14 +39,21 @@ const ComparisonDisplay = ({ page, size, comparisons }) => (
 
 const CompareTable = ({ comparisons }) => {
   const [page, setPage, size, setSize, numItems] = usePagination(comparisons.length);
+  const { minOverlap } = useContext(SettingsContext)
   const numberedComparisons = comparisons.map((el, i) => [i + 1, ...el]);
 
   return (
     <>
-      <div
-        className="uk-margin uk-grid uk-grid-small uk-child-width-1-2@s"
-        style={{ gridRowGap: "10px" }}
-      >
+      <Pagination
+        activePage={page}
+        size={size}
+        numItems={numItems}
+        pageRange={5}
+        onChange={setPage}
+      />
+      <div className="uk-flex uk-flex-between">
+      <span style={{color: "red"}}>{`Minimum Overlap Highlighted: ${minOverlap} grams`}</span>
+        <div className="uk-flex">
         <div>
           <input
             className="uk-input align-center"
@@ -62,14 +70,8 @@ const CompareTable = ({ comparisons }) => {
             onKeyDown={(e) => e.keyCode === 13 && setSize(e.currentTarget.value)}
           />
         </div>
+        </div>
       </div>
-      <Pagination
-        activePage={page}
-        size={size}
-        numItems={numItems}
-        pageRange={5}
-        onChange={setPage}
-      />
       <ComparisonDisplay page={page} size={size} comparisons={numberedComparisons} />
     </>
   );

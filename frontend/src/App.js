@@ -167,6 +167,8 @@ const ColorschemeSetting = ({ colorMap, setColorMap }) => (
 const NavbarOptions = () => {
   const {
     minOverlap,
+    ignoreStopwords,
+    toggleIgnoreStopwords,
     setMinOverlap,
     allowSelfSimilarities,
     toggleAllowSelfSimilarities,
@@ -198,7 +200,7 @@ const NavbarOptions = () => {
               ))}
             </div>
           </div>
-          <div className="uk-flex uk-flex-middle">
+          <div className="uk-flex uk-flex-middle uk-margin">
             <h4 style={{ margin: "0", marginRight: "20px" }}>Show Redundancy</h4>
             <input
               style={{ margin: "0" }}
@@ -206,6 +208,17 @@ const NavbarOptions = () => {
               checked={allowSelfSimilarities}
               readOnly
               onClick={toggleAllowSelfSimilarities}
+              type="checkbox"
+            />
+          </div>
+          <div className="uk-flex uk-flex-middle">
+            <h4 style={{ margin: "0", marginRight: "20px" }}>Ignore Stopwords</h4>
+            <input
+              style={{ margin: "0" }}
+              className="uk-checkbox"
+              checked={ignoreStopwords}
+              readOnly
+              onClick={toggleIgnoreStopwords}
               type="checkbox"
             />
           </div>
