@@ -1,54 +1,41 @@
-import React, { useEffect, useMemo, useReducer, useState } from "react";
-import { FaInfoCircle, FaTrash } from "react-icons/fa";
+import React, { useMemo, useReducer, useState } from "react";
+import { FaInfoCircle, FaPlus, FaTimes } from "react-icons/fa";
 
 import { useKeycode } from "../hooks/keycode";
-import { useList } from "../hooks/list";
+import { useMarkup } from "../hooks/markup";
 import { usePagination } from "../hooks/pagination";
 import { useVisualizations } from "../hooks/visualizations";
-import { displayMessage } from "../utils/message";
-import { useMarkup } from "../hooks/markup"
-import { Markup } from "./utils/Markup";
 import { Accordion, AccordionItem } from "./utils/Accordion";
 import { Button } from "./utils/Button";
 import { Card, CardBody, CardHeader, CardTitle } from "./utils/Card";
-import { ChooseFile, sameLength, useFile } from "./utils/ChooseFile";
+import { ChooseFile, useFile } from "./utils/ChooseFile";
 import { DeleteButton } from "./utils/DeleteButton";
 import { EyeClosed, EyeOpen } from "./utils/Icons";
+import { CenterLoading } from "./utils/Loading";
+import { Markup } from "./utils/Markup";
 import { Modal } from "./utils/Modal";
 import { Pagination } from "./utils/Pagination";
 
-const ModelModal = ({ isOpen, setIsOpen, models, addModel, otherLines, forceSameLine = false }) => {
+const ModelModal = ({ close, addModel, length }) => {
   const [name, setName] = useState("");
   const [infoText, setInfoText] = useState(null);
   const [fileName, setFile, lines] = useFile(null);
-  const linesAreSame = sameLength([lines, ...otherLines]);
+  const rightLength = lines ? lines.length === length : true;
 
-  const close = () => setIsOpen(false);
-  const modelIsValid = () => !Object.values(models).some((model) => model.name === name);
-  const accept = () => {
-    if (!name) {
-      setInfoText("no name given");
-      return;
-    }
-    if (fileName === null) {
-      setInfoText("no file given");
-      return;
-    }
-    if (forceSameLine && !linesAreSame) {
-      setInfoText(`the files has to have exactly ${otherLines[0].length} lines`);
-      return;
-    }
-    if (modelIsValid()) {
-      addModel({ name, lines });
-      close();
-    } else {
-      setInfoText(`name '${name}' is already taken`);
-    }
+  const accept = async () => {
+    const cleanName = name.trim();
+    if (!cleanName) setInfoText("no name given");
+    else if (fileName === null) setInfoText("no file given");
+    else if (!rightLength) setInfoText(`the files has to have exactly ${length} lines`);
+    else if (!(await addModel({ name: cleanName, lines })))
+      setInfoText(`name '${cleanName}' is already taken`);
+    else close();
   };
-  useKeycode([13], accept, isOpen);
+
+  useKeycode([13], accept);
 
   return (
-    <Modal isOpen={isOpen} onRequestClose={close}>
+    <Modal isOpen onRequestClose={close}>
       <input
         className="uk-input align-center"
         type="text"
@@ -59,199 +46,68 @@ const ModelModal = ({ isOpen, setIsOpen, models, addModel, otherLines, forceSame
       />
       <ChooseFile
         className="uk-margin-top"
-        kind="Model"
-        name="Model"
+        kind="model file"
         fileName={fileName}
         setFile={setFile}
         lines={lines}
-        linesAreSame={linesAreSame}
+        linesAreSame={rightLength}
       />
+      <div className="uk-margin-top uk-text-primary">
+        <FaInfoCircle /> the model file has to have {length} lines
+      </div>
       {infoText && (
-        <div className="uk-margin-top uk-text-primary">
+        <div className="uk-margin-top uk-text-primary uk-text-danger">
           <FaInfoCircle /> {infoText}
         </div>
       )}
       <div className="uk-margin" style={{ float: "right" }}>
-        <button className="uk-button uk-button-secondary" onClick={close}>
+        <Button variant="secondary" onClick={close}>
           cancel
-        </button>
-        <button className="uk-button uk-button-primary" onClick={accept}>
+        </Button>
+        <Button variant="primary" onClick={accept}>
           add
-        </button>
+        </Button>
       </div>
     </Modal>
   );
 };
 
-const ModelList = ({ models, removeModel }) => <ul className="uk-list uk-list-striped uk-list-primary">
-    {models.map(({name}) => (
-      <li className="uk-flex uk-flex-between" key={name}>
-        <span>{name}</span>
-        <DeleteButton onClick={() => removeModel(name)}>
-          <FaTrash />
-        </DeleteButton>
-      </li>
-    ))}
-  </ul>
-
-const ModelTable = ({ models, linesAreSame = true, removeModel }) => (
-  <table className="uk-table uk-table-divider uk-table-small uk-table-middle">
-    <thead>
-      <tr>
-        <th>name</th>
-        <th>lines</th>
-      </tr>
-    </thead>
-    <tbody>
-      {Object.entries(models).map(([key, model]) => (
-        <tr key={key} style={{ position: "relative" }}>
-          <td>{model.name}</td>
-          <td>
-            <span
-              style={{
-                padding: "5px 10px",
-                background: !linesAreSame ? "#f0506e" : null,
-              }}
-            >
-              {model.lines.length}
-            </span>
-          </td>
-          <td
-            style={{
-              position: "absolute",
-              transform: "translate(-100%, -6%)",
-            }}
-          >
-            {removeModel && (
-              <DeleteButton onClick={() => removeModel(key)}>
-                <FaTrash />
-              </DeleteButton>
-            )}
-          </td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
+const ModelBadge = ({ name, removeModel }) => (
+  <div className="uk-flex" style={{ border: "1px solid", padding: "5px 10px" }}>
+    <span style={{ marginRight: "10px" }}>{name}</span>
+    <a
+      href="/#"
+      style={{ display: "flex", marginLeft: "3px" }}
+      onClick={(e) => {
+        e.preventDefault();
+        removeModel(name);
+      }}
+    >
+      <FaTimes style={{ minWidth: "15px", color: "black" }} />
+    </a>
+  </div>
 );
 
-const VisualizationCreator = ({ back, addVisualization }) => {
-  const [modelModalIsOpen, setModelModalOpen] = useState(false);
+const ModelList = ({ models, removeModel }) => (
+  <div className="margin-between-10 uk-flex uk-flex-wrap">
+    {models.map(({ name }) => (
+      <ModelBadge key={name} name={name} removeModel={removeModel} />
+    ))}
+  </div>
+);
 
-  const [docFileName, setDocFile, docFileLines] = useFile(null);
-  const [refFileName, setRefFile, refFileLines] = useFile(null);
-  const [name, setName] = useState("");
-
-  const [models, addModel, removeModel] = useList();
-  const allLines = [refFileLines, docFileLines, ...Object.values(models).map(({ lines }) => lines)];
-  const hasInput = docFileName !== null && refFileName !== null;
-  const atLeastOneModel = Boolean(Object.keys(models).length);
-  const linesAreSame = sameLength(allLines);
-
-  useEffect(() => {
-    if (hasInput) setName(`${docFileName}-${refFileName}`);
-  }, [hasInput, docFileName, refFileName]);
-
-  let tooltip = null;
-  if (!atLeastOneModel) tooltip = "title: add at least one model; pos: right;";
-  else if (!linesAreSame) tooltip = "title: not all lines are same; pos: right;";
-
-  return (
-    <>
-      <div className="uk-flex">
-        <div className="uk-flex-column" style={{ display: "inline-flex", minWidth: "300px" }}>
-          <Button className="uk-margin-small" onClick={back} variant="primary">
-            Back
-          </Button>
-          <ChooseFile
-            className="uk-margin-small"
-            kind="Documents"
-            name="Documents"
-            fileName={docFileName}
-            setFile={setDocFile}
-            lines={docFileLines}
-            linesAreSame={linesAreSame}
-          />
-
-          <ChooseFile
-            className="uk-margin-small"
-            kind="References"
-            name="References"
-            fileName={refFileName}
-            setFile={setRefFile}
-            lines={refFileLines}
-            linesAreSame={linesAreSame}
-          />
-          {hasInput && (
-            <>
-              <input
-                type="text"
-                className="uk-input uk-margin-small align-center"
-                value={name}
-                placeholder="name"
-                onChange={(e) => setName(e.currentTarget.value)}
-              />
-              <Button
-                className="uk-margin-small"
-                variant="primary"
-                onClick={() => setModelModalOpen(true)}
-              >
-                Add Model
-              </Button>
-
-              <Button
-                className="uk-margin-small"
-                variant="primary"
-                onClick={() => {
-                  addVisualization({
-                    id: name,
-                    documents: docFileLines,
-                    references: refFileLines,
-                    models: Object.values(models),
-                  });
-                  back();
-                }}
-                disabled={!atLeastOneModel || !linesAreSame}
-                data-uk-tooltip={tooltip}
-              >
-                Save
-              </Button>
-            </>
-          )}
-        </div>
-
-        <div style={{ width: "20px" }} />
-        <div className="uk-flex-column" style={{ flexGrow: 1 }}>
-          <h3>Models</h3>
-          <ModelTable models={models} linesAreSame={linesAreSame} removeModel={removeModel} />
-        </div>
-      </div>
-
-      {modelModalIsOpen && (
-        <ModelModal
-          isOpen={modelModalIsOpen}
-          models={models}
-          addModel={addModel}
-          setIsOpen={setModelModalOpen}
-          otherLines={allLines}
-        />
-      )}
-    </>
+const VisualizeContent = ({ doc, models }) => {
+  const [slot, toggleSlot] = useReducer(
+    (state, newSlot) => (state !== newSlot ? newSlot : null),
+    null
   );
-};
-
-const VisualizeContent = ({ doc, reference, models }) => {
-  const [slot, toggleSlot] = useReducer((state, newSlot) => state !== newSlot ? newSlot : null, null);
-  const referenceSelected = slot === "reference";
   const ref = useMemo(() => {
-    if (slot === null) return null
-    if (referenceSelected) return reference
-    return models[slot][1]
-  }, [slot, models, reference, referenceSelected])
+    if (slot === null) return null;
+    return models[slot][1];
+  }, [slot, models]);
 
-  const [docMarkup, refMarkup] = useMarkup(doc, ref)
+  const [docMarkup, refMarkup] = useMarkup(doc, ref);
   const markupState = useState(null);
-
-  const ReferenceEye = referenceSelected ? EyeClosed : EyeOpen;
 
   return (
     <div className="visualization-layout margin-between-10">
@@ -260,25 +116,12 @@ const VisualizeContent = ({ doc, reference, models }) => {
           <CardHeader>
             <CardTitle>Document</CardTitle>
           </CardHeader>
-          <CardBody>{docMarkup ? <Markup markups={docMarkup} markupState={markupState} /> : doc}</CardBody>
+          <CardBody>
+            {docMarkup ? <Markup markups={docMarkup} markupState={markupState} /> : doc}
+          </CardBody>
         </Card>
       </div>
       <div>
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              <div className="uk-flex uk-flex-between">
-                Reference
-                <ReferenceEye
-                  className="uk-margin-right"
-                  style={{ minWidth: "30px" }}
-                  onClick={() => toggleSlot("reference")}
-                />
-              </div>
-            </CardTitle>
-          </CardHeader>
-          <CardBody>{referenceSelected ? <Markup markups={refMarkup} markupState={markupState} /> : reference}</CardBody>
-        </Card>
         {models.map(([name, modelLine], i) => {
           const modelSelected = slot === i;
           const ModelEye = modelSelected ? EyeClosed : EyeOpen;
@@ -296,7 +139,13 @@ const VisualizeContent = ({ doc, reference, models }) => {
                   </div>
                 </CardTitle>
               </CardHeader>
-              <CardBody>{modelSelected ? <Markup markups={refMarkup} markupState={markupState} /> : modelLine}</CardBody>
+              <CardBody>
+                {modelSelected ? (
+                  <Markup markups={refMarkup} markupState={markupState} />
+                ) : (
+                  modelLine
+                )}
+              </CardBody>
             </Card>
           );
         })}
@@ -306,23 +155,22 @@ const VisualizeContent = ({ doc, reference, models }) => {
 };
 
 const Visualize = ({ visualization, clear }) => {
-  const { name, documents, references, models } = visualization;
+  const { name, documents, models } = visualization;
 
   const [page, setPage, size, , numItems] = usePagination(documents.length, 1, 1);
   const linesIndex = page - 1;
-  useKeycode([37, 39], (code) => {
-    if (code === 37) {
-      setPage(page - 1);
-    } else if (code === 39) {
-      setPage(page + 1);
-    }
+  useKeycode([27, 37, 39], (code) => {
+    if (code === 27) clear();
+    else if (code === 37) setPage(page - 1);
+    else if (code === 39) setPage(page + 1);
   });
+
   return (
     <div>
-      <div className="uk-flex uk-flex-middle">
-        <Button onClick={clear} variant="primary" style={{ marginRight: "10vw" }}>
-          Back
-        </Button>
+      <Button onClick={clear} variant="primary" style={{ marginRight: "10vw" }}>
+        Back
+      </Button>
+      <div className="uk-flex uk-flex-middle uk-flex-center">
         <Pagination
           activePage={page}
           size={size}
@@ -334,98 +182,154 @@ const Visualize = ({ visualization, clear }) => {
       <h3 style={{ marginTop: "10px" }}>{name}</h3>
       <VisualizeContent
         doc={documents[linesIndex]}
-        reference={references[linesIndex]}
         models={models.map((model) => [model.name, model.lines[linesIndex]])}
       />
     </div>
   );
 };
 
-const AddModel = ({ visualization, addModel }) => {
+const AddModel = ({ length, addModel }) => {
   const [modelModalIsOpen, setModelModalOpen] = useState(false);
   return (
-    <>
-      <Button onClick={() => setModelModalOpen(true)}>Add Model</Button>
-      {modelModalIsOpen && (
-        <ModelModal
-          isOpen
-          models={visualization.models}
-          addModel={addModel}
-          setIsOpen={setModelModalOpen}
-          otherLines={[visualization.documents]}
-          forceSameLine
-        />
-      )}
-    </>
-  );
-};
-
-const VisualizationOverview = () => {
-  const {
-    visualizations,
-    addVisualization,
-    putVisualization,
-    deleteVisualization,
-  } = useVisualizations();
-  const [currVisualization, setCurrVisualization] = useState(null);
-  const [showOverview, setShowOverview] = useState(true);
-
-  if (currVisualization !== null)
-    return (<Visualize visualization={currVisualization} clear={() => setCurrVisualization(null)} />);
-  if (visualizations) return (
     <div>
-      {showOverview ? (
-        <div className="uk-flex uk-flex-top">
-          <Button onClick={() => setShowOverview((v) => !v)} variant="primary">
-            Create Visualization
-          </Button>
-          <div style={{ width: "20px" }} />
-          <Accordion>
-            {visualizations.map((visualization) => {
-              const { id, models } = visualization
-              const addModel = (model) => putVisualization({...visualization, models: {...models, model}});
-              return (
-                <AccordionItem
-                  key={id}
-                  text={id}
-                  buttons={[["visualize", () => setCurrVisualization(visualization)]]}
-                  remove={() => deleteVisualization(id)}
-                >
-                  <div className="uk-flex uk-flex-between uk-flex-middle">
-                    <h3 style={{margin: 0}}>Models</h3>
-                    <AddModel
-                      visualization={visualization}
-                      addModel={addModel}
-                    />
-                  </div>
-                  <ModelList
-                    models={models}
-                    removeModel={(modelName) => {
-                      const newModels = visualization.models.filter(({ name }) => name !== modelName);
-                      if (!newModels.length) {
-                        displayMessage("can not remove last model");
-                        return;
-                      }
-                      putVisualization({visualization, models: newModels});
-                    }}
-                  />
-                </AccordionItem>
-              );
-            })}
-          </Accordion>
-        </div>
-      ) : (
-        <VisualizationCreator
-          back={() => setShowOverview((v) => !v)}
-          addVisualization={(data) => {
-            addVisualization(data);
-            setCurrVisualization(data);
-          }}
-        />
+      <Button
+        className="uk-flex uk-flex-middle uk-flex-center"
+        variant="primary"
+        style={{ height: "30px", width: "30px", padding: "0px" }}
+        onClick={() => setModelModalOpen(true)}
+      >
+        <FaPlus />
+      </Button>
+      {modelModalIsOpen && (
+        <ModelModal close={() => setModelModalOpen(false)} addModel={addModel} length={length} />
       )}
     </div>
   );
-  return null
 };
 
-export { VisualizationOverview };
+const VisualizationItem = ({ visualization, addModel, removeModel, visualize, remove }) => (
+  <AccordionItem
+    text={visualization.id}
+    infoText={visualization.models.length ? null : "a model needs to be added (click to expand)"}
+    buttons={[["visualize", visualize]]}
+    badges={[`${visualization.documents.length} lines`, `${visualization.models.length} models`]}
+  >
+    <div className="uk-flex uk-flex-between uk-flex-middle">
+      <div
+        className="uk-flex uk-flex-middle"
+        style={{ alignContent: "center", alignItems: "center" }}
+      >
+        <h3 style={{ margin: 0, marginRight: "10px" }}>Models</h3>
+        <AddModel length={visualization.documents.length} addModel={addModel} />
+      </div>
+      <DeleteButton onClick={remove} />
+    </div>
+    <div style={{ padding: "10px" }}>
+      <ModelList models={visualization.models} removeModel={removeModel} />
+    </div>
+  </AccordionItem>
+);
+
+const AddVisualizationModal = ({ close, create }) => {
+  const [name, setName] = useState("");
+  const [infoText, setInfoText] = useState(null);
+  const [fileName, setFile, lines] = useFile(null);
+
+  const accept = async () => {
+    const cleanName = name.trim();
+    if (!cleanName) setInfoText("no name given");
+    if (fileName === null) setInfoText("upload a document file");
+    else {
+      try {
+        await create(cleanName, lines);
+        close();
+      } catch ({ message }) {
+        if (message === "NOID") setInfoText("no name given");
+        else if (message === "TAKEN") setInfoText(`name '${cleanName}' is already taken`);
+        else setInfoText(`error: ${message}`);
+      }
+    }
+  };
+
+  useKeycode([13], accept);
+
+  return (
+    <Modal isOpen onRequestClose={close}>
+      <input
+        className="uk-input align-center"
+        type="text"
+        value={name}
+        placeholder="name"
+        autoFocus
+        onChange={(e) => setName(e.currentTarget.value)}
+      />
+      <ChooseFile
+        className="uk-margin-top"
+        kind="document file"
+        fileName={fileName}
+        setFile={setFile}
+        lines={lines}
+      />
+      {infoText && (
+        <div className="uk-margin-top uk-text-danger">
+          <FaInfoCircle /> {infoText}
+        </div>
+      )}
+      <div className="uk-margin" style={{ float: "right" }}>
+        <Button variant="secondary" onClick={close}>
+          cancel
+        </Button>
+        <Button variant="primary" onClick={accept}>
+          add
+        </Button>
+      </div>
+    </Modal>
+  );
+};
+
+const VisualizationView = () => {
+  const vis = useVisualizations();
+
+  const [currVisualization, setCurrVisualization] = useState(null);
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const openModal = () => setModalIsOpen(true);
+
+  if (currVisualization !== null)
+    return <Visualize visualization={currVisualization} clear={() => setCurrVisualization(null)} />;
+  if (!vis.visualizations) return <CenterLoading />;
+
+  return (
+    <div>
+      <div className="uk-flex uk-flex-center">
+        <Button variant="primary" onClick={openModal}>
+          Create Visualization
+        </Button>
+      </div>
+      {modalIsOpen && (
+        <AddVisualizationModal close={() => setModalIsOpen(false)} create={vis.create} />
+      )}
+      <div className="uk-margin" />
+      <Accordion>
+        {vis.visualizations.map((visualization) => {
+          const { id } = visualization;
+          const addModel = (model) => vis.addModel(id, model);
+          const removeModel = (modelName) => vis.delModel(id, modelName);
+          const visualize = () => setCurrVisualization(visualization);
+          const remove = () => vis.remove(id);
+          return (
+            <VisualizationItem
+              key={id}
+              visualization={visualization}
+              addModel={addModel}
+              removeModel={removeModel}
+              visualize={visualize}
+              remove={remove}
+            />
+          );
+        })}
+      </Accordion>
+    </div>
+  );
+};
+
+export { VisualizationView };

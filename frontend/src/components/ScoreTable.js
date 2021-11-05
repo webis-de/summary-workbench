@@ -30,7 +30,7 @@ const CopyToClipboardButton = ({ text }) => {
     clearTimeout(timeout.current)
     timeout.current = setTimeout(() => setSaved(false), 1000)
   }
-  return <Button size="small" onClick={onClick} style={{padding: "5px", backgroundColor: "white", borderRadius:"2px"}}>
+  return <Button size="small" title="copy" onClick={onClick} style={{padding: "5px", backgroundColor: "white", borderRadius:"2px"}}>
     {saved ? <FaCheck style={{width: "30px", color: "green"}} /> : <FaRegCopy style={{width: "30px"}} />}
   </Button>
 };

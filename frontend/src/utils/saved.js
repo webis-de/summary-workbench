@@ -5,28 +5,21 @@ const initDatabase = (collectionName, fields) => {
   db.version(1).stores({
     [collectionName]: `id,${fields},_timestamp`,
   });
+  const collection = db[collectionName]
   const add = async (data) => {
-    const extendedData = { ...data, _timestamp: Date.now() };
-    const ID = extendedData.id;
-    let suffix = 2;
-    while (true) {
-      try {
-        /* eslint-disable no-await-in-loop */
-        await db[collectionName].add(extendedData)
-        break;
-      } catch (err) {
-        if (err instanceof Dexie.ConstraintError) {
-          extendedData.id = `${ID}-${suffix}`;
-          suffix++;
-        }
-        else throw err
-      }
+    const id = data.id.trim()
+    if (!id) throw new Error("NOID")
+    const extendedData = { ...data, id, _timestamp: Date.now() };
+    try {
+      await collection.add(extendedData);
+    } catch (err) {
+      if (err instanceof Dexie.ConstraintError) throw new Error("TAKEN")
+      throw err;
     }
+    return true;
   };
-  const put = async (data) => db[collectionName].put(data)
-  const del = (id) => db[collectionName].delete(id);
-  const getAll = () => db[collectionName].orderBy("_timestamp").reverse().toArray();
-  return { add, del, put, getAll }
-}
+  const getAll = () => collection.orderBy("_timestamp").reverse().toArray();
+  return { collection, add, getAll };
+};
 
-export {initDatabase}
+export { initDatabase };

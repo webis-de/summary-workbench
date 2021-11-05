@@ -8,7 +8,6 @@ const saveSetting = (summarizer, status) =>
   window.localStorage.setItem(summarizer, status ? "true" : "false");
 const loadSetting = (summarizer) => {
   const setting = window.localStorage.getItem(summarizer);
-  console.log(summarizer, setting)
   if (setting === null && defaultSummarizers.includes(summarizer)) return true;
   return setting === "true";
 };

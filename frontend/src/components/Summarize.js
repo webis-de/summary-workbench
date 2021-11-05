@@ -207,7 +207,7 @@ const Summary = ({ markup, summary, markupState, scrollState, showMarkup }) => {
   const { summaryText } = summary;
   const { numWords, percentOverlap } = useMemo(
     () => generateStatistics(summaryText, markup[1]),
-    [summary]
+    [markup, summaryText]
   );
 
   return (

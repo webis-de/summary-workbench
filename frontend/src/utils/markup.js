@@ -297,7 +297,7 @@ class Textblock {
     const tokens = [];
     const idx = [];
     this.clean_words.forEach((word, i) => {
-      if (word && (ignore_stopwords || !word.match(stopword_re))) {
+      if (word && (!ignore_stopwords || !word.match(stopword_re))) {
         tokens.push(word);
         idx.push(i);
       }

@@ -6,7 +6,7 @@ import { About } from "./components/About";
 import { Evaluate } from "./components/Evaluate";
 import { Summarize } from "./components/Summarize";
 import { Button } from "./components/utils/Button";
-import { VisualizationOverview } from "./components/Visualize";
+import { VisualizationView } from "./components/Visualize";
 import { MetricsProvider } from "./contexts/MetricsContext";
 import { SettingsContext, SettingsProvider } from "./contexts/SettingsContext";
 import { SummarizersProvider } from "./contexts/SummarizersContext";
@@ -16,7 +16,7 @@ import { colorschemes } from "./utils/color";
 const routes = [
   ["/summarize", "Summarize", Summarize],
   ["/evaluate", "Evaluate", Evaluate],
-  ["/visualize", "Visualize", VisualizationOverview],
+  ["/visualize", "Visualize", VisualizationView],
   ["/about", "About", About],
 ];
 
@@ -179,81 +179,83 @@ const NavbarOptions = () => {
   } = useContext(SettingsContext);
   return (
     <div className="uk-flex uk-flex-center" style={{ marginLeft: "30px" }}>
-      <FaCog className="hover-gray" style={{ minWidth: "20px" }} />
-      <div uk-dropdown="mode: click; pos: bottom-left">
-        <h3>Highlighting</h3>
-        <IndentStyle>
-          <ColorschemeSetting colorMap={colorMap} setColorMap={setColorMap} />
-          <div className="uk-flex uk-flex-middle uk-margin">
-            <h4 style={{ margin: "0", marginRight: "20px" }}>Minimum Word Overlap</h4>
-            <div className="margin-between-20" style={{ display: "inline-block" }}>
-              {[1, 2, 3, 4, 5].map((num) => (
-                <label key={num} style={{ whiteSpace: "nowrap" }}>
-                  {num}
-                  <input
-                    type="radio"
-                    value={num}
-                    checked={num === minOverlap}
-                    onChange={(e) => setMinOverlap(e.target.value)}
-                  />
-                </label>
-              ))}
+      <div className="uk-flex uk-flex-middle">
+        <FaCog className="hover-gray" style={{ minWidth: "20px" }} />
+        <div uk-dropdown="mode: click; pos: bottom-left">
+          <h3>Highlighting</h3>
+          <IndentStyle>
+            <ColorschemeSetting colorMap={colorMap} setColorMap={setColorMap} />
+            <div className="uk-flex uk-flex-middle uk-margin">
+              <h4 style={{ margin: "0", marginRight: "20px" }}>Minimum Word Overlap</h4>
+              <div className="margin-between-20" style={{ display: "inline-block" }}>
+                {[1, 2, 3, 4, 5].map((num) => (
+                  <label key={num} style={{ whiteSpace: "nowrap" }}>
+                    {num}
+                    <input
+                      type="radio"
+                      value={num}
+                      checked={num === minOverlap}
+                      onChange={(e) => setMinOverlap(e.target.value)}
+                    />
+                  </label>
+                ))}
+              </div>
             </div>
-          </div>
-          <div className="uk-flex uk-flex-middle uk-margin">
-            <h4 style={{ margin: "0", marginRight: "20px" }}>Show Redundancy</h4>
-            <input
-              style={{ margin: "0" }}
-              className="uk-checkbox"
-              checked={allowSelfSimilarities}
-              readOnly
-              onClick={toggleAllowSelfSimilarities}
-              type="checkbox"
-            />
-          </div>
-          <div className="uk-flex uk-flex-middle">
-            <h4 style={{ margin: "0", marginRight: "20px" }}>Ignore Stopwords</h4>
-            <input
-              style={{ margin: "0" }}
-              className="uk-checkbox"
-              checked={ignoreStopwords}
-              readOnly
-              onClick={toggleIgnoreStopwords}
-              type="checkbox"
-            />
-          </div>
-        </IndentStyle>
-        <h3>Summarization</h3>
-        <IndentStyle>
-          <div className="uk-flex uk-flex-row" style={{ alignItems: "center" }}>
-            <h4 style={{ margin: 0 }}>Summary Length</h4>
-            <input
-              type="range"
-              min="10"
-              max="50"
-              step="5"
-              defaultValue={summaryLength}
-              style={{
-                flex: "1 0",
-                minWidth: "100px",
-                marginLeft: "15px",
-                marginRight: "15px",
-              }}
-              onChange={(e) => setSummaryLength(e.currentTarget.value)}
-            />
-            <span
-              className="uk-flex uk-label"
-              style={{
-                alignItems: "center",
-                justifyContent: "right",
-                width: "30px",
-                height: "30px",
-              }}
-            >
-              {`${summaryLength}%`}
-            </span>
-          </div>
-        </IndentStyle>
+            <div className="uk-flex uk-flex-middle uk-margin">
+              <h4 style={{ margin: "0", marginRight: "20px" }}>Show Redundancy</h4>
+              <input
+                style={{ margin: "0" }}
+                className="uk-checkbox"
+                checked={allowSelfSimilarities}
+                readOnly
+                onClick={toggleAllowSelfSimilarities}
+                type="checkbox"
+              />
+            </div>
+            <div className="uk-flex uk-flex-middle">
+              <h4 style={{ margin: "0", marginRight: "20px" }}>Ignore Stopwords</h4>
+              <input
+                style={{ margin: "0" }}
+                className="uk-checkbox"
+                checked={ignoreStopwords}
+                readOnly
+                onClick={toggleIgnoreStopwords}
+                type="checkbox"
+              />
+            </div>
+          </IndentStyle>
+          <h3>Summarization</h3>
+          <IndentStyle>
+            <div className="uk-flex uk-flex-row" style={{ alignItems: "center" }}>
+              <h4 style={{ margin: 0 }}>Summary Length</h4>
+              <input
+                type="range"
+                min="10"
+                max="50"
+                step="5"
+                defaultValue={summaryLength}
+                style={{
+                  flex: "1 0",
+                  minWidth: "100px",
+                  marginLeft: "15px",
+                  marginRight: "15px",
+                }}
+                onChange={(e) => setSummaryLength(e.currentTarget.value)}
+              />
+              <span
+                className="uk-flex uk-label"
+                style={{
+                  alignItems: "center",
+                  justifyContent: "right",
+                  width: "30px",
+                  height: "30px",
+                }}
+              >
+                {`${summaryLength}%`}
+              </span>
+            </div>
+          </IndentStyle>
+        </div>
       </div>
     </div>
   );
@@ -283,6 +285,8 @@ const ScrollToTopButton = () => {
         right: "15px",
         width: "38px",
         color: "#000",
+        backgroundColor: "#fff",
+        borderRadius: "100%"
       }}
       onClick={scrollToTop}
     />

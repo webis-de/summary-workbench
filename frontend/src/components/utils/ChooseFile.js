@@ -32,30 +32,38 @@ const useFile = () => {
   return [fileName, setFile, lines];
 };
 
-const ChooseFile = ({ kind, fileName, setFile, lines, linesAreSame, ...other }) => {
+const processDropEvent = (e) => {
+  e.preventDefault();
+  const files = [];
+  const { items } = e.dataTransfer;
+  if (items) {
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      const entry = item.webkitGetAsEntry();
+      if (entry !== null && entry.isFile) {
+        files.push(item.getAsFile());
+      }
+    }
+  }
+  return files
+}
+
+const ChooseFile = ({ kind, fileName, setFile, lines, linesAreSame = true, ...other }) => {
   const uploadRef = useRef();
   const [isDragged, setIsDragged] = useState(false);
   const dropHandler = (e) => {
-    e.preventDefault();
-
-    if (e.dataTransfer.items) {
-      e.dataTransfer.items.foreach((item) => {
-        const entry = item.webkitGetAsEntry();
-        if (entry !== null && entry.isFile) {
-          setFile(item.getAsFile());
-        }
-      });
-    }
+    const files = processDropEvent(e)
+    if (files.length) setFile(files[0].getAsFile());
     setIsDragged(false);
   };
 
   const fileSelectOnChange = (e) => setFile(e.currentTarget.files[0]);
 
-  let extraStyle = { backgroundColor: "#f0506e", color: "white" }
+  let extraStyle = { backgroundColor: "#f0506e", color: "white" };
   if (linesAreSame === null) {
     extraStyle = { backgroundColor: "#f8f8f8" };
   } else if (linesAreSame) {
-    extraStyle = { backgroundColor: "#32d296", color: "white" }
+    extraStyle = { backgroundColor: "#32d296", color: "white" };
   }
 
   return (
@@ -103,4 +111,4 @@ const ChooseFile = ({ kind, fileName, setFile, lines, linesAreSame, ...other }) 
   );
 };
 
-export { ChooseFile, useFile, sameLength };
+export { ChooseFile, useFile, sameLength, processDropEvent };

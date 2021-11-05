@@ -4,7 +4,15 @@ import { Badge } from "./Badge";
 import { Button } from "./Button";
 import { DeleteButton } from "./DeleteButton";
 
-const AccordionItem = ({ children, text, buttons, remove, badges = [], open = false }) => (
+const AccordionItem = ({
+  children,
+  text,
+  infoText,
+  buttons,
+  remove,
+  badges = [],
+  open = false,
+}) => (
   <li
     className={open ? "uk-open" : ""}
     style={{
@@ -28,6 +36,11 @@ const AccordionItem = ({ children, text, buttons, remove, badges = [], open = fa
         >
           {text}
         </span>
+        {infoText && (
+          <span className="uk-text-danger" style={{ margin: "0px 20px" }}>
+            {infoText}
+          </span>
+        )}
         {badges && (
           <div className="uk-flex uk-flex-wrap" style={{ gridRowGap: "10px" }}>
             {badges.map((badge, i) => (

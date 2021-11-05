@@ -48,42 +48,29 @@ const FileInput = ({ setCalculation }) => (
 
 const Evaluate = () => {
   const [calculation, setCalculation] = useState(null);
-  const setCalculationID = (id) => setCalculation((calc) => ({ ...calc, id }));
 
   const { loading, metrics, reload } = useContext(MetricsContext);
-  const {
-    calculations,
-    addCalculation,
-    deleteCalculation,
-  } = useCalculations();
+  const calc = useCalculations();
 
-  const saveCalculation = () => {
-    addCalculation({...calculation, metrics });
-    setCalculation(null);
-  };
+  const saveCalculation = async (id) => calc.add({ ...calculation, id, metrics }).then(() => setCalculation(null))
   const scrollRef = useRef();
-
-  const setComputedCalculation = (calc) => setCalculation(calc);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      if (calculation && scrollRef.current) scrollRef.current.scrollIntoView({ block: "start", behavior: "smooth", alignToTop: true });
+      if (calculation && scrollRef.current)
+        scrollRef.current.scrollIntoView({ block: "start", behavior: "smooth", alignToTop: true });
     }, 20);
     return () => clearTimeout(timeout);
   }, [calculation]);
 
   if (loading) return <CenterLoading />;
-  if (!metrics)
-    return (
-      <Button onClick={reload}>
-        Retry
-      </Button>
-    );
+  if (!metrics) return <Button onClick={reload}>Retry</Button>;
+
   return (
     <div>
       <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gridGap: "10px" }}>
         <div>
-          <FileInput setCalculation={setComputedCalculation} />
+          <FileInput setCalculation={setCalculation} />
         </div>
         <div>
           <Settings className="uk-margin" />
@@ -94,18 +81,16 @@ const Evaluate = () => {
         <Result
           className="uk-margin"
           calculation={calculation}
-          setCalculationID={setCalculationID}
           saveCalculation={saveCalculation}
-          saveFunction={() => addCalculation(calculation)}
         />
       )}
-      {calculations &&
+      {calc.calculations && (
         <Saved
           className="uk-margin"
-          calculations={calculations}
-          deleteCalculation={deleteCalculation}
+          calculations={calc.calculations}
+          deleteCalculation={calc.del}
         />
-      }
+      )}
     </div>
   );
 };
