@@ -109,12 +109,6 @@ class Service(ABC):
         except AttributeError:
             abort("docker_username needs to be defined for tagging the image", self.name())
 
-    def nodeport(self):
-        try:
-            return self.config["deploy"]["nodeport"]
-        except AttributeError:
-            abort("deploy nodeport needs to be defined", "kubernetes")
-
     def repository(self):
         return f"{self.docker_username()}/tldr-{self.name}"
 
@@ -232,7 +226,6 @@ class Proxy(Service):
             f"./templates/kubernetes/basic/{self.__type__}.yaml", multiple=True
         )
         port = docs[2]["spec"]["ports"][0]
-        port["nodePort"] = self.nodeport()
 
         path = Path(self.__deploy_path__ / f"{self.__type__}.yaml")
         path.parent.mkdir(exist_ok=True, parents=True)
