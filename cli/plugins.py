@@ -138,8 +138,8 @@ class Plugin(ABC):
         config = PluginSchema().load(config_json)
         config.update(global_config)
         self.config = config
+        self.config["metadata"].update(config["environment"])
         self.environment = config["metadata"].copy()
-        self.environment.update(config["environment"])
         self.version = config["version"]
         self.name = expand_name(config["name"], self.environment)
         self.short_safe_name = clean_name(f"{self.owner}-{self.name}")

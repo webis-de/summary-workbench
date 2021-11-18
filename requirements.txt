@@ -5,3 +5,4 @@ marshmallow
 termcolor
 GitPython
 giturlparse
+requests
