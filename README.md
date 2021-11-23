@@ -1,6 +1,8 @@
 # Description
 
 Web project build with Flask, Express.js and React.js to assess and investigate the quality of summarization tasks.
+You can evaluate the quality of your own summarizations or generate summarizations from texts or urls based on many metrics and summarizers.
+A running demo can be found here: [https://tldr.demo.webis.de](https://tldr.demo.webis.de)
 
 # Configuration
 
@@ -9,14 +11,14 @@ Web project build with Flask, Express.js and React.js to assess and investigate 
 The application can be customized with the `manage.py` script (install required packages: `pip install -r requirements.txt`).  
 The `manage.py` has the following options:
 
-| command            | description                                                  |
-| ------------------ | ------------------------------------------------------------ |
-| build              | build images for the plugins (metrics, summarizers)          |
-| push               | push an image to dockerhub for later deployment              |
-| gen-docker-compose | generate a docker-compose.yaml to run the application localy |
-| gen-kubernetes     | generates kubernetes files for the deployment                |
+| command            | description                                                   |
+| ------------------ | ------------------------------------------------------------- |
+| build              | build images for the plugins (metrics, summarizers)           |
+| push               | push an image to dockerhub for later deployment               |
+| gen-docker-compose | generate a docker-compose.yaml to run the application locally |
+| gen-kubernetes     | generates kubernetes files for the deployment                 |
 
-If you want to run the application localy, only `gen-docker-compose` is relevant for you (see [Development / run application localy](#development-run-application-localy)).
+If you want to run the application locally, only `gen-docker-compose` is relevant for you (see [Development / run application locally](#development-run-application-locally)).
 
 ## Application config.yaml
 
@@ -32,48 +34,44 @@ The `config.yaml` has the following options:
 
 Suboptions for `deploy`:
 
-| option   | description                         |
-| -------- | ----------------------------------- |
-| nodeport | port where application gets exposed |
+| option | description                                                                   |
+| ------ | ----------------------------------------------------------------------------- |
+| host   | address where the application gets deployed (e.g. https://tldr.demo.webis.de) |
 
 Suboptions for `metrics` and `summarizers`:
 
-| option | description                                                                                                                                                            |
-| ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| source | path or git url to the plugin folder or repository                                                                                                                     |
-| config | custom config which overrides the plugin config (e.g. for renaming if there is a name conflict, or changing the model) (see [Write a Plugin](#write-a-plugin) Section) |
+| option      | description                                                                                                                                                                                                                                                                           |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| source      | path or git url to the plugin folder or repository                                                                                                                                                                                                                                    |
+| environment | Key-value pairs that will be add to the plugin as environment varaible during build time and are present in the running plugin container. It is usefull e.g. when a plugin provides different models and one wants to choose a model. (see [Write a Plugin](#write-a-plugin) Section) |
 
 # Write a Plugin
 
 A plugin is a folder or git repository which contains the following files:
 
-| file                                                       | required                                 | description                                                                                                                                                                                                                                                                                                                                                                  |
-| ---------------------------------------------------------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| config.yaml                                                | yes                                      | see [plugin config.yaml](#plugin-configyaml)                                                                                                                                                                                                                                                                                                                                 |
-| Dockerfile                                                 | if config.yaml contains no `deployimage` | used for building the deployment image                                                                                                                                                                                                                                                                                                                                       |
-| Dockerfile.dev                                             | if config.yaml contains no `devimage`    | used for building the development image                                                                                                                                                                                                                                                                                                                                      |
-| metric.py, metric folder, summarizer.py, summarizer folder | yes (one)                                | metric.py or metric folder for metric plugin (see [Metric](#metric)), summarizer.py or summarizer folder for summarizer plugin (see [Summarizer](#summarizer))                                                                                                                                                                                                               |
-| model_setup.py                                             | yes                                      | Is used to setup your application (i.e. download models). Leave it empty if no external data is needed. The file is required to remind the plugin creator that external data should be stored localy. All plugins can run without writing anything into this file but this can lead to performance issues (i.e. the models are downloaded on every restart of the container) |
-| Pipfile.lock, Pipfile, requirements.txt                    | yes (one)                                | contains the packages required by your application                                                                                                                                                                                                                                                                                                                           |
+| file                                                       | required                                 | description                                                                                                                                                                                                                                                                                                                                                                    |
+| ---------------------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| config.yaml                                                | yes                                      | see [plugin config.yaml](#plugin-configyaml)                                                                                                                                                                                                                                                                                                                                   |
+| Dockerfile                                                 | if config.yaml contains no `deployimage` | used for building the deployment image                                                                                                                                                                                                                                                                                                                                         |
+| Dockerfile.dev                                             | if config.yaml contains no `devimage`    | used for building the development image                                                                                                                                                                                                                                                                                                                                        |
+| metric.py, metric folder, summarizer.py, summarizer folder | yes (one)                                | metric.py or metric folder for metric plugin (see [Metric](#metric)), summarizer.py or summarizer folder for summarizer plugin (see [Summarizer](#summarizer))                                                                                                                                                                                                                 |
+| model_setup.py                                             | yes                                      | Is used to setup your application (i.e. download models). Leave it empty if no external data is needed. The file is required to remind the plugin creator that external data should be stored locally. All plugins can run without writing anything into this file but this can lead to performance issues (i.e. the models are downloaded on every restart of the container). |
+| Pipfile.lock, Pipfile, requirements.txt                    | yes (one)                                | contains the packages required by your application                                                                                                                                                                                                                                                                                                                             |
 
 ## Plugin config.yaml
 
 Following Options can be specify in the `config.yaml`:
 
-| option      | required                          | description                                                                               |
-| ----------- | --------------------------------- | ----------------------------------------------------------------------------------------- |
-| version     | yes                               | version string of the plugin                                                              |
-| name        | yes                               | name of the plugin (only a-zA-Z0-9\_ allowed) (e.g. bert)                                 |
-| readable    | yes                               | name of the metric/summarizer for reading (e.g. BERTScore)                                |
-| type        | yes                               | type of metric (lexical, semantic) or summarizer (abstractive, extractive)                |
-| model       | no                                | model which the plugin uses, will be available in the `PLUGIN_MODEL` environment variable |
-| homepage    | no                                | url of the homepage or the source of the paper or something similar                       |
-| sourcecode  | no                                | url where the sourcecode can be found                                                     |
-| devimage    | if Dockerfile.dev is not provided | available images can be found under `images/dev/` (i.e. default, slim, java)              |
-| deployimage | if Dockerfile is not provided     | available images can be found under `images/deploy/` (i.e. default, slim, java)           |
+| option      | required                          | description                                                                                                                                                                                                                    |
+| ----------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| version     | yes                               | version string of the plugin                                                                                                                                                                                                   |
+| name        | yes                               | name of the plugin (e.g. BERTScore)                                                                                                                                                                                            |
+| metadata    | no                                | Dictionary with extra data that is available to the container during build time and when running. This data is also returned when quering for available Metrics/Summrizers. Metadata we use: type, model, homepage, sourcecode |
+| devimage    | if Dockerfile.dev is not provided | available images can be found under `images/dev/` (i.e. default, slim, java)                                                                                                                                                   |
+| deployimage | if Dockerfile is not provided     | available images can be found under `images/deploy/` (i.e. default, slim, java)                                                                                                                                                |
 
 Everything under `/root` in the container is stored in a volume.  
-If you have a model it should be stored there.
+If you have extra data it should be stored there.
 
 ## Metric
 
@@ -94,7 +92,7 @@ The summarizer.py file should have a class `SummarizerPlugin` with the following
   - ratio: number between 0 and 1 which can be used to control the length of the summary
   - returns: a string or a list of sentences which is the generated summary
 
-# Development / run application localy
+# Development / run application locally
 
 **requirements**: install docker and docker-compose on your system and make sure the docker service is running (`sudo systemctl start docker.service`)
 
@@ -119,16 +117,18 @@ Before deploying you need to build the necessary images and push them to dockerh
 
 The application consists of an frontend with a REST based backend/api.  
 Therefore the application can be used without the frontend.
+The script tldr.py can be used to use the application from the commandline.
+It can also be imported in python files to build applications based on the application.
 
-api location: `http://<domain>:<port>/api`
+api location: `https://<domain>:<port>/api` (e.g. `https://tldr.demo.webis.de`)
 
-- development: `http://localhost:5000/api`
-- production: `http://<your-domain>:<nodeport>/api`
+- development: `https://localhost:5000/api`
+- production: `https://<your-domain>:<port>/api`
 
 **get information about all available metrics**:
 
 - method: GET
-- location: `http://<domain>:<port>/api/metrics`
+- location: `https://<domain>:<port>/api/metrics`
 - returns:
 
 ```json
@@ -141,7 +141,7 @@ api location: `http://<domain>:<port>/api`
 **get information about all available summarizers**:
 
 - method: GET
-- location: `http://<domain>:<port>/api/summarizers`
+- location: `https://<domain>:<port>/api/summarizers`
 - returns:
 
 ```json
@@ -154,7 +154,7 @@ api location: `http://<domain>:<port>/api`
 **evaluation request**:
 
 - method: POST
-- location: `http://<domain>:<port>/api/evaluate`
+- location: `https://<domain>:<port>/api/evaluate`
 - payload (hypotheses and references have to have same length):
 
 ```json
@@ -169,17 +169,17 @@ api location: `http://<domain>:<port>/api`
 
 ```json
 {
-    "scores": {
-        "<metric 1>": "<float or dictionary of subscores>",
-        "<metric 2>": "<float or dictionary of subscores>"
-    }
+  "scores": {
+    "<metric 1>": "<float or dictionary of subscores>",
+    "<metric 2>": "<float or dictionary of subscores>"
+  }
 }
 ```
 
 **summary request**:
 
 - method: POST
-- location: `http://<domain>:<port>/api/summarize`
+- location: `https://<domain>:<port>/api/summarize`
 - payload:
 
 ```json
@@ -194,18 +194,18 @@ api location: `http://<domain>:<port>/api`
 
 ```json
 {
-    "original": {
-        "text": "<list of sentences: original text from which the summaries where generated>",
-        "title": "<(only if url was used) string: title of the article"
-    },
-    "summaries": {
-        "<summarizer 1>": "<list of sentences>",
-        "<summarizer 2>": "<list of sentences>"
-    }
+  "original": {
+    "text": "<list of sentences: original text from which the summaries where generated>",
+    "title": "<(only if url was used) string: title of the article"
+  },
+  "summaries": {
+    "<summarizer 1>": "<list of sentences>",
+    "<summarizer 2>": "<list of sentences>"
+  }
 }
 ```
 
-# Used Metrics, Summarizers and Implementations
+# Builtin Metrics and Summarizers
 
 # Metrics
 
