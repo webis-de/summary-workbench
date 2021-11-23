@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 
-from requests import get, post
+import requests
+
+
+def get(url, json=None):
+    r = requests.post(url, json=json) if json else requests.get(url)
+    if r.ok:
+        return r.json()
+    else:
+        r.raise_for_status()
 
 
 class Api:
@@ -8,34 +16,34 @@ class Api:
         self.host = host
 
     def get_metrics(self):
-        return get(f"{self.host}/api/metrics").json()
+        return get(f"{self.host}/api/metrics")
 
     def get_summarizers(self):
-        return get(f"{self.host}/api/summarizers").json()
+        return get(f"{self.host}/api/summarizers")
 
     def evaluate(self, metrics, hypotheses, references):
-        return post(
+        return get(
             f"{self.host}/api/evaluate",
             json={
                 "metrics": metrics,
                 "hypotheses": hypotheses,
                 "references": references,
             },
-        ).json()
+        )
 
     def summarize(self, text, summarizers, ratio):
-        return post(
+        return get(
             f"{self.host}/api/summarize",
             json={"text": text, "summarizers": summarizers, "ratio": ratio},
-        ).json()
+        )
 
 
 if __name__ == "__main__":
     from pprint import pprint
     from sys import stdin
-    from termcolor import colored
 
     import click
+    from termcolor import colored
 
     def read_file(filename):
         with open(filename, "r") as f:
@@ -127,21 +135,22 @@ if __name__ == "__main__":
             else:
                 pprint(
                     dict(
-                        pair for pair in available_summarizers.items() if pair[0] in metrics
+                        pair
+                        for pair in available_summarizers.items()
+                        if pair[0] in metrics
                     )
                 )
-
 
     @main.command(help="summarize text from stdin or the content of a file")
     @click.option(
         "--file", default=None, help="file that contains the text to summarize"
     )
     @click.option(
-        "--ratio", default=0.1, help="length of the summarization to generate based on the lenght of the doucment"
+        "--ratio",
+        default=0.1,
+        help="length of the summarization to generate based on the lenght of the doucment",
     )
-    @click.option(
-        "--raw", is_flag=True, default=False, help="show raw response"
-    )
+    @click.option("--raw", is_flag=True, default=False, help="show raw response")
     @click.argument("summarizers", nargs=-1)
     @click.pass_context
     def summarize(ctx, file, ratio, raw, summarizers):
