@@ -2,7 +2,7 @@
 
 Web project build with Flask, Express.js and React.js to assess and investigate the quality of summarization tasks.
 You can evaluate the quality of your own summarizations or generate summarizations from texts or urls based on many metrics and summarizers.
-A running demo can be found here: [https://tldr.demo.webis.de](https://tldr.demo.webis.de)
+A running demo can be found here: <https://tldr.demo.webis.de>.
 
 # Configuration
 
@@ -22,7 +22,7 @@ If you want to run the application locally, only `gen-docker-compose` is relevan
 
 ## Application config.yaml
 
-The application is configured with the `config.yaml` file (specify a custom config with the option `--config <path>`).  
+The application is configured with the <config.yaml> file (specify a custom config with the option `--config <path>`).  
 The `config.yaml` has the following options:
 
 | option          | required for         | description                                                                  |
@@ -47,6 +47,8 @@ Suboptions for `metrics` and `summarizers`:
 
 # Write a Plugin
 
+This section explains how you can write your own metrics or summarizers to integrate with tldr.
+Checkout [Application Config.yaml](#application-config-yaml) on how to integrate your plugin in the application.
 A plugin is a folder or git repository which contains the following files:
 
 | file                                                       | required                                 | description                                                                                                                                                                                                                                                                                                                                                                    |
@@ -58,9 +60,9 @@ A plugin is a folder or git repository which contains the following files:
 | model_setup.py                                             | yes                                      | Is used to setup your application (i.e. download models). Leave it empty if no external data is needed. The file is required to remind the plugin creator that external data should be stored locally. All plugins can run without writing anything into this file but this can lead to performance issues (i.e. the models are downloaded on every restart of the container). |
 | Pipfile.lock, Pipfile, requirements.txt                    | yes (one)                                | contains the packages required by your application                                                                                                                                                                                                                                                                                                                             |
 
-## Plugin config.yaml
+## config.yaml
 
-Following Options can be specify in the `config.yaml`:
+Following Options can be specified in the `config.yaml`:
 
 | option      | required                          | description                                                                                                                                                                                                                    |
 | ----------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -75,6 +77,7 @@ If you have extra data it should be stored there.
 
 ## Metric
 
+For some examples checkout the <metrics> folder.
 The metric.py file should have a class `MetricPlugin` with the following methods:
 
 - evaluate(self, hypotheses, references)
@@ -85,6 +88,7 @@ The metric.py file should have a class `MetricPlugin` with the following methods
 
 ## Summarizer
 
+For some examples checkout the <summarizers> folder.
 The summarizer.py file should have a class `SummarizerPlugin` with the following methods:
 
 - summarize(self, text, ratio)
@@ -102,108 +106,17 @@ The application can be accessed via `localhost:3000`.
 
 The `api` and `frontend` containers are available even before the other containers are done initializing.
 Some parts of the applications will only become available over time, because they are busy downloading a model.
-If you worry about the status of the application run `docker-compose ps`.
-If there is no service with state `Exited`, than everything should be fine.
-Alternatively use `docker-compose logs <service>` for troubleshooting.
 
-# Production
+# Deployment on Kubernetes
 
-## Deployment on Kubernetes
-
-Use `./manage.py gen-kubernetes` to generate the kubernetes service files and which can be found under `deploy/`.
-Before deploying you need to build the necessary images and push them to dockerhub with `./manage.py build` and `./manage.py push`
+`./manage.py gen-kubernetes` will generate the kubernetes service files and store them under `deploy/`.
+Before deploying you need to build the necessary images and push them to dockerhub with `./manage.py build` and `./manage.py push`.
 
 # Api Documentation
 
-The application consists of an frontend with a REST based backend/api.  
-Therefore the application can be used without the frontend.
-The script tldr.py can be used to use the application from the commandline.
+The api documentation can be found under `/api/doc` (e.g. <https://tldr.demo.webis.de/api/doc>).  
+The script `tldr.py` can be used to access the application from the commandline.
 It can also be imported in python files to build applications based on the application.
-
-api location: `https://<domain>:<port>/api` (e.g. `https://tldr.demo.webis.de`)
-
-- development: `https://localhost:5000/api`
-- production: `https://<your-domain>:<port>/api`
-
-**get information about all available metrics**:
-
-- method: GET
-- location: `https://<domain>:<port>/api/metrics`
-- returns:
-
-```json
-{
-  "<metric 1>": "<dict: dictionary with information e.g. homepage, version, type, ...>",
-  "<metric 2>": "<dict: dictionary with information e.g. homepage, version, type, ...>"
-}
-```
-
-**get information about all available summarizers**:
-
-- method: GET
-- location: `https://<domain>:<port>/api/summarizers`
-- returns:
-
-```json
-{
-  "<summarizer 1>": "<dict: dictionary with information e.g. homepage, version, type, ...>",
-  "<summarizer 2>": "<dict: dictionary with information e.g. homepage, version, type, ...>"
-}
-```
-
-**evaluation request**:
-
-- method: POST
-- location: `https://<domain>:<port>/api/evaluate`
-- payload (hypotheses and references have to have same length):
-
-```json
-{
-  "metrics": "<list of strings: list of metrics (i.e. ['bleu', 'cider', ...])>",
-  "hypotheses": "<list of strings: hypotheses for evaluation>",
-  "references": "<list of strings: references for evaluation>"
-}
-```
-
-- returns:
-
-```json
-{
-  "scores": {
-    "<metric 1>": "<float or dictionary of subscores>",
-    "<metric 2>": "<float or dictionary of subscores>"
-  }
-}
-```
-
-**summary request**:
-
-- method: POST
-- location: `https://<domain>:<port>/api/summarize`
-- payload:
-
-```json
-{
-  "text": "<string: text of which the summary has to be generated or url where the text is found>",
-  "summarizers": "<list of strings: list of summarizers (i.e. ['t5', 'textrank', ...])>",
-  "ratio": "<number: between 0 and 1, controls summary length>"
-}
-```
-
-- returns:
-
-```json
-{
-  "original": {
-    "text": "<list of sentences: original text from which the summaries where generated>",
-    "title": "<(only if url was used) string: title of the article"
-  },
-  "summaries": {
-    "<summarizer 1>": "<list of sentences>",
-    "<summarizer 2>": "<list of sentences>"
-  }
-}
-```
 
 # Builtin Metrics and Summarizers
 

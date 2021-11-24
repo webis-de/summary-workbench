@@ -2,11 +2,30 @@ const cors = require("cors");
 const express = require("express");
 const logger = require("morgan");
 const helmet = require("helmet");
+const swaggerJsDoc = require("swagger-jsdoc")
+const swaggerUI = require("swagger-ui-express")
+
+const swaggerOptions = {
+  definition: {
+    openapi: "3.0.0",
+    info: {
+      title: "tldr api",
+      version: "1.0.0",
+      description: "tldr api",
+    }
+  },
+  apis: ["./routes/*.js"]
+}
+
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+
 const cookieParser = require("cookie-parser");
 
 const apiRouter = require("./routes/api");
 
 const app = express();
+
+app.use("/api/doc", swaggerUI.serve, swaggerUI.setup(swaggerDocs))
 
 const errorMiddleware = (err, req, res, next) => {
   console.error(err.message)

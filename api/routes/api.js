@@ -7,7 +7,7 @@ const {
   METRICS_INFO,
 } = require("../config");
 
-const { body, check, validationResult } = require("express-validator");
+const { body } = require("express-validator");
 const { sentenceSplitter, articleDownloader } = require("../subservices");
 
 const { isURL } = require("validator");
@@ -25,6 +25,18 @@ const allIsIn = (validElements) => (list) =>
 const setDefault = (defaultValue) => (v) =>
   v === undefined ? defaultValue : v;
 
+/**
+  * @swagger
+  * /api/metrics:
+  *   get:
+  *     description: get available metrics together with their properties
+  *     responses:
+  *       200:
+  *         description: Success
+  *       400:
+  *         description: Failure
+  */
+
 router.get("/metrics", async (req, res, next) => {
   try {
     return res.json(METRICS_INFO);
@@ -32,6 +44,18 @@ router.get("/metrics", async (req, res, next) => {
     return next(err);
   }
 });
+
+/**
+  * @swagger
+  * /api/summarizers:
+  *   get:
+  *     description: get available summarizers together with their properties
+  *     responses:
+  *       200:
+  *         description: Success
+  *       400:
+  *         description: Failure
+  */
 
 router.get("/summarizers", async (req, res, next) => {
   try {
@@ -79,6 +103,44 @@ const validateHypRefMiddleware = (req, res, next) => {
   return next();
 };
 
+/**
+  * @swagger
+  * /api/evaluate:
+  *   post:
+  *     description: evaluate summarized texts with some metrics
+  *     requestBody:
+  *       content:
+  *         application/json:
+  *           schema:
+  *             type: object
+  *             properties:
+  *               metrics:
+  *                 description: list of metrics for the evaluation
+  *                 example: ["anonymous-rouge", "anonymous-bleu"]
+  *                 schema:
+  *                   type: array
+  *                   items:
+  *                     type: string
+  *               references:
+  *                 description: list of texts
+  *                 example: ["I like to swim. Water is nice", "I like forests, because trees are nice. I wish i could climb."]
+  *                 schema:
+  *                   type: array
+  *                   items:
+  *                     type: string
+  *               hypotheses:
+  *                 description: List of texts which are the summaries of the texts with corresponding index in the references array. It has to have the same length as the references array.
+  *                 example: ["Water is nice.", "Forests are nice."]
+  *                 schema:
+  *                   type: array
+  *                   items:
+  *                     type: string
+  *     responses:
+  *       200:
+  *         description: Success
+  *       400:
+  *         description: Failure
+  */
 router.post(
   "/evaluate",
   evaluateValidator,
@@ -105,6 +167,42 @@ const summarizeValidator = [
   isListOfStrings(body("summarizers"), SUMMARIZERS),
 ];
 
+/**
+  * @swagger
+  * /api/summarize:
+  *   post:
+  *     description: Summarize A text or url
+  *     requestBody:
+  *       content:
+  *         application/json:
+  *           schema:
+  *             type: object
+  *             properties:
+  *               summarizers:
+  *                 description: list of summarizers to use (see /api/summarizers)
+  *                 example: ["anonymous-textrank", "anonymous-newspaper3k"]
+  *                 schema:
+  *                   type: array
+  *                   items:
+  *                     type: string
+  *               text:
+  *                 description: text to summarizer or url of a website which is used to crawl the text
+  *                 example: New World was inhabited by an alien species called the Spackle . The last few hundred survivors are stuck in one small village that 's slowly dying since no one can have any kids.
+  *                 type: string
+  *               ratio:
+  *                 description: length of the summarie
+  *                 example: 0.1
+  *                 schema:
+  *                   type: number
+  *                   minimum: 0
+  *                   maximum: 1
+  *     responses:
+  *       200:
+  *         description: Success
+  *       400:
+  *         description: Failure
+  *
+  */
 router.post(
   "/summarize",
   summarizeValidator,
@@ -117,7 +215,7 @@ router.post(
         ? await articleDownloader.download(text)
         : { text };
       let summariesText = await summarize(summarizers, original.text, ratio);
-      summaries = {};
+      let summaries = {};
       for (const [metric, result] of Object.entries(summariesText)) {
         summaries[metric] = await sentenceSplitter.split(result);
       }
