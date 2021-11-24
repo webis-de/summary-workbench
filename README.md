@@ -8,8 +8,8 @@ A running demo can be found here: <https://tldr.demo.webis.de>.
 
 ## manage.py
 
-The application can be customized with the `manage.py` script (install required packages: `pip install -r requirements.txt`).  
-The `manage.py` has the following options:
+The application can be customized with the [manage.py](manage.py) script (install required packages: `pip install -r requirements.txt`).  
+The [manage.py](manage.py) has the following options:
 
 | command            | description                                                   |
 | ------------------ | ------------------------------------------------------------- |
@@ -22,8 +22,8 @@ If you want to run the application locally, only `gen-docker-compose` is relevan
 
 ## Application config.yaml
 
-The application is configured with the <config.yaml> file (specify a custom config with the option `--config <path>`).  
-The `config.yaml` has the following options:
+The application is configured with the [config.yaml](config.yaml) file (specify a custom config with the option `--config <path>`).  
+The [config.yaml](config.yaml) has the following options:
 
 | option          | required for         | description                                                                  |
 | --------------- | -------------------- | ---------------------------------------------------------------------------- |
@@ -48,7 +48,7 @@ Suboptions for `metrics` and `summarizers`:
 # Write a Plugin
 
 This section explains how you can write your own metrics or summarizers to integrate with tldr.
-Checkout [Application Config.yaml](#application-config-yaml) on how to integrate your plugin in the application.
+Checkout [Application Config.yaml](#application-configyaml) on how to integrate your plugin in the application.
 A plugin is a folder or git repository which contains the following files:
 
 | file                                                       | required                                 | description                                                                                                                                                                                                                                                                                                                                                                    |
@@ -60,7 +60,7 @@ A plugin is a folder or git repository which contains the following files:
 | model_setup.py                                             | yes                                      | Is used to setup your application (i.e. download models). Leave it empty if no external data is needed. The file is required to remind the plugin creator that external data should be stored locally. All plugins can run without writing anything into this file but this can lead to performance issues (i.e. the models are downloaded on every restart of the container). |
 | Pipfile.lock, Pipfile, requirements.txt                    | yes (one)                                | contains the packages required by your application                                                                                                                                                                                                                                                                                                                             |
 
-## config.yaml
+## Plugin config.yaml
 
 Following Options can be specified in the `config.yaml`:
 
@@ -77,7 +77,7 @@ If you have extra data it should be stored there.
 
 ## Metric
 
-For some examples checkout the <metrics> folder.
+For some examples checkout the [metrics](metrics) folder.
 The metric.py file should have a class `MetricPlugin` with the following methods:
 
 - evaluate(self, hypotheses, references)
@@ -88,7 +88,7 @@ The metric.py file should have a class `MetricPlugin` with the following methods
 
 ## Summarizer
 
-For some examples checkout the <summarizers> folder.
+For some examples checkout the [summarizers](summarizers) folder.
 The summarizer.py file should have a class `SummarizerPlugin` with the following methods:
 
 - summarize(self, text, ratio)
@@ -115,7 +115,7 @@ Before deploying you need to build the necessary images and push them to dockerh
 # Api Documentation
 
 The api documentation can be found under `/api/doc` (e.g. <https://tldr.demo.webis.de/api/doc>).  
-The script `tldr.py` can be used to access the application from the commandline.
+The script [tldr.py](tldr.py) can be used to access the application from the commandline.
 It can also be imported in python files to build applications based on the application.
 
 # Builtin Metrics and Summarizers
