@@ -1,9 +1,20 @@
+import math
 import os
+import sys
+import warnings
 
-from transformers import (AutoModelForSeq2SeqLM, AutoTokenizer,
-                          EncoderDecoderModel, LongformerTokenizer, pipeline)
+from transformers import AutoTokenizer, pipeline
+
+if not sys.warnoptions:
+    warnings.simplefilter("ignore")
 
 MODEL = os.environ["model"]
+
+
+def add_dot(text):
+    if text[-1] != ".":
+        return text + "."
+    return text
 
 
 class NeuralSummarizer(object):
@@ -13,7 +24,6 @@ class NeuralSummarizer(object):
         "BART-XSum": "facebook/bart-large-xsum",
         "Pegasus-CNN": "google/pegasus-cnn_dailymail",
         "Pegasus-XSum": "google/pegasus-xsum",
-        "Longformer2Roberta": "patrickvonplaten/longformer2roberta-cnn_dailymail-fp16",
     }
 
     def __init__(self, model: str = "T5"):
@@ -28,66 +38,67 @@ class NeuralSummarizer(object):
          'BART-XSum': 'facebook/bart-large-xsum',
          'Pegasus-CNN': 'google/pegasus-cnn_dailymail',
          'Pegasus-XSum': 'google/pegasus-xsum',
-         'Longformer2Roberta': 'patrickvonplaten/longformer2roberta-cnn_dailymail-fp16'
         }
 
         Args:
             model (str, optional): [summarization model]. Defaults to 't5-base'.
         """
         self.model = self.MODELS[model]
-        self.tokenizer = None
-        self.encoder_decoder = None
-        self.pipeline = None
-        if self.model != "patrickvonplaten/longformer2roberta-cnn_dailymail-fp16":
-            self.pipeline = pipeline("summarization", model=self.model)
-            self.tokenizer = AutoTokenizer.from_pretrained(self.model)
-        else:
-            self.encoder_decoder = EncoderDecoderModel.from_pretrained(
-                "patrickvonplaten/longformer2roberta-cnn_dailymail-fp16"
-            )
-            self.tokenizer = LongformerTokenizer.from_pretrained(
-                "allenai/longformer-base-4096"
-            )
+        self.pipeline = pipeline("summarization", model=self.model)
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model)
 
-    def _truncate_text(self, text, remove_extra_tokens=0):
-        for i in range(3):
-            tokens = self.tokenizer(
-                text, return_tensors="pt", truncation=True
-            ).input_ids
-            max_model_length = tokens.size()[1]
-            truncated_tokens = tokens[0][: max_model_length - remove_extra_tokens]
-            text = self.tokenizer.decode(
-                truncated_tokens, clean_up_tokenization_spaces=True
-            )
-            without_truncate_length = self.tokenizer(
-                text, return_tensors="pt"
-            ).input_ids.size()[1]
-            if max_model_length >= without_truncate_length:
-                return tokens, text
-        return self._truncate_text(text, remove_extra_tokens=remove_extra_tokens + 3)
+    def _decode(self, tokens):
+        return self.tokenizer.decode(tokens, skip_special_tokens=True)
+
+    def _split(self, text):
+        tokenize_result = self.tokenizer(
+            text,
+            add_special_tokens=True,
+            padding=True,
+            return_tensors="pt",
+            truncation=True,
+            return_overflowing_tokens=True,
+            return_attention_mask=True,
+        )
+        token_chunks = tokenize_result.input_ids
+        length = tokenize_result.attention_mask.sum(axis=1).tolist()
+        text_chunks = [self._decode(chunk) for chunk in token_chunks]
+        return list(zip(text_chunks, length))
+
+    def _summarize_chunk(self, text, length, ratio, tolerance=0.1):
+        if ratio > 0.5:
+            ratio = 0.5
+        if length < 5:  # too short inputs may give errors
+            return ""
+        requested_length = ratio * length
+        max_length = max(
+            math.floor((1 + tolerance) * requested_length), 16
+        )  # short max_length will give error for short inputs
+        min_length = math.floor((1 - tolerance) * requested_length)
+
+        summary = self.pipeline(
+            text,
+            min_length=min_length,
+            max_length=max_length,
+            clean_up_tokenization_spaces=True,
+        )[0]["summary_text"]
+        return summary
 
     def summarize(self, text: str = None, ratio: float = 0.2):
         """Currently used models cannot process sequences longer than 1024 tokens. Thus, truncate the text to appropriate number of tokens."""
-        tokens, truncated_text = self._truncate_text(text)
-        min_summary_length = round(len(truncated_text.split()) * ratio)
+        chunks = self._split(text)
 
-        if self.pipeline:
-            summarization = self.pipeline(
-                truncated_text,
-                min_length=min_summary_length,
-                clean_up_tokenization_spaces=True,
-            )
-            summary_text = summarization[0]["summary_text"]
-            return summary_text
+        # don't summarize last chunk if too short
+        if len(chunks) > 1 and chunks[-1][1] < 50:
+            chunks.pop()
 
-        if self.encoder_decoder:
-            output_ids = self.encoder_decoder.generate(
-                tokens, min_length=min_summary_length
-            )
-            summary_text = self.tokenizer.decode(
-                output_ids[0], skip_special_tokens=True
-            )
-            return summary_text
+        summaries = [
+            self._summarize_chunk(text, length, ratio) for text, length in chunks
+        ]
+        summaries = [s.replace("<n>", " ").replace("\n", " ") for s in summaries]
+        summaries = [s.strip() for s in summaries]
+        summaries = [add_dot(s) for s in summaries if s]
+        return " ".join(summaries)
 
 
 class SummarizerPlugin:

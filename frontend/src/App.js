@@ -286,7 +286,7 @@ const ScrollToTopButton = () => {
         width: "38px",
         color: "#000",
         backgroundColor: "#fff",
-        borderRadius: "100%"
+        borderRadius: "100%",
       }}
       onClick={scrollToTop}
     />

@@ -43,6 +43,7 @@ Suboptions for `metrics` and `summarizers`:
 | option      | description                                                                                                                                                                                                                                                                           |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | source      | path or git url to the plugin folder or repository                                                                                                                                                                                                                                    |
+| image_url   | specify an url to an docker image in dockerhub want to use a existing image                                                                                                                                                                                                           |
 | environment | Key-value pairs that will be add to the plugin as environment varaible during build time and are present in the running plugin container. It is usefull e.g. when a plugin provides different models and one wants to choose a model. (see [Write a Plugin](#write-a-plugin) Section) |
 
 # Write a Plugin

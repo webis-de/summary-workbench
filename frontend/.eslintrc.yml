@@ -21,6 +21,7 @@ plugins:
   - import
   - promise
 rules:
+  react/function-component-definition: 0
   react/react-in-jsx-scope: 0
   react/jsx-filename-extension: 0
   react/no-array-index-key: 0

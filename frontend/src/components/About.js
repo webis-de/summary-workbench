@@ -28,26 +28,30 @@ const AboutTable = ({ section, content }) => (
           <td>
             <span>{type}</span>
           </td>
-          <td>
-            {sourcecode && (
-              <a href={sourcecode}>{extractGithubUser(sourcecode)}</a>
-            )}
-          </td>
-          <td>{homepage && (
-            <a href={homepage}>{homepage}</a>
-          )}</td>
+          <td>{sourcecode && <a href={sourcecode}>{extractGithubUser(sourcecode)}</a>}</td>
+          <td>{homepage && <a href={homepage}>{homepage}</a>}</td>
           <td>{model}</td>
         </tr>
       ))}
     </tbody>
   </table>
-)
+);
 
+const WaitResource = ({ loading, reloader }) => {
+  if (loading) return <CenterLoading />;
+  return (
+    <Button className="uk-container" onClick={reloader}>
+      Retry
+    </Button>
+  );
+};
 
 const About = () => {
-  const { summarizers, loading: summarizersLoading, reload: summarizersReload } = useContext(
-    SummarizersContext
-  );
+  const {
+    summarizers,
+    loading: summarizersLoading,
+    reload: summarizersReload,
+  } = useContext(SummarizersContext);
   const { metrics, loading: metricsLoading, reload: metricsReload } = useContext(MetricsContext);
 
   return (
@@ -55,41 +59,21 @@ const About = () => {
       <div>
         <h4>Summarization</h4>
         <div className="uk-margin-left">
-          <>
-            {summarizersLoading ? (
-              <CenterLoading />
-            ) : (
-                <>
-                  {!summarizers ? (
-                    <Button className="uk-container" onClick={summarizersReload}>
-                      Retry
-                    </Button>
-                  ) : (
-                      <AboutTable section="Summarizer" content={summarizers} />
-                    )}
-                </>
-              )}
-          </>
+          {!summarizers ? (
+            <WaitResource loading={summarizersLoading} reloader={summarizersReload} />
+          ) : (
+            <AboutTable section="Summarizer" content={summarizers} />
+          )}
         </div>
       </div>
       <div>
         <h4>Evaluation</h4>
         <div className="uk-margin-left">
-          <>
-            {metricsLoading ? (
-              <CenterLoading />
-            ) : (
-                <>
-                  {!metrics ? (
-                    <Button className="uk-container" onClick={metricsReload}>
-                      Retry
-                    </Button>
-                  ) : (
-                      <AboutTable section="Metric" content={metrics} />
-                    )}
-                </>
-              )}
-          </>
+          {!metrics ? (
+            <WaitResource loading={metricsLoading} reloader={metricsReload} />
+          ) : (
+            <AboutTable section="Summarizer" content={summarizers} />
+          )}
           <div style={{ marginTop: "1em", marginBottom: "1.5em" }} className="uk-text-meta">
             Evaluate a single hypothesis against the reference or upload hypothesis and reference
             files. Results can be saved and exported as LaTeX and CSV.

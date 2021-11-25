@@ -4,7 +4,7 @@ const innerHoverStyle = { background: "yellow", color: "black", display: "relati
 const baseMarkupStyle = {
   padding: 0,
   paddingTop: "0.1em",
-  paddingBottom: "0.1em"
+  paddingBottom: "0.1em",
 };
 const outerHoverStyle = { ...baseMarkupStyle, ...innerHoverStyle };
 
@@ -82,7 +82,7 @@ const StringContent = memo(({ content }) => {
   const lines = content.split("\n");
   return (
     <span>
-      <>{lines[0]}</>
+      {lines[0]}
       {lines.slice(1).map((line, i) => (
         <Fragment key={i}>
           <br />
@@ -112,15 +112,13 @@ const MarkupRoot = ({ markups, markupState, scrollState, allowScroll, showMarkup
 );
 
 const Markup = ({ markups, markupState, scrollState, showMarkup = true }) => (
-  <>
-    <MarkupRoot
-      markups={markups}
-      markupState={markupState}
-      scrollState={scrollState}
-      allowScroll={showMarkup}
-      showMarkup={showMarkup}
-    />
-  </>
+  <MarkupRoot
+    markups={markups}
+    markupState={markupState}
+    scrollState={scrollState}
+    allowScroll={showMarkup}
+    showMarkup={showMarkup}
+  />
 );
 
 export { Markup, useMarkupScroll };

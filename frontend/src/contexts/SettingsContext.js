@@ -1,4 +1,4 @@
-import React, { useCallback, useReducer, useState } from "react";
+import React, { useCallback, useMemo, useReducer, useState } from "react";
 
 import { ColorMap } from "../utils/color";
 
@@ -17,8 +17,7 @@ const loadAllowSelfSimilarities = () =>
 const storeAllowSelfSimilarities = (allowSelfSimilarities) =>
   window.localStorage.setItem("allow_self_similarities", allowSelfSimilarities);
 
-const loadIgnoreStopwords = () =>
-  window.localStorage.getItem("ignore_stopwords") === "true";
+const loadIgnoreStopwords = () => window.localStorage.getItem("ignore_stopwords") === "true";
 const storeIgnoreStopwords = (ignoreStopwords) =>
   window.localStorage.setItem("ignore_stopwords", ignoreStopwords);
 
@@ -55,23 +54,32 @@ const SettingsProvider = ({ children }) => {
     setAllowSelfSimilarities(newValue);
     storeAllowSelfSimilarities(newValue);
   }, [allowSelfSimilarities, setAllowSelfSimilarities]);
-  return (
-    <SettingsContext.Provider
-      value={{
-        minOverlap,
-        ignoreStopwords,
-        toggleIgnoreStopwords,
-        setMinOverlap,
-        allowSelfSimilarities,
-        toggleAllowSelfSimilarities,
-        colorMap,
-        setColorMap,
-        summaryLength,
-        setSummaryLength,
-      }}
-    >
-      {children}
-    </SettingsContext.Provider>
+  const value = useMemo(
+    () => ({
+      minOverlap,
+      ignoreStopwords,
+      toggleIgnoreStopwords,
+      setMinOverlap,
+      allowSelfSimilarities,
+      toggleAllowSelfSimilarities,
+      colorMap,
+      setColorMap,
+      summaryLength,
+      setSummaryLength,
+    }),
+    [
+      minOverlap,
+      ignoreStopwords,
+      toggleIgnoreStopwords,
+      setMinOverlap,
+      allowSelfSimilarities,
+      toggleAllowSelfSimilarities,
+      colorMap,
+      setColorMap,
+      summaryLength,
+      setSummaryLength,
+    ]
   );
+  return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;
 };
 export { SettingsContext, SettingsProvider };

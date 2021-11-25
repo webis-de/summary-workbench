@@ -18,6 +18,7 @@ summarizers:
   - ./summarizers/bertsum
   - ./summarizers/textrank
   - ./summarizers/newspaper3k
+  - ./summarizers/longformer2roberta
   - source: ./summarizers/neuralsum
     environment:
       model: T5
@@ -33,6 +34,3 @@ summarizers:
   - source: ./summarizers/neuralsum
     environment:
       model: Pegasus-XSum
-  - source: ./summarizers/neuralsum
-    environment:
-      model: Longformer2Roberta

@@ -1,0 +1,6 @@
+version: "1.0"
+name: "Longformer2Roberta"
+devimage: slim
+deployimage: slim
+metadata:
+  type: abstractive

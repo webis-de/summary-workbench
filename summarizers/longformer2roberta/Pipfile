@@ -11,8 +11,6 @@ ipdb = "*"
 flask = "*"
 gunicorn = "*"
 transformers = {extras = ["torch"],version = "*"}
-sentencepiece = "*"
-protobuf = "*"
 
 [requires]
 python_version = "3.8"

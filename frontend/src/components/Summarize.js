@@ -6,7 +6,6 @@ import { SettingsContext } from "../contexts/SettingsContext";
 import { SummarizersContext } from "../contexts/SummarizersContext";
 import { useMarkups, usePairwiseMarkups } from "../hooks/markup";
 import { displayError, displayMessage } from "../utils/message";
-import { PluginCard } from "./utils/PluginCard";
 import { ModelGrid } from "./Model";
 import { Badge, DismissableBadge } from "./utils/Badge";
 import { Button } from "./utils/Button";
@@ -15,6 +14,7 @@ import { LiveSearch, useFilter } from "./utils/FuzzySearch";
 import { Bars, EyeClosed, EyeOpen, ThumbsDown, ThumbsUp } from "./utils/Icons";
 import { CenterLoading } from "./utils/Loading";
 import { Markup, useMarkupScroll } from "./utils/Markup";
+import { PluginCard } from "./utils/PluginCard";
 
 const Feedback = ({ summary }) => {
   const { name, summaryText, originalText, url } = summary;
@@ -138,7 +138,7 @@ const InputDocument = ({ summarize, isComputing }) => {
                 settings={settings}
                 selectModel={selectSummarizer}
               />
-              <div style={{marginTop: "30px"}} />
+              <div style={{ marginTop: "30px" }} />
               <span className="colored-header">summary length:</span> {`${summaryLength} %`}
               <div
                 className="uk-flex uk-flex-wrap"
@@ -147,21 +147,21 @@ const InputDocument = ({ summarize, isComputing }) => {
                   gap: "5px",
                 }}
               >
-                  <span className="colored-header">selected:</span>
-                  {chosenModels.map((model) => (
-                    <DismissableBadge onClick={() => unselectSummarizer(model)} key={model}>
-                      <a
-                        href="/#"
-                        className="nostyle"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setSelectedSummarizer(model);
-                        }}
-                      >
-                        {summarizers[model].name}
-                      </a>
-                    </DismissableBadge>
-                  ))}
+                <span className="colored-header">selected:</span>
+                {chosenModels.map((model) => (
+                  <DismissableBadge onClick={() => unselectSummarizer(model)} key={model}>
+                    <a
+                      href="/#"
+                      className="nostyle"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setSelectedSummarizer(model);
+                      }}
+                    >
+                      {summarizers[model].name}
+                    </a>
+                  </DismissableBadge>
+                ))}
               </div>
               {selectedSummarizer && (
                 <div style={{ marginTop: "20px", marginBottom: "20px" }}>
@@ -230,21 +230,19 @@ const Summary = ({ markup, summary, markupState, scrollState, showMarkup }) => {
 };
 
 const Document = ({ markup, markupState, scrollState, showMarkup }) => (
-  <>
-    <div>
-      <div
-        className="uk-card uk-card-default uk-card-body"
-        style={{ height: "60vh", width: "auto", overflow: "auto", padding: "20px" }}
-      >
-        <Markup
-          markups={markup}
-          markupState={markupState}
-          scrollState={scrollState}
-          showMarkup={showMarkup}
-        />
-      </div>
+  <div>
+    <div
+      className="uk-card uk-card-default uk-card-body"
+      style={{ height: "60vh", width: "auto", overflow: "auto", padding: "20px" }}
+    >
+      <Markup
+        markups={markup}
+        markupState={markupState}
+        scrollState={scrollState}
+        showMarkup={showMarkup}
+      />
     </div>
-  </>
+  </div>
 );
 
 const SummaryTabView = ({ title, showOverlap, summaries, markups, documentLength }) => {
@@ -398,6 +396,11 @@ const SummaryView = ({ title, summaries, documentLength }) => {
   const pairwiseMarkups = usePairwiseMarkups(originals, sums);
   const summaryMarkups = useMarkups(sums);
   const scrollRef = useRef();
+  const tabViewKey = useRef(true);
+
+  useMemo(() => {
+    tabViewKey.current = !tabViewKey.current;
+  }, [summaries]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -413,6 +416,7 @@ const SummaryView = ({ title, summaries, documentLength }) => {
         <div>
           {showTab ? (
             <SummaryTabView
+              key={tabViewKey.current}
               documentLength={documentLength}
               showOverlap={showOverlap}
               summaries={summaries}
@@ -502,7 +506,7 @@ const Summarize = () => {
     <>
       <InputDocument summarize={summarize} isComputing={computing} />
       {results && (
-        <div style={{marginTop: "40px"}}>
+        <div style={{ marginTop: "40px" }}>
           <SummaryView documentLength={documentLength} summaries={results} title={title} />
         </div>
       )}
