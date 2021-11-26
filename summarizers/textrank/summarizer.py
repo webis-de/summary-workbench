@@ -1,5 +1,26 @@
-import spacy
 import pytextrank
+import spacy
+
+
+def take_ratio(ranked_sents, ratio):
+    ranked_sents = list(ranked_sents)
+    num_tokens = sum(len(s) for s in ranked_sents)
+    requested_tokens = round(ratio * num_tokens)
+    token_count = 0
+    taken_sents = []
+    for sent in ranked_sents:
+        prev_token_count = token_count
+        token_count += len(sent)
+        if taken_sents and (token_count - requested_tokens) > (
+            requested_tokens - prev_token_count
+        ):
+            break
+        taken_sents.append(sent)
+    return taken_sents
+
+
+def order_sentences(ranked_sents, original_sents):
+    return [s for s in original_sents if s in ranked_sents]
 
 
 class SummarizerPlugin:
@@ -9,10 +30,11 @@ class SummarizerPlugin:
 
     def summarize(self, text, ratio):
         doc = self.nlp(text)
-        limit_sentences = max(1, round(len(list(doc.sents)) * ratio * 0.4))
-        most_important_sentences = doc._.textrank.summary(
+        ranked_sents = doc._.textrank.summary(
             limit_phrases=128,
-            limit_sentences=limit_sentences,
-            preserve_order=True,
+            limit_sentences=len(list(doc.sents)),
+            preserve_order=False,
         )
-        return " ".join(map(str, most_important_sentences))
+        ranked_sents = take_ratio(ranked_sents, ratio)
+        ranked_sents = order_sentences(ranked_sents, doc.sents)
+        return " ".join(map(str, ranked_sents))
