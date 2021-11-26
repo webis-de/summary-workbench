@@ -10,4 +10,4 @@ class SummarizerPlugin:
         self.bertsum = BertSummarizer(model=MODEL, reduce_option="max")
 
     def summarize(self, text, ratio):
-        return self.bertsum(text, min_length=0, max_length=500, ratio=ratio*0.3)
+        return self.bertsum(text, min_length=0, max_length=500, ratio=ratio)
