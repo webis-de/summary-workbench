@@ -1,0 +1,8 @@
+version: "1.0"
+name: BARTScore
+devimage: slim
+deployimage: slim
+metadata:
+  type: semantic
+  homepage: https://arxiv.org/abs/2106.11520
+  sourcecode: https://github.com/neulab/BARTScore

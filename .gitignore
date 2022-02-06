@@ -1,3 +1,4 @@
+.venv
 config.dev.yaml
 plugin_config.json
 experiments.py

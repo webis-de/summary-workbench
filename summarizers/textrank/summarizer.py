@@ -31,7 +31,7 @@ class SummarizerPlugin:
     def summarize(self, text, ratio):
         doc = self.nlp(text)
         ranked_sents = doc._.textrank.summary(
-            limit_phrases=128,
+            limit_phrases=round(len(doc._.phrases) * 0.3),
             limit_sentences=len(list(doc.sents)),
             preserve_order=False,
         )

@@ -1,12 +1,9 @@
-import gh from "parse-github-url";
 import React, { useContext } from "react";
 
 import { MetricsContext } from "../contexts/MetricsContext";
 import { SummarizersContext } from "../contexts/SummarizersContext";
 import { Button } from "./utils/Button";
 import { CenterLoading } from "./utils/Loading";
-
-const extractGithubUser = (url) => gh(url).repo || url;
 
 const AboutTable = ({ section, content }) => (
   <table className="uk-table uk-table-striped">
@@ -28,7 +25,7 @@ const AboutTable = ({ section, content }) => (
           <td>
             <span>{type}</span>
           </td>
-          <td>{sourcecode && <a href={sourcecode}>{extractGithubUser(sourcecode)}</a>}</td>
+          <td>{sourcecode && <a href={sourcecode}>{sourcecode}</a>}</td>
           <td>{homepage && <a href={homepage}>{homepage}</a>}</td>
           <td>{model}</td>
         </tr>

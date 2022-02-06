@@ -13,6 +13,7 @@ metrics:
   - ./metrics/rouge
   - ./metrics/sentence_transformers
   - ./metrics/cosine_similarity
+  - ./metrics/bartscore
 
 summarizers:
   - ./summarizers/bertsum

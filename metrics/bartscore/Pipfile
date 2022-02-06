@@ -1,0 +1,22 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+click = "*"
+docker = "*"
+"ruamel.yaml" = "*"
+marshmallow = "*"
+termcolor = "*"
+giturlparse = "*"
+requests = "*"
+GitPython = "*"
+torch = "*"
+transformers = "*"
+
+[dev-packages]
+ipython = "*"
+
+[requires]
+python_version = "3.9"
