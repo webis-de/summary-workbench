@@ -9,40 +9,33 @@ import { Saved } from "./Saved";
 import { Settings } from "./Settings";
 import { Upload } from "./Upload";
 import { Button } from "./utils/Button";
-import { Card, CardBody, CardHeader, CardTitle } from "./utils/Card";
+import { Card, CardContent, CardHead } from "./utils/Card";
 import { CenterLoading } from "./utils/Loading";
+import { Tab, TabContent, TabHead, TabPanel, Tabs } from "./utils/Tabs";
 
 const FileInput = ({ setCalculation }) => (
-  <Card>
-    <CardHeader>
-      <CardTitle>
-        <div className="uk-flex">
+  <Card full>
+    <Tabs>
+      <CardHead>
+        <div className="flex">
           <FaRegFile />
-          <ul
-            className="uk-tab dark-tab"
-            data-uk-tab="connect: #choose-upload;"
-            style={{ margin: "0" }}
-          >
-            <li>
-              <a href="/#">Upload files</a>
-            </li>
-            <li>
-              <a href="/#">Single Example</a>
-            </li>
-          </ul>
+          <TabHead>
+            <Tab>Upload files</Tab>
+            <Tab>Single Example</Tab>
+          </TabHead>
         </div>
-      </CardTitle>
-    </CardHeader>
-    <CardBody>
-      <ul id="choose-upload" className="uk-switcher">
-        <li>
-          <Upload className="uk-margin" setCalculation={setCalculation} />
-        </li>
-        <li>
-          <OneHypRef className="uk-margin" />
-        </li>
-      </ul>
-    </CardBody>
+      </CardHead>
+      <CardContent>
+        <TabContent>
+          <TabPanel>
+            <Upload className="uk-margin" setCalculation={setCalculation} />
+          </TabPanel>
+          <TabPanel>
+            <OneHypRef className="uk-margin" />
+          </TabPanel>
+        </TabContent>
+      </CardContent>
+    </Tabs>
   </Card>
 );
 
@@ -52,7 +45,8 @@ const Evaluate = () => {
   const { loading, metrics, reload } = useContext(MetricsContext);
   const calc = useCalculations();
 
-  const saveCalculation = async (id) => calc.add({ ...calculation, id, metrics }).then(() => setCalculation(null))
+  const saveCalculation = async (id) =>
+    calc.add({ ...calculation, id, metrics }).then(() => setCalculation(null));
   const scrollRef = useRef();
 
   useEffect(() => {
@@ -78,11 +72,7 @@ const Evaluate = () => {
       </div>
       <div ref={scrollRef} style={{ scrollMarginTop: "100px" }} className="uk-margin-large-top" />
       {calculation && (
-        <Result
-          className="uk-margin"
-          calculation={calculation}
-          saveCalculation={saveCalculation}
-        />
+        <Result className="uk-margin" calculation={calculation} saveCalculation={saveCalculation} />
       )}
       {calc.calculations && (
         <Saved

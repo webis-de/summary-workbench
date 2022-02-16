@@ -1,27 +1,24 @@
-import React from "react";
-import ReactModal from "react-modal";
+import { Dialog } from "@headlessui/react";
+import React, { useState } from "react";
 
-ReactModal.setAppElement("#root");
-
-const customStyles = {
-  overlay: { zIndex: "10000" },
-  content: {
-    outline: null,
-    top: "50%",
-    width: "min(500px, 80vw)",
-    left: "50%",
-    right: "auto",
-    bottom: "auto",
-    maxHeight: "80vh",
-    overflowY: "auto",
-    transform: "translate(-50%, -50%)",
-  },
-};
-
-const Modal = ({ children, ...other }) => (
-  <ReactModal style={customStyles} {...other}>
-    {children}
-  </ReactModal>
+const ModalTitle = ({ children }) => (
+  <Dialog.Title className="text-3xl font-bold">{children}</Dialog.Title>
 );
 
-export { Modal };
+const useModal = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const open = () => setIsOpen(true);
+  const close = () => setIsOpen(false);
+  return [isOpen, open, close];
+};
+
+const Modal = ({ children, isOpen, close }) => (
+  <Dialog open={isOpen} onClose={close}>
+    <Dialog.Overlay className="fixed inset-0 bg-black opacity-30" />
+    <div className="fixed bg-white shadow-xl shadow-stone-400 z-50 border inset-x-12 inset-y-6 overflow-y-auto bg-slate">
+      {children}
+    </div>
+  </Dialog>
+);
+
+export { Modal, ModalTitle, useModal };

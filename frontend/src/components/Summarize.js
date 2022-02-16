@@ -9,12 +9,14 @@ import { displayError, displayMessage } from "../utils/message";
 import { ModelGrid } from "./Model";
 import { Badge, DismissableBadge } from "./utils/Badge";
 import { Button } from "./utils/Button";
-import { Card, CardBody, CardHeader, CardTitle } from "./utils/Card";
+import { Card, CardContent, CardHead } from "./utils/Card";
 import { LiveSearch, useFilter } from "./utils/FuzzySearch";
 import { Bars, EyeClosed, EyeOpen, ThumbsDown, ThumbsUp } from "./utils/Icons";
 import { CenterLoading } from "./utils/Loading";
 import { Markup, useMarkupScroll } from "./utils/Markup";
 import { PluginCard } from "./utils/PluginCard";
+import { Pill, TabContent, TabHead, TabPanel, Tabs } from "./utils/Tabs";
+import { HeadingBig } from "./utils/Text";
 
 const Feedback = ({ summary }) => {
   const { name, summaryText, originalText, url } = summary;
@@ -105,33 +107,34 @@ const InputDocument = ({ summarize, isComputing }) => {
   return (
     <div className="uk-margin-medium-top@s uk-margin-large-top@l">
       <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gridGap: "10px" }}>
-        <div>
-          <div className="uk-flex uk-flex-column">
-            <Header text="Document" fontSize="14pt">
+        <Card full>
+          <CardHead>
+            <div className="flex justify-between">
+              <HeadingBig>Document</HeadingBig>
               <Button variant="primary" onClick={insertSampleText}>
                 sample text
               </Button>
-            </Header>
-            <textarea
-              value={documentText}
-              onChange={(e) => setDocumentText(e.currentTarget.value)}
-              className="uk-textarea uk-card uk-card-default uk-card-body"
-              rows="8"
-              placeholder="Paste URL or long text"
-              style={{ minHeight: "350px", padding: "20px", resize: "none", overflow: "auto" }}
-            />
-          </div>
-        </div>
+            </div>
+          </CardHead>
+          <textarea
+            value={documentText}
+            onChange={(e) => setDocumentText(e.currentTarget.value)}
+            className="uk-textarea resize-none min-h-[350px]"
+            rows="8"
+            placeholder="Paste URL or long text"
+            style={{ height: "100%" }}
+          />
+        </Card>
 
         <div className="uk-flex uk-flex-column">
-          <Card>
-            <CardHeader>
-              <CardTitle style={{ display: "flex", alignItems: "center", marginRight: "10px" }}>
-                <span style={{ marginRight: "10px" }}>Models</span>
+          <Card full>
+            <CardHead>
+              <div className="flex items-center">
+                Models
                 <LiveSearch query={query} setQuery={setQuery} />
-              </CardTitle>
-            </CardHeader>
-            <CardBody>
+              </div>
+            </CardHead>
+            <CardContent>
               <ModelGrid
                 keys={filteredKeys}
                 models={summarizers}
@@ -172,16 +175,16 @@ const InputDocument = ({ summarize, isComputing }) => {
                 {isComputing ? (
                   <Loading />
                 ) : (
-                  <button
-                    className="uk-button uk-button-primary"
+                  <Button
+                    appearence="room"
                     disabled={!documentText || !chosenModels.length}
                     onClick={() => summarize(documentText, chosenModels, summaryLength)}
                   >
                     Summarize
-                  </button>
+                  </Button>
                 )}
               </div>
-            </CardBody>
+            </CardContent>
           </Card>
         </div>
       </div>
@@ -212,7 +215,7 @@ const Summary = ({ markup, summary, markupState, scrollState, showMarkup }) => {
 
   return (
     <div>
-      <div className="uk-flex uk-flex-right" style={{ transform: "translate(20px, -20px)" }}>
+      <div className="flex gap-2 pb-2 -mt-2">
         <Badge>{`${numWords} words`}</Badge>
         <Badge>{`${(percentOverlap * 100).toFixed(0)}% overlap`}</Badge>
       </div>
@@ -229,22 +232,6 @@ const Summary = ({ markup, summary, markupState, scrollState, showMarkup }) => {
   );
 };
 
-const Document = ({ markup, markupState, scrollState, showMarkup }) => (
-  <div>
-    <div
-      className="uk-card uk-card-default uk-card-body"
-      style={{ height: "60vh", width: "auto", overflow: "auto", padding: "20px" }}
-    >
-      <Markup
-        markups={markup}
-        markupState={markupState}
-        scrollState={scrollState}
-        showMarkup={showMarkup}
-      />
-    </div>
-  </div>
-);
-
 const SummaryTabView = ({ title, showOverlap, summaries, markups, documentLength }) => {
   const { summarizers } = useContext(SummarizersContext);
   const markupState = useState(null);
@@ -259,53 +246,51 @@ const SummaryTabView = ({ title, showOverlap, summaries, markups, documentLength
   return (
     <div className="uk-flex">
       <div style={{ flexBasis: "60%" }}>
-        <Header text={title || "Document"} fontSize="16pt">
-          <span style={{ fontSize: "12pt" }}>{documentLength} words</span>
-        </Header>
-        <Document
-          title={title}
-          markup={markups[summaryIndex][0]}
-          markupState={markupState}
-          scrollState={scrollState}
-          showMarkup={showOverlap}
-        />
+        <Card full>
+          <CardHead>
+            <div className="flex justify-between items-center">
+              <HeadingBig>{title || "Document"}</HeadingBig>
+              <span style={{ fontSize: "12pt" }}>{documentLength} words</span>
+            </div>
+          </CardHead>
+          <div className="h-[60vh] overflow-auto bg-white p-4">
+            <Markup
+              markups={markups[summaryIndex][0]}
+              markupState={markupState}
+              scrollState={scrollState}
+              showMarkup={showOverlap}
+            />
+          </div>
+        </Card>
       </div>
       <div style={{ minWidth: "20px" }} />
       <div style={{ flexBasis: "40%" }}>
-        <Header>
-          <ul className="uk-tab dark-tab uk-margin" data-uk-tab="connect: #summary-display;">
-            {summaries.map(({ name }, index) => (
-              <li key={name}>
-                <a
-                  className=""
-                  style={{ color: "blue", fontSize: "1em" }}
-                  href="/#"
-                  onClick={() => setSummaryIndex(index)}
-                >
-                  {summarizers[name].name}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </Header>
-        <div
-          style={{ height: "auto", overflow: "auto" }}
-          className="uk-card uk-card-default uk-card-body"
-        >
-          <ul id="summary-display" className="uk-switcher">
-            {markups.map((markup, index) => (
-              <li key={index}>
-                <Summary
-                  markup={markup}
-                  summary={summaries[index]}
-                  showMarkup={showOverlap}
-                  markupState={markupState}
-                  scrollState={scrollState}
-                />
-              </li>
-            ))}
-          </ul>
-        </div>
+        <Tabs onChange={(index) => setSummaryIndex(index)}>
+          <Card full>
+            <CardHead>
+              <TabHead>
+                {summaries.map(({ name }) => (
+                  <Pill key={name}>{summarizers[name].name}</Pill>
+                ))}
+              </TabHead>
+            </CardHead>
+            <CardContent>
+              <TabContent>
+                {markups.map((markup, index) => (
+                  <TabPanel key={index}>
+                    <Summary
+                      markup={markup}
+                      summary={summaries[index]}
+                      showMarkup={showOverlap}
+                      markupState={markupState}
+                      scrollState={scrollState}
+                    />
+                  </TabPanel>
+                ))}
+              </TabContent>
+            </CardContent>
+          </Card>
+        </Tabs>
       </div>
     </div>
   );

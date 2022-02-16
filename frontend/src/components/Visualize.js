@@ -7,7 +7,7 @@ import { usePagination } from "../hooks/pagination";
 import { useVisualizations } from "../hooks/visualizations";
 import { Accordion, AccordionItem } from "./utils/Accordion";
 import { Button } from "./utils/Button";
-import { Card, CardBody, CardHeader, CardTitle } from "./utils/Card";
+import { Card, CardContent, CardHead } from "./utils/Card";
 import { ChooseFile, useFile } from "./utils/ChooseFile";
 import { DeleteButton } from "./utils/DeleteButton";
 import { EyeClosed, EyeOpen } from "./utils/Icons";
@@ -15,6 +15,7 @@ import { CenterLoading } from "./utils/Loading";
 import { Markup } from "./utils/Markup";
 import { Modal } from "./utils/Modal";
 import { Pagination } from "./utils/Pagination";
+import { HeadingBig } from "./utils/Text";
 
 const ModelModal = ({ close, addModel, length }) => {
   const [name, setName] = useState("");
@@ -112,13 +113,13 @@ const VisualizeContent = ({ doc, models }) => {
   return (
     <div className="visualization-layout margin-between-10">
       <div>
-        <Card>
-          <CardHeader>
-            <CardTitle>Document</CardTitle>
-          </CardHeader>
-          <CardBody>
+        <Card full>
+          <CardHead>
+            <HeadingBig>Document</HeadingBig>
+          </CardHead>
+          <CardContent>
             {docMarkup ? <Markup markups={docMarkup} markupState={markupState} /> : doc}
-          </CardBody>
+          </CardContent>
         </Card>
       </div>
       <div>
@@ -127,25 +128,23 @@ const VisualizeContent = ({ doc, models }) => {
           const ModelEye = modelSelected ? EyeClosed : EyeOpen;
           return (
             <Card key={name} style={{ flexBasis: "50%" }}>
-              <CardHeader>
-                <CardTitle>
-                  <div className="uk-flex uk-flex-between">
-                    {name}
-                    <ModelEye
-                      className="uk-margin-right"
-                      style={{ minWidth: "30px" }}
-                      onClick={() => toggleSlot(i)}
-                    />
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardBody>
+              <CardHead>
+                <div className="flex justify-between">
+                  <HeadingBig>{name}</HeadingBig>
+                  <ModelEye
+                    className="uk-margin-right"
+                    style={{ minWidth: "30px" }}
+                    onClick={() => toggleSlot(i)}
+                  />
+                </div>
+              </CardHead>
+              <CardContent>
                 {modelSelected ? (
                   <Markup markups={refMarkup} markupState={markupState} />
                 ) : (
                   modelLine
                 )}
-              </CardBody>
+              </CardContent>
             </Card>
           );
         })}

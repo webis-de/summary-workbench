@@ -3,7 +3,7 @@ import { FaCalculator, FaInfoCircle } from "react-icons/fa";
 
 import { ResultInfo } from "./ResultInfo";
 import { Button } from "./utils/Button";
-import { Card, CardBody, CardHeader, CardTitle } from "./utils/Card";
+import { Card, CardContent, CardHead } from "./utils/Card";
 
 const UploadButton = (props) => (
   <Button variant="primary" {...props} style={{ whiteSpace: "nowrap" }}>
@@ -27,13 +27,11 @@ const Result = ({ className, calculation, saveCalculation }) => {
   };
 
   return (
-    <Card className={className}>
-      <CardHeader>
-        <CardTitle>
-          <FaCalculator /> Results
-        </CardTitle>
-      </CardHeader>
-      <CardBody>
+    <Card full>
+      <CardHead>
+        <FaCalculator /> Results
+      </CardHead>
+      <CardContent>
         <div
           className="uk-flex uk-flex-middle"
           style={{ marginTop: "-10px", marginBottom: "20px" }}
@@ -54,7 +52,7 @@ const Result = ({ className, calculation, saveCalculation }) => {
           </div>
         )}
         <ResultInfo scores={scores} hypotheses={hypotheses} references={references} />
-      </CardBody>
+      </CardContent>
     </Card>
   );
 };

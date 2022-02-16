@@ -1,11 +1,11 @@
 import React, { useContext, useMemo, useState } from "react";
 
 import { MetricsContext } from "../contexts/MetricsContext";
-import { PluginCard } from "./utils/PluginCard";
 import { ModelGrid } from "./Model";
 import { DismissableBadge } from "./utils/Badge";
-import { Card, CardBody, CardHeader, CardTitle } from "./utils/Card";
+import { Card, CardContent, CardHead } from "./utils/Card";
 import { LiveSearch, useFilter } from "./utils/FuzzySearch";
+import { PluginCard } from "./utils/PluginCard";
 
 const getChosenMetrics = (settings) =>
   Object.entries(settings)
@@ -31,24 +31,21 @@ const Settings = () => {
   const chosenMetrics = getChosenMetrics(settings);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle style={{ display: "flex", alignItems: "center", marginRight: "10px" }}>
-          <span style={{ marginRight: "10px" }}>Metrics</span>
+    <Card full>
+      <CardHead>
+        <div className="flex items-center">
+          <CardHead>Metrics</CardHead>
           <LiveSearch query={query} setQuery={setQuery} />
-        </CardTitle>
-      </CardHeader>
-      <CardBody>
+        </div>
+      </CardHead>
+      <CardContent>
         <ModelGrid
           keys={filteredKeys}
           models={metrics}
           settings={settings}
           selectModel={selectMetric}
         />
-        <div
-          className="uk-flex uk-flex-wrap"
-          style={{ alignItems: "center", gap: "5px", marginTop: "30px" }}
-        >
+        <div className="flex flex-wrap items-center gap-5">
           <span className="colored-header">selected:</span>
           {chosenMetrics.map((model) => (
             <DismissableBadge onClick={() => unselectMetric(model)} key={model}>
@@ -70,7 +67,7 @@ const Settings = () => {
             <PluginCard plugin={metrics[selectedMetric]} inline={false} />
           </div>
         )}
-      </CardBody>
+      </CardContent>
     </Card>
   );
 };
