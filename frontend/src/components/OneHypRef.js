@@ -11,8 +11,9 @@ import { Textarea } from "./utils/Form";
 import { InfoText } from "./utils/InfoText";
 import { Loading } from "./utils/Loading";
 import { Markup } from "./utils/Markup";
+import { TableWrapper, Table, Tbody, Td, Tr } from "./utils/Table";
 
-const OneHypRefResult = ({ className, calculation }) => {
+const OneHypRefResult = ({ calculation }) => {
   const { scores, hypText, refText } = calculation;
   const [hypothesis, reference] = useMarkup(hypText, refText);
 
@@ -21,19 +22,21 @@ const OneHypRefResult = ({ className, calculation }) => {
   const markupState = useState();
 
   return (
-    <div className={className}>
-      <table className="uk-table uk-margin">
-        <tbody>
-          <tr>
-            <td>
-              <Markup markups={reference} markupState={markupState} />
-            </td>
-            <td>
-              <Markup markups={hypothesis} markupState={markupState} />
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div>
+      <TableWrapper>
+        <Table>
+          <Tbody>
+            <Tr>
+              <Td>
+                <Markup markups={reference} markupState={markupState} />
+              </Td>
+              <Td>
+                <Markup markups={hypothesis} markupState={markupState} />
+              </Td>
+            </Tr>
+          </Tbody>
+        </Table>
+      </TableWrapper>
       <ScoreTable flatScores={flatScores} />
     </div>
   );
@@ -98,7 +101,7 @@ const OneHypRef = () => {
           </Button>
         )}
       </div>
-      {evaluateResult && <OneHypRefResult className="uk-margin" calculation={evaluateResult} />}
+      {evaluateResult && <OneHypRefResult calculation={evaluateResult} />}
     </>
   );
 };

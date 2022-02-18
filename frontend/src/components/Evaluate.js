@@ -12,20 +12,16 @@ import { Button } from "./utils/Button";
 import { Card, CardContent, CardHead } from "./utils/Card";
 import { CenterLoading } from "./utils/Loading";
 import { Tab, TabContent, TabHead, TabPanel, Tabs } from "./utils/Tabs";
+import { HeadingBig, Hint } from "./utils/Text";
 
 const FileInput = ({ setCalculation }) => (
   <Card full>
     <Tabs>
-      <CardHead>
-        <div className="flex">
-          <FaRegFile />
-          <TabHead border>
-            <Tab>Upload files</Tab>
-            <Tab>Single Example</Tab>
-          </TabHead>
-        </div>
-      </CardHead>
       <CardContent>
+        <TabHead border>
+          <Tab>Upload files</Tab>
+          <Tab>Single Example</Tab>
+        </TabHead>
         <TabContent>
           <TabPanel>
             <Upload className="uk-margin" setCalculation={setCalculation} />
@@ -42,7 +38,7 @@ const FileInput = ({ setCalculation }) => (
 const Evaluate = () => {
   const [calculation, setCalculation] = useState(null);
 
-  const { loading, metrics, reload } = useContext(MetricsContext);
+  const { loading, metrics, retry } = useContext(MetricsContext);
   const calc = useCalculations();
 
   const saveCalculation = async (id) =>
@@ -58,10 +54,15 @@ const Evaluate = () => {
   }, [calculation]);
 
   if (loading) return <CenterLoading />;
-  if (!metrics) return <Button onClick={reload}>Retry</Button>;
+  if (!metrics) return <Button onClick={retry}>Retry</Button>;
 
   return (
     <div>
+      <HeadingBig>Evaluation</HeadingBig>
+      <Hint>
+        Evaluate a single hypothesis against a reference or upload hypothesis and reference files.
+        Results can be saved and exported as LaTeX or CSV.
+      </Hint>
       <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gridGap: "10px" }}>
         <div>
           <FileInput setCalculation={setCalculation} />

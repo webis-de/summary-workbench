@@ -16,7 +16,7 @@ import { CenterLoading } from "./utils/Loading";
 import { Markup, useMarkupScroll } from "./utils/Markup";
 import { PluginCard } from "./utils/PluginCard";
 import { Pill, TabContent, TabHead, TabPanel, Tabs } from "./utils/Tabs";
-import { HeadingBig, HeadingSemiBig } from "./utils/Text";
+import { HeadingBig, HeadingSemiBig, Hint } from "./utils/Text";
 import { Tooltip } from "./utils/Tooltip";
 
 const Feedback = ({ summary }) => {
@@ -406,7 +406,7 @@ const Summarize = () => {
   const [title, setTitle] = useState(null);
   const [computing, setComputing] = useState(null);
   const [documentLength, setDocumentLength] = useState(0);
-  const { summarizers, loading, reload } = useContext(SummarizersContext);
+  const { summarizers, loading, retry } = useContext(SummarizersContext);
 
   const summarize = async (rawText, models, summaryLength) => {
     const requestText = rawText.trim();
@@ -449,12 +449,14 @@ const Summarize = () => {
   };
 
   if (loading) return <CenterLoading />;
-  if (!summarizers) return <Button onClick={reload}>Retry</Button>;
+  if (!summarizers) return <Button onClick={retry}>Retry</Button>;
   return (
     <>
+      <HeadingBig>Summarization</HeadingBig>
+      <Hint>Summarize documents.</Hint>
       <InputDocument summarize={summarize} isComputing={computing} />
       {results && (
-        <div style={{ marginTop: "40px" }}>
+        <div>
           <SummaryView documentLength={documentLength} summaries={results} title={title} />
         </div>
       )}

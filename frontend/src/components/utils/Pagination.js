@@ -66,9 +66,14 @@ const Pagination = ({ numPages, page, setPage, size, setSize }) => (
   </div>
 );
 
-const validRange = (value, maxValue, minValue = 1) => Math.max(minValue, Math.min(maxValue, value));
+const validRange = (value, maxValue, minValue = 1) => {
+  let _value = value
+  if (Number.isInteger(maxValue)) _value = Math.min(maxValue, _value)
+  if (Number.isInteger(minValue)) _value = Math.max(minValue, _value)
+  return _value
+}
 
-const usePagination = (numItems, initialPage = 1, initialSize = 10) => {
+const usePagination = (numItems, initialPage = 1, initialSize = 10, maxSize=null) => {
   const [page, _setPage] = useState(initialPage);
   const [size, _setSize] = useState(initialSize);
 
@@ -80,15 +85,14 @@ const usePagination = (numItems, initialPage = 1, initialSize = 10) => {
   );
   const setSize = useCallback(
     (requestSize) => {
-      const newSize = validRange(parseNumber(requestSize) || size, numItems);
+      const newSize = validRange(parseNumber(requestSize) || size, maxSize);
       _setSize(newSize);
       _setPage(Math.ceil((size * (page - 1) + 1) / newSize));
     },
-    [numItems, size, page, _setSize]
+    [numItems, size, page, maxSize, _setSize]
   );
 
   useEffect(() => setPage(validRange(page, numPages)), [numPages, page, setPage]);
-  console.log(size, page, page <= Math.ceil(numItems / size));
 
   return { page, numPages, setPage, size, setSize };
 };

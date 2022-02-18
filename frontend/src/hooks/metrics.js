@@ -1,20 +1,19 @@
-import { useCallback, useEffect, useReducer, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useAsync } from "react-use";
 
 import { getMetricsRequest } from "../api";
 import { displayMessage } from "../utils/message";
 
 const saveSetting = (metric, status) =>
   window.localStorage.setItem(metric, status ? "true" : "false");
+
 const loadSetting = (metric) => {
   const setting = window.localStorage.getItem(metric);
   if (setting === null && metric === "anonymous-rouge") return true;
-  return setting === "true"
-}
+  return setting === "true";
+};
 
 const useMetrics = () => {
-  const [metrics, setMetrics] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [reloading, reload] = useReducer((v) => !v, true);
   const [metricTypes, setMetricTypes] = useState(null);
   const [settings, setSettings] = useState(null);
 
@@ -29,19 +28,15 @@ const useMetrics = () => {
     [settings]
   );
 
-  useEffect(() => {
-    setLoading(true);
-    getMetricsRequest()
-      .then((data) => setMetrics(data))
-      .catch(() => {
-        setMetrics(null);
-        setLoading(false);
-        displayMessage("error fetching metrics");
-      });
-  }, [setLoading, setMetrics, reloading]);
+  const { value: metrics, loading, retry, error } = useAsync(getMetricsRequest);
+  useEffect(() => error && displayMessage(error.value), [error]);
 
   useEffect(() => {
-    if (!metrics) return;
+    if (!metrics) {
+      setMetricTypes({});
+      setSettings({});
+      return;
+    }
     const types = {};
     Object.entries(metrics).forEach(([metric, { type }]) => {
       if (types[type]) types[type].push(metric);
@@ -53,10 +48,9 @@ const useMetrics = () => {
     });
     setMetricTypes(types);
     setSettings(newSettings);
-    setLoading(false);
-  }, [metrics]);
+  }, [metrics, setMetricTypes, setSettings]);
 
-  return { reload, metrics, metricTypes, loading, toggleSetting, settings };
+  return { retry, metrics, metricTypes, loading, toggleSetting, settings };
 };
 
 export { useMetrics };

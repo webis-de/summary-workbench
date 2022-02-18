@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useReducer, useState } from "react";
+import { useAsyncRetry } from "react-use";
 
 import { getSummarizersRequest } from "../api";
 import { displayError } from "../utils/message";
@@ -13,11 +14,8 @@ const loadSetting = (summarizer) => {
 };
 
 const useSummarizers = () => {
-  const [summarizers, setSummarizers] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [reloading, reload] = useReducer((v) => !v, true);
-  const [summarizerTypes, setSummarizerTypes] = useState(null);
-  const [settings, setSettings] = useState(null);
+  const [summarizerTypes, setSummarizerTypes] = useState({});
+  const [settings, setSettings] = useState({});
 
   const toggleSetting = useCallback(
     (summarizer) => {
@@ -30,18 +28,15 @@ const useSummarizers = () => {
     [settings]
   );
 
+  const { value: summarizers, loading, retry, error } = useAsyncRetry(getSummarizersRequest);
+  useEffect(() => error && displayError(error.value), [error]);
+
   useEffect(() => {
-    setLoading(true);
-    getSummarizersRequest()
-      .then((data) => setSummarizers(data))
-      .catch((err) => {
-        setSummarizers(null);
-        setLoading(false);
-        displayError(err);
-      });
-  }, [setLoading, setSummarizers, reloading]);
-  useEffect(() => {
-    if (!summarizers) return;
+    if (!summarizers) {
+      setSummarizerTypes({});
+      setSettings({})
+      return
+    }
     const types = {};
     Object.entries(summarizers).forEach(([summarizer, { type }]) => {
       if (types[type]) types[type].push(summarizer);
@@ -53,10 +48,9 @@ const useSummarizers = () => {
     });
     setSummarizerTypes(types);
     setSettings(newSettings);
-    setLoading(false);
-  }, [summarizers]);
+  }, [summarizers, setSettings, setSummarizerTypes]);
 
-  return { reload, summarizers, summarizerTypes, loading, toggleSetting, settings };
+  return { retry, summarizers, summarizerTypes, loading, toggleSetting, settings };
 };
 
 export { useSummarizers };

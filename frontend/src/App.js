@@ -9,6 +9,7 @@ import { Evaluate } from "./components/Evaluate";
 import { Summarize } from "./components/Summarize";
 import { Button, ButtonGroup } from "./components/utils/Button";
 import { Card, CardContent, CardHead } from "./components/utils/Card";
+import { Container } from "./components/utils/Container";
 import { Modal, ModalTitle, useModal } from "./components/utils/Modal";
 import { RadioButton, RadioGroup, RadioOption } from "./components/utils/Radio";
 import { Range } from "./components/utils/Range";
@@ -30,7 +31,7 @@ const routes = [
 
 const Footer = () => (
   <>
-    <div className="mt-10" />
+    <div className="h-20" />
     <footer className="py-8 px-[5%] bg-gray-100 text-xs text-gray-600 absolute left-0 bottom-0 right-0 inline-flex gap-2 items-center justify-end">
       <span>
         &copy; 2022{" "}
@@ -93,18 +94,20 @@ const Navbar = () => (
   <>
     <div className="h-16" />
     <nav className="fixed top-0 right-0 z-30 left-0 bg-neutral-700">
-      <div className="container mx-auto px-8 h-16 flex justify-between items-center">
-        <NavLink href="https://webis.de/">
-          <div className="flex items-center">
-            <img src="https://assets.webis.de/img/webis-logo.png" alt="Webis Logo" />
-            <span className="ml-4">Webis.de</span>
+      <Container>
+        <div className="h-16 flex justify-between items-center">
+          <NavLink href="https://webis.de/">
+            <div className="flex items-center">
+              <img src="https://assets.webis.de/img/webis-logo.png" alt="Webis Logo" />
+              <span className="ml-4">Webis.de</span>
+            </div>
+          </NavLink>
+          <div className="flex gap-10">
+            <NavRoutes />
+            <NavbarOptions />
           </div>
-        </NavLink>
-        <div className="flex gap-10">
-          <NavRoutes />
-          <NavbarOptions />
         </div>
-      </div>
+      </Container>
     </nav>
   </>
 );
@@ -114,13 +117,13 @@ const NavbarOptions = () => {
 
   const {
     minOverlap,
-    ignoreStopwords,
-    toggleIgnoreStopwords,
     setMinOverlap,
-    allowSelfSimilarities,
-    toggleAllowSelfSimilarities,
+    ignoreStopwords,
+    setIgnoreStopwords,
+    selfSimilarities,
+    setSelfSimilarities,
     colorMap,
-    setColorMap,
+    setColorscheme,
     summaryLength,
     setSummaryLength,
   } = useContext(SettingsContext);
@@ -182,23 +185,20 @@ const NavbarOptions = () => {
                 <HeadingMedium>Show Redundancy</HeadingMedium>
                 <div className="flex justify-between items-top">
                   <Hint>Show also the matching word groups within the reference or hypothesis</Hint>
-                  <Toggle
-                    enabled={allowSelfSimilarities}
-                    setEnabled={toggleAllowSelfSimilarities}
-                  />
+                  <Toggle checked={selfSimilarities} onChange={setSelfSimilarities} />
                 </div>
               </div>
               <div>
                 <HeadingMedium>Ignore Stopwords</HeadingMedium>
                 <div className="flex justify-between items-top">
                   <Hint>{"Don't consider stopwords part of the match"}</Hint>
-                  <Toggle enabled={ignoreStopwords} setEnabled={toggleIgnoreStopwords} />
+                  <Toggle checked={ignoreStopwords} onChange={setIgnoreStopwords} />
                 </div>
               </div>
               <div>
                 <HeadingMedium>Colorscheme</HeadingMedium>
                 <Hint>Color palette used to highlight matching</Hint>
-                <RadioGroup value={colorMap.colorscheme} setValue={setColorMap}>
+                <RadioGroup value={colorMap.colorscheme} setValue={setColorscheme}>
                   <div className="pt-2 grid grid-cols-2 justify-items-center gap-4">
                     {Object.keys(colorschemes).map((category) => (
                       <HeadingSmall key={category}>{category}</HeadingSmall>
@@ -253,8 +253,8 @@ const Content = () => {
   return (
     <>
       <ScrollToTopButton />
-      <main className="uk-section uk-section-default">
-        <div className="uk-container uk-container-expand">{element}</div>
+      <main className="pt-7">
+        <Container>{element}</Container>
       </main>
     </>
   );

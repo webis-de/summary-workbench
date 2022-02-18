@@ -4,34 +4,32 @@ import { MetricsContext } from "../contexts/MetricsContext";
 import { SummarizersContext } from "../contexts/SummarizersContext";
 import { Button } from "./utils/Button";
 import { CenterLoading } from "./utils/Loading";
+import { Table, TableWrapper, Tbody, Td, Th, Thead, Tr } from "./utils/Table";
+import { HeadingBig } from "./utils/Text";
 
 const AboutTable = ({ section, content }) => (
-  <table className="uk-table uk-table-striped">
-    <thead>
-      <tr>
-        <th>{section}</th>
-        <th>Type</th>
-        <th>Code</th>
-        <th>Homepage</th>
-        <th>Embedding Model</th>
-      </tr>
-    </thead>
-    <tbody>
-      {Object.entries(content).map(([metric, { name, type, sourcecode, model, homepage }]) => (
-        <tr key={metric}>
-          <td>
-            <span>{name}</span>
-          </td>
-          <td>
-            <span>{type}</span>
-          </td>
-          <td>{sourcecode && <a href={sourcecode}>{sourcecode}</a>}</td>
-          <td>{homepage && <a href={homepage}>{homepage}</a>}</td>
-          <td>{model}</td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
+  <TableWrapper>
+    <Table>
+      <Thead>
+        <Th>{section}</Th>
+        <Th>Type</Th>
+        <Th>Code</Th>
+        <Th>Homepage</Th>
+        <Th>Embedding Model</Th>
+      </Thead>
+      <Tbody>
+        {Object.entries(content).map(([metric, { name, type, sourcecode, model, homepage }]) => (
+          <Tr key={metric}>
+            <Td>{name}</Td>
+            <Td>{type}</Td>
+            <Td>{sourcecode && <a href={sourcecode}>{sourcecode}</a>}</Td>
+            <Td>{homepage && <a href={homepage}>{homepage}</a>}</Td>
+            <Td>{model}</Td>
+          </Tr>
+        ))}
+      </Tbody>
+    </Table>
+  </TableWrapper>
 );
 
 const WaitResource = ({ loading, reloader }) => {
@@ -47,14 +45,14 @@ const About = () => {
   const {
     summarizers,
     loading: summarizersLoading,
-    reload: summarizersReload,
+    retry: summarizersReload,
   } = useContext(SummarizersContext);
   const { metrics, loading: metricsLoading, reload: metricsReload } = useContext(MetricsContext);
 
   return (
-    <article className="uk-container">
+    <div>
       <div>
-        <h4>Summarization</h4>
+        <HeadingBig>Summarization</HeadingBig>
         <div className="uk-margin-left">
           {!summarizers ? (
             <WaitResource loading={summarizersLoading} reloader={summarizersReload} />
@@ -64,21 +62,17 @@ const About = () => {
         </div>
       </div>
       <div>
-        <h4>Evaluation</h4>
+        <HeadingBig>Evaluation</HeadingBig>
         <div className="uk-margin-left">
           {!metrics ? (
             <WaitResource loading={metricsLoading} reloader={metricsReload} />
           ) : (
-            <AboutTable section="Summarizer" content={summarizers} />
+            <AboutTable section="Summarizer" content={metrics} />
           )}
-          <div style={{ marginTop: "1em", marginBottom: "1.5em" }} className="uk-text-meta">
-            Evaluate a single hypothesis against the reference or upload hypothesis and reference
-            files. Results can be saved and exported as LaTeX and CSV.
-          </div>
         </div>
       </div>
       <div>
-        <h4>Code</h4>
+        <HeadingBig>Code</HeadingBig>
         <a
           className="uk-margin-left"
           href="https://git.informatik.uni-leipzig.de/ds40bamo/comparefile"
@@ -86,7 +80,7 @@ const About = () => {
           https://git.informatik.uni-leipzig.de/ds40bamo/comparefile
         </a>
       </div>
-    </article>
+    </div>
   );
 };
 

@@ -86,14 +86,6 @@ const cyrb53 = (str, seed = 0) => {
 
 const toProp = (num, maxNum) => (num % maxNum) / (maxNum - 1);
 
-const hexToRGB = (hex) => {
-  const bigint = parseInt(hex, 16);
-  const r = (bigint >> 16) & 255;
-  const g = (bigint >> 8) & 255;
-  const b = bigint & 255;
-  return [r, g, b];
-};
-
 const RGBToHex = (r, g, b) => [r, g, b].map((c) => c.toString(16).padStart(2, "0")).join("");
 
 const foregroundColor = (r, g, b) =>
