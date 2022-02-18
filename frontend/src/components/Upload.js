@@ -70,7 +70,7 @@ const Upload = ({ setCalculation }) => {
           linesAreSame={linesAreSame}
         />
       </div>
-      <div className="uk-flex uk-flex-left">
+      <div className="flex items-center">
         {isComputing ? (
           <Loading />
         ) : (

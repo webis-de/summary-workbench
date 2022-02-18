@@ -1,114 +1,96 @@
-import React from "react";
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 
-const range = (from, to) => {
-  const size = to - from;
-  return size > 0 ? [...Array(size).keys(size)].map((i) => from + i) : [];
+const parseNumber = (number) => {
+  let cleanNumber = number;
+  if (typeof number === "string") cleanNumber = number.replace(/\D/g, "");
+  return cleanNumber ? parseInt(cleanNumber, 10) : null;
 };
 
-const PaginationBefore = ({ activePage, itemsBefore, onClickFrom }) => {
-  const before = range(Math.max(1, activePage - itemsBefore), activePage);
-  if (before.length) {
-    return (
-      <>
-        {before[0] !== 1 && (
-          <li>
-            <a href="/#" onClick={onClickFrom(1)}>
-              1
-            </a>
-          </li>
-        )}
-        {before[0] > 2 && (
-          <li className="uk-disabled">
-            <span>...</span>
-          </li>
-        )}
-        {before.map((el) => (
-          <li key={el}>
-            <a href="/#" onClick={onClickFrom(el)}>
-              {el}
-            </a>
-          </li>
-        ))}
-      </>
-    );
-  }
-  return null;
-};
-
-const PaginationAfter = ({ activePage, lastPage, itemsAfter, onClickFrom }) => {
-  const after = range(activePage + 1, Math.min(activePage + itemsAfter, lastPage) + 1);
-
-  if (after.length) {
-    return (
-      <>
-        {after.map((el) => (
-          <li key={el}>
-            <a href="/#" onClick={onClickFrom(el)}>
-              {el}
-            </a>
-          </li>
-        ))}
-        {after[after.length - 1] < lastPage - 1 && (
-          <li className="uk-disabled">
-            <span>...</span>
-          </li>
-        )}
-        {after[after.length - 1] !== lastPage && (
-          <li>
-            <a href="/#" onClick={onClickFrom(lastPage)}>
-              {lastPage}
-            </a>
-          </li>
-        )}
-      </>
-    );
-  }
-  return null;
-};
-
-const Pagination = ({ activePage, size, numItems, onChange, pageRange = 5, width = "400px" }) => {
-  const itemsLeftRight = Math.floor(pageRange / 2);
-  const lastPage = Math.ceil(numItems / size);
-  const nop = (e) => e.preventDefault();
-  const onClickFrom = (el) => (e) => {
-    e.preventDefault();
-    onChange(el);
+const InputField = ({ value: initValue, onDone }) => {
+  const [value, setValue] = useState(initValue);
+  const accept = () => {
+    let number = parseNumber(value);
+    number = number != null ? number : initValue;
+    setValue(initValue);
+    onDone(number);
   };
-  const prevDisabled = activePage <= 1;
-  const nextDisabled = activePage >= lastPage;
+  useEffect(() => {
+    setValue(initValue);
+  }, [initValue, setValue]);
+
   return (
-    <div className="uk-flex uk-flex-middle uk-flex-center">
-      <a
-        href="/#"
-        className={`uk-slidenav ${prevDisabled ? "uk-disabled" : ""}`}
-        data-uk-slidenav-previous
-        onClick={prevDisabled ? nop : onClickFrom(activePage - 1)}
-      />
-      <ul className="uk-pagination uk-flex-center" data-uk-margin style={{ width }}>
-        <PaginationBefore
-          activePage={activePage}
-          itemsBefore={itemsLeftRight}
-          onClickFrom={onClickFrom}
-        />
-        <li className="uk-active">
-          <span className="foreground">{activePage}</span>
-        </li>
-        <PaginationAfter
-          activePage={activePage}
-          lastPage={lastPage}
-          itemsAfter={itemsLeftRight}
-          onClickFrom={onClickFrom}
-        />
-      </ul>
-      <a
-        href="/#"
-        className={`uk-slidenav ${nextDisabled ? "uk-disabled" : ""}`}
-        data-uk-slidenav-next
-        disabled={nextDisabled}
-        onClick={nextDisabled ? nop : onClickFrom(activePage + 1)}
-      />
-    </div>
+    <input
+      type="text"
+      value={value}
+      onChange={(e) => setValue(e.currentTarget.value)}
+      onKeyDown={(e) => e.keyCode === 13 && accept()}
+      onBlur={accept}
+      className="w-16 rounded-none border-none bg-white ring-1 ring-gray-300 text-gray-900 focus:ring-blue-500 focus:z-10 block text-right"
+    />
   );
 };
 
-export { Pagination };
+const Label = ({ children }) => (
+  <span className="whitespace-nowrap inline-flex items-center px-3 text-sm text-gray-900 ring-1 ring-gray-300 bg-gray-200">
+    {children}
+  </span>
+);
+
+const Button = ({ isLeft, isRight, disabled, onClick, children }) => {
+  let className =
+    "py-2 px-3 text-white font-bold text-sm disabled:bg-blue-200 disabled:cursor-default disabled:ring-blue-200 focus:z-10 ring-1 ring-blue-500 leading-tight bg-blue-500 hover:bg-blue-700 active:bg-blue-800";
+  if (isLeft) className += " rounded-l-lg";
+  if (isRight) className += " rounded-r-lg";
+
+  return (
+    <button className={className} disabled={disabled} onClick={onClick}>
+      {children}
+    </button>
+  );
+};
+
+const Pagination = ({ numPages, page, setPage, size, setSize }) => (
+  <div className="inline-flex">
+    <Button isLeft disabled={page <= 1} onClick={() => setPage(page - 1)}>
+      Previous
+    </Button>
+    <InputField value={page} onDone={setPage} />
+    <Label>
+      / &nbsp;<span className="font-bold">{numPages}</span>&nbsp;
+    </Label>
+    <InputField value={size} onDone={setSize} />
+    <Label>items per page</Label>
+    <Button isRight disabled={page >= numPages} onClick={() => setPage(page + 1)}>
+      Next
+    </Button>
+  </div>
+);
+
+const validRange = (value, maxValue, minValue = 1) => Math.max(minValue, Math.min(maxValue, value));
+
+const usePagination = (numItems, initialPage = 1, initialSize = 10) => {
+  const [page, _setPage] = useState(initialPage);
+  const [size, _setSize] = useState(initialSize);
+
+  const numPages = useMemo(() => Math.ceil(numItems / size), [numItems, size]);
+
+  const setPage = useCallback(
+    (newPage) => _setPage((oldPage) => validRange(parseNumber(newPage) || oldPage, numPages)),
+    [numPages, _setPage]
+  );
+  const setSize = useCallback(
+    (requestSize) => {
+      const newSize = validRange(parseNumber(requestSize) || size, numItems);
+      _setSize(newSize);
+      _setPage(Math.ceil((size * (page - 1) + 1) / newSize));
+    },
+    [numItems, size, page, _setSize]
+  );
+
+  useEffect(() => setPage(validRange(page, numPages)), [numPages, page, setPage]);
+  console.log(size, page, page <= Math.ceil(numItems / size));
+
+  return { page, numPages, setPage, size, setSize };
+};
+
+export { Pagination, usePagination };

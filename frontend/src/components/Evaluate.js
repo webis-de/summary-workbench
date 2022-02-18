@@ -19,7 +19,7 @@ const FileInput = ({ setCalculation }) => (
       <CardHead>
         <div className="flex">
           <FaRegFile />
-          <TabHead>
+          <TabHead border>
             <Tab>Upload files</Tab>
             <Tab>Single Example</Tab>
           </TabHead>

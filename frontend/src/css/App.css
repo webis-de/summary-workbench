@@ -6,6 +6,10 @@ General rules
 */
 /* Styling scrollbar */
 
+.tooltip {
+  padding: 0px 5px !important;
+}
+
 html {
   min-height: 100%;
   position: relative;
@@ -17,13 +21,13 @@ body {
 }
 
 a.nostyle:link {
-    text-decoration: inherit;
-    color: inherit;
+  text-decoration: inherit;
+  color: inherit;
 }
 
 a.nostyle:visited {
-    text-decoration: inherit;
-    color: inherit;
+  text-decoration: inherit;
+  color: inherit;
 }
 
 .hover-green:hover {
@@ -31,7 +35,7 @@ a.nostyle:visited {
 }
 
 .hover-red:hover {
-  color: #B02F2C;
+  color: #b02f2c;
 }
 
 .hover-blue:hover {
@@ -44,7 +48,7 @@ a.nostyle:visited {
 
 .tooltip-icon {
   width: 20px;
-  color: #55A6D1;
+  color: #55a6d1;
 }
 
 .tooltip-icon:hover {

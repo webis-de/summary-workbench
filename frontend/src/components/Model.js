@@ -1,9 +1,8 @@
 import React, { useMemo } from "react";
 
-import { usePagination } from "../hooks/pagination";
 import { RGBToHex, randomColor } from "../utils/color";
 import { BadgeButton } from "./utils/Button";
-import { Pagination } from "./utils/Pagination";
+import { Pagination, usePagination } from "./utils/Pagination";
 
 const typeToColor = (type) => {
   switch (type) {
@@ -68,7 +67,7 @@ const Legend = ({ models }) => {
 };
 
 const ModelGrid = ({ keys, models, settings, selectModel }) => {
-  const [page, setPage, size, , numItems] = usePagination(keys.length);
+  const { numPages, page, setPage, size, setSize } = usePagination(keys.length);
   return (
     <div style={{ marginTop: "-35px" }}>
       <Legend models={models} />
@@ -96,15 +95,13 @@ const ModelGrid = ({ keys, models, settings, selectModel }) => {
           <div>no models configured</div>
         )}
       </div>
-      {numItems > size && (
-        <Pagination
-          activePage={page}
-          size={size}
-          numItems={numItems}
-          onChange={setPage}
-          width="250px"
-        />
-      )}
+      <Pagination
+        page={page}
+        size={size}
+        numPages={numPages}
+        setPage={setPage}
+        setSize={setSize}
+      />
     </div>
   );
 };

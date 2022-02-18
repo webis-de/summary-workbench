@@ -2,28 +2,53 @@ import React from "react";
 import { FaQuestionCircle } from "react-icons/fa";
 
 import { SavedInfo } from "./SavedInfo";
-import { Accordion, AccordionItem } from "./utils/Accordion";
+import { Badge, BadgeGroup } from "./utils/Badge";
+import { Disclosure, DisclosureContent, DisclosureToggle } from "./utils/Disclosure";
+import { HeadingBig, HeadingMedium } from "./utils/Text";
+
+const SavedEntry = ({ calculation, deleteCalculation }) => {
+  const badges = Object.keys(calculation.scores).map((name) => calculation.metrics[name].name);
+  return (
+    <Disclosure key={calculation.id}>
+      <div className="border border-black divide-y divide-gray-300">
+        <DisclosureToggle>
+          <div className="p-4 flex justify-between items-center w-full">
+            <HeadingMedium>{calculation.id}</HeadingMedium>
+            <BadgeGroup>
+              {badges.map((badge, i) => (
+                <Badge key={i}>{badge}</Badge>
+              ))}
+            </BadgeGroup>
+          </div>
+        </DisclosureToggle>
+        <DisclosureContent>
+          <div className="p-4">
+            <SavedInfo calculation={calculation} deleteCalculation={deleteCalculation} />
+          </div>
+        </DisclosureContent>
+      </div>
+    </Disclosure>
+  );
+};
 
 const Saved = ({ className, calculations, deleteCalculation }) => (
   <div className={className}>
-    <div className="uk-flex uk-flex-middle uk-margin-bottom">
-      <h3 style={{ margin: 0, marginRight: "20px" }}>Saved Calculations</h3>
+    <div className="pb-4 flex items-center gap-2">
+      <HeadingBig>Saved Calculations</HeadingBig>
       <FaQuestionCircle
-        className="tooltip-icon"
+        className="w-5 text-blue-500 hover:text-blue-700"
         data-uk-tooltip="title: the data is stored in the browser; pos: right;"
       />
     </div>
-    <Accordion>
+    <div className="flex flex-col gap-2 shadow-lg">
       {calculations.map((calculation, index) => (
-        <AccordionItem key={calculation.id} text={calculation.id} badges={Object.keys(calculation.scores).map((name) => calculation.metrics[name].name)}>
-          <SavedInfo
-            index={index}
-            calculation={calculation}
-            deleteCalculation={() => deleteCalculation(calculation.id)}
-          />
-        </AccordionItem>
+        <SavedEntry
+          key={index}
+          calculation={calculation}
+          deleteCalculation={() => deleteCalculation(calculation.id)}
+        />
       ))}
-    </Accordion>
+    </div>
   </div>
 );
 

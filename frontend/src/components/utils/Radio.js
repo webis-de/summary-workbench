@@ -19,13 +19,13 @@ const RadioGroup = ({ value, setValue, children }) => (
 const convertGroupToStyle = (group) => {
   switch (group) {
     case "first":
-      return "rounded-t-md border-x border-t";
+      return "rounded-t-md";
     case "middle":
-      return "border-x border-t";
+      return "";
     case "last":
-      return "rounded-b-md border";
+      return "rounded-b-md";
     default:
-      return "rounded-md border";
+      return "rounded-md";
   }
 };
 
@@ -33,8 +33,8 @@ const RadioButton = withRadio(({ checked, group, children }) => (
   <button
     className={`${
       checked
-        ? "bg-gray-700 text-white border-gray-700 ring-gray-700 ring-2"
-        : "text-gray-900 bg-white hover:text-white hover:bg-gray-500 border-gray-900"
+        ? "bg-gray-600 text-white ring-4 ring-black"
+        : "text-gray-900 bg-white hover:text-white hover:bg-gray-400 ring-1 ring-gray-700"
     } py-2 px-4 text-sm font-medium w-full
     ${convertGroupToStyle(group)}`}
   >

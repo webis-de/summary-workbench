@@ -1,49 +1,35 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import UIkit from "uikit";
+import React, { useRef } from "react";
 
-import { flatten } from "../utils/flatScores";
 import { usePairwiseMarkups } from "../hooks/markup";
+import { flatten } from "../utils/flatScores";
 import { CompareTable } from "./CompareTable";
 import { ScoreTable } from "./ScoreTable";
 import { DeleteButton } from "./utils/DeleteButton";
+import { Pill, TabContent, TabHead, TabPanel, Tabs } from "./utils/Tabs";
 
-const SavedInfo = ({ index, calculation, deleteCalculation }) => {
-  const {scores, metrics, hypotheses, references} = calculation
+const SavedInfo = ({ calculation, deleteCalculation }) => {
+  const { scores, metrics, hypotheses, references } = calculation;
   const flatScores = flatten(scores, metrics);
-  const toggleID = `toggle-saved-calculation-${index}`;
-  const loadRef = useRef();
-  const [showMarkups, setShowMarkups] = useState(false)
-  const comparisons = usePairwiseMarkups(showMarkups && hypotheses, references)
-  const showEvent = useCallback(() => {
-    if (comparisons.length) return;
-    if (loadRef.current && loadRef.current.className.includes("uk-active")) {
-      setShowMarkups(true)
-    } else UIkit.util.once(document, "show", `#${toggleID}`, showEvent);
-  }, [comparisons, toggleID]);
-  useEffect(showEvent, [showEvent]);
-
-  const tabStyle={border: "2px solid #1e87f0"};
+  const comparisons = usePairwiseMarkups(hypotheses, references);
 
   return (
-    <div>
-      <div className="uk-flex uk-flex-middle uk-margin">
-        <ul className="uk-subnav uk-subnav-pill uk-margin uk-margin-right uk-width-expand uk-flex-middle" data-uk-switcher={`connect: #${toggleID};`} style={{marginBottom: "0"}}>
-          <li>
-            <a href="/#" style={tabStyle}>Scores</a>
-          </li>
-          <li>
-            <a href="/#" style={tabStyle}>Visualize Overlap</a>
-          </li>
-        </ul>
+    <Tabs>
+      <div className="flex justify-between pb-3">
+        <TabHead>
+          <Pill>Scores</Pill>
+          <Pill>Visualize Overlap</Pill>
+        </TabHead>
         <DeleteButton onClick={deleteCalculation} />
       </div>
-      <ul id={toggleID} className="uk-switcher">
-        <li>
+      <TabContent>
+        <TabPanel>
           <ScoreTable flatScores={flatScores} />
-        </li>
-        <li ref={loadRef}>{comparisons.length && <CompareTable comparisons={comparisons} />}</li>
-      </ul>
-    </div>
+        </TabPanel>
+        <TabPanel>
+          {comparisons.length && <CompareTable comparisons={comparisons} />}
+        </TabPanel>
+      </TabContent>
+    </Tabs>
   );
 };
 

@@ -17,7 +17,7 @@ const Tab = ({ children }) => (
       <button
         className={`${
           selected
-            ? "text-indigo-500 border-indigo-500"
+            ? "text-blue-500 border-blue-500"
             : "hover:border-gray-400 border-transparent"
         } px-2 py-2 border-b-2`}
       >
@@ -32,8 +32,10 @@ const Pill = ({ children }) => (
     {({ selected }) => (
       <button
         className={`${
-          selected ? "bg-blue-600 text-white shadow-md cursor-default" : "text-gray-800 bg-gray-200 hover:bg-gray-300"
-        } px-4 py-2 text-sm font-medium rounded`}
+          selected
+            ? "bg-blue-600 border-blue-600 text-white cursor-default ring-2 ring-sky-300"
+            : "text-black bg-slate-200 hover:bg-slate-300 border-slate-300"
+        } px-4 py-2 text-sm font-medium rounded border`}
       >
         {children}
       </button>

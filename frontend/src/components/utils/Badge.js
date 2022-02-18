@@ -43,4 +43,6 @@ const DismissableBadge = ({ children, style, onClick }) => (
   </span>
 );
 
-export { Badge, DismissableBadge };
+const BadgeGroup = ({ children }) => <div className="flex flex-wrap gap-2">{children}</div>;
+
+export { Badge, DismissableBadge, BadgeGroup };

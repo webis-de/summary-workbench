@@ -1,9 +1,8 @@
-import React, { useState, useContext } from "react";
-import {SettingsContext} from "../contexts/SettingsContext"
+import React, { useContext, useState } from "react";
 
-import { usePagination } from "../hooks/pagination";
+import { SettingsContext } from "../contexts/SettingsContext";
 import { Markup } from "./utils/Markup";
-import { Pagination } from "./utils/Pagination";
+import { Pagination, usePagination } from "./utils/Pagination";
 
 const MarkupEntry = ({ row, hypothesis, reference }) => {
   const markupState = useState();
@@ -38,41 +37,27 @@ const ComparisonDisplay = ({ page, size, comparisons }) => (
 );
 
 const CompareTable = ({ comparisons }) => {
-  const [page, setPage, size, setSize, numItems] = usePagination(comparisons.length);
-  const { minOverlap } = useContext(SettingsContext)
+  const {page, setPage, size, setSize, numPages} = usePagination(comparisons.length);
+  const { minOverlap } = useContext(SettingsContext);
   const numberedComparisons = comparisons.map((el, i) => [i + 1, ...el]);
+  const Pages = (
+    <div className="flex justify-center">
+      <Pagination
+        page={page}
+        size={size}
+        numPages={numPages}
+        setPage={setPage}
+        setSize={setSize}
+      />
+    </div>
+  );
 
   return (
     <>
-      <Pagination
-        activePage={page}
-        size={size}
-        numItems={numItems}
-        pageRange={5}
-        onChange={setPage}
-      />
-      <div className="uk-flex uk-flex-between">
-      <span style={{color: "red"}}>{`Minimum Overlap Highlighted: ${minOverlap} grams`}</span>
-        <div className="uk-flex">
-        <div>
-          <input
-            className="uk-input align-center"
-            type="text"
-            placeholder="jump to page"
-            onKeyDown={(e) => e.keyCode === 13 && setPage(e.currentTarget.value)}
-          />
-        </div>
-        <div>
-          <input
-            className="uk-input align-center"
-            type="text"
-            placeholder="examples per page"
-            onKeyDown={(e) => e.keyCode === 13 && setSize(e.currentTarget.value)}
-          />
-        </div>
-        </div>
-      </div>
+      {Pages}
+      <span style={{ color: "red" }}>{`Minimum Overlap Highlighted: ${minOverlap} grams`}</span>
       <ComparisonDisplay page={page} size={size} comparisons={numberedComparisons} />
+      {Pages}
     </>
   );
 };

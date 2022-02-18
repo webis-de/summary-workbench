@@ -1,9 +1,8 @@
 import React, { useMemo, useReducer, useState } from "react";
 import { FaInfoCircle, FaPlus, FaTimes } from "react-icons/fa";
+import { useKey } from "react-use";
 
-import { useKeycode } from "../hooks/keycode";
 import { useMarkup } from "../hooks/markup";
-import { usePagination } from "../hooks/pagination";
 import { useVisualizations } from "../hooks/visualizations";
 import { Accordion, AccordionItem } from "./utils/Accordion";
 import { Button } from "./utils/Button";
@@ -14,7 +13,7 @@ import { EyeClosed, EyeOpen } from "./utils/Icons";
 import { CenterLoading } from "./utils/Loading";
 import { Markup } from "./utils/Markup";
 import { Modal } from "./utils/Modal";
-import { Pagination } from "./utils/Pagination";
+import { Pagination, usePagination } from "./utils/Pagination";
 import { HeadingBig } from "./utils/Text";
 
 const ModelModal = ({ close, addModel, length }) => {
@@ -33,7 +32,7 @@ const ModelModal = ({ close, addModel, length }) => {
     else close();
   };
 
-  useKeycode([13], accept);
+  useKey("Enter", accept);
 
   return (
     <Modal isOpen onRequestClose={close}>
@@ -156,26 +155,25 @@ const VisualizeContent = ({ doc, models }) => {
 const Visualize = ({ visualization, clear }) => {
   const { name, documents, models } = visualization;
 
-  const [page, setPage, size, , numItems] = usePagination(documents.length, 1, 1);
+  const { numPages, page, setPage, size, setSize } = usePagination(documents.length, 1, 1);
   const linesIndex = page - 1;
-  useKeycode([27, 37, 39], (code) => {
-    if (code === 27) clear();
-    else if (code === 37) setPage(page - 1);
-    else if (code === 39) setPage(page + 1);
-  });
+
+  useKey("Escape", clear);
+  useKey("ArrowLeft", () => setPage(page - 1));
+  useKey("ArrowRight", () => setPage(page + 1));
 
   return (
     <div>
       <Button onClick={clear} variant="primary" style={{ marginRight: "10vw" }}>
         Back
       </Button>
-      <div className="uk-flex uk-flex-middle uk-flex-center">
+      <div className="flex justify-center">
         <Pagination
-          activePage={page}
+          page={page}
           size={size}
-          numItems={numItems}
-          pageRange={5}
-          onChange={setPage}
+          numPages={numPages}
+          setPage={setPage}
+          setSize={setSize}
         />
       </div>
       <h3 style={{ marginTop: "10px" }}>{name}</h3>
@@ -250,7 +248,7 @@ const AddVisualizationModal = ({ close, create }) => {
     }
   };
 
-  useKeycode([13], accept);
+  useKey("Enter", accept);
 
   return (
     <Modal isOpen onRequestClose={close}>

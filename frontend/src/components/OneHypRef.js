@@ -7,6 +7,7 @@ import { flatten } from "../utils/flatScores";
 import { displayError } from "../utils/message";
 import { ScoreTable } from "./ScoreTable";
 import { Button } from "./utils/Button";
+import { Textarea } from "./utils/Form";
 import { InfoText } from "./utils/InfoText";
 import { Loading } from "./utils/Loading";
 import { Markup } from "./utils/Markup";
@@ -17,7 +18,7 @@ const OneHypRefResult = ({ className, calculation }) => {
 
   const { metrics } = useContext(MetricsContext);
   const flatScores = useMemo(() => flatten(scores, metrics), [scores, metrics]);
-  const markupState = useState()
+  const markupState = useState();
 
   return (
     <div className={className}>
@@ -39,14 +40,11 @@ const OneHypRefResult = ({ className, calculation }) => {
 };
 
 const TextField = ({ value, setValue, placeholder }) => (
-  <textarea
-    className="uk-textarea"
+  <Textarea
     value={value}
     onChange={(e) => setValue(e.currentTarget.value)}
-    as="textarea"
-    rows="5"
+    rows="8"
     placeholder={placeholder}
-    style={{ resize: "none", overflow: "auto" }}
   />
 );
 
@@ -83,33 +81,22 @@ const OneHypRef = () => {
           [!metricIsChoosen, "Select at least one metric.", true],
         ]}
       />
-      <div className="uk-margin uk-child-width-1-2@s">
+      <div className="flex gap-2">
         <TextField value={refText} setValue={setRefText} placeholder="Enter the reference text" />
         <TextField value={hypText} setValue={setHypText} placeholder="Enter the predicted text" />
       </div>
-      <div className="uk-flex uk-flex-between">
-        <div className="uk-flex uk-flex-left">
-          {isComputing ? (
-            <Loading />
-          ) : (
-            <Button
-              variant="primary"
-              disabled={!hasInput || !metricIsChoosen}
-              onClick={() => compute()}
-            >
-              Evaluate
-            </Button>
-          )}
-        </div>
-        <Button
-          variant="primary"
-          onClick={() => {
-            setHypText("");
-            setRefText("");
-          }}
-        >
-          Clear
-        </Button>
+      <div className="flex justify-center">
+        {isComputing ? (
+          <Loading />
+        ) : (
+          <Button
+            variant="primary"
+            disabled={!hasInput || !metricIsChoosen}
+            onClick={() => compute()}
+          >
+            Evaluate
+          </Button>
+        )}
       </div>
       {evaluateResult && <OneHypRefResult className="uk-margin" calculation={evaluateResult} />}
     </>

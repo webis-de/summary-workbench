@@ -16,17 +16,18 @@ import { CenterLoading } from "./utils/Loading";
 import { Markup, useMarkupScroll } from "./utils/Markup";
 import { PluginCard } from "./utils/PluginCard";
 import { Pill, TabContent, TabHead, TabPanel, Tabs } from "./utils/Tabs";
-import { HeadingBig } from "./utils/Text";
+import { HeadingBig, HeadingSemiBig } from "./utils/Text";
+import { Tooltip } from "./utils/Tooltip";
 
 const Feedback = ({ summary }) => {
   const { name, summaryText, originalText, url } = summary;
   const sendFeedback = (feedback) =>
     feedbackRequest(name, summaryText, originalText, url, feedback);
   const [submitted, setSubmitted] = useState(false);
-  if (submitted) return <>Thanks for the Feedback!</>;
+  if (submitted) return <HeadingSemiBig>Thanks for the Feedback!</HeadingSemiBig>;
   return (
-    <div className="uk-small">
-      <span className="colored-header"> Good Summary?</span>
+    <div className="flex">
+      <HeadingSemiBig>Good Summary?</HeadingSemiBig>
       <ThumbsUp
         className="uk-margin-left"
         onClick={() =>
@@ -46,26 +47,6 @@ const Feedback = ({ summary }) => {
     </div>
   );
 };
-
-const Header = ({ text, fontSize, backgroundColor = "#B02F2C", children, style }) => (
-  <div
-    className="uk-flex uk-flex-between uk-flex-middle margin-between-20"
-    style={{
-      paddingLeft: "20px",
-      paddingRight: "10px",
-      paddingTop: "10px",
-      fontWeight: "500",
-      paddingBottom: "12px",
-      backgroundColor,
-      color: "white",
-      fontSize,
-      ...style,
-    }}
-  >
-    {text && <div style={{ fontSize }}>{text}</div>}
-    {children}
-  </div>
-);
 
 const getChosenModels = (models) =>
   Object.entries(models)
@@ -176,7 +157,6 @@ const InputDocument = ({ summarize, isComputing }) => {
                   <Loading />
                 ) : (
                   <Button
-                    appearence="room"
                     disabled={!documentText || !chosenModels.length}
                     onClick={() => summarize(documentText, chosenModels, summaryLength)}
                   >
@@ -225,7 +205,7 @@ const Summary = ({ markup, summary, markupState, scrollState, showMarkup }) => {
         scrollState={scrollState}
         showMarkup={showMarkup}
       />
-      <div className="uk-flex uk-flex-right">
+      <div className="pt-4 flex justify-end">
         <Feedback summary={summary} />
       </div>
     </div>
@@ -250,10 +230,10 @@ const SummaryTabView = ({ title, showOverlap, summaries, markups, documentLength
           <CardHead>
             <div className="flex justify-between items-center">
               <HeadingBig>{title || "Document"}</HeadingBig>
-              <span style={{ fontSize: "12pt" }}>{documentLength} words</span>
+              <span className="font-bold">{documentLength} words</span>
             </div>
           </CardHead>
-          <div className="h-[60vh] overflow-auto bg-white p-4">
+          <div className="max-h-[60vh] overflow-auto bg-white p-4">
             <Markup
               markups={markups[summaryIndex][0]}
               markupState={markupState}
@@ -319,17 +299,18 @@ const SummaryCompareView = ({ summaries, markups, showOverlap }) => {
   return (
     <>
       {grids.map((grid, gridIndex) => (
-        <div key={gridIndex} className="uk-margin uk-grid uk-child-width-expand@s">
+        <div key={gridIndex} className="flex gap-4">
           {grid.map(([markup, summarizer], markupIndex) => (
-            <div key={markupIndex}>
-              <Header text={summarizer} fontSize="16pt" />
-              <div
-                style={{ maxHeight: "500px", overflow: "auto" }}
-                className="uk-card uk-card-default uk-card-body"
-              >
-                <Markup markups={markup} showMarkup={showOverlap} />
-              </div>
-            </div>
+            <Card key={markupIndex} full>
+              <CardHead>
+                <HeadingBig>{summarizer}</HeadingBig>
+              </CardHead>
+              <CardContent>
+                <div className="max-h-52 overflow-auto">
+                  <Markup markups={markup} showMarkup={showOverlap} />
+                </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       ))}
@@ -337,41 +318,23 @@ const SummaryCompareView = ({ summaries, markups, showOverlap }) => {
   );
 };
 
-const Icon = ({ OpenIcon, CloseIcon, show, toggle, descriptionOpen, descriptionClose }) =>
-  show ? (
-    <OpenIcon
-      style={{ minWidth: "30px" }}
-      onClick={toggle}
-      data-uk-tooltip={`title: ${descriptionOpen}; pos: left`}
-    />
-  ) : (
-    <CloseIcon
-      onClick={toggle}
-      style={{ minWidth: "30px" }}
-      data-uk-tooltip={`title: ${descriptionClose}; pos: left`}
-    />
-  );
-
 const ToggleView = ({ showTab, toggleShowTab }) => (
-  <CSSTransition in={showTab} timeout={300} classNames="summarizer-toggle-view">
-    <Bars
-      style={{ minWidth: "30px" }}
-      onClick={toggleShowTab}
-      data-uk-tooltip={`title: ${showTab ? "Compare View" : "Reset View"}; pos: left`}
-    />
-  </CSSTransition>
+  <Tooltip text="Change View">
+    <CSSTransition in={showTab} timeout={300} classNames="summarizer-toggle-view">
+      <Bars className="w-10" onClick={toggleShowTab} />
+    </CSSTransition>
+  </Tooltip>
 );
 
-const ToggleOverlap = ({ show, toggle }) => (
-  <Icon
-    OpenIcon={EyeOpen}
-    CloseIcon={EyeClosed}
-    show={show}
-    toggle={toggle}
-    descriptionOpen="Show Agreement"
-    descriptionClose="Hide Agreement"
-  />
-);
+const ToggleOverlap = ({ show, toggle }) => {
+  const Icon = show ? EyeOpen : EyeClosed;
+
+  return (
+    <Tooltip text={"Show/Hide Agreement"}>
+      <Icon className="w-10" onClick={toggle} />
+    </Tooltip>
+  );
+};
 
 const SummaryView = ({ title, summaries, documentLength }) => {
   const [showTab, toggleShowTab] = useReducer((e) => !e, true);
