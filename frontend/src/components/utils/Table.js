@@ -7,10 +7,10 @@ const TableWrapper = ({ children }) => (
 );
 
 const Table = ({ children, fixed }) => (
-  <div className="overflow-hidde">
+  <div className="overflow-hidden">
     <table
       className={`w-full divide-y divide-gray-200 ${
-        fixed ? "table-fxed" : "table-auto"
+        fixed ? "table-fixed" : "table-auto"
       }`}
     >
       {children}
