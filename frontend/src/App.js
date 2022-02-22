@@ -63,8 +63,8 @@ const Footer = () => (
 
 const NavLink = ({ href, to, children }) => {
   const classNameBase = "uppercase text-sm";
-  const className = `text-gray-400 hover:text-slate-200 hover:no-underline ${classNameBase}`;
-  const activeClassName = `text-gray-100 hover:text-gray-100 underline underline-offset-4 ${classNameBase}`;
+  const className = `text-gray-400 font-medium hover:text-slate-200 hover:no-underline ${classNameBase}`;
+  const activeClassName = `text-gray-100 font-medium hover:text-gray-100 underline underline-offset-4 ${classNameBase}`;
   if (href)
     return (
       <a href={href} className={className}>
@@ -93,7 +93,7 @@ const NavRoutes = () => (
 const Navbar = () => (
   <>
     <div className="h-16" />
-    <nav className="fixed top-0 right-0 z-30 left-0 bg-neutral-700">
+    <nav className="fixed bg-[#1B3451] top-0 right-0 z-30 left-0 bg-neutral-700">
       <Container>
         <div className="h-16 flex justify-between items-center">
           <NavLink href="https://webis.de/">
