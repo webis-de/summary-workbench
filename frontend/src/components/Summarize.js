@@ -452,8 +452,8 @@ const Summarize = () => {
   if (!summarizers) return <Button onClick={retry}>Retry</Button>;
   return (
     <>
-      {/* <HeadingBig>Summarization</HeadingBig>
-      <Hint>Summarize documents.</Hint> */}
+      <HeadingBig>Summarize Documents</HeadingBig>
+      <p>You can select multiple models and customize the desired summary length. Longer documents are split into chunks for abstractive summarizers and the individual summaries are concatenated as the final summary. </p>
       <InputDocument summarize={summarize} isComputing={computing} />
       {results && (
         <div>
