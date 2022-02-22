@@ -102,7 +102,7 @@ const InputDocument = ({ summarize, isComputing }) => {
             onChange={(e) => setDocumentText(e.currentTarget.value)}
             className="uk-textarea resize-none min-h-[350px]"
             rows="8"
-            placeholder="Paste a URL or some long text to be summarized."
+            placeholder="Enter a URL or the text to be summarized."
             style={{ height: "100%" }}
           />
         </Card>
@@ -453,7 +453,7 @@ const Summarize = () => {
   return (
     <>
       <HeadingBig>Summarize Documents</HeadingBig>
-      <p>You can select multiple models and customize the desired summary length. Longer documents are split into chunks for abstractive summarizers and the individual summaries are concatenated as the final summary. </p>
+      <Hint>You can select multiple models and customize the desired summary length. Longer documents are split into chunks for abstractive summarizers and the individual summaries are concatenated as the final summary. </Hint>
       <InputDocument summarize={summarize} isComputing={computing} />
       {results && (
         <div>

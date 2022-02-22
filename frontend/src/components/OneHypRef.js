@@ -78,15 +78,15 @@ const OneHypRef = () => {
 
   return (
     <>
-      <InfoText
+      {/* <InfoText
         messages={[
           [!hasInput, "Enter a hypothesis and a reference.", false],
           [!metricIsChoosen, "Select at least one metric.", true],
         ]}
-      />
+      /> */}
       <div className="flex gap-2">
-        <TextField value={refText} setValue={setRefText} placeholder="Enter the reference text" />
-        <TextField value={hypText} setValue={setHypText} placeholder="Enter the predicted text" />
+        <TextField value={refText} setValue={setRefText} placeholder="Enter the reference text." />
+        <TextField value={hypText} setValue={setHypText} placeholder="Enter the predicted text." />
       </div>
       <div className="flex justify-center">
         {isComputing ? (

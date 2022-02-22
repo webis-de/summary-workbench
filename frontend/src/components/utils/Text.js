@@ -15,6 +15,6 @@ const HeadingBig = ({ children }) => (
   <h3 className="text-2xl capitalize font-semibold text-gray-900">{children}</h3>
 );
 
-const Hint = ({ children }) => <span className="block text-sm text-gray-500">{children}</span>;
+const Hint = ({ children }) => <span className="block text-base">{children}</span>;
 
 export { HeadingSemiBig, HeadingBig, HeadingSmall, HeadingMedium, Hint };
