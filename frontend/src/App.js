@@ -30,35 +30,36 @@ const routes = [
 ];
 
 const Footer = () => (
-  <>
-    <div className="h-20" />
-    <footer className="py-8 px-[5%] bg-gray-100 text-xs text-gray-600 absolute left-0 bottom-0 right-0 inline-flex gap-2 items-center justify-end">
-      <span>
-        &copy; 2022{" "}
-        <a className="hover:text-gray-600" href="https://webis.de/">
-          Webis Group
+  <footer className="h-32 w-full bg-gray-100 text-xs text-gray-600">
+    <Container>
+      <div className="h-full flex gap-2 items-center justify-end">
+        <span>
+          &copy; 2022{" "}
+          <a className="hover:text-gray-600" href="https://webis.de/">
+            Webis Group
+          </a>
+        </span>
+        <span>&bull;</span>
+        <a href="https://github.com/webis-de">
+          <FaGithub className="text-base text-gray-400 hover:text-gray-400" />
         </a>
-      </span>
-      <span>&bull;</span>
-      <a href="https://github.com/webis-de">
-        <FaGithub className="text-base text-gray-400 hover:text-gray-400" />
-      </a>
-      <a href="https://twitter.com/webis_de">
-        <FaTwitter className="text-base text-gray-400 hover:text-gray-400" />
-      </a>
-      <a href="https://www.youtube.com/webis">
-        <FaYoutube className="text-base text-gray-400 hover:text-gray-400" />
-      </a>
-      <span>&bull;</span>
-      <a className="hover:text-gray-600" href="https://webis.de/people.html">
-        Contact
-      </a>
-      <span>&bull;</span>
-      <a className="hover:text-gray-600" href="https://webis.de/legal.html">
-        Impressum / Terms / Privacy
-      </a>
-    </footer>
-  </>
+        <a href="https://twitter.com/webis_de">
+          <FaTwitter className="text-base text-gray-400 hover:text-gray-400" />
+        </a>
+        <a href="https://www.youtube.com/webis">
+          <FaYoutube className="text-base text-gray-400 hover:text-gray-400" />
+        </a>
+        <span>&bull;</span>
+        <a className="hover:text-gray-600" href="https://webis.de/people.html">
+          Contact
+        </a>
+        <span>&bull;</span>
+        <a className="hover:text-gray-600" href="https://webis.de/legal.html">
+          Impressum / Terms / Privacy
+        </a>
+      </div>
+    </Container>
+  </footer>
 );
 
 const NavLink = ({ href, to, children }) => {
@@ -132,8 +133,7 @@ const NavbarOptions = () => {
     <div>
       <FaCog
         onClick={openModal}
-        className="text-gray-400 hover:text-slate-200 cursor-pointer"
-        style={{ minWidth: "20px" }}
+        className="text-gray-400 hover:text-slate-200 cursor-pointer min-w-[20px]"
       />
       <Modal isOpen={isOpen} close={closeModal}>
         <div className="bg-slate-100 p-5 sticky z-20 top-0 flex justify-between items-center border-b">
@@ -145,8 +145,10 @@ const NavbarOptions = () => {
         <div className="p-5 space-y-6">
           <Card full>
             <CardHead>
-              <HeadingBig>Summarization</HeadingBig>
-              <Hint>Customize the Summarization</Hint>
+              <div>
+                <HeadingBig>Summarization</HeadingBig>
+                <Hint>Customize the Summarization</Hint>
+              </div>
             </CardHead>
             <CardContent>
               <div>
@@ -158,11 +160,13 @@ const NavbarOptions = () => {
           </Card>
           <Card>
             <CardHead>
-              <HeadingBig>Highlighting</HeadingBig>
-              <Hint>
-                Highlighting that is applied to matching word groups (agreement) in the hypothesis
-                and reference
-              </Hint>
+              <div>
+                <HeadingBig>Highlighting</HeadingBig>
+                <Hint>
+                  Highlighting that is applied to matching word groups (agreement) in the hypothesis
+                  and reference
+                </Hint>
+              </div>
             </CardHead>
             <CardContent>
               <div>
@@ -253,7 +257,7 @@ const Content = () => {
   return (
     <>
       <ScrollToTopButton />
-      <main className="pt-7">
+      <main className="pt-7 pb-7 flex-grow">
         <Container>{element}</Container>
       </main>
     </>
@@ -265,9 +269,11 @@ const App = () => (
     <SummarizersProvider>
       <SettingsProvider>
         <Router>
-          <Navbar />
-          <Content />
-          <Footer />
+          <div className="min-h-screen flex flex-col">
+            <Navbar />
+            <Content />
+            <Footer />
+          </div>
         </Router>
       </SettingsProvider>
     </SummarizersProvider>

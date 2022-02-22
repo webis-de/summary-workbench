@@ -2,6 +2,7 @@ import React, { useEffect, useReducer, useRef, useState } from "react";
 
 import { useFile } from "./hooks/File";
 import { ChooseFile } from "./utils/ChooseFile";
+import { Input } from "./utils/Form"
 
 const Button = ({ onClick, children, style, ...other }) => (
   <button className="uk-button uk-button-primary uk-margin-small" onClick={onClick} {...other}>
@@ -16,7 +17,7 @@ const AddModel = ({ style, file, setFile, lines, linesAreSame, addModel }) => {
       className="uk-flex uk-flex-column"
       style={{ padding: "10px", border: "1px solid", ...style }}
     >
-      <input ref={inputRef} className="uk-input align-center" type="text" placeholder="Name" />
+      <Input ref={inputRef} placeholder="Name" />
       <ChooseFile
         className="uk-margin-small"
         placeholder="Upload Predictions"
@@ -94,17 +95,19 @@ const Visualization = () => {
           />
         </div>
         {Boolean(models.length) && (
-          <table className="uk-table">
-            <tbody>
-              {models.map((model) => (
-                <tr>
-                  {model.map((entry) => (
-                    <td>{entry}</td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <TableWrapper>
+            <Table>
+              <Tbody>
+                {models.map((model) => (
+                  <Tr hover stripe>
+                    {model.map((entry) => (
+                      <Td>{entry}</Td>
+                    ))}
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          </TableWrapper>
         )}
       </div>
     </>

@@ -1,10 +1,10 @@
-import React, { useRef } from "react";
+import React from "react";
 
 import { usePairwiseMarkups } from "../hooks/markup";
 import { flatten } from "../utils/flatScores";
 import { CompareTable } from "./CompareTable";
 import { ScoreTable } from "./ScoreTable";
-import { DeleteButton } from "./utils/DeleteButton";
+import { DeleteButton } from "./utils/Button";
 import { Pill, TabContent, TabHead, TabPanel, Tabs } from "./utils/Tabs";
 
 const SavedInfo = ({ calculation, deleteCalculation }) => {
@@ -25,9 +25,7 @@ const SavedInfo = ({ calculation, deleteCalculation }) => {
         <TabPanel>
           <ScoreTable flatScores={flatScores} />
         </TabPanel>
-        <TabPanel>
-          {comparisons.length && <CompareTable comparisons={comparisons} />}
-        </TabPanel>
+        <TabPanel>{comparisons.length && <CompareTable comparisons={comparisons} />}</TabPanel>
       </TabContent>
     </Tabs>
   );

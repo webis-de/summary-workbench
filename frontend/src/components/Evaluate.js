@@ -63,17 +63,17 @@ const Evaluate = () => {
         Evaluate a single hypothesis against a reference or upload hypothesis and reference files.
         Results can be saved and exported as LaTeX or CSV.
       </Hint>
-      <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gridGap: "10px" }}>
-        <div>
+      <div className="flex flex-row gap-3">
+        <div className="grow min-w-[600px]">
           <FileInput setCalculation={setCalculation} />
         </div>
         <div>
-          <Settings className="uk-margin" />
+          <Settings/>
         </div>
       </div>
-      <div ref={scrollRef} style={{ scrollMarginTop: "100px" }} className="uk-margin-large-top" />
+      <div ref={scrollRef} className="uk-margin-large-top scroll-m-20" />
       {calculation && (
-        <Result className="uk-margin" calculation={calculation} saveCalculation={saveCalculation} />
+        <Result calculation={calculation} saveCalculation={saveCalculation} />
       )}
       {calc.calculations && (
         <Saved

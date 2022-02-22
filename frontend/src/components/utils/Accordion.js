@@ -1,8 +1,7 @@
 import React from "react";
 
 import { Badge } from "./Badge";
-import { Button } from "./Button";
-import { DeleteButton } from "./DeleteButton";
+import { Button, DeleteButton } from "./Button";
 
 const AccordionItem = ({
   children,
@@ -64,7 +63,7 @@ const AccordionItem = ({
               {buttonsText}
             </Button>
           ))}
-        {remove && <DeleteButton onClick={remove} className="uk-margin-right" />}
+        {remove && <DeleteButton onClick={remove} />}
       </div>
     </div>
     <div className="uk-padding-small uk-accordion-content" style={{ margin: 0 }}>

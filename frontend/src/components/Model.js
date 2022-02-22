@@ -1,7 +1,6 @@
 import React, { useMemo } from "react";
 
 import { RGBToHex, randomColor } from "../utils/color";
-import { BadgeButton } from "./utils/Button";
 import { Pagination, usePagination } from "./utils/Pagination";
 
 const typeToColor = (type) => {
@@ -19,23 +18,19 @@ const typeToColor = (type) => {
   }
 };
 
-const Model = ({ info, onClick, style, isSet }) => (
-  <BadgeButton
+const Model = ({ info, onClick, isSet }) => (
+  <button
     onClick={onClick}
+    className="border-2 border-lg p-2"
     style={{
-      border: "3px solid",
-      borderRadius: "8px",
       borderColor: typeToColor(info.type),
-      padding: "14px",
-      color: "black",
       backgroundColor: isSet ? "#ffcccb" : "white",
-      ...style,
     }}
   >
-    <span title={info.name} style={{ overflow: "hidden", textOverflow: "ellipsis" }}>
+    <span title={info.name} className="block overflow-hidden text-ellipsis">
       {info.name}
     </span>
-  </BadgeButton>
+  </button>
 );
 
 const Legend = ({ models }) => {
@@ -69,16 +64,9 @@ const Legend = ({ models }) => {
 const ModelGrid = ({ keys, models, settings, selectModel }) => {
   const { numPages, page, setPage, size, setSize } = usePagination(keys.length);
   return (
-    <div style={{ marginTop: "-35px" }}>
+    <div>
       <Legend models={models} />
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "50% 50%",
-          marginTop: "10px",
-          gridGap: "10px",
-        }}
-      >
+      <div className="grid grid-cols-2 gap-4">
         {Object.values(models).length ? (
           keys
             .slice((page - 1) * size, page * size)
@@ -87,7 +75,6 @@ const ModelGrid = ({ keys, models, settings, selectModel }) => {
                 key={key}
                 info={models[key]}
                 onClick={() => selectModel(key)}
-                style={{ width: "100%" }}
                 isSet={settings[key]}
               />
             ))
@@ -95,13 +82,7 @@ const ModelGrid = ({ keys, models, settings, selectModel }) => {
           <div>no models configured</div>
         )}
       </div>
-      <Pagination
-        page={page}
-        size={size}
-        numPages={numPages}
-        setPage={setPage}
-        setSize={setSize}
-      />
+      <Pagination page={page} size={size} numPages={numPages} setPage={setPage} setSize={setSize} />
     </div>
   );
 };

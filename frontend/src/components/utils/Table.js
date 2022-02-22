@@ -7,12 +7,8 @@ const TableWrapper = ({ children }) => (
 );
 
 const Table = ({ children, fixed }) => (
-  <div className="overflow-hidde">
-    <table
-      className={`w-full divide-y divide-gray-200 ${
-        fixed ? "table-fxed" : "table-auto"
-      }`}
-    >
+  <div className="overflow-auto">
+    <table className={`w-full divide-y divide-gray-200 ${fixed ? "table-fxed" : "table-auto"}`}>
       {children}
     </table>
   </div>
@@ -36,22 +32,23 @@ const Tbody = ({ children }) => (
 
 const Tr = ({ children, hover, striped }) => (
   <tr
-    className={`bg-white ${striped ? "even:bg-gray-50" : ""} ${
-      hover ? "hover:bg-gray-100" : ""
-    }`}
+    className={`bg-white ${striped ? "even:bg-gray-50" : ""} ${hover ? "hover:bg-gray-100" : ""}`}
   >
     {children}
   </tr>
 );
 
-const Td = ({ children, nowrap, center, right, strong }) => {
+const Td = ({ children, nowrap, center, right, strong, loose }) => {
   let direction = "text-left";
   if (center) direction = "text-center";
   else if (right) direction = "text-right";
 
+  let padding = "py-4 px-6";
+  if (loose) padding = "p-2";
+
   return (
     <td
-      className={`py-4 px-6 text-sm font-medium ${
+      className={`${padding} text-sm font-medium ${
         strong ? "text-gray-900" : "text-gray-500"
       } ${direction} ${nowrap ? "whitespace-nowrap" : ""}`}
     >

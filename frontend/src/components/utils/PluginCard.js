@@ -5,7 +5,7 @@ const isLink = (text) => text.match(/^https?:\/\//);
 const Link = ({ Icon, link, title }) => {
   if (link)
     return (
-      <a className="nostyle" href={link} title={title}>
+      <a href={link} title={title}>
         <Icon />
       </a>
     );
@@ -40,10 +40,7 @@ const PluginCard = ({ plugin, inline = true }) => {
         }}
       >
         <div>{name}</div>
-        <div
-          className="margin-between-10"
-          style={{ marginLeft: "30px", marginBottom: "4px", paddingRight: "4px" }}
-        >
+        <div className="flex gap-2">
           <SourceCode link={sourcecode} />
           <HomePage link={homepage} />
         </div>

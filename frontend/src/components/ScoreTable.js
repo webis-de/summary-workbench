@@ -4,6 +4,7 @@ import { FaCheck, FaRegCopy } from "react-icons/fa";
 import { toCSV, toLatex } from "../utils/export";
 import { Button } from "./utils/Button";
 import { Table, TableWrapper, Tbody, Td, Th, Thead, Tr } from "./utils/Table";
+import { Input } from "./utils/Form";
 
 const createFormatButton =
   (kind) =>
@@ -57,7 +58,7 @@ const ExportPreview = ({ text }) => (
 );
 
 const PrecionField = ({ onChange }) => (
-  <input className="uk-input" placeholder="round values up to X points" onChange={onChange} />
+  <Input placeholder="round values up to X points" onChange={onChange} />
 );
 
 const ScoreTable = ({ flatScores }) => {

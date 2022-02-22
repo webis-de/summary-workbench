@@ -22,8 +22,8 @@ const AboutTable = ({ section, content }) => (
           <Tr key={metric}>
             <Td>{name}</Td>
             <Td>{type}</Td>
-            <Td>{sourcecode && <a href={sourcecode}>{sourcecode}</a>}</Td>
-            <Td>{homepage && <a href={homepage}>{homepage}</a>}</Td>
+            <Td>{sourcecode && <Button appearence="link" variant="primary" href={sourcecode}>Code</Button>}</Td>
+            <Td>{homepage && <Button appearence="link" variant="success" href={homepage}>Homepage</Button>}</Td>
             <Td>{model}</Td>
           </Tr>
         ))}
@@ -31,6 +31,7 @@ const AboutTable = ({ section, content }) => (
     </Table>
   </TableWrapper>
 );
+
 
 const WaitResource = ({ loading, reloader }) => {
   if (loading) return <CenterLoading />;
@@ -50,33 +51,26 @@ const About = () => {
   const { metrics, loading: metricsLoading, reload: metricsReload } = useContext(MetricsContext);
 
   return (
-    <div>
+    <div className="flex flex-col gap-8">
       <div>
         <HeadingBig>Summarization</HeadingBig>
-        <div className="uk-margin-left">
-          {!summarizers ? (
-            <WaitResource loading={summarizersLoading} reloader={summarizersReload} />
-          ) : (
-            <AboutTable section="Summarizer" content={summarizers} />
-          )}
-        </div>
+        {!summarizers ? (
+          <WaitResource loading={summarizersLoading} reloader={summarizersReload} />
+        ) : (
+          <AboutTable section="Summarizer" content={summarizers} />
+        )}
       </div>
       <div>
         <HeadingBig>Evaluation</HeadingBig>
-        <div className="uk-margin-left">
-          {!metrics ? (
-            <WaitResource loading={metricsLoading} reloader={metricsReload} />
-          ) : (
-            <AboutTable section="Summarizer" content={metrics} />
-          )}
-        </div>
+        {!metrics ? (
+          <WaitResource loading={metricsLoading} reloader={metricsReload} />
+        ) : (
+          <AboutTable section="Summarizer" content={metrics} />
+        )}
       </div>
       <div>
         <HeadingBig>Code</HeadingBig>
-        <a
-          className="uk-margin-left"
-          href="https://git.informatik.uni-leipzig.de/ds40bamo/comparefile"
-        >
+        <a href="https://git.informatik.uni-leipzig.de/ds40bamo/comparefile">
           https://git.informatik.uni-leipzig.de/ds40bamo/comparefile
         </a>
       </div>
