@@ -97,13 +97,97 @@ The summarizer.py file should have a class `SummarizerPlugin` with the following
   - ratio: number between 0 and 1 which can be used to control the length of the summary
   - returns: a string or a list of sentences which is the generated summary
 
+### Example
+Let us add the ConcluGen model (for generating informative conclusions of arguments) as a plugin.
+**Method 1. From a local folder.**
+1. Under `summarizers`, create a new directory named `conclugen`
+2. This directory must contain the four files mentioned above:   `requirements.txt`, `model_setup.py`, `summarizer.py`, and `config.yaml`. 
+   
+Contents of `requirements.txt`
+```
+requests
+transformers[torch]
+```
+Download and save model checkpoints in the `model_setup.py`
+
+```
+URL = "https://files.webis.de/webis-conclugen21-models/dbart.tar.gz"
+SAVE_PATH = "checkpoints"
+
+def setup():
+    # create checkpoints directory if non-existent
+    print("Creating and downloading checkpoints")
+    pathlib.Path(SAVE_PATH).mkdir(parents=True, exist_ok=True)
+    response = requests.get(URL, stream=True)
+    file = tarfile.open(fileobj=response.raw, mode="r|gz")
+    file.extractall(path=SAVE_PATH)
+    print("Done")
+
+if __name__ =="__main__":
+    setup()
+```
+Create the summarization pipeline in `summarizer.py`. This file declares a `SummarizerPlugin()` that implements the `summarize()` method.
+```
+from transformers import AutoModelForSeq2SeqLM, pipeline, AutoTokenizer
+
+class ConcluGen():
+  def __init__(self):
+        self.tokenizer = AutoTokenizer.from_pretrained(pathlib.Path(MODEL_NAME), local_files_only=True)
+        self.model = AutoModelForSeq2SeqLM.from_pretrained(pathlib.Path(MODEL_NAME), local_files_only=True)
+        self.pipeline = pipeline(
+            "summarization", model=self.model, tokenizer=self.tokenizer
+        )
+  
+  def generate_conclusion(self, text, ratio):
+    return "Conclusion"
+
+class SummarizerPlugin():
+  def __init__(self):
+    self.summarizer = ConcluGen()
+  
+  def summarize(self, *args, **kwargs):
+    return self.summarizer.generate_conclusion(*args, **kwargs)
+```
+Provide model details and metadata for the web interface via the local `config.yaml` file.
+
+```version: "1.0"
+name: "ConcluGen"
+devimage: slim
+deployimage: slim
+metadata:
+  type: abstractive
+  homepage: https://aclanthology.org/2021.findings-acl.306/
+  sourcecode: https://github.com/webis-de/acl21-informative-conclusion-generation
+```
+
+**Method 2. From a git repository.**
+TBD
+
+Regenerate docker compose file via `python manage.py gen-docker-compose` and redeploy the app.
+
+```
+docker-compose down --remove-orphans
+docker-compose up .
+```
+
+The new plugin should now be available for inference via the web interface.
+
+
+
+
 # Development / run application locally
 
 **requirements**: install docker and docker-compose on your system and make sure the docker service is running (`sudo systemctl start docker.service`)
 
 Generate a docker-compose file for the local development of the application with `./manage.py gen-docker-compose`.
-Comment the services which you don't need in the `config.yaml` to prevent unnecessary RAM usage.
-The application can be accessed via `localhost:3000`.
+
+Comment out the services which you don't need in `config.yaml` to prevent unnecessary RAM usage.
+
+Run `docker-compose up .`
+
+**Note**: This step takes a while to finish if running for the first time as it builds individual docker images for each summarization model and evaluation metric.
+
+The application can be accessed via `localhost:3000`
 
 The `api` and `frontend` containers are available even before the other containers are done initializing.
 Some parts of the applications will only become available over time, because they are busy downloading a model.
