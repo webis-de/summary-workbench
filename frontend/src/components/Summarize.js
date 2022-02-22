@@ -93,7 +93,7 @@ const InputDocument = ({ summarize, isComputing }) => {
             <div className="flex justify-between">
               <HeadingBig>Document</HeadingBig>
               <Button variant="primary" onClick={insertSampleText}>
-                sample text
+                Sample Text
               </Button>
             </div>
           </CardHead>
@@ -102,7 +102,7 @@ const InputDocument = ({ summarize, isComputing }) => {
             onChange={(e) => setDocumentText(e.currentTarget.value)}
             className="uk-textarea resize-none min-h-[350px]"
             rows="8"
-            placeholder="Paste URL or long text"
+            placeholder="Paste a URL or some long text to be summarized."
             style={{ height: "100%" }}
           />
         </Card>
@@ -123,7 +123,7 @@ const InputDocument = ({ summarize, isComputing }) => {
                 selectModel={selectSummarizer}
               />
               <div style={{ marginTop: "30px" }} />
-              <span className="colored-header">summary length:</span> {`${summaryLength} %`}
+              <span className="colored-header">Summary Length:</span> {`${summaryLength} %`}
               <div
                 className="uk-flex uk-flex-wrap"
                 style={{
@@ -131,7 +131,7 @@ const InputDocument = ({ summarize, isComputing }) => {
                   gap: "5px",
                 }}
               >
-                <span className="colored-header">selected:</span>
+                <span className="colored-header">Selected:</span>
                 {chosenModels.map((model) => (
                   <DismissableBadge onClick={() => unselectSummarizer(model)} key={model}>
                     <a
@@ -452,8 +452,8 @@ const Summarize = () => {
   if (!summarizers) return <Button onClick={retry}>Retry</Button>;
   return (
     <>
-      <HeadingBig>Summarization</HeadingBig>
-      <Hint>Summarize documents.</Hint>
+      {/* <HeadingBig>Summarization</HeadingBig>
+      <Hint>Summarize documents.</Hint> */}
       <InputDocument summarize={summarize} isComputing={computing} />
       {results && (
         <div>

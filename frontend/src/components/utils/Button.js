@@ -71,14 +71,14 @@ const convertGroupToStyle = (group) => {
 };
 
 const Button = ({
-  appearence = "fill",
+  appearance = "fill",
   variant = "primary",
   onClick,
   disabled,
   group,
   children,
 }) => {
-  const a = disabled ? "disabled" : appearence;
+  const a = disabled ? "disabled" : appearance;
   const className = `${buttonStyles["*"]} ${buttonStyles[a]["*"]} ${
     buttonStyles[a][variant]
   } ${convertGroupToStyle(group)}`;
