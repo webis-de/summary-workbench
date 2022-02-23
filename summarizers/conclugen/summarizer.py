@@ -3,7 +3,7 @@ import pathlib
 from transformers import AutoModelForSeq2SeqLM, pipeline, AutoTokenizer
 import transformers
 
-MODEL_NAME = "checkpoints/dbart"
+MODEL_PATH = "/tldr_plugin_files/checkpoints/dbart"
 
 def add_dot(text):
     if text[-1] != ".":
@@ -15,11 +15,11 @@ class ConcluGen(object):
 
     def __init__(self):
         print("Transformers Version:", transformers.__version__)
-        print(pathlib.Path(MODEL_NAME).resolve())
-        self.tokenizer = AutoTokenizer.from_pretrained(pathlib.Path(MODEL_NAME), local_files_only=True)
+        print(pathlib.Path(MODEL_PATH).resolve())
+        self.tokenizer = AutoTokenizer.from_pretrained(pathlib.Path(MODEL_PATH), local_files_only=True)
         if self.tokenizer:
             print("Tokenizer initialized")
-        self.model = AutoModelForSeq2SeqLM.from_pretrained(pathlib.Path(MODEL_NAME), local_files_only=True)
+        self.model = AutoModelForSeq2SeqLM.from_pretrained(pathlib.Path(MODEL_PATH), local_files_only=True)
         if self.model:
             print("Model initialized")
         self.pipeline = pipeline(
