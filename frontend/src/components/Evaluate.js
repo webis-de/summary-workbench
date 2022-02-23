@@ -19,15 +19,15 @@ const FileInput = ({ setCalculation }) => (
     <Tabs>
       <CardContent>
         <TabHead border>
-          <Tab>Upload files</Tab>
           <Tab>Single Example</Tab>
+          <Tab>Upload files</Tab>
         </TabHead>
         <TabContent>
           <TabPanel>
-            <Upload className="uk-margin" setCalculation={setCalculation} />
+            <OneHypRef className="uk-margin" />
           </TabPanel>
           <TabPanel>
-            <OneHypRef className="uk-margin" />
+            <Upload className="uk-margin" setCalculation={setCalculation} />
           </TabPanel>
         </TabContent>
       </CardContent>
@@ -58,10 +58,10 @@ const Evaluate = () => {
 
   return (
     <div>
-      <HeadingBig>Evaluation</HeadingBig>
+      <HeadingBig>Evaluation Predictions</HeadingBig>
       <Hint>
-        Evaluate a single hypothesis against a reference or upload hypothesis and reference files.
-        Results can be saved and exported as LaTeX or CSV.
+        Evaluate using multiple metrics a single prediction against a reference text, or upload both of them as files. After computing the metrics, a visual comparison between two texts can be made that shows the overlapping tokens.
+        Scores from evaluation metrics can be exported in LaTeX (table) or CSV format.
       </Hint>
       <div className="flex flex-row gap-3">
         <div className="grow min-w-[600px]">

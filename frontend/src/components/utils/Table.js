@@ -8,7 +8,11 @@ const TableWrapper = ({ children }) => (
 
 const Table = ({ children, fixed }) => (
   <div className="overflow-auto">
-    <table className={`w-full divide-y divide-gray-200 ${fixed ? "table-fxed" : "table-auto"}`}>
+    <table
+      className={`w-full divide-y divide-gray-200 ${
+        fixed ? "table-fixed" : "table-auto"
+      }`}
+    >
       {children}
     </table>
   </div>

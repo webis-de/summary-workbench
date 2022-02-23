@@ -64,8 +64,8 @@ const Footer = () => (
 
 const NavLink = ({ href, to, children }) => {
   const classNameBase = "uppercase text-sm";
-  const className = `text-gray-400 hover:text-slate-200 hover:no-underline ${classNameBase}`;
-  const activeClassName = `text-gray-100 hover:text-gray-100 underline underline-offset-4 ${classNameBase}`;
+  const className = `text-gray-400 font-medium hover:text-slate-200 hover:no-underline ${classNameBase}`;
+  const activeClassName = `text-gray-100 font-medium hover:text-gray-100 underline underline-offset-4 ${classNameBase}`;
   if (href)
     return (
       <a href={href} className={className}>
@@ -94,15 +94,18 @@ const NavRoutes = () => (
 const Navbar = () => (
   <>
     <div className="h-16" />
-    <nav className="fixed top-0 right-0 z-30 left-0 bg-neutral-700">
+    <nav className="fixed bg-[#1B3451] top-0 right-0 z-30 left-0 bg-neutral-700">
       <Container>
         <div className="h-16 flex justify-between items-center">
           <NavLink href="https://webis.de/">
-            <div className="flex items-center">
+            {/* <div className="flex items-center">
               <img src="https://assets.webis.de/img/webis-logo.png" alt="Webis Logo" />
               <span className="ml-4">Webis.de</span>
-            </div>
+            </div> */}
+            <span className="text-2xl no-underline text-slate-50 normal-case hover:text-blue-dark font-sans font-bold">Summary Workbench
+            </span> 
           </NavLink>
+
           <div className="flex gap-10">
             <NavRoutes />
             <NavbarOptions />
@@ -138,7 +141,7 @@ const NavbarOptions = () => {
       <Modal isOpen={isOpen} close={closeModal}>
         <div className="bg-slate-100 p-5 sticky z-20 top-0 flex justify-between items-center border-b">
           <ModalTitle>Settings</ModalTitle>
-          <Button appearence="soft" onClick={closeModal}>
+          <Button appearance="soft" onClick={closeModal}>
             Close
           </Button>
         </div>
@@ -243,9 +246,8 @@ const ScrollToTopButton = () => {
 
   return (
     <FaChevronCircleUp
-      className={`fixed cursor-pointer text-blue-700 bg-white rounded-full w-9 z-10 bottom-5 right-4 ${
-        visible ? "block" : "hidden"
-      }`}
+      className={`fixed cursor-pointer text-blue-700 bg-white rounded-full w-9 z-10 bottom-5 right-4 ${visible ? "block" : "hidden"
+        }`}
       title="scoll to top"
       onClick={scrollToTop}
     />

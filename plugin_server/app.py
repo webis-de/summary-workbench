@@ -1,8 +1,10 @@
 import logging
 from os import environ
-
+import pathlib
+import os
 import sys
-sys.path.insert(0, "/tldr_plugin_files")
+sys.path.insert(0,"/tldr_plugin_files")
+os.chdir("/tldr_plugin_files")
 
 from flask import Flask, jsonify, request
 
@@ -41,6 +43,8 @@ def construct_metric():
 def construct_summarizer():
     from summarizer import SummarizerPlugin
 
+    print("Constructing Summarizer")
+    print("Current plugin files", list(pathlib.Path("/tldr_plugin_files").iterdir()))
     plugin = SummarizerPlugin()
 
     def index():
