@@ -446,12 +446,14 @@ const Summarize = () => {
   if (!summarizers) return <Button onClick={retry}>Retry</Button>;
   return (
     <>
-      <HeadingBig>Summarize Documents</HeadingBig>
-      <Hint>
-        You can select multiple models and customize the desired summary length. Longer documents
-        are split into chunks for abstractive summarizers and the individual summaries are
-        concatenated as the final summary.{" "}
-      </Hint>
+      <div className="pb-4">
+        <HeadingBig>Summarize Documents</HeadingBig>
+        <Hint>
+          You can select multiple models and customize the desired summary length. Longer documents
+          are split into chunks for abstractive summarizers and the individual summaries are
+          concatenated as the final summary.{" "}
+        </Hint>
+      </div>
       <InputDocument summarize={summarize} isComputing={computing} />
       {results && (
         <div>

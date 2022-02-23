@@ -5,7 +5,7 @@ const transformScores = (scores, precision) => {
   return [names, values];
 };
 
-const toLatex = (scores, transpose, precision) => {
+const latex = (scores, transpose, precision) => {
   const [names, values] = transformScores(scores, precision);
   if (transpose) {
     return `\\begin{tabular}{l${"r".repeat(scores.length)}}
@@ -25,10 +25,10 @@ ${names.map((name, i) => `\\textbf{${name}} & ${values[i]} \\\\`).join("\n")}
 \\end{tabular}`;
 };
 
-const toCSV = (scores, transpose, precision) => {
+const csv = (scores, transpose, precision) => {
   const [names, values] = transformScores(scores, precision);
   if (transpose) return `${names.join(",")}\n${values.join(",")}`;
   return `metric,score\n${names.map((name, i) => `${name},${values[i]}`).join("\n")}`;
 };
 
-export { toLatex, toCSV };
+export default { latex, csv };

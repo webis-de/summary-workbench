@@ -1,5 +1,4 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { FaRegFile } from "react-icons/fa";
 
 import { MetricsContext } from "../contexts/MetricsContext";
 import { useCalculations } from "../hooks/calculations";
@@ -8,8 +7,9 @@ import { Result } from "./Result";
 import { Saved } from "./Saved";
 import { Settings } from "./Settings";
 import { Upload } from "./Upload";
+import { Badge } from "./utils/Badge";
 import { Button } from "./utils/Button";
-import { Card, CardContent, CardHead } from "./utils/Card";
+import { Card, CardContent } from "./utils/Card";
 import { CenterLoading } from "./utils/Loading";
 import { Tab, TabContent, TabHead, TabPanel, Tabs } from "./utils/Tabs";
 import { HeadingBig, Hint } from "./utils/Text";
@@ -58,23 +58,25 @@ const Evaluate = () => {
 
   return (
     <div>
-      <HeadingBig>Evaluation Predictions</HeadingBig>
-      <Hint>
-        Evaluate using multiple metrics a single prediction against a reference text, or upload both of them as files. After computing the metrics, a visual comparison between two texts can be made that shows the overlapping tokens.
-        Scores from evaluation metrics can be exported in LaTeX (table) or CSV format.
-      </Hint>
+      <div className="pb-4">
+        <HeadingBig>Evaluation Predictions</HeadingBig>
+        <Hint>
+          Evaluate using multiple metrics a single prediction against a reference text, or upload
+          both of them as files. After computing the metrics, a visual comparison between two texts
+          can be made that shows the overlapping tokens. Scores from evaluation metrics can be
+          exported in LaTeX (table) or CSV format.
+        </Hint>
+      </div>
       <div className="flex flex-row gap-3">
         <div className="grow min-w-[600px]">
           <FileInput setCalculation={setCalculation} />
         </div>
         <div>
-          <Settings/>
+          <Settings />
         </div>
       </div>
       <div ref={scrollRef} className="uk-margin-large-top scroll-m-20" />
-      {calculation && (
-        <Result calculation={calculation} saveCalculation={saveCalculation} />
-      )}
+      {calculation && <Result calculation={calculation} saveCalculation={saveCalculation} />}
       {calc.calculations && (
         <Saved
           className="uk-margin"

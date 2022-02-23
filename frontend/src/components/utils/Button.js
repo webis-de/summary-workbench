@@ -2,7 +2,6 @@ import React from "react";
 import { FaTrash } from "react-icons/fa";
 
 const buttonStyles = {
-  "*": "px-4 py-2 text-sm font-bold tracking-tight focus:z-10",
   fill: {
     "*": "focus:outline-none focus:ring transition text-white",
     primary: "bg-blue-600 hover:bg-blue-800 active:bg-blue-800 focus:ring-blue-300",
@@ -66,34 +65,20 @@ const buttonStyles = {
   },
 };
 
-const convertGroupToStyle = (group) => {
-  switch (group) {
-    case "first":
-      return "rounded-t-md border-x border-t w-full";
-    case "middle":
-      return "border-x border-t w-full";
-    case "last":
-      return "rounded-b-md border w-full";
-    default:
-      return "rounded";
-  }
-};
-
 const Button = ({
   appearance = "fill",
   variant = "primary",
   href,
   disabled,
-  group,
   children,
   flatRight,
   flatLeft,
   ...props
 }) => {
   const a = disabled ? "disabled" : appearance;
-  const className = `${buttonStyles["*"]} ${buttonStyles[a]["*"]} ${
-    buttonStyles[a][variant]
-  } ${convertGroupToStyle(group)} ${flatRight ? "rounded-r-[0]" : ""} ${
+  const className = `px-4 py-2 text-sm font-bold tracking-tight focus:z-10 rounded-md ${
+    buttonStyles[a]["*"]
+  } ${buttonStyles[a][variant]} ${flatRight ? "rounded-r-[0]" : ""} ${
     flatLeft ? "rounded-l-[0]" : ""
   }`;
   const passProps = { ...props, className, disabled: a === "disabled" };
@@ -106,27 +91,10 @@ const Button = ({
   return <button {...passProps}>{children}</button>;
 };
 
-const ButtonGroup = ({ children }) => {
-  const annotations = children.map((child) => ["middle", child]);
-  annotations[0][0] = "first";
-  annotations[annotations.length - 1][0] = "last";
-  return (
-    <div>
-      <div className="w-full inline-flex flex-col rounded-lg shadow-md" role="group">
-        {annotations.map(([annotation, child]) =>
-          React.cloneElement(child, {
-            group: annotation,
-          })
-        )}
-      </div>
-    </div>
-  );
-};
-
 const DeleteButton = (props) => (
   <Button appearence="box" variant="danger" {...props}>
     <FaTrash />
   </Button>
 );
 
-export { Button, ButtonGroup, DeleteButton };
+export { Button, DeleteButton };

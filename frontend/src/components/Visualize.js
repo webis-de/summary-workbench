@@ -140,7 +140,6 @@ const Visualize = ({ visualization, clear }) => {
 
   const { numPages, page, setPage, size, setSize } = usePagination(documents.length, 1, 1);
   const linesIndex = page - 1;
-  console.log(page);
 
   useKey("Escape", clear);
   useKey("ArrowLeft", () => setPage((old) => old - 1));
