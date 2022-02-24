@@ -10,7 +10,7 @@ const SavedEntry = ({ calculation, deleteCalculation }) => {
   const badges = Object.keys(calculation.scores).map((name) => calculation.metrics[name].name);
   return (
     <Disclosure key={calculation.id}>
-      <div className="border border-black divide-y divide-gray-300">
+      <div className="border border-black rounded-lg divide-y divide-gray-300">
         <DisclosureToggle>
           <div className="p-4 flex justify-between items-center w-full">
             <HeadingMedium>{calculation.id}</HeadingMedium>

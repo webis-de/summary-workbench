@@ -8,10 +8,10 @@ import { displayError } from "../utils/message";
 import { ScoreTable } from "./ScoreTable";
 import { Button } from "./utils/Button";
 import { Textarea } from "./utils/Form";
-import { InfoText } from "./utils/InfoText";
 import { Loading } from "./utils/Loading";
 import { Markup } from "./utils/Markup";
-import { TableWrapper, Table, Tbody, Td, Tr } from "./utils/Table";
+import { Table, TableWrapper, Tbody, Td, Tr } from "./utils/Table";
+import { Hint } from "./utils/Text";
 
 const OneHypRefResult = ({ calculation }) => {
   const { scores, hypText, refText } = calculation;
@@ -78,12 +78,6 @@ const OneHypRef = () => {
 
   return (
     <>
-      {/* <InfoText
-        messages={[
-          [!hasInput, "Enter a hypothesis and a reference.", false],
-          [!metricIsChoosen, "Select at least one metric.", true],
-        ]}
-      /> */}
       <div className="flex gap-2">
         <TextField value={refText} setValue={setRefText} placeholder="Enter the reference text." />
         <TextField value={hypText} setValue={setHypText} placeholder="Enter the predicted text." />

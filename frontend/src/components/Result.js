@@ -1,17 +1,12 @@
 import React, { useState } from "react";
-import { FaCalculator, FaInfoCircle } from "react-icons/fa";
 
 import { ResultInfo } from "./ResultInfo";
 import { Button } from "./utils/Button";
 import { Card, CardContent, CardHead } from "./utils/Card";
+import { Input } from "./utils/Form";
+import { HeadingSemiBig, Hint } from "./utils/Text";
 
-const UploadButton = (props) => (
-  <Button variant="primary" {...props} style={{ whiteSpace: "nowrap" }}>
-    Save
-  </Button>
-);
-
-const Result = ({ className, calculation, saveCalculation }) => {
+const Result = ({ calculation, saveCalculation }) => {
   const { id, scores, hypotheses, references } = calculation;
   const [calcID, setCalcID] = useState(id);
   const [infoText, setInfoText] = useState(null);
@@ -29,28 +24,23 @@ const Result = ({ className, calculation, saveCalculation }) => {
   return (
     <Card full>
       <CardHead>
-        <FaCalculator /> Results
+        <HeadingSemiBig>Result</HeadingSemiBig>
       </CardHead>
       <CardContent>
-        <div
-          className="uk-flex uk-flex-middle"
-          style={{ marginTop: "-10px", marginBottom: "20px" }}
-        >
-          <div className="uk-flex uk-width-1-3" style={{ flexGrow: "1", maxWidth: "500px" }}>
-            <input
-              className="uk-input"
+        <div>
+          <div className="flex max-w-[400px]">
+            <Input
               value={calcID}
               onChange={(e) => setCalcID(e.currentTarget.value)}
               onKeyDown={(e) => e.keyCode === 13 && save()}
+              flatRight
             />
-            <UploadButton onClick={save} />
+            <Button onClick={save} flatLeft>
+              Save
+            </Button>
           </div>
         </div>
-        {infoText && (
-          <div className="uk-margin uk-text-primary uk-text-danger">
-            <FaInfoCircle /> {infoText}
-          </div>
-        )}
+        {infoText && <Hint type="info">{infoText}</Hint>}
         <ResultInfo scores={scores} hypotheses={hypotheses} references={references} />
       </CardContent>
     </Card>

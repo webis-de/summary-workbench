@@ -5,7 +5,7 @@ import { MetricsContext } from "../contexts/MetricsContext";
 import { displayError } from "../utils/message";
 import { Button } from "./utils/Button";
 import { ChooseFile, sameLength, useFile } from "./utils/ChooseFile";
-import { InfoText } from "./utils/InfoText";
+import { Hint } from "./utils/Text"
 import { Loading } from "./utils/Loading";
 
 const getChosenMetrics = (settings) =>
@@ -17,10 +17,10 @@ const getMessages = (filesAreInput, linesAreSame, metricIsChoosen) => [
   [
     !filesAreInput,
     "Both files must contain the same number of non-empty lines. Each line is interpreted as a sentence.",
-    false,
+    "info",
   ],
-  [!linesAreSame, "The files are not valid because they have different number of lines.", true],
-  [!metricIsChoosen, "Select at least one metric.", true],
+  [!linesAreSame, "The files are not valid because they have different number of lines.", "warn"],
+  [!metricIsChoosen, "Select at least one metric.", "warn"],
 ];
 
 const Upload = ({ setCalculation }) => {
@@ -43,14 +43,16 @@ const Upload = ({ setCalculation }) => {
       const { scores } = await evaluateRequest(chosenMetrics, hypotheses, references);
       setCalculation({ id, scores, hypotheses, references });
     } catch (err) {
-      displayError(err)
+      displayError(err);
     }
     setIsComputing(false);
   };
 
   return (
     <>
-      <InfoText messages={getMessages(filesAreInput, linesAreSame, metricIsChoosen)} />
+      {getMessages(filesAreInput, linesAreSame, metricIsChoosen).map(
+        ([show, message, type]) => show && <Hint type={type}>{message}</Hint>
+      )}
       <div
         className="uk-margin uk-grid uk-grid-small uk-child-width-1-2@s"
         style={{ gridRowGap: "10px" }}

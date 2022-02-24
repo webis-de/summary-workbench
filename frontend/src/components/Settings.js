@@ -6,6 +6,7 @@ import { DismissableBadge } from "./utils/Badge";
 import { Card, CardContent, CardHead } from "./utils/Card";
 import { LiveSearch, useFilter } from "./utils/FuzzySearch";
 import { PluginCard } from "./utils/PluginCard";
+import { HeadingSemiBig } from "./utils/Text";
 
 const getChosenMetrics = (settings) =>
   Object.entries(settings)
@@ -33,12 +34,10 @@ const Settings = () => {
   return (
     <Card full>
       <CardHead>
-        <div className="flex items-center">
-          <CardHead>Metrics</CardHead>
-          <LiveSearch query={query} setQuery={setQuery} />
-        </div>
+        <HeadingSemiBig>Metrics</HeadingSemiBig>
       </CardHead>
       <CardContent>
+        <LiveSearch query={query} setQuery={setQuery} />
         <ModelGrid
           keys={filteredKeys}
           models={metrics}
@@ -51,7 +50,6 @@ const Settings = () => {
             <DismissableBadge onClick={() => unselectMetric(model)} key={model}>
               <a
                 href="/#"
-                className="nostyle"
                 onClick={(e) => {
                   e.preventDefault();
                   setSelectedMetric(model);

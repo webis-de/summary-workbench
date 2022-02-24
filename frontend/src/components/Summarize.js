@@ -86,87 +86,83 @@ const InputDocument = ({ summarize, isComputing }) => {
   };
 
   return (
-    <div className="uk-margin-medium-top@s uk-margin-large-top@l">
-      <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gridGap: "10px" }}>
+    <div className="grid grid-cols-2 gap-3">
+      <Card full>
+        <CardHead>
+          <div className="w-full flex justify-between items-center">
+            <HeadingSemiBig>Document</HeadingSemiBig>
+            <Button variant="primary" onClick={insertSampleText}>
+              Sample Text
+            </Button>
+          </div>
+        </CardHead>
+        <textarea
+          value={documentText}
+          onChange={(e) => setDocumentText(e.currentTarget.value)}
+          className="uk-textarea resize-none min-h-[350px]"
+          rows="8"
+          placeholder="Enter a URL or the text to be summarized."
+          style={{ height: "100%" }}
+        />
+      </Card>
+
+      <div className="uk-flex uk-flex-column">
         <Card full>
           <CardHead>
-            <div className="flex justify-between">
-              <HeadingBig>Document</HeadingBig>
-              <Button variant="primary" onClick={insertSampleText}>
-                Sample Text
-              </Button>
-            </div>
+            <HeadingSemiBig>Models</HeadingSemiBig>
           </CardHead>
-          <textarea
-            value={documentText}
-            onChange={(e) => setDocumentText(e.currentTarget.value)}
-            className="uk-textarea resize-none min-h-[350px]"
-            rows="8"
-            placeholder="Enter a URL or the text to be summarized."
-            style={{ height: "100%" }}
-          />
-        </Card>
-
-        <div className="uk-flex uk-flex-column">
-          <Card full>
-            <CardHead>
-              <div className="flex items-center">
-                Models
-                <LiveSearch query={query} setQuery={setQuery} />
-              </div>
-            </CardHead>
-            <CardContent>
-              <ModelGrid
-                keys={filteredKeys}
-                models={summarizers}
-                settings={settings}
-                selectModel={selectSummarizer}
-              />
-              <div style={{ marginTop: "30px" }} />
-              <span className="colored-header">Summary Length:</span> {`${summaryLength} %`}
-              <div
-                className="uk-flex uk-flex-wrap"
-                style={{
-                  alignItems: "center",
-                  gap: "5px",
-                }}
-              >
-                <span className="colored-header">Selected:</span>
-                {chosenModels.map((model) => (
-                  <DismissableBadge onClick={() => unselectSummarizer(model)} key={model}>
-                    <a
-                      href="/#"
-                      className="nostyle"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setSelectedSummarizer(model);
-                      }}
-                    >
-                      {summarizers[model].name}
-                    </a>
-                  </DismissableBadge>
-                ))}
-              </div>
-              {selectedSummarizer && (
-                <div style={{ marginTop: "20px", marginBottom: "20px" }}>
-                  <PluginCard plugin={summarizers[selectedSummarizer]} inline={false} />
-                </div>
-              )}
-              <div className="uk-flex uk-flex-center" style={{ marginTop: "40px" }}>
-                {isComputing ? (
-                  <Loading />
-                ) : (
-                  <Button
-                    disabled={!documentText || !chosenModels.length}
-                    onClick={() => summarize(documentText, chosenModels, summaryLength)}
+          <CardContent>
+            <LiveSearch query={query} setQuery={setQuery} />
+            <ModelGrid
+              keys={filteredKeys}
+              models={summarizers}
+              settings={settings}
+              selectModel={selectSummarizer}
+            />
+            <div style={{ marginTop: "30px" }} />
+            <span className="colored-header">Summary Length:</span> {`${summaryLength} %`}
+            <div
+              className="uk-flex uk-flex-wrap"
+              style={{
+                alignItems: "center",
+                gap: "5px",
+              }}
+            >
+              <span className="colored-header">Selected:</span>
+              {chosenModels.map((model) => (
+                <DismissableBadge onClick={() => unselectSummarizer(model)} key={model}>
+                  <a
+                    href="/#"
+                    className="nostyle"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setSelectedSummarizer(model);
+                    }}
                   >
-                    Summarize
-                  </Button>
-                )}
+                    {summarizers[model].name}
+                  </a>
+                </DismissableBadge>
+              ))}
+            </div>
+            {selectedSummarizer && (
+              <div style={{ marginTop: "20px", marginBottom: "20px" }}>
+                <PluginCard plugin={summarizers[selectedSummarizer]} inline={false} />
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            )}
+            <div className="uk-flex uk-flex-center" style={{ marginTop: "40px" }}>
+              {isComputing ? (
+                <Loading />
+              ) : (
+                <Button
+                  disabled={!documentText || !chosenModels.length}
+                  onClick={() => summarize(documentText, chosenModels, summaryLength)}
+                >
+                  Summarize
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
@@ -228,10 +224,8 @@ const SummaryTabView = ({ title, showOverlap, summaries, markups, documentLength
       <div style={{ flexBasis: "60%" }}>
         <Card full>
           <CardHead>
-            <div className="flex justify-between items-center">
-              <HeadingBig>{title || "Document"}</HeadingBig>
-              <span className="font-bold">{documentLength} words</span>
-            </div>
+            <HeadingBig>{title || "Document"}</HeadingBig>
+            <span className="font-bold">{documentLength} words</span>
           </CardHead>
           <div className="max-h-[60vh] overflow-auto bg-white p-4">
             <Markup
@@ -452,8 +446,14 @@ const Summarize = () => {
   if (!summarizers) return <Button onClick={retry}>Retry</Button>;
   return (
     <>
-      <HeadingBig>Summarize Documents</HeadingBig>
-      <Hint>You can select multiple models and customize the desired summary length. Longer documents are split into chunks for abstractive summarizers and the individual summaries are concatenated as the final summary. </Hint>
+      <div className="pb-4">
+        <HeadingBig>Summarize Documents</HeadingBig>
+        <Hint>
+          You can select multiple models and customize the desired summary length. Longer documents
+          are split into chunks for abstractive summarizers and the individual summaries are
+          concatenated as the final summary.{" "}
+        </Hint>
+      </div>
       <InputDocument summarize={summarize} isComputing={computing} />
       {results && (
         <div>

@@ -1,4 +1,6 @@
-import React, { useCallback, useEffect, useMemo, useReducer, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+
+import { Input } from "./Form";
 
 const parseNumber = (number) => {
   let cleanNumber = number;
@@ -19,8 +21,7 @@ const InputField = ({ value: initValue, onDone }) => {
   }, [initValue, setValue]);
 
   return (
-    <input
-      type="text"
+    <Input
       value={value}
       onChange={(e) => setValue(e.currentTarget.value)}
       onKeyDown={(e) => e.keyCode === 13 && accept()}
@@ -51,7 +52,7 @@ const Button = ({ isLeft, isRight, disabled, onClick, children }) => {
 
 const Pagination = ({ numPages, page, setPage, size, setSize }) => (
   <div className="inline-flex">
-    <Button isLeft disabled={page <= 1} onClick={() => setPage(page - 1)}>
+    <Button isLeft disabled={page <= 1} onClick={() => setPage((old) => old - 1)}>
       Previous
     </Button>
     <InputField value={page} onDone={setPage} />
@@ -60,27 +61,32 @@ const Pagination = ({ numPages, page, setPage, size, setSize }) => (
     </Label>
     <InputField value={size} onDone={setSize} />
     <Label>items per page</Label>
-    <Button isRight disabled={page >= numPages} onClick={() => setPage(page + 1)}>
+    <Button isRight disabled={page >= numPages} onClick={() => setPage((old) => old + 1)}>
       Next
     </Button>
   </div>
 );
 
 const validRange = (value, maxValue, minValue = 1) => {
-  let _value = value
-  if (Number.isInteger(maxValue)) _value = Math.min(maxValue, _value)
-  if (Number.isInteger(minValue)) _value = Math.max(minValue, _value)
-  return _value
-}
+  let _value = value;
+  if (Number.isInteger(maxValue)) _value = Math.min(maxValue, _value);
+  if (Number.isInteger(minValue)) _value = Math.max(minValue, _value);
+  return _value;
+};
 
-const usePagination = (numItems, initialPage = 1, initialSize = 10, maxSize=null) => {
+const usePagination = (numItems, initialPage = 1, initialSize = 10, maxSize = null) => {
   const [page, _setPage] = useState(initialPage);
   const [size, _setSize] = useState(initialSize);
 
   const numPages = useMemo(() => Math.ceil(numItems / size), [numItems, size]);
 
   const setPage = useCallback(
-    (newPage) => _setPage((oldPage) => validRange(parseNumber(newPage) || oldPage, numPages)),
+    (obj) => {
+      let f = null;
+      if (typeof obj === "function") f = (oldPage) => obj(oldPage);
+      else f = () => obj;
+      return _setPage((oldPage) => validRange(parseNumber(f(oldPage)) || oldPage, numPages));
+    },
     [numPages, _setPage]
   );
   const setSize = useCallback(

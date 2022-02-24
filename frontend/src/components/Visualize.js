@@ -1,20 +1,20 @@
 import React, { useMemo, useReducer, useState } from "react";
-import { FaInfoCircle, FaPlus, FaTimes } from "react-icons/fa";
+import { FaPlus, FaTimes } from "react-icons/fa";
 import { useKey } from "react-use";
 
 import { useMarkup } from "../hooks/markup";
 import { useVisualizations } from "../hooks/visualizations";
 import { Accordion, AccordionItem } from "./utils/Accordion";
-import { Button } from "./utils/Button";
+import { Button, DeleteButton } from "./utils/Button";
 import { Card, CardContent, CardHead } from "./utils/Card";
 import { ChooseFile, useFile } from "./utils/ChooseFile";
-import { DeleteButton } from "./utils/DeleteButton";
+import { Input } from "./utils/Form";
 import { EyeClosed, EyeOpen } from "./utils/Icons";
 import { CenterLoading } from "./utils/Loading";
 import { Markup } from "./utils/Markup";
 import { Modal } from "./utils/Modal";
 import { Pagination, usePagination } from "./utils/Pagination";
-import { HeadingBig } from "./utils/Text";
+import { HeadingBig, Hint } from "./utils/Text";
 
 const ModelModal = ({ close, addModel, length }) => {
   const [name, setName] = useState("");
@@ -36,14 +36,7 @@ const ModelModal = ({ close, addModel, length }) => {
 
   return (
     <Modal isOpen onRequestClose={close}>
-      <input
-        className="uk-input align-center"
-        type="text"
-        value={name}
-        placeholder="name"
-        autoFocus
-        onChange={(e) => setName(e.currentTarget.value)}
-      />
+      <Input value={name} placeholder="name" onChange={(e) => setName(e.currentTarget.value)} />
       <ChooseFile
         className="uk-margin-top"
         kind="model file"
@@ -52,14 +45,8 @@ const ModelModal = ({ close, addModel, length }) => {
         lines={lines}
         linesAreSame={rightLength}
       />
-      <div className="uk-margin-top uk-text-primary">
-        <FaInfoCircle /> the model file has to have {length} lines
-      </div>
-      {infoText && (
-        <div className="uk-margin-top uk-text-primary uk-text-danger">
-          <FaInfoCircle /> {infoText}
-        </div>
-      )}
+      <Hint type="info">the model file has to have {length} lines</Hint>
+      {infoText && <Hint type="warn">{infoText}</Hint>}
       <div className="uk-margin" style={{ float: "right" }}>
         <Button variant="secondary" onClick={close}>
           cancel
@@ -73,23 +60,23 @@ const ModelModal = ({ close, addModel, length }) => {
 };
 
 const ModelBadge = ({ name, removeModel }) => (
-  <div className="uk-flex" style={{ border: "1px solid", padding: "5px 10px" }}>
+  <div className="flex border border-black px-2 py-1">
     <span style={{ marginRight: "10px" }}>{name}</span>
-    <a
+    <button
+      className="flex items-center"
       href="/#"
-      style={{ display: "flex", marginLeft: "3px" }}
       onClick={(e) => {
         e.preventDefault();
         removeModel(name);
       }}
     >
-      <FaTimes style={{ minWidth: "15px", color: "black" }} />
-    </a>
+      <FaTimes className="text-black min-w-[20px]" />
+    </button>
   </div>
 );
 
 const ModelList = ({ models, removeModel }) => (
-  <div className="margin-between-10 uk-flex uk-flex-wrap">
+  <div className="flex flex-wrap gap-2">
     {models.map(({ name }) => (
       <ModelBadge key={name} name={name} removeModel={removeModel} />
     ))}
@@ -110,8 +97,8 @@ const VisualizeContent = ({ doc, models }) => {
   const markupState = useState(null);
 
   return (
-    <div className="visualization-layout margin-between-10">
-      <div>
+    <div className="flex items-top gap-3">
+      <div className="basis-[45%]">
         <Card full>
           <CardHead>
             <HeadingBig>Document</HeadingBig>
@@ -121,32 +108,28 @@ const VisualizeContent = ({ doc, models }) => {
           </CardContent>
         </Card>
       </div>
-      <div>
-        {models.map(([name, modelLine], i) => {
-          const modelSelected = slot === i;
-          const ModelEye = modelSelected ? EyeClosed : EyeOpen;
-          return (
-            <Card key={name} style={{ flexBasis: "50%" }}>
-              <CardHead>
-                <div className="flex justify-between">
+      <div className="basis-[55%]">
+        <div className="flex flex-col gap-3">
+          {models.map(([name, modelLine], i) => {
+            const modelSelected = slot === i;
+            const ModelEye = modelSelected ? EyeClosed : EyeOpen;
+            return (
+              <Card full key={name}>
+                <CardHead>
                   <HeadingBig>{name}</HeadingBig>
-                  <ModelEye
-                    className="uk-margin-right"
-                    style={{ minWidth: "30px" }}
-                    onClick={() => toggleSlot(i)}
-                  />
-                </div>
-              </CardHead>
-              <CardContent>
-                {modelSelected ? (
-                  <Markup markups={refMarkup} markupState={markupState} />
-                ) : (
-                  modelLine
-                )}
-              </CardContent>
-            </Card>
-          );
-        })}
+                  <ModelEye className="w-9" onClick={() => toggleSlot(i)} />
+                </CardHead>
+                <CardContent>
+                  {modelSelected ? (
+                    <Markup markups={refMarkup} markupState={markupState} />
+                  ) : (
+                    modelLine
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
@@ -159,8 +142,8 @@ const Visualize = ({ visualization, clear }) => {
   const linesIndex = page - 1;
 
   useKey("Escape", clear);
-  useKey("ArrowLeft", () => setPage(page - 1));
-  useKey("ArrowRight", () => setPage(page + 1));
+  useKey("ArrowLeft", () => setPage((old) => old - 1));
+  useKey("ArrowRight", () => setPage((old) => old + 1));
 
   return (
     <div>
@@ -252,14 +235,7 @@ const AddVisualizationModal = ({ close, create }) => {
 
   return (
     <Modal isOpen onRequestClose={close}>
-      <input
-        className="uk-input align-center"
-        type="text"
-        value={name}
-        placeholder="name"
-        autoFocus
-        onChange={(e) => setName(e.currentTarget.value)}
-      />
+      <Input value={name} placeholder="name" onChange={(e) => setName(e.currentTarget.value)} />
       <ChooseFile
         className="uk-margin-top"
         kind="document file"
@@ -267,11 +243,7 @@ const AddVisualizationModal = ({ close, create }) => {
         setFile={setFile}
         lines={lines}
       />
-      {infoText && (
-        <div className="uk-margin-top uk-text-danger">
-          <FaInfoCircle /> {infoText}
-        </div>
-      )}
+      {infoText && <Hint type="warn">{infoText}</Hint>}
       <div className="uk-margin" style={{ float: "right" }}>
         <Button variant="secondary" onClick={close}>
           cancel
