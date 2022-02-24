@@ -16,9 +16,7 @@ const Tab = ({ children }) => (
     {({ selected }) => (
       <button
         className={`${
-          selected
-            ? "text-blue-500 border-blue-500"
-            : "hover:border-gray-400 border-transparent"
+          selected ? "text-blue-500 border-blue-500" : "hover:border-gray-400 border-transparent"
         } px-2 py-2 border-b-2`}
       >
         {children}

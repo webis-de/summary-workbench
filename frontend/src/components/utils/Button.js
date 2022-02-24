@@ -69,6 +69,7 @@ const Button = ({
   appearance = "fill",
   variant = "primary",
   href,
+  small,
   disabled,
   children,
   flatRight,
@@ -76,12 +77,21 @@ const Button = ({
   ...props
 }) => {
   const a = disabled ? "disabled" : appearance;
-  const className = `px-4 py-2 text-sm font-bold tracking-tight focus:z-10 rounded-md ${
-    buttonStyles[a]["*"]
-  } ${buttonStyles[a][variant]} ${flatRight ? "rounded-r-[0]" : ""} ${
-    flatLeft ? "rounded-l-[0]" : ""
-  }`;
+
+  let className =
+    "text-sm font-bold tracking-tight focus:z-10 rounded-md h-full whitespace-nowrap";
+
+  className += ` ${buttonStyles[a]["*"]}`;
+  className += ` ${buttonStyles[a][variant]}`;
+
+  if (flatRight) className += " rounded-r-[0]";
+  if (flatLeft) className += " rounded-l-[0]";
+
+  if (small) className += " px-2 py-1"
+  else className += " px-4 py-2"
+
   const passProps = { ...props, className, disabled: a === "disabled" };
+
   if (href)
     return (
       <a href={href} {...passProps}>
@@ -93,7 +103,7 @@ const Button = ({
 
 const DeleteButton = (props) => (
   <Button appearence="box" variant="danger" {...props}>
-    <FaTrash />
+    <FaTrash className="p-[1px] w-[20px] h-[20px]" />
   </Button>
 );
 

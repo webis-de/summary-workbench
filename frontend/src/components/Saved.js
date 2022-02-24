@@ -5,29 +5,32 @@ import { SavedInfo } from "./SavedInfo";
 import { Badge, BadgeGroup } from "./utils/Badge";
 import { Disclosure, DisclosureContent, DisclosureToggle } from "./utils/Disclosure";
 import { HeadingBig, HeadingMedium } from "./utils/Text";
+import { Tooltip } from "./utils/Tooltip";
 
 const SavedEntry = ({ calculation, deleteCalculation }) => {
   const badges = Object.keys(calculation.scores).map((name) => calculation.metrics[name].name);
   return (
-    <Disclosure key={calculation.id}>
-      <div className="border border-black rounded-lg divide-y divide-gray-300">
-        <DisclosureToggle>
-          <div className="p-4 flex justify-between items-center w-full">
-            <HeadingMedium>{calculation.id}</HeadingMedium>
-            <BadgeGroup>
-              {badges.map((badge, i) => (
-                <Badge key={i}>{badge}</Badge>
-              ))}
-            </BadgeGroup>
-          </div>
-        </DisclosureToggle>
-        <DisclosureContent>
-          <div className="p-4">
-            <SavedInfo calculation={calculation} deleteCalculation={deleteCalculation} />
-          </div>
-        </DisclosureContent>
-      </div>
-    </Disclosure>
+    <div className="shadow-md">
+      <Disclosure key={calculation.id}>
+        <div className="border border-black rounded-lg divide-y divide-gray-300">
+          <DisclosureToggle>
+            <div className="p-4 flex justify-between items-center w-full">
+              <HeadingMedium>{calculation.id}</HeadingMedium>
+              <BadgeGroup>
+                {badges.map((badge, i) => (
+                  <Badge key={i}>{badge}</Badge>
+                ))}
+              </BadgeGroup>
+            </div>
+          </DisclosureToggle>
+          <DisclosureContent>
+            <div className="p-4">
+              <SavedInfo calculation={calculation} deleteCalculation={deleteCalculation} />
+            </div>
+          </DisclosureContent>
+        </div>
+      </Disclosure>
+    </div>
   );
 };
 
@@ -35,12 +38,11 @@ const Saved = ({ className, calculations, deleteCalculation }) => (
   <div className={className}>
     <div className="pb-4 flex items-center gap-2">
       <HeadingBig>Saved Calculations</HeadingBig>
-      <FaQuestionCircle
-        className="w-5 text-blue-500 hover:text-blue-700"
-        data-uk-tooltip="title: the data is stored in the browser; pos: right;"
-      />
+      <Tooltip place="right" text="the data is stored in the browser">
+        <FaQuestionCircle className="w-5 text-blue-500 hover:text-blue-700" />
+      </Tooltip>
     </div>
-    <div className="flex flex-col gap-2 shadow-lg">
+    <div className="flex flex-col gap-2">
       {calculations.map((calculation, index) => (
         <SavedEntry
           key={index}

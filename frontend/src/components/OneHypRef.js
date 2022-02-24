@@ -11,7 +11,7 @@ import { Textarea } from "./utils/Form";
 import { Loading } from "./utils/Loading";
 import { Markup } from "./utils/Markup";
 import { Table, TableWrapper, Tbody, Td, Tr } from "./utils/Table";
-import { Hint } from "./utils/Text";
+import { FlexResponsive } from "./utils/Layout";
 
 const OneHypRefResult = ({ calculation }) => {
   const { scores, hypText, refText } = calculation;
@@ -78,10 +78,10 @@ const OneHypRef = () => {
 
   return (
     <>
-      <div className="flex gap-2">
+      <FlexResponsive>
         <TextField value={refText} setValue={setRefText} placeholder="Enter the reference text." />
         <TextField value={hypText} setValue={setHypText} placeholder="Enter the predicted text." />
-      </div>
+      </FlexResponsive>
       <div className="flex justify-center">
         {isComputing ? (
           <Loading />

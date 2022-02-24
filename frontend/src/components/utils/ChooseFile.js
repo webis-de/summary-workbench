@@ -1,5 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 
+import { DragContext } from "../../contexts/DragContext";
 import { displayError } from "../../utils/message";
 import { readFile } from "../../utils/readFile";
 
@@ -45,70 +46,64 @@ const processDropEvent = (e) => {
       }
     }
   }
-  return files
-}
+  return files;
+};
 
-const ChooseFile = ({ kind, fileName, setFile, lines, linesAreSame = true, ...other }) => {
+const ChooseFile = ({ kind, fileName, setFile, lines, linesAreSame = true }) => {
+  const dragged = useContext(DragContext);
   const uploadRef = useRef();
-  const [isDragged, setIsDragged] = useState(false);
-  const dropHandler = (e) => {
-    const files = processDropEvent(e)
-    if (files.length) setFile(files[0].getAsFile());
-    setIsDragged(false);
+
+  const onDrop = (e) => {
+    const files = processDropEvent(e);
+    if (files.length) setFile(files[0]);
   };
+  const onClick = () => uploadRef.current.click();
 
-  const fileSelectOnChange = (e) => setFile(e.currentTarget.files[0]);
+  let classExtra = "bg-red-600 text-white";
+  if (linesAreSame === null) classExtra = "text-black bg-white";
+  else if (linesAreSame) classExtra = "bg-green-600 text-white";
 
-  let extraStyle = { backgroundColor: "#f0506e", color: "white" };
-  if (linesAreSame === null) {
-    extraStyle = { backgroundColor: "#f8f8f8" };
-  } else if (linesAreSame) {
-    extraStyle = { backgroundColor: "#32d296", color: "white" };
-  }
+  const showLineBox = lines !== null;
 
   return (
-    <div {...other}>
-      <div
-        className="uk-flex uk-flex-stretch uk-box-shadow-hover-medium"
-        onDragOver={(e) => {
-          setIsDragged(true);
-          e.preventDefault();
+    <button
+      className={`${
+        dragged
+          ? "outline-dashed outline-2 outline-offset-4 outline-black"
+          : "focus:ring focus:ring-blue-600"
+      } w-full flex items-stretch ring-2 ring-slate-600 text-sm rounded-lg`}
+      onDrop={onDrop}
+      onClick={onClick}
+    >
+      <button className="px-3 bg-gray-700 text-white flex items-center whitespace-nowrap rounded-l-lg hover:bg-gray-600">
+        Upload File
+      </button>
+      <input
+        className={`${
+          showLineBox ? "" : "rounded-r-lg"
+        } border-none block w-full bg-gray-50 text-gray-900 text-sm`}
+        type="text"
+        value={fileName || ""}
+        placeholder={`Upload ${kind}`}
+        disabled
+        readOnly
+      />
+      {showLineBox && (
+        <span
+          className={`${classExtra} flex items-center whitespace-nowrap p-2 rounded-r-lg`}
+        >{`${lines.length} lines`}</span>
+      )}
+      <input
+        className="hidden"
+        type="file"
+        ref={uploadRef}
+        onChange={(e) => {
+          const file = e.currentTarget.files[0];
+          if (file) setFile(file);
         }}
-        onDragLeave={() => setIsDragged(false)}
-        onDrop={(e) => dropHandler(e)}
-        onClick={() => uploadRef.current.click()}
-        style={isDragged ? { outlineStyle: "solid", outlineWidth: "1px" } : {}}
-      >
-        <input
-          className="uk-textarea align-center"
-          type="text"
-          value={fileName || ""}
-          placeholder={`Upload ${kind}`}
-          readOnly
-          style={{ borderColor: "lightgrey" }}
-        />
-        {lines !== null && (
-          <span
-            className="uk-flex uk-flex-middle"
-            style={{
-              ...extraStyle,
-              paddingLeft: "10px",
-              paddingRight: "10px",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {`${lines.length} lines`}
-          </span>
-        )}
-        <input
-          type="file"
-          ref={uploadRef}
-          onChange={fileSelectOnChange}
-          style={{ display: "none" }}
-        />
-      </div>
-    </div>
+      />
+    </button>
   );
 };
 
-export { ChooseFile, useFile, sameLength, processDropEvent };
+export { ChooseFile, useFile, sameLength };

@@ -60,11 +60,7 @@ const Settings = () => {
             </DismissableBadge>
           ))}
         </div>
-        {selectedMetric && (
-          <div style={{ marginTop: "30px" }}>
-            <PluginCard plugin={metrics[selectedMetric]} inline={false} />
-          </div>
-        )}
+        {selectedMetric && <PluginCard plugin={metrics[selectedMetric]} inline={false} />}
       </CardContent>
     </Card>
   );

@@ -7,15 +7,16 @@ import { NavLink as Link, Navigate, BrowserRouter as Router, useRoutes } from "r
 import { About } from "./components/About";
 import { Evaluate } from "./components/Evaluate";
 import { Summarize } from "./components/Summarize";
-import { Button} from "./components/utils/Button";
+import { Button } from "./components/utils/Button";
 import { Card, CardContent, CardHead } from "./components/utils/Card";
 import { Container } from "./components/utils/Container";
 import { Modal, ModalTitle, useModal } from "./components/utils/Modal";
-import { ButtonGroup, RadioButton, RadioGroup, RadioBullet } from "./components/utils/Radio";
+import { ButtonGroup, RadioBullet, RadioButton, RadioGroup } from "./components/utils/Radio";
 import { Range } from "./components/utils/Range";
 import { HeadingBig, HeadingMedium, HeadingSmall, Hint } from "./components/utils/Text";
 import { Toggle } from "./components/utils/Toggle";
 import { VisualizationView } from "./components/Visualize";
+import { DragProvider } from "./contexts/DragContext";
 import { MetricsProvider } from "./contexts/MetricsContext";
 import { SettingsContext, SettingsProvider } from "./contexts/SettingsContext";
 import { SummarizersProvider } from "./contexts/SummarizersContext";
@@ -192,7 +193,9 @@ const NavbarOptions = () => {
               <div>
                 <HeadingMedium>Show Redundancy</HeadingMedium>
                 <div className="flex justify-between items-top">
-                  <Hint small>Show also the matching word groups within the reference or hypothesis</Hint>
+                  <Hint small>
+                    Show also the matching word groups within the reference or hypothesis
+                  </Hint>
                   <Toggle checked={selfSimilarities} onChange={setSelfSimilarities} />
                 </div>
               </div>
@@ -269,19 +272,21 @@ const Content = () => {
 };
 
 const App = () => (
-  <MetricsProvider>
-    <SummarizersProvider>
-      <SettingsProvider>
-        <Router>
-          <div className="min-h-screen flex flex-col">
-            <Navbar />
-            <Content />
-            <Footer />
-          </div>
-        </Router>
-      </SettingsProvider>
-    </SummarizersProvider>
-  </MetricsProvider>
+  <DragProvider>
+    <MetricsProvider>
+      <SummarizersProvider>
+        <SettingsProvider>
+          <Router>
+            <div className="min-h-screen flex flex-col overflow-hidden">
+              <Navbar />
+              <Content />
+              <Footer />
+            </div>
+          </Router>
+        </SettingsProvider>
+      </SummarizersProvider>
+    </MetricsProvider>
+  </DragProvider>
 );
 
 export default App;

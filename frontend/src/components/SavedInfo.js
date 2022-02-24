@@ -14,7 +14,7 @@ const SavedInfo = ({ calculation, deleteCalculation }) => {
 
   return (
     <Tabs>
-      <div className="flex justify-between pb-3">
+      <div className="flex justify-between items-center pb-3">
         <TabHead>
           <Pill>Scores</Pill>
           <Pill>Visualize Overlap</Pill>

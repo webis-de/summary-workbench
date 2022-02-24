@@ -43,7 +43,7 @@ const AccordionItem = ({
         {badges && (
           <div className="uk-flex uk-flex-wrap" style={{ gridRowGap: "10px" }}>
             {badges.map((badge, i) => (
-              <Badge key={i} emphasis>
+              <Badge key={i}>
                 {badge}
               </Badge>
             ))}

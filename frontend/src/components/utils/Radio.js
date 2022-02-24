@@ -16,19 +16,6 @@ const RadioGroup = ({ value, setValue, children }) => (
   </Radio>
 );
 
-const convertGroupToStyle = (group) => {
-  switch (group) {
-    case "first":
-      return "rounded-t-md";
-    case "middle":
-      return "";
-    case "last":
-      return "rounded-b-md";
-    default:
-      return "rounded-md";
-  }
-};
-
 const groupToStyle = {
   horizontal: {
     first: "rounded-l-md",
@@ -72,7 +59,7 @@ const ButtonGroup = ({ children, direction = "vertical" }) => {
   annotations[annotations.length - 1][0] = "last";
   return (
     <div>
-      <div className={`w-full inline-flex ${direction === "vertical" ? "flex-col" : "flex-row"} rounded-lg shadow-md`} role="group">
+      <div className={`w-full inline-flex ${direction === "vertical" ? "flex-col" : "flex-row"} rounded-lg`} role="group">
         {annotations.map(([annotation, child]) =>
           React.cloneElement(child, {
             group: annotation,

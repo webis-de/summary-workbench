@@ -7,7 +7,6 @@ import { Result } from "./Result";
 import { Saved } from "./Saved";
 import { Settings } from "./Settings";
 import { Upload } from "./Upload";
-import { Badge } from "./utils/Badge";
 import { Button } from "./utils/Button";
 import { Card, CardContent } from "./utils/Card";
 import { CenterLoading } from "./utils/Loading";
@@ -24,10 +23,10 @@ const FileInput = ({ setCalculation }) => (
         </TabHead>
         <TabContent>
           <TabPanel>
-            <OneHypRef className="uk-margin" />
+            <OneHypRef />
           </TabPanel>
           <TabPanel>
-            <Upload className="uk-margin" setCalculation={setCalculation} />
+            <Upload setCalculation={setCalculation} />
           </TabPanel>
         </TabContent>
       </CardContent>
@@ -67,15 +66,15 @@ const Evaluate = () => {
           exported in LaTeX (table) or CSV format.
         </Hint>
       </div>
-      <div className="flex flex-row gap-3">
-        <div className="grow min-w-[600px]">
+      <div className="flex flex-col lg:flex-row gap-3">
+        <div className="grow min-w-[400px]">
           <FileInput setCalculation={setCalculation} />
         </div>
         <div>
           <Settings />
         </div>
       </div>
-      <div ref={scrollRef} className="uk-margin-large-top scroll-m-20" />
+      <div ref={scrollRef} className="scroll-m-20" />
       {calculation && <Result calculation={calculation} saveCalculation={saveCalculation} />}
       {calc.calculations && (
         <Saved

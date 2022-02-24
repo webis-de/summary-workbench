@@ -51,7 +51,7 @@ const ExportPreview = ({ format, flatScores }) => {
     <div className="pt-5">
       <pre className="relative p-3 border-1 border-gray-900">
         <div className="absolute right-3 top-3">
-          <div className="flex gap-4">
+          <div className="flex items-center gap-4">
             <div className="w-16">
               <Input
                 placeholder="digits"

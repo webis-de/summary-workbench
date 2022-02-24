@@ -24,8 +24,8 @@ const typeToProps = {
 };
 
 const Hint = ({ children, type = "default", noicon, small }) => {
-  const iconClass = small ? "w-5 h-5" : "w-6 h-6";
-  const wrapperClass = small ? "block w-5" : "block w-8";
+  const iconClass = small ? "w-[20px] h-[20px]" : "w-[25px] h-[25px]";
+  const wrapperClass = small ? "block min-w-[20px]" : "block min-w-[25px]";
   const [textColor, Icon] = typeToProps[type];
   return (
     <div className={`flex items-start gap-2 ${small ? "text-sm" : "text-base"} ${textColor}`}>
@@ -34,9 +34,16 @@ const Hint = ({ children, type = "default", noicon, small }) => {
           <Icon className={iconClass} />
         </div>
       )}
-      <p className="tracking-tight block min-w-[20px]">{children}</p>
+      <p className="tracking-tight block">{children}</p>
     </div>
   );
 };
 
-export { HeadingSemiBig, HeadingBig, HeadingSmall, HeadingMedium, Hint };
+const Label = ({ text, children }) => (
+  <label className="w-full flex flex-col gap-1 text-sm font-medium text-gray-900 capitalize">
+    {text}
+    {children}
+  </label>
+);
+
+export { HeadingSemiBig, HeadingBig, HeadingSmall, HeadingMedium, Hint, Label };

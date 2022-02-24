@@ -5,8 +5,9 @@ import { MetricsContext } from "../contexts/MetricsContext";
 import { displayError } from "../utils/message";
 import { Button } from "./utils/Button";
 import { ChooseFile, sameLength, useFile } from "./utils/ChooseFile";
-import { Hint } from "./utils/Text"
+import { FlexResponsive } from "./utils/Layout";
 import { Loading } from "./utils/Loading";
+import { Hint, Label } from "./utils/Text";
 
 const getChosenMetrics = (settings) =>
   Object.entries(settings)
@@ -19,8 +20,12 @@ const getMessages = (filesAreInput, linesAreSame, metricIsChoosen) => [
     "Both files must contain the same number of non-empty lines. Each line is interpreted as a sentence.",
     "info",
   ],
-  [!linesAreSame, "The files are not valid because they have different number of lines.", "warn"],
-  [!metricIsChoosen, "Select at least one metric.", "warn"],
+  [
+    !linesAreSame,
+    "The files are not valid because they have different number of lines.",
+    "warning",
+  ],
+  [!metricIsChoosen, "Select at least one metric.", "warning"],
 ];
 
 const Upload = ({ setCalculation }) => {
@@ -50,29 +55,27 @@ const Upload = ({ setCalculation }) => {
 
   return (
     <>
-      {getMessages(filesAreInput, linesAreSame, metricIsChoosen).map(
-        ([show, message, type]) => show && <Hint type={type}>{message}</Hint>
-      )}
-      <div
-        className="uk-margin uk-grid uk-grid-small uk-child-width-1-2@s"
-        style={{ gridRowGap: "10px" }}
-      >
-        <ChooseFile
-          kind="references"
-          fileName={refFileName}
-          setFile={setRefFile}
-          lines={references}
-          linesAreSame={linesAreSame}
-        />
-        <ChooseFile
-          kind="predictions"
-          fileName={hypFileName}
-          setFile={setHypFile}
-          lines={hypotheses}
-          linesAreSame={linesAreSame}
-        />
-      </div>
-      <div className="flex items-center">
+      <FlexResponsive>
+        <Label text="References">
+          <ChooseFile
+            kind="references"
+            fileName={refFileName}
+            setFile={setRefFile}
+            lines={references}
+            linesAreSame={linesAreSame}
+          />
+        </Label>
+        <Label text="Predictions">
+          <ChooseFile
+            kind="predictions"
+            fileName={hypFileName}
+            setFile={setHypFile}
+            lines={hypotheses}
+            linesAreSame={linesAreSame}
+          />
+        </Label>
+      </FlexResponsive>
+      <div className="pt-4 flex items-center gap-5">
         {isComputing ? (
           <Loading />
         ) : (
@@ -83,6 +86,9 @@ const Upload = ({ setCalculation }) => {
           >
             Evaluate
           </Button>
+        )}
+        {getMessages(filesAreInput, linesAreSame, metricIsChoosen).map(
+          ([show, message, type]) => show && <Hint type={type} small>{message}</Hint>
         )}
       </div>
     </>
