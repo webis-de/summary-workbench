@@ -12,6 +12,7 @@ import { Button } from "./utils/Button";
 import { Card, CardContent, CardHead } from "./utils/Card";
 import { LiveSearch, useFilter } from "./utils/FuzzySearch";
 import { Bars, EyeClosed, EyeOpen, ThumbsDown, ThumbsUp } from "./utils/Icons";
+import { SpaceGap } from "./utils/Layout";
 import { CenterLoading } from "./utils/Loading";
 import { Markup, useMarkupScroll } from "./utils/Markup";
 import { PluginCard } from "./utils/PluginCard";
@@ -86,25 +87,27 @@ const InputDocument = ({ summarize, isComputing }) => {
   };
 
   return (
-    <div className="grid grid-cols-2 gap-3">
-      <Card full>
-        <CardHead>
-          <div className="w-full flex justify-between items-center">
-            <HeadingSemiBig>Document</HeadingSemiBig>
-            <Button variant="primary" onClick={insertSampleText}>
-              Sample Text
-            </Button>
-          </div>
-        </CardHead>
-        <textarea
-          value={documentText}
-          onChange={(e) => setDocumentText(e.currentTarget.value)}
-          className="uk-textarea resize-none min-h-[350px]"
-          rows="8"
-          placeholder="Enter a URL or the text to be summarized."
-          style={{ height: "100%" }}
-        />
-      </Card>
+    <div className="flex flex-col lg:flex-row gap-3">
+      <div className="grow min-w-[400px]">
+        <Card full>
+          <CardHead>
+            <div className="w-full flex justify-between items-center">
+              <HeadingSemiBig>Document</HeadingSemiBig>
+              <Button variant="primary" onClick={insertSampleText}>
+                Sample Text
+              </Button>
+            </div>
+          </CardHead>
+          <textarea
+            value={documentText}
+            onChange={(e) => setDocumentText(e.currentTarget.value)}
+            className="uk-textarea resize-none min-h-[350px]"
+            rows="8"
+            placeholder="Enter a URL or the text to be summarized."
+            style={{ height: "100%" }}
+          />
+        </Card>
+      </div>
 
       <div className="uk-flex uk-flex-column">
         <Card full>
@@ -286,29 +289,28 @@ const buildGrids = (list) => {
 
 const SummaryCompareView = ({ summaries, markups, showOverlap }) => {
   const { summarizers } = useContext(SummarizersContext);
-  const grids = buildGrids(
-    markups.map((markup, index) => [markup, summarizers[summaries[index].name].name])
-  );
+  const elements = markups.map((markup, index) => [
+    markup,
+    summarizers[summaries[index].name].name,
+  ]);
 
   return (
-    <>
-      {grids.map((grid, gridIndex) => (
-        <div key={gridIndex} className="flex gap-4">
-          {grid.map(([markup, summarizer], markupIndex) => (
-            <Card key={markupIndex} full>
-              <CardHead>
-                <HeadingBig>{summarizer}</HeadingBig>
-              </CardHead>
-              <CardContent>
-                <div className="max-h-52 overflow-auto">
-                  <Markup markups={markup} showMarkup={showOverlap} />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+    <div className="flex flex-wrap gap-3">
+      {elements.map(([markup, summarizer], markupIndex) => (
+        <div key={markupIndex} className="grow w-full lg:w-[45%] xl:w-[30%]">
+          <Card full>
+            <CardHead>
+              <HeadingBig>{summarizer}</HeadingBig>
+            </CardHead>
+            <CardContent>
+              <div className="max-h-72 overflow-auto">
+                <Markup markups={markup} showMarkup={showOverlap} />
+              </div>
+            </CardContent>
+          </Card>
         </div>
       ))}
-    </>
+    </div>
   );
 };
 
@@ -353,8 +355,8 @@ const SummaryView = ({ title, summaries, documentLength }) => {
   }, [summaries]);
 
   return (
-    <div ref={scrollRef} style={{ scrollMarginTop: "100px" }}>
-      <div className="uk-flex">
+    <div className="scroll-mt-20" ref={scrollRef}>
+      <div className="flex gap-2">
         <div>
           {showTab ? (
             <SummaryTabView
@@ -373,10 +375,7 @@ const SummaryView = ({ title, summaries, documentLength }) => {
             />
           )}
         </div>
-        <div
-          className="icon-margin uk-flex uk-flex-column"
-          style={{ marginLeft: "10px", minWidth: "30px" }}
-        >
+        <div className="uk-flex uk-flex-column min-w-[30px]">
           <ToggleView showTab={showTab} toggleShowTab={toggleShowTab} />
           <ToggleOverlap show={!showOverlap} toggle={toggleShowOverlap} />
         </div>
@@ -445,8 +444,8 @@ const Summarize = () => {
   if (loading) return <CenterLoading />;
   if (!summarizers) return <Button onClick={retry}>Retry</Button>;
   return (
-    <>
-      <div className="pb-4">
+    <SpaceGap big>
+      <div>
         <HeadingBig>Summarize Documents</HeadingBig>
         <Hint>
           You can select multiple models and customize the desired summary length. Longer documents
@@ -460,7 +459,7 @@ const Summarize = () => {
           <SummaryView documentLength={documentLength} summaries={results} title={title} />
         </div>
       )}
-    </>
+    </SpaceGap>
   );
 };
 

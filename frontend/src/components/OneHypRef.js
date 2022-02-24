@@ -8,10 +8,11 @@ import { displayError } from "../utils/message";
 import { ScoreTable } from "./ScoreTable";
 import { Button } from "./utils/Button";
 import { Textarea } from "./utils/Form";
+import { FlexResponsive, SpaceGap } from "./utils/Layout";
 import { Loading } from "./utils/Loading";
 import { Markup } from "./utils/Markup";
 import { Table, TableWrapper, Tbody, Td, Tr } from "./utils/Table";
-import { FlexResponsive } from "./utils/Layout";
+import { HeadingMedium } from "./utils/Text";
 
 const OneHypRefResult = ({ calculation }) => {
   const { scores, hypText, refText } = calculation;
@@ -22,23 +23,29 @@ const OneHypRefResult = ({ calculation }) => {
   const markupState = useState();
 
   return (
-    <div>
-      <TableWrapper>
-        <Table>
-          <Tbody>
-            <Tr>
-              <Td>
-                <Markup markups={reference} markupState={markupState} />
-              </Td>
-              <Td>
-                <Markup markups={hypothesis} markupState={markupState} />
-              </Td>
-            </Tr>
-          </Tbody>
-        </Table>
-      </TableWrapper>
-      <ScoreTable flatScores={flatScores} />
-    </div>
+    <SpaceGap big>
+      <div>
+        <HeadingMedium>Overlap</HeadingMedium>
+        <TableWrapper>
+          <Table>
+            <Tbody>
+              <Tr>
+                <Td>
+                  <Markup markups={reference} markupState={markupState} />
+                </Td>
+                <Td>
+                  <Markup markups={hypothesis} markupState={markupState} />
+                </Td>
+              </Tr>
+            </Tbody>
+          </Table>
+        </TableWrapper>
+      </div>
+      <div>
+        <HeadingMedium>Scores</HeadingMedium>
+        <ScoreTable flatScores={flatScores} />
+      </div>
+    </SpaceGap>
   );
 };
 
@@ -77,26 +84,30 @@ const OneHypRef = () => {
   };
 
   return (
-    <>
+    <SpaceGap>
       <FlexResponsive>
         <TextField value={refText} setValue={setRefText} placeholder="Enter the reference text." />
         <TextField value={hypText} setValue={setHypText} placeholder="Enter the predicted text." />
       </FlexResponsive>
-      <div className="flex justify-center">
-        {isComputing ? (
-          <Loading />
-        ) : (
-          <Button
-            variant="primary"
-            disabled={!hasInput || !metricIsChoosen}
-            onClick={() => compute()}
-          >
-            Evaluate
-          </Button>
-        )}
-      </div>
-      {evaluateResult && <OneHypRefResult calculation={evaluateResult} />}
-    </>
+      {isComputing ? (
+        <Loading />
+      ) : (
+        <Button
+          variant="primary"
+          disabled={!hasInput || !metricIsChoosen}
+          onClick={() => compute()}
+        >
+          Evaluate
+        </Button>
+      )}
+      {evaluateResult && (
+        <div>
+          <div className="mt-4">
+            <OneHypRefResult calculation={evaluateResult} />
+          </div>
+        </div>
+      )}
+    </SpaceGap>
   );
 };
 

@@ -79,7 +79,7 @@ const ScoreTable = ({ flatScores }) => {
   const [format, setFormat] = useState(null);
   useEffect(() => setFormat(null), [flatScores]);
   return (
-    <>
+    <div>
       <TableWrapper>
         <Table>
           <Thead>
@@ -109,7 +109,7 @@ const ScoreTable = ({ flatScores }) => {
         </RadioGroup>
       </div>
       {format && <ExportPreview format={format} flatScores={flatScores} />}
-    </>
+    </div>
   );
 };
 

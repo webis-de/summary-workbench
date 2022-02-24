@@ -71,7 +71,7 @@ const ChooseFile = ({ kind, fileName, setFile, lines, linesAreSame = true }) => 
         dragged
           ? "outline-dashed outline-2 outline-offset-4 outline-black"
           : "focus:ring focus:ring-blue-600"
-      } w-full flex items-stretch ring-2 ring-slate-600 text-sm rounded-lg`}
+      } w-full flex items-stretch ring-2 ring-slate-600 divide-slate-600 divide-x-2 text-sm rounded-lg`}
       onDrop={onDrop}
       onClick={onClick}
     >
