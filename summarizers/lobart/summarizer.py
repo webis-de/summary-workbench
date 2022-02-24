@@ -30,7 +30,7 @@ class LoBARTModel(object):
             logger.error("Failed to initialize LoBART model.")
     
     
-    def summarize(self, text:str=None, ratio:float=0.4):
+    def summarize(self, text:str=None, ratio:float=0.2):
         token_ids = self.tokenizer.batch_encode_plus([text], return_tensors="pt", max_length=self.model.config.max_position_embeddings, pad_to_max_length=True)['input_ids']
         # LoBART parameters for decoding taken from the paper
         num_beams = 4
