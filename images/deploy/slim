@@ -8,7 +8,7 @@ RUN [ -f Pipfile.lock -o -f Pipfile ] && pip install pipenv && pipenv lock --req
 RUN cat requirements.txt
 
 FROM ${image}
-RUN apt update && apt install -y git
+RUN apt update && apt install -y git build-essential
 WORKDIR /app
 COPY . .
 COPY --from=lock-stage /app/requirements.txt .
