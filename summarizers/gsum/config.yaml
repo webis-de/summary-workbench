@@ -1,0 +1,8 @@
+version: "1.0"
+name: "GSum (BART)"
+devimage: slim
+deployimage: slim
+metadata:
+  type: abstractive
+  homepage: https://aclanthology.org/2021.naacl-main.384/
+  sourcecode: https://github.com/neulab/guided_summarization
