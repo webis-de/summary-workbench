@@ -2,7 +2,6 @@ import React, { useContext, useMemo, useState } from "react";
 
 import { MetricsContext } from "../contexts/MetricsContext";
 import { ModelGrid } from "./Model";
-import { DismissableBadge } from "./utils/Badge";
 import { Card, CardContent, CardHead } from "./utils/Card";
 import { LiveSearch, useFilter } from "./utils/FuzzySearch";
 import { PluginCard } from "./utils/PluginCard";
@@ -45,19 +44,11 @@ const Settings = () => {
           selectModel={selectMetric}
         />
         <div className="flex flex-wrap items-center gap-5">
-          <span className="colored-header">selected:</span>
+          <span>selected:</span>
           {chosenMetrics.map((model) => (
-            <DismissableBadge onClick={() => unselectMetric(model)} key={model}>
-              <a
-                href="/#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setSelectedMetric(model);
-                }}
-              >
-                {metrics[model].name}
-              </a>
-            </DismissableBadge>
+            <div onClick={() => unselectMetric(model)} key={model}>
+              {metrics[model].name}
+            </div>
           ))}
         </div>
         {selectedMetric && <PluginCard plugin={metrics[selectedMetric]} inline={false} />}

@@ -36,12 +36,6 @@ body {
   border: 2.5px solid #376c47;
 }
 
-.colored-header {
-  color: #376c47;
-  font-size: 14pt;
-  font-weight: bold;
-}
-
 textarea::placeholder {
   line-height: 8em;
   text-align: center;

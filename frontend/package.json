@@ -19,8 +19,7 @@
     "react-scripts": "^5.0.0",
     "react-tooltip": "^4.2.21",
     "react-transition-group": "^4.4.2",
-    "react-use": "^17.3.2",
-    "uikit": "^3.10.1"
+    "react-use": "^17.3.2"
   },
   "scripts": {
     "start": "HOST=0.0.0.0 react-scripts start",

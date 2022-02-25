@@ -1,25 +1,15 @@
-import React, { useEffect, useReducer, useRef, useState } from "react";
+import React, { useMemo, useReducer, useRef } from "react";
 
-import { useFile } from "./hooks/File";
-import { ChooseFile } from "./utils/ChooseFile";
-import { Input } from "./utils/Form"
+import { Button } from "./utils/Button";
+import { ChooseFile, useFile } from "./utils/ChooseFile";
+import { Input } from "./utils/Form";
 
-const Button = ({ onClick, children, style, ...other }) => (
-  <button className="uk-button uk-button-primary uk-margin-small" onClick={onClick} {...other}>
-    {children}
-  </button>
-);
-
-const AddModel = ({ style, file, setFile, lines, linesAreSame, addModel }) => {
+const AddModel = ({ file, setFile, lines, linesAreSame, addModel }) => {
   const inputRef = useRef();
   return (
-    <div
-      className="uk-flex uk-flex-column"
-      style={{ padding: "10px", border: "1px solid", ...style }}
-    >
+    <div className="flex flex-col">
       <Input ref={inputRef} placeholder="Name" />
       <ChooseFile
-        className="uk-margin-small"
         placeholder="Upload Predictions"
         file={file}
         setFile={setFile}
@@ -34,51 +24,38 @@ const AddModel = ({ style, file, setFile, lines, linesAreSame, addModel }) => {
 };
 
 const Visualization = () => {
-  const [docFile, setDocFile] = useState(null);
-  const [refFile, setRefFile] = useState(null);
-  const [predFile, setPredFile] = useState(null);
-  const [docFileLines] = useFile(docFile);
-  const [refFileLines] = useFile(refFile);
-  const [predFileLines] = useFile(predFile);
-  const [linesAreSame, setLinesAreSame] = useState(null);
+  const { lines: docFileLines, setFile: setDocFile } = useFile();
+  const { lines: refFileLines, setFile: setRefFile } = useFile();
+  const { lines: predFileLines, setFile: setPredFile } = useFile();
+  const linesAreSame = useMemo(
+    () => (refFileLines !== null && docFileLines !== null ? refFileLines === docFileLines : null),
+    [refFileLines, docFileLines]
+  );
   const [models, addModel] = useReducer((oldState, model) => [model, ...oldState], []);
-
-  useEffect(() => {
-    if (refFileLines !== null && docFileLines !== null) {
-      setLinesAreSame(refFileLines === docFileLines);
-    } else {
-      setLinesAreSame(null);
-    }
-  }, [refFileLines, docFileLines]);
 
   return (
     <>
-      <div className="uk-margin-medium-top@s uk-margin-large-top@l">
-        <div className="uk-flex">
-          <div style={{ width: "40%" }}>
-            <div className="uk-flex uk-flex-column" style={{ display: "inline-flex" }}>
+      <div>
+        <div>
+          <div>
+            <div className="inline-flex flex-col">
               <ChooseFile
-                className="uk-margin-small"
-                placeholder="Upload Documents"
-                file={docFile}
+                kind="Documents"
                 setFile={setDocFile}
                 lines={docFileLines}
                 linesAreSame={linesAreSame}
-                style={{ width: "300px" }}
               />
 
               <ChooseFile
-                className="uk-margin-small"
-                placeholder="Upload References"
-                file={refFile}
+                kind="References"
                 setFile={setRefFile}
                 lines={refFileLines}
                 linesAreSame={linesAreSame}
               />
-              <Button data-uk-toggle="target: #add-model">Add Model</Button>
+              <Button>Add Model</Button>
               {Boolean(models.length) && (
                 <>
-                  <Button data-uk-toggle="target: #add-model">Add Anotation</Button>
+                  <Button>Add Anotation</Button>
                   <Button>Visualize</Button>
                   <Button>Save</Button>
                 </>

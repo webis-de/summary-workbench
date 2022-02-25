@@ -1,6 +1,3 @@
-import "uikit/dist/css/uikit.min.css";
-import "uikit/dist/js/uikit.min";
-
 import "./index.css";
 
 import React from "react";

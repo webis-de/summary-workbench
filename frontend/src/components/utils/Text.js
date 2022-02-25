@@ -1,19 +1,19 @@
 import { MdDangerous, MdInfo, MdWarning } from "react-icons/md";
 
-const HeadingSmall = ({ children }) => (
-  <h4 className="text-bold capitalize text-slate-600 text-sm font-semibold">{children}</h4>
+const HeadingSmall = ({ children, raw }) => (
+  <h4 className={`text-bold ${raw ? "" : "capitalize"} text-slate-600 text-sm font-semibold`}>{children}</h4>
 );
 
-const HeadingMedium = ({ children }) => (
-  <h3 className="text-bold capitalize text-slate-600 font-semibold">{children}</h3>
+const HeadingMedium = ({ children, raw }) => (
+  <h3 className={`text-bold ${raw ? "" : "capitalize"} text-slate-600 font-semibold`}>{children}</h3>
 );
 
-const HeadingSemiBig = ({ children }) => (
-  <h2 className="text-xl capitalize font-semibold text-gray-900">{children}</h2>
+const HeadingSemiBig = ({ children, raw }) => (
+  <h2 className={`text-xl ${raw ? "" : "capitalize"} font-semibold text-gray-900`}>{children}</h2>
 );
 
-const HeadingBig = ({ children }) => (
-  <h1 className="text-2xl capitalize font-semibold text-gray-900">{children}</h1>
+const HeadingBig = ({ children, raw }) => (
+  <h1 className={`text-2xl ${raw ? "" : "capitalize"} font-semibold text-gray-900`}>{children}</h1>
 );
 
 const typeToProps = {

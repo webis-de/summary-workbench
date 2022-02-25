@@ -1,9 +1,11 @@
 import React from "react";
 import { FaTrash } from "react-icons/fa";
 
+import { Loading } from "./Loading";
+
 const buttonStyles = {
   fill: {
-    "*": "focus:outline-none focus:ring transition text-white",
+    "*": "focus:outline-none transition text-white",
     primary: "bg-blue-600 hover:bg-blue-800 active:bg-blue-800 focus:ring-blue-300",
     secondary: "bg-gray-600 hover:bg-gray-800 active:bg-gray-800 focus:ring-gray-300",
     success: "bg-green-600 hover:bg-green-800 active:bg-green-800 focus:ring-green-300",
@@ -11,7 +13,7 @@ const buttonStyles = {
     danger: "bg-red-600 hover:bg-red-800 active:bg-red-800 focus:ring-red-300",
   },
   outline: {
-    "*": "border focus:outline-none focus:ring transition",
+    "*": "border focus:outline-none transition",
     primary:
       "text-blue-600 border-blue-600 hover:text-white hover:bg-blue-600 active:bg-blue-800 focus:ring-blue-300",
     secondary:
@@ -24,7 +26,7 @@ const buttonStyles = {
       "text-red-600 border-red-600 hover:text-white hover:bg-red-600 active:bg-red-800 focus:ring-red-300",
   },
   soft: {
-    "*": "border shadow focus:outline-none focus:ring transition",
+    "*": "border shadow focus:outline-none transition",
     primary:
       "text-blue-600 bg-blue-50 border-blue-200 hover:bg-blue-100 active:bg-blue-200 focus:ring-blue-300",
     secondary:
@@ -37,7 +39,7 @@ const buttonStyles = {
       "text-red-600 bg-red-50 border-red-200 hover:bg-red-100 active:bg-red-200 focus:ring-red-300",
   },
   box: {
-    "*": "border-b-2 focus:outline-none focus:ring transition text-white",
+    "*": "border-b-2 focus:outline-none transition text-white",
     primary: "bg-blue-600 border-blue-900 hover:bg-blue-700 active:bg-blue-800 focus:ring-blue-300",
     secondary:
       "bg-gray-600 border-gray-900 hover:bg-gray-700 active:bg-gray-800 focus:ring-gray-300",
@@ -56,7 +58,7 @@ const buttonStyles = {
     danger: "text-yellow-600 hover:text-yellow-800 duration-300",
   },
   disabled: {
-    "*": "cursor-default text-sm font-medium text-white",
+    "*": "cursor-default text-sm text-white",
     primary: "bg-blue-300",
     secondary: "bg-gray-300",
     success: "bg-green-300",
@@ -74,12 +76,14 @@ const Button = ({
   children,
   flatRight,
   flatLeft,
+  loading,
   ...props
 }) => {
   const a = disabled ? "disabled" : appearance;
 
-  let className = "text-sm font-bold tracking-tight focus:z-10 rounded-md h-full whitespace-nowrap";
+  let className = "text-sm font-bold tracking-tight focus:z-10 whitespace-nowrap";
 
+  if (appearance !== "link") className += " rounded-md"
   className += ` ${buttonStyles[a]["*"]}`;
   className += ` ${buttonStyles[a][variant]}`;
 
@@ -90,22 +94,41 @@ const Button = ({
     if (small) className += " px-2 py-1";
     else className += " px-4 py-2";
   }
+  if (!loading && appearance !== "link" && appearance !== "disabled") className += " focus:ring-2";
 
   const passProps = { ...props, className, disabled: a === "disabled" };
+
+  let components = children;
+  if (loading) {
+    let loadingVariant = variant;
+    if (appearance === "fill" || appearance === "box") loadingVariant = "white";
+    components = (
+      <div className="flex gap-2 items-center">
+        <Loading variant={loadingVariant} small />
+        {children}
+      </div>
+    );
+  }
 
   if (href)
     return (
       <a href={href} {...passProps}>
-        {children}
+        {components}
       </a>
     );
-  return <button {...passProps}>{children}</button>;
+  return <button {...passProps}>{components}</button>;
 };
 
 const DeleteButton = (props) => (
-  <Button appearence="box" variant="danger" {...props}>
+  <Button {...props} appearence="box" variant="danger">
     <FaTrash className="p-[1px] w-[16px] h-[16px]" />
   </Button>
 );
 
-export { Button, DeleteButton };
+const LoadingButton = ({ props }) => (
+  <Button {...props} loading>
+    Loading...
+  </Button>
+);
+
+export { Button, DeleteButton, LoadingButton };

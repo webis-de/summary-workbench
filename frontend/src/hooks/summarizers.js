@@ -1,8 +1,7 @@
-import { useCallback, useEffect, useReducer, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAsyncRetry } from "react-use";
 
 import { getSummarizersRequest } from "../api";
-import { displayError } from "../utils/message";
 
 const defaultSummarizers = ["anonymous-textrank", "anonymous-bart-cnn"];
 const saveSetting = (summarizer, status) =>
@@ -29,7 +28,6 @@ const useSummarizers = () => {
   );
 
   const { value: summarizers, loading, retry, error } = useAsyncRetry(getSummarizersRequest);
-  useEffect(() => error && displayError(error.value), [error]);
 
   useEffect(() => {
     if (!summarizers) {
@@ -50,7 +48,7 @@ const useSummarizers = () => {
     setSettings(newSettings);
   }, [summarizers, setSettings, setSummarizerTypes]);
 
-  return { retry, summarizers, summarizerTypes, loading, toggleSetting, settings };
+  return { error, retry, summarizers, summarizerTypes, loading, toggleSetting, settings };
 };
 
 export { useSummarizers };

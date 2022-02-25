@@ -1,15 +1,14 @@
 import React, { useContext, useMemo, useState } from "react";
+import { useAsyncFn } from "react-use";
 
 import { evaluateRequest } from "../api";
 import { MetricsContext } from "../contexts/MetricsContext";
 import { useMarkup } from "../hooks/markup";
 import { flatten } from "../utils/flatScores";
-import { displayError } from "../utils/message";
 import { ScoreTable } from "./ScoreTable";
-import { Button } from "./utils/Button";
+import { Button, LoadingButton } from "./utils/Button";
 import { Textarea } from "./utils/Form";
 import { FlexResponsive, SpaceGap } from "./utils/Layout";
-import { Loading } from "./utils/Loading";
 import { Markup } from "./utils/Markup";
 import { Table, TableWrapper, Tbody, Td, Tr } from "./utils/Table";
 import { HeadingMedium } from "./utils/Text";
@@ -66,22 +65,15 @@ const getChosenMetrics = (metrics) =>
 const OneHypRef = () => {
   const [hypText, setHypText] = useState("");
   const [refText, setRefText] = useState("");
-  const [evaluateResult, setEvaluateResult] = useState(null);
-  const [isComputing, setIsComputing] = useState(false);
   const { settings } = useContext(MetricsContext);
+
+  const [state, doFetch] = useAsyncFn(async () => {
+    const { scores } = await evaluateRequest(getChosenMetrics(settings), [hypText], [refText]);
+    return { scores, hypText, refText };
+  }, [settings, hypText, refText]);
 
   const hasInput = hypText.trim() && refText.trim();
   const metricIsChoosen = Object.values(settings).some((e) => e);
-
-  const compute = () => {
-    setIsComputing(true);
-    evaluateRequest(getChosenMetrics(settings), [hypText], [refText])
-      .then(({ scores }) => {
-        setEvaluateResult({ scores, hypText, refText });
-      })
-      .catch(displayError)
-      .finally(() => setIsComputing(false));
-  };
 
   return (
     <SpaceGap>
@@ -89,21 +81,17 @@ const OneHypRef = () => {
         <TextField value={refText} setValue={setRefText} placeholder="Enter the reference text." />
         <TextField value={hypText} setValue={setHypText} placeholder="Enter the predicted text." />
       </FlexResponsive>
-      {isComputing ? (
-        <Loading />
+      {state.loading ? (
+        <LoadingButton />
       ) : (
-        <Button
-          variant="primary"
-          disabled={!hasInput || !metricIsChoosen}
-          onClick={() => compute()}
-        >
+        <Button variant="primary" disabled={!hasInput || !metricIsChoosen} onClick={doFetch}>
           Evaluate
         </Button>
       )}
-      {evaluateResult && (
+      {!state.loading && state.value && (
         <div>
           <div className="mt-4">
-            <OneHypRefResult calculation={evaluateResult} />
+            <OneHypRefResult calculation={state.value} />
           </div>
         </div>
       )}

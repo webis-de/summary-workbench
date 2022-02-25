@@ -48,9 +48,11 @@ const AboutTable = ({ section, content }) => (
 const WaitResource = ({ loading, reloader }) => {
   if (loading) return <CenterLoading />;
   return (
-    <Button className="uk-container" onClick={reloader}>
-      Retry
-    </Button>
+    <div className="flex justify-center">
+      <Button appearance="link" onClick={reloader}>
+        Retry
+      </Button>
+    </div>
   );
 };
 
@@ -97,11 +99,11 @@ const About = () => {
       </SpaceGap>
       <SpaceGap>
         <HeadingSemiBig>Summarization Models</HeadingSemiBig>
-          {!summarizers ? (
-            <WaitResource loading={summarizersLoading} reloader={summarizersReload} />
-          ) : (
-            <AboutTable section="Summarizer" content={summarizers} />
-          )}
+        {!summarizers ? (
+          <WaitResource loading={summarizersLoading} reloader={summarizersReload} />
+        ) : (
+          <AboutTable section="Summarizer" content={summarizers} />
+        )}
       </SpaceGap>
       <SpaceGap>
         <HeadingSemiBig>Evaluation Metrics</HeadingSemiBig>

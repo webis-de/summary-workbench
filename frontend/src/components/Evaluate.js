@@ -1,5 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
+import { useAsyncFn } from "react-use";
 
+import { evaluateRequest } from "../api";
 import { MetricsContext } from "../contexts/MetricsContext";
 import { useCalculations } from "../hooks/calculations";
 import { OneHypRef } from "./OneHypRef";
@@ -13,7 +15,7 @@ import { CenterLoading } from "./utils/Loading";
 import { Tab, TabContent, TabHead, TabPanel, Tabs } from "./utils/Tabs";
 import { HeadingBig, Hint } from "./utils/Text";
 
-const FileInput = ({ setCalculation }) => (
+const FileInput = ({ compute, computing }) => (
   <Card full>
     <Tabs>
       <CardContent>
@@ -26,7 +28,7 @@ const FileInput = ({ setCalculation }) => (
             <OneHypRef />
           </TabPanel>
           <TabPanel>
-            <Upload setCalculation={setCalculation} />
+            <Upload compute={compute} computing={computing} />
           </TabPanel>
         </TabContent>
       </CardContent>
@@ -35,22 +37,20 @@ const FileInput = ({ setCalculation }) => (
 );
 
 const Evaluate = () => {
-  const [calculation, setCalculation] = useState(null);
-
   const { loading, metrics, retry } = useContext(MetricsContext);
   const calc = useCalculations();
 
-  const saveCalculation = async (id) =>
-    calc.add({ ...calculation, id, metrics }).then(() => setCalculation(null));
-  const scrollRef = useRef();
+  const [state, doFetch] = useAsyncFn(async (id, chosenMetrics, hypotheses, references) => {
+    const { scores } = await evaluateRequest(chosenMetrics, hypotheses, references);
+    return { id, scores, hypotheses, references };
+  }, []);
+  const [calculation, setCalculation] = useState(null);
+  useEffect(() => setCalculation(state.value), [state.value]);
 
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (calculation && scrollRef.current)
-        scrollRef.current.scrollIntoView({ block: "start", behavior: "smooth", alignToTop: true });
-    }, 20);
-    return () => clearTimeout(timeout);
-  }, [calculation]);
+  const saveCalculation = async (id) => {
+    calc.add({ ...state.value, id, metrics });
+    setCalculation(null);
+  };
 
   if (loading) return <CenterLoading />;
   if (!metrics) return <Button onClick={retry}>Retry</Button>;
@@ -68,21 +68,18 @@ const Evaluate = () => {
       </div>
       <div className="flex flex-col lg:flex-row gap-3">
         <div className="grow min-w-[400px]">
-          <FileInput setCalculation={setCalculation} />
+          <div>
+            <FileInput compute={doFetch} computing={state.loading} />
+          </div>
         </div>
         <div>
           <Settings />
         </div>
       </div>
-      <div ref={scrollRef} className="scroll-m-20" />
-      {calculation && <Result calculation={calculation} saveCalculation={saveCalculation} />}
-      {calc.calculations && (
-        <Saved
-          className="uk-margin"
-          calculations={calc.calculations}
-          deleteCalculation={calc.del}
-        />
+      {!state.loading && calculation && (
+        <Result calculation={calculation} saveCalculation={saveCalculation} />
       )}
+      {calc.calculations && <Saved calculations={calc.calculations} deleteCalculation={calc.del} />}
     </div>
   );
 };

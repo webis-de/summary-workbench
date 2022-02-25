@@ -24,37 +24,12 @@ const Badge = ({ children, appearance = "fill", variant = "primary", uppercase }
   <span
     className={`${uppercase ? "uppercase" : ""} ${badgeStyles[appearance]["*"]} ${
       badgeStyles[appearance][variant]
-    } whitespace-nowrap leading-none align-baseline text-xs inline-block font-bold rounded-full`}
+    } whitespace-nowrap flex items-center gap-2 leading-none align-baseline text-xs font-bold rounded-full`}
   >
     {children}
-  </span>
-);
-
-const DismissableBadge = ({ children, style, onClick }) => (
-  <span
-    className="uk-badge uk-text-bold uk-flex"
-    style={{
-      alignItems: "center",
-      padding: "10px",
-      paddingRight: "6px",
-      whiteSpace: "nowrap",
-      ...style,
-    }}
-  >
-    {children}
-    <a
-      href="/#"
-      style={{ display: "flex", marginLeft: "3px" }}
-      onClick={(e) => {
-        e.preventDefault();
-        if (onClick) onClick();
-      }}
-    >
-      <FaTimes style={{ minWidth: "15px", color: "black" }} />
-    </a>
   </span>
 );
 
 const BadgeGroup = ({ children }) => <div className="flex flex-wrap gap-2">{children}</div>;
 
-export { Badge, DismissableBadge, BadgeGroup };
+export { Badge, BadgeGroup };

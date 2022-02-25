@@ -1,7 +1,7 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useRef } from "react";
+import { useAsyncFn } from "react-use";
 
 import { DragContext } from "../../contexts/DragContext";
-import { displayError } from "../../utils/message";
 import { readFile } from "../../utils/readFile";
 
 const sameLength = (elements) => {
@@ -12,25 +12,19 @@ const sameLength = (elements) => {
 };
 
 const useFile = () => {
-  const [file, setFile] = useState(null);
-  const [fileName, setFileName] = useState(null);
-  const [lines, setLines] = useState(null);
-  useEffect(() => {
+  const [state, setFile] = useAsyncFn(async (file) => {
     if (file) {
-      readFile(file)
-        .then((text) => text.trim())
-        .then((text) => {
-          setLines(text.split("\n").map((line) => line.trim()));
-          setFileName(file.name);
-        })
-        .catch(displayError);
-    } else {
-      setLines(null);
-      setFileName(null);
+      let text = await readFile(file);
+      text = await text.trim();
+      return {
+        lines: text.split("\n").map((line) => line.trim()),
+        fileName: file.name,
+      };
     }
-  }, [file]);
+    return {};
+  });
 
-  return [fileName, setFile, lines];
+  return { ...state.value, setFile };
 };
 
 const processDropEvent = (e) => {

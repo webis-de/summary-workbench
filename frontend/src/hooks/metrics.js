@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from "react";
 import { useAsync } from "react-use";
 
 import { getMetricsRequest } from "../api";
-import { displayMessage } from "../utils/message";
 
 const saveSetting = (metric, status) =>
   window.localStorage.setItem(metric, status ? "true" : "false");
@@ -29,7 +28,6 @@ const useMetrics = () => {
   );
 
   const { value: metrics, loading, retry, error } = useAsync(getMetricsRequest);
-  useEffect(() => error && displayMessage(error.value), [error]);
 
   useEffect(() => {
     if (!metrics) {
@@ -50,7 +48,7 @@ const useMetrics = () => {
     setSettings(newSettings);
   }, [metrics, setMetricTypes, setSettings]);
 
-  return { retry, metrics, metricTypes, loading, toggleSetting, settings };
+  return { retry, error, metrics, metricTypes, loading, toggleSetting, settings };
 };
 
 export { useMetrics };

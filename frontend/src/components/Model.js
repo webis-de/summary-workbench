@@ -43,17 +43,10 @@ const Legend = ({ models }) => {
     [models]
   );
   return (
-    <div className="uk-flex" style={{ gap: "15px" }}>
+    <div className="flex flex-wrap gap-2">
       {types.map(([type, color]) => (
-        <div key={type} className="uk-flex" style={{ alignItems: "center", whiteSpace: "nowrap" }}>
-          <div
-            style={{
-              display: "inline-block",
-              padding: "3px",
-              marginRight: "5px",
-              backgroundColor: color,
-            }}
-          />
+        <div key={type} className="flex gap-1 items-center whitespace-nowrap text-sm">
+          <div className="p-1" style={{ backgroundColor: color }} />
           {type}
         </div>
       ))}

@@ -10,12 +10,12 @@ import { Tooltip } from "./utils/Tooltip";
 const SavedEntry = ({ calculation, deleteCalculation }) => {
   const badges = Object.keys(calculation.scores).map((name) => calculation.metrics[name].name);
   return (
-    <div className="shadow-md">
+    <div className="shadow-md rounded-lg">
       <Disclosure key={calculation.id}>
         <div className="border border-black rounded-lg divide-y divide-gray-300">
           <DisclosureToggle>
-            <div className="p-4 flex justify-between items-center w-full">
-              <HeadingMedium>{calculation.id}</HeadingMedium>
+            <div className="px-4 h-12 flex justify-between items-center w-full">
+              <HeadingMedium raw>{calculation.id}</HeadingMedium>
               <BadgeGroup>
                 {badges.map((badge, i) => (
                   <Badge key={i}>{badge}</Badge>
@@ -34,8 +34,8 @@ const SavedEntry = ({ calculation, deleteCalculation }) => {
   );
 };
 
-const Saved = ({ className, calculations, deleteCalculation }) => (
-  <div className={className}>
+const Saved = ({ calculations, deleteCalculation }) => (
+  <div>
     <div className="pb-4 flex items-center gap-2">
       <HeadingBig>Saved Calculations</HeadingBig>
       <Tooltip place="right" text="the data is stored in the browser">

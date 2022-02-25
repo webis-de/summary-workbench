@@ -1,15 +1,16 @@
 import React, { useContext, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { CSSTransition } from "react-transition-group";
+import { useAsyncFn } from "react-use";
 
 import { feedbackRequest, summarizeRequest } from "../api";
 import { SettingsContext } from "../contexts/SettingsContext";
 import { SummarizersContext } from "../contexts/SummarizersContext";
 import { useMarkups, usePairwiseMarkups } from "../hooks/markup";
-import { displayError, displayMessage } from "../utils/message";
 import { ModelGrid } from "./Model";
-import { Badge, DismissableBadge } from "./utils/Badge";
-import { Button } from "./utils/Button";
+import { Badge } from "./utils/Badge";
+import { Button, LoadingButton } from "./utils/Button";
 import { Card, CardContent, CardHead } from "./utils/Card";
+import { Textarea } from "./utils/Form";
 import { LiveSearch, useFilter } from "./utils/FuzzySearch";
 import { Bars, EyeClosed, EyeOpen, ThumbsDown, ThumbsUp } from "./utils/Icons";
 import { SpaceGap } from "./utils/Layout";
@@ -22,29 +23,26 @@ import { Tooltip } from "./utils/Tooltip";
 
 const Feedback = ({ summary }) => {
   const { name, summaryText, originalText, url } = summary;
-  const sendFeedback = (feedback) =>
-    feedbackRequest(name, summaryText, originalText, url, feedback);
-  const [submitted, setSubmitted] = useState(false);
-  if (submitted) return <HeadingSemiBig>Thanks for the Feedback!</HeadingSemiBig>;
+  const [state, submit] = useAsyncFn(
+    (feedback) => feedbackRequest(name, summaryText, originalText, url, feedback).then(() => true),
+    [name, summaryText, originalText, url]
+  );
+
+  if (state.value) return <HeadingSemiBig>Thanks for the Feedback!</HeadingSemiBig>;
   return (
-    <div className="flex">
-      <HeadingSemiBig>Good Summary?</HeadingSemiBig>
-      <ThumbsUp
-        className="uk-margin-left"
-        onClick={() =>
-          sendFeedback("good")
-            .then(() => setSubmitted(true))
-            .catch(displayError)
-        }
-      />
-      <ThumbsDown
-        className="uk-margin-small-left"
-        onClick={() =>
-          sendFeedback("bad")
-            .then(() => setSubmitted(true))
-            .catch(displayError)
-        }
-      />
+    <div className="flex flex-col items-end">
+      <div className="flex gap-4">
+        <HeadingSemiBig>Good Summary?</HeadingSemiBig>
+        <div className="flex gap-2">
+          <ThumbsUp onClick={() => submit("good")} />
+          <ThumbsDown onClick={() => submit("bad")} />
+        </div>
+      </div>
+      {state.error && (
+        <Hint type="danger" small>
+          An Error occured
+        </Hint>
+      )}
     </div>
   );
 };
@@ -53,8 +51,6 @@ const getChosenModels = (models) =>
   Object.entries(models)
     .filter((e) => e[1])
     .map((e) => e[0]);
-
-const Loading = () => <div data-uk-spinner />;
 
 const sampleText = `Alan Mathison Turing was an English mathematician, computer scientist, logician, cryptanalyst, philosopher, and theoretical biologist. Turing was highly influential in the development of theoretical computer science, providing a formalisation of the concepts of algorithm and computation with the Turing machine, which can be considered a model of a general-purpose computer. Turing is widely considered to be the father of theoretical computer science and artificial intelligence. Despite these accomplishments, he was never fully recognised in his home country, if only because much of his work was covered by the Official Secrets Act.
 During the Second World War, Turing worked for the Government Code and Cypher School (GC&CS) at Bletchley Park, Britain's codebreaking centre that produced Ultra intelligence. For a time he led Hut 8, the section that was responsible for German naval cryptanalysis. Here, he devised a number of techniques for speeding the breaking of German ciphers, including improvements to the pre-war Polish bombe method, an electromechanical machine that could find settings for the Enigma machine.
@@ -98,18 +94,15 @@ const InputDocument = ({ summarize, isComputing }) => {
               </Button>
             </div>
           </CardHead>
-          <textarea
+          <Textarea
             value={documentText}
             onChange={(e) => setDocumentText(e.currentTarget.value)}
-            className="uk-textarea resize-none min-h-[350px]"
-            rows="8"
             placeholder="Enter a URL or the text to be summarized."
-            style={{ height: "100%" }}
           />
         </Card>
       </div>
 
-      <div className="uk-flex uk-flex-column">
+      <div>
         <Card full>
           <CardHead>
             <HeadingSemiBig>Models</HeadingSemiBig>
@@ -122,29 +115,11 @@ const InputDocument = ({ summarize, isComputing }) => {
               settings={settings}
               selectModel={selectSummarizer}
             />
-            <div style={{ marginTop: "30px" }} />
-            <span className="colored-header">Summary Length:</span> {`${summaryLength} %`}
-            <div
-              className="uk-flex uk-flex-wrap"
-              style={{
-                alignItems: "center",
-                gap: "5px",
-              }}
-            >
-              <span className="colored-header">Selected:</span>
+            <span>Summary Length:</span> {`${summaryLength} %`}
+            <div className="flex flex-wrap gap-1">
+              <span>Selected:</span>
               {chosenModels.map((model) => (
-                <DismissableBadge onClick={() => unselectSummarizer(model)} key={model}>
-                  <a
-                    href="/#"
-                    className="nostyle"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setSelectedSummarizer(model);
-                    }}
-                  >
-                    {summarizers[model].name}
-                  </a>
-                </DismissableBadge>
+                <div key={summarizers[model].name}>{summarizers[model].name}</div>
               ))}
             </div>
             {selectedSummarizer && (
@@ -152,9 +127,9 @@ const InputDocument = ({ summarize, isComputing }) => {
                 <PluginCard plugin={summarizers[selectedSummarizer]} inline={false} />
               </div>
             )}
-            <div className="uk-flex uk-flex-center" style={{ marginTop: "40px" }}>
+            <div className="flex items-center gap-5">
               {isComputing ? (
-                <Loading />
+                <LoadingButton />
               ) : (
                 <Button
                   disabled={!documentText || !chosenModels.length}
@@ -163,6 +138,18 @@ const InputDocument = ({ summarize, isComputing }) => {
                   Summarize
                 </Button>
               )}
+              <div className="flex flex-col">
+                {!documentText && (
+                  <Hint type="info" small>
+                    Input text to summarize
+                  </Hint>
+                )}
+                {!chosenModels.length && (
+                  <Hint type="warning" small>
+                    Choose at least one metric
+                  </Hint>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -223,14 +210,14 @@ const SummaryTabView = ({ title, showOverlap, summaries, markups, documentLength
 
   if (!markups.length) return <div>some error occured</div>;
   return (
-    <div className="uk-flex">
-      <div style={{ flexBasis: "60%" }}>
+    <div className="flex items-start gap-3">
+      <div className="basis-[60%]">
         <Card full>
           <CardHead>
             <HeadingBig>{title || "Document"}</HeadingBig>
             <span className="font-bold">{documentLength} words</span>
           </CardHead>
-          <div className="max-h-[60vh] overflow-auto bg-white p-4">
+          <div className="max-h-[70vh] overflow-auto bg-white p-4">
             <Markup
               markups={markups[summaryIndex][0]}
               markupState={markupState}
@@ -240,8 +227,7 @@ const SummaryTabView = ({ title, showOverlap, summaries, markups, documentLength
           </div>
         </Card>
       </div>
-      <div style={{ minWidth: "20px" }} />
-      <div style={{ flexBasis: "40%" }}>
+      <div className="basis-[40%]">
         <Tabs onChange={(index) => setSummaryIndex(index)}>
           <Card full>
             <CardHead>
@@ -375,7 +361,7 @@ const SummaryView = ({ title, summaries, documentLength }) => {
             />
           )}
         </div>
-        <div className="uk-flex uk-flex-column min-w-[30px]">
+        <div className="flex flex-col min-w-[30px]">
           <ToggleView showTab={showTab} toggleShowTab={toggleShowTab} />
           <ToggleOverlap show={!showOverlap} toggle={toggleShowOverlap} />
         </div>
@@ -395,51 +381,33 @@ const computeParagraphs = (text) => {
 };
 
 const Summarize = () => {
-  const [results, setResults] = useState(null);
-  const [title, setTitle] = useState(null);
-  const [computing, setComputing] = useState(null);
-  const [documentLength, setDocumentLength] = useState(0);
   const { summarizers, loading, retry } = useContext(SummarizersContext);
 
-  const summarize = async (rawText, models, summaryLength) => {
+  const [state, doFetch] = useAsyncFn(async (rawText, models, summaryLength) => {
     const requestText = rawText.trim();
     const ratio = parseInt(summaryLength, 10) / 100;
-
-    if (!models.length) {
-      displayMessage("No summarizer selected");
-      return;
+    const response = await summarizeRequest(requestText, models, ratio);
+    const { summaries, original, url } = response;
+    if (Object.values(summaries).every((summarySentences) => !summarySentences.length)) {
+      throw new Error("No summaries could be generated. The input is probably too short.");
     }
-    if (!requestText) {
-      displayMessage("Please enter some text.");
-      return;
-    }
-    setComputing(true);
-    try {
-      const response = await summarizeRequest(requestText, models, ratio);
-      const { summaries, original, url } = response;
-      if (Object.values(summaries).every((summarySentences) => !summarySentences.length)) {
-        throw new Error("No summaries could be generated. The input is probably too short.");
-      }
-      const originalText = computeParagraphs(original.text);
-      const newSummaries = Object.entries(summaries).map(([name, summarySentences]) => {
-        const summaryText = computeParagraphs(summarySentences);
-        return {
-          name,
-          originalText,
-          summaryText,
-          url,
-        };
-      });
-      newSummaries.sort((a, b) => a.name > b.name);
-      setResults(newSummaries);
-      setTitle(original.title);
-      setDocumentLength(computeNumWords(originalText));
-    } catch (err) {
-      displayError(err);
-    } finally {
-      setComputing(false);
-    }
-  };
+    const originalText = computeParagraphs(original.text);
+    const newSummaries = Object.entries(summaries).map(([name, summarySentences]) => {
+      const summaryText = computeParagraphs(summarySentences);
+      return {
+        name,
+        originalText,
+        summaryText,
+        url,
+      };
+    });
+    newSummaries.sort((a, b) => a.name > b.name);
+    return {
+      summaries: newSummaries,
+      title: original.title,
+      documentLength: computeNumWords(originalText),
+    };
+  }, []);
 
   if (loading) return <CenterLoading />;
   if (!summarizers) return <Button onClick={retry}>Retry</Button>;
@@ -453,12 +421,8 @@ const Summarize = () => {
           concatenated as the final summary.{" "}
         </Hint>
       </div>
-      <InputDocument summarize={summarize} isComputing={computing} />
-      {results && (
-        <div>
-          <SummaryView documentLength={documentLength} summaries={results} title={title} />
-        </div>
-      )}
+      <InputDocument summarize={doFetch} isComputing={state.loading} />
+      {!state.loading && state.value && <SummaryView {...state.value} />}
     </SpaceGap>
   );
 };

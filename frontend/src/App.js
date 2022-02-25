@@ -2,7 +2,8 @@ import "./css/App.css";
 
 import React, { useContext, useEffect, useState } from "react";
 import { FaChevronCircleUp, FaCog, FaGithub, FaTwitter, FaYoutube } from "react-icons/fa";
-import { NavLink as Link, Navigate, BrowserRouter as Router, useRoutes } from "react-router-dom";
+import { useLocation } from "react-router";
+import { BrowserRouter, NavLink as Link, Navigate, useRoutes } from "react-router-dom";
 
 import { About } from "./components/About";
 import { Evaluate } from "./components/Evaluate";
@@ -270,6 +271,21 @@ const Content = () => {
     </>
   );
 };
+
+const ScrollRouterTop = ({ children }) => {
+  const location = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location]);
+
+  return children;
+};
+
+const Router = ({ children }) => (
+  <BrowserRouter>
+    <ScrollRouterTop>{children}</ScrollRouterTop>
+  </BrowserRouter>
+);
 
 const App = () => (
   <DragProvider>

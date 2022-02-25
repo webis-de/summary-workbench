@@ -29,7 +29,7 @@ const PluginCard = ({ plugin, inline = true }) => {
       }}
     >
       <div
-        className="uk-flex uk-flex-between"
+        className="flex justify-between"
         style={{
           alignItems: "center",
           borderBottom: "1px solid black",
