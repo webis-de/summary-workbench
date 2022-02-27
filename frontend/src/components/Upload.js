@@ -12,8 +12,8 @@ const getChosenMetrics = (settings) =>
     .map((e) => e[0]);
 
 const Upload = ({ compute, computing }) => {
-  const { fileName: hypFileName, setFile: setHypFile, lines: hypotheses } = useFile();
-  const { fileName: refFileName, setFile: setRefFile, lines: references } = useFile();
+  const { fileName: hypFileName, lines: hypotheses, setFile: setHypFile } = useFile();
+  const { fileName: refFileName, lines: references, setFile: setRefFile } = useFile();
 
   const { settings } = useContext(MetricsContext);
 

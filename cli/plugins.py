@@ -170,7 +170,7 @@ class Plugin(ABC):
         if pipfile.exists() or pipfilelock.exists():
             command = f"pipenv install && pipenv run bash -c '{BASE_COMMAND}'"
         elif requirements_file.exists():
-            command = f"pip install -r requirements.txt && {BASE_COMMAND}"
+            command = f"([[ -d /root/.venv ]] || python -m venv /root/.venv) && source /root/.venv/bin/activate && pip install -r requirements.txt && {BASE_COMMAND}"
         else:
             abort("neither requirements.txt nor Pipfile exists", self.name)
         return f'bash -c "{command}"'

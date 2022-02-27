@@ -84,7 +84,7 @@ const InputDocument = ({ summarize, isComputing }) => {
 
   return (
     <div className="flex flex-col lg:flex-row gap-3">
-      <div className="grow min-w-[400px]">
+      <div className="grow flex flex-col min-w-[400px] min-h-[400px]">
         <Card full>
           <CardHead>
             <div className="w-full flex justify-between items-center">

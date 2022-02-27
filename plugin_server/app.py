@@ -1,10 +1,10 @@
 import logging
-from os import environ
-import pathlib
 import os
+import pathlib
 import sys
-sys.path.insert(0,"/tldr_plugin_files")
-os.chdir("/tldr_plugin_files")
+from os import environ
+
+sys.path.insert(0, "/tldr_plugin_files")
 
 from flask import Flask, jsonify, request
 

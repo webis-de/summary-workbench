@@ -13,8 +13,7 @@ BASE_COMMAND = " && ".join(
     [
         "pip install flask",
         "python model_setup.py",
-        "cd /tldr_plugin_server",
-        "python wsgi.py",
+        "python /tldr_plugin_server/wsgi.py",
     ]
 )
 CONFIG_PATH = {"path": "./config.yaml"}

@@ -9,7 +9,7 @@ import transformers
 import logging
 logging.basicConfig(level=logging.ERROR)
 
-MODEL_PATH = "/tldr_plugin_files/checkpoints/podcast_LoBART4k_ORC.pt"
+MODEL_PATH = Path("checkpoints/podcast_LoBART4k_ORC.pt").absolute()
 
 class LoBARTModel(object):
     def __init__(self):
@@ -21,7 +21,7 @@ class LoBARTModel(object):
         self.model = LoBART.from_pretrained("facebook/bart-large-cnn")
         self.model.swap_fullattn_to_localattn(attention_window = self.attention_window)
         self.model.expand_learned_embed_positions(multiple=self.multi_input_span, cut = self.multi_input_span*2)
-        state = torch.load(Path(MODEL_PATH), map_location=torch.device("cpu"))
+        state = torch.load(MODEL_PATH, map_location=torch.device("cpu"))
         model_state_dict = state['model']
         self.model.load_state_dict(model_state_dict)
         if self.model:

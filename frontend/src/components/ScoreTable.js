@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useReducer, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { FaCheck, FaRegCopy } from "react-icons/fa";
 import { useToggle } from "react-use";
 
@@ -21,16 +21,14 @@ const CopyToClipboardButton = ({ text }) => {
   };
   if (saved)
     return (
-    <div className="p-[1px]">
       <Button variant="success">
         <FaCheck />
       </Button>
-    </div>
     );
   return (
-      <Button appearance="outline" variant="primary" onClick={onClick}>
-        <FaRegCopy />
-      </Button>
+    <Button appearance="fill" variant="primary" onClick={onClick}>
+      <FaRegCopy />
+    </Button>
   );
 };
 
@@ -49,28 +47,30 @@ const ExportPreview = ({ format, flatScores }) => {
   );
   return (
     <div className="pt-5">
-      <pre className="relative p-3 border-1 border-gray-900">
-        <div className="absolute right-3 top-3">
-          <div className="flex items-center gap-4">
-            <div className="w-16">
-              <Input
-                placeholder="digits"
-                small
-                right
-                onChange={(e) => {
-                  updatePrecision(e.currentTarget.value);
-                }}
-              />
+      <div className="relative">
+        <pre className="p-6 border border-gray-900 overflow-auto">
+          <div className="absolute right-3 top-3 z-10">
+            <div className="flex items-center gap-4">
+              <div className="w-16">
+                <Input
+                  placeholder="digits"
+                  small
+                  right
+                  onChange={(e) => {
+                    updatePrecision(e.currentTarget.value);
+                  }}
+                />
+              </div>
+              <div className="flex items-center gap-1">
+                <HeadingSmall>transpose</HeadingSmall>
+                <Toggle checked={transpose} onChange={() => toggleTranspose()} />
+              </div>
+              <CopyToClipboardButton text={text} />
             </div>
-            <div className="flex items-center gap-1">
-              <HeadingSmall>transpose</HeadingSmall>
-              <Toggle checked={transpose} onChange={() => toggleTranspose()} />
-            </div>
-            <CopyToClipboardButton text={text} />
           </div>
-        </div>
-        {text}
-      </pre>
+          {text}
+        </pre>
+      </div>
     </div>
   );
 };

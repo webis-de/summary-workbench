@@ -5,7 +5,7 @@ import { DragContext } from "../../contexts/DragContext";
 import { readFile } from "../../utils/readFile";
 
 const sameLength = (elements) => {
-  const validElements = elements.filter((e) => e !== null);
+  const validElements = elements.filter((e) => Boolean(e));
   if (!validElements.length) return true;
   const [first, ...other] = validElements;
   return other.every((e) => e.length === first.length);
@@ -57,7 +57,7 @@ const ChooseFile = ({ kind, fileName, setFile, lines, linesAreSame = true }) => 
   if (linesAreSame === null) classExtra = "text-black bg-white";
   else if (linesAreSame) classExtra = "bg-green-600 text-white";
 
-  const showLineBox = lines !== null;
+  const showLineBox = Boolean(lines);
 
   return (
     <button
