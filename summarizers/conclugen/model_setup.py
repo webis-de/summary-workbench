@@ -4,7 +4,7 @@ import pathlib
 import inspect
 import logging
 
-SAVE_PATH = pathlib.Path("~/checkpoints")
+SAVE_PATH = pathlib.Path("~/checkpoints").expanduser()
 URL = "https://files.webis.de/webis-conclugen21-models/dbart.tar.gz"
 MODEL_NAME = "Webis-Conclugen21"
 
