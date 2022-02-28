@@ -59,7 +59,7 @@ After the war, Turing worked at the National Physical Laboratory, where he desig
 Turing was prosecuted in 1952 for homosexual acts; the Labouchere Amendment of 1885 had mandated that "gross indecency" was a criminal offence in the UK. He accepted chemical castration treatment, with DES, as an alternative to prison. Turing died in 1954, 16 days before his 42nd birthday, from cyanide poisoning. An inquest determined his death as a suicide, but it has been noted that the known evidence is also consistent with accidental poisoning.
 In 2009, following an Internet campaign, British Prime Minister Gordon Brown made an official public apology on behalf of the British government for "the appalling way he was treated". Queen Elizabeth II granted Turing a posthumous pardon in 2013. The "Alan Turing law" is now an informal term for a 2017 law in the United Kingdom that retroactively pardoned men cautioned or convicted under historical legislation that outlawed homosexual acts.`;
 
-const InputDocument = ({ summarize, isComputing }) => {
+const InputDocument = ({ summarize, state }) => {
   const [documentText, setDocumentText] = useState("");
   const { summarizers, settings, toggleSetting } = useContext(SummarizersContext);
   const { summaryLength } = useContext(SettingsContext);
@@ -128,7 +128,7 @@ const InputDocument = ({ summarize, isComputing }) => {
               </div>
             )}
             <div className="flex items-center gap-5">
-              {isComputing ? (
+              {state.loading ? (
                 <LoadingButton />
               ) : (
                 <Button
@@ -147,6 +147,11 @@ const InputDocument = ({ summarize, isComputing }) => {
                 {!chosenModels.length && (
                   <Hint type="warning" small>
                     Choose at least one metric
+                  </Hint>
+                )}
+                {!state.loading && state.error && (
+                  <Hint type="danger" small>
+                    {state.error.message}
                   </Hint>
                 )}
               </div>
@@ -421,7 +426,7 @@ const Summarize = () => {
           concatenated as the final summary.{" "}
         </Hint>
       </div>
-      <InputDocument summarize={doFetch} isComputing={state.loading} />
+      <InputDocument summarize={doFetch} state={state} />
       {!state.loading && state.value && <SummaryView {...state.value} />}
     </SpaceGap>
   );

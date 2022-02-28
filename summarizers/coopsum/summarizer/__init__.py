@@ -16,7 +16,7 @@ class CoopModel(object):
         self.vae = VAE(self.model, device='cpu')
         if self.vae:
             print("Intialized successfully.")
-    
+
     def summarize(self, text, ratio=0.2):
         sentences = sent_tokenize(text)
         raw_encodings = self.vae.encode(sentences)
@@ -30,6 +30,6 @@ class SummarizerPlugin():
     def __init__(self) -> None:
         print("Initializing Coop Model")
         self.summarizer = CoopModel()
-    
+
     def summarize(self, *args, **kwargs):
         return self.summarizer.summarize(*args, **kwargs)
