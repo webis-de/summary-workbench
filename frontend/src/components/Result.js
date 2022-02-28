@@ -36,48 +36,46 @@ const Result = ({ calculation, saveCalculation }) => {
   };
 
   return (
-    <div className="py-8">
-      <div ref={scrollRef} className="scroll-m-20">
-        <Card full>
-          <CardHead>
-            <HeadingSemiBig>Result</HeadingSemiBig>
-          </CardHead>
-          <CardContent>
-            <Tabs>
-              <div className="flex gap-8 items-center">
-                <TabHead>
-                  <Pill>Scores</Pill>
-                  <Pill>Visualize Overlap</Pill>
-                </TabHead>
-                <div className="inline-flex max-w-[400px] items-stretch">
-                  <Input
-                    value={calcID}
-                    onChange={(e) => setCalcID(e.currentTarget.value)}
-                    onKeyDown={(e) => e.keyCode === 13 && save()}
-                    flatRight
-                  />
-                  <Button onClick={save} flatLeft>
-                    Save
-                  </Button>
-                </div>
-                {infoText && (
-                  <Hint small type="info">
-                    {infoText}
-                  </Hint>
-                )}
+    <div ref={scrollRef} className="scroll-m-20">
+      <Card full>
+        <CardHead>
+          <HeadingSemiBig>Result</HeadingSemiBig>
+        </CardHead>
+        <CardContent>
+          <Tabs>
+            <div className="flex gap-8 items-center">
+              <TabHead>
+                <Pill>Scores</Pill>
+                <Pill>Visualize Overlap</Pill>
+              </TabHead>
+              <div className="inline-flex max-w-[400px] items-stretch">
+                <Input
+                  value={calcID}
+                  onChange={(e) => setCalcID(e.currentTarget.value)}
+                  onKeyDown={(e) => e.keyCode === 13 && save()}
+                  flatRight
+                />
+                <Button onClick={save} flatLeft>
+                  Save
+                </Button>
               </div>
-              <TabContent>
-                <TabPanel>
-                  <ScoreTable flatScores={flatScores} />
-                </TabPanel>
-                <TabPanel>
-                  <CompareTable comparisons={comparisons} />
-                </TabPanel>
-              </TabContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-      </div>
+              {infoText && (
+                <Hint small type="info">
+                  {infoText}
+                </Hint>
+              )}
+            </div>
+            <TabContent>
+              <TabPanel>
+                <ScoreTable flatScores={flatScores} />
+              </TabPanel>
+              <TabPanel>
+                <CompareTable comparisons={comparisons} />
+              </TabPanel>
+            </TabContent>
+          </Tabs>
+        </CardContent>
+      </Card>
     </div>
   );
 };

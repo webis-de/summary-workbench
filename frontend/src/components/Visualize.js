@@ -70,7 +70,7 @@ const ModelBadge = ({ name, removeModel }) => (
         removeModel(name);
       }}
     >
-      <FaTimes className="text-black min-w-[20px]" />
+      <FaTimes className="text-black w-[20px] h-[20px]" />
     </button>
   </div>
 );

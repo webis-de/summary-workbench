@@ -83,7 +83,7 @@ const Button = ({
 
   let className = "text-sm font-bold tracking-tight focus:z-10 whitespace-nowrap";
 
-  if (appearance !== "link") className += " rounded-md"
+  if (appearance !== "link") className += " rounded-md";
   className += ` ${buttonStyles[a]["*"]}`;
   className += ` ${buttonStyles[a][variant]}`;
 

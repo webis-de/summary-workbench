@@ -34,8 +34,8 @@ const Feedback = ({ summary }) => {
       <div className="flex gap-4">
         <HeadingSemiBig>Good Summary?</HeadingSemiBig>
         <div className="flex gap-2">
-          <ThumbsUp onClick={() => submit("good")} />
-          <ThumbsDown onClick={() => submit("bad")} />
+          <ThumbsUp className="w-5 h-5" onClick={() => submit("good")} />
+          <ThumbsDown className="w-5 h-5" onClick={() => submit("bad")} />
         </div>
       </div>
       {state.error && (
@@ -308,7 +308,7 @@ const SummaryCompareView = ({ summaries, markups, showOverlap }) => {
 const ToggleView = ({ showTab, toggleShowTab }) => (
   <Tooltip text="Change View">
     <CSSTransition in={showTab} timeout={300} classNames="summarizer-toggle-view">
-      <Bars className="w-10" onClick={toggleShowTab} />
+      <Bars className="w-7 h-7" onClick={toggleShowTab} />
     </CSSTransition>
   </Tooltip>
 );
@@ -318,7 +318,7 @@ const ToggleOverlap = ({ show, toggle }) => {
 
   return (
     <Tooltip text={"Show/Hide Agreement"}>
-      <Icon className="w-10" onClick={toggle} />
+      <Icon className="w-7 h-7" onClick={toggle} />
     </Tooltip>
   );
 };
@@ -366,7 +366,7 @@ const SummaryView = ({ title, summaries, documentLength }) => {
             />
           )}
         </div>
-        <div className="flex flex-col min-w-[30px]">
+        <div className="flex flex-col">
           <ToggleView showTab={showTab} toggleShowTab={toggleShowTab} />
           <ToggleOverlap show={!showOverlap} toggle={toggleShowOverlap} />
         </div>

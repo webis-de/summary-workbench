@@ -56,24 +56,26 @@ const Evaluate = () => {
   if (!metrics) return <Button onClick={retry}>Retry</Button>;
 
   return (
-    <div>
-      <div className="pb-4">
-        <HeadingBig>Evaluation Predictions</HeadingBig>
-        <Hint>
-          Evaluate using multiple metrics a single prediction against a reference text, or upload
-          both of them as files. After computing the metrics, a visual comparison between two texts
-          can be made that shows the overlapping tokens. Scores from evaluation metrics can be
-          exported in LaTeX (table) or CSV format.
-        </Hint>
-      </div>
-      <div className="flex flex-col lg:flex-row gap-3">
-        <div className="grow min-w-[400px]">
-          <div>
-            <FileInput compute={doFetch} computing={state.loading} />
-          </div>
+    <div className="flex flex-col gap-8">
+      <div>
+        <div className="pb-4">
+          <HeadingBig>Evaluation Predictions</HeadingBig>
+          <Hint>
+            Evaluate using multiple metrics a single prediction against a reference text, or upload
+            both of them as files. After computing the metrics, a visual comparison between two
+            texts can be made that shows the overlapping tokens. Scores from evaluation metrics can
+            be exported in LaTeX (table) or CSV format.
+          </Hint>
         </div>
-        <div>
-          <Settings />
+        <div className="flex flex-col lg:flex-row gap-3">
+          <div className="grow min-w-[400px]">
+            <div>
+              <FileInput compute={doFetch} computing={state.loading} />
+            </div>
+          </div>
+          <div>
+            <Settings />
+          </div>
         </div>
       </div>
       {!state.loading && calculation && (
