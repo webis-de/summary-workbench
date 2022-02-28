@@ -152,4 +152,4 @@ const colorschemes = {
   colorblind: Object.keys(colorblindColorschemes),
 };
 
-export { ColorMap, colorschemes, randomColor, RGBToHex };
+export { ColorMap, colorschemes, randomColor, RGBToHex, cyrb53 };

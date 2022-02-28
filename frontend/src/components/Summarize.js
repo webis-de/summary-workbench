@@ -6,17 +6,15 @@ import { feedbackRequest, summarizeRequest } from "../api";
 import { SettingsContext } from "../contexts/SettingsContext";
 import { SummarizersContext } from "../contexts/SummarizersContext";
 import { useMarkups, usePairwiseMarkups } from "../hooks/markup";
-import { ModelGrid } from "./Model";
+import { Settings } from "./Settings";
 import { Badge } from "./utils/Badge";
 import { Button, LoadingButton } from "./utils/Button";
 import { Card, CardContent, CardHead } from "./utils/Card";
 import { Textarea } from "./utils/Form";
-import { LiveSearch, useFilter } from "./utils/FuzzySearch";
 import { Bars, EyeClosed, EyeOpen, ThumbsDown, ThumbsUp } from "./utils/Icons";
 import { SpaceGap } from "./utils/Layout";
 import { CenterLoading } from "./utils/Loading";
 import { Markup, useMarkupScroll } from "./utils/Markup";
-import { PluginCard } from "./utils/PluginCard";
 import { Pill, TabContent, TabHead, TabPanel, Tabs } from "./utils/Tabs";
 import { HeadingBig, HeadingSemiBig, Hint } from "./utils/Text";
 import { Tooltip } from "./utils/Tooltip";
@@ -63,18 +61,6 @@ const InputDocument = ({ summarize, state }) => {
   const [documentText, setDocumentText] = useState("");
   const { summarizers, settings, toggleSetting } = useContext(SummarizersContext);
   const { summaryLength } = useContext(SettingsContext);
-  const summarizerKeys = useMemo(() => Object.keys(summarizers).sort(), [summarizers]);
-  const { query, setQuery, filteredKeys } = useFilter(summarizerKeys);
-  const [selectedSummarizer, setSelectedSummarizer] = useState(null);
-  const selectSummarizer = (key) => {
-    if (settings[key]) setSelectedSummarizer(null);
-    else setSelectedSummarizer(key);
-    toggleSetting(key);
-  };
-  const unselectSummarizer = (key) => {
-    toggleSetting(key);
-    if (selectedSummarizer === key) setSelectedSummarizer(null);
-  };
 
   const chosenModels = getChosenModels(settings);
 
@@ -102,62 +88,51 @@ const InputDocument = ({ summarize, state }) => {
         </Card>
       </div>
 
-      <div>
-        <Card full>
-          <CardHead>
-            <HeadingSemiBig>Models</HeadingSemiBig>
-          </CardHead>
-          <CardContent>
-            <LiveSearch query={query} setQuery={setQuery} />
-            <ModelGrid
-              keys={filteredKeys}
-              models={summarizers}
-              settings={settings}
-              selectModel={selectSummarizer}
-            />
-            <span>Summary Length:</span> {`${summaryLength} %`}
-            <div className="flex flex-wrap gap-1">
-              <span>Selected:</span>
-              {chosenModels.map((model) => (
-                <div key={summarizers[model].name}>{summarizers[model].name}</div>
-              ))}
-            </div>
-            {selectedSummarizer && (
-              <div style={{ marginTop: "20px", marginBottom: "20px" }}>
-                <PluginCard plugin={summarizers[selectedSummarizer]} inline={false} />
+      <div className="min-w-[600px]">
+        <div>
+          <Card full>
+            <CardHead>
+              <HeadingSemiBig>Models</HeadingSemiBig>
+            </CardHead>
+            <CardContent>
+              <Settings
+                models={summarizers}
+                settings={settings}
+                toggleSetting={toggleSetting}
+                type="Summarizers"
+              />
+              <div className="flex items-center gap-5">
+                {state.loading ? (
+                  <LoadingButton />
+                ) : (
+                  <Button
+                    disabled={!documentText || !chosenModels.length}
+                    onClick={() => summarize(documentText, chosenModels, summaryLength)}
+                  >
+                    Summarize
+                  </Button>
+                )}
+                <div className="flex flex-col">
+                  {!documentText && (
+                    <Hint type="info" small>
+                      Input text to summarize
+                    </Hint>
+                  )}
+                  {!chosenModels.length && (
+                    <Hint type="warning" small>
+                      Choose at least one metric
+                    </Hint>
+                  )}
+                  {!state.loading && state.error && (
+                    <Hint type="danger" small>
+                      {state.error.message}
+                    </Hint>
+                  )}
+                </div>
               </div>
-            )}
-            <div className="flex items-center gap-5">
-              {state.loading ? (
-                <LoadingButton />
-              ) : (
-                <Button
-                  disabled={!documentText || !chosenModels.length}
-                  onClick={() => summarize(documentText, chosenModels, summaryLength)}
-                >
-                  Summarize
-                </Button>
-              )}
-              <div className="flex flex-col">
-                {!documentText && (
-                  <Hint type="info" small>
-                    Input text to summarize
-                  </Hint>
-                )}
-                {!chosenModels.length && (
-                  <Hint type="warning" small>
-                    Choose at least one metric
-                  </Hint>
-                )}
-                {!state.loading && state.error && (
-                  <Hint type="danger" small>
-                    {state.error.message}
-                  </Hint>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
@@ -262,20 +237,6 @@ const SummaryTabView = ({ title, showOverlap, summaries, markups, documentLength
       </div>
     </div>
   );
-};
-
-const buildGrids = (list) => {
-  const grids = [];
-  let grid = null;
-  for (let i = 0; i < list.length; i++) {
-    if (i % 3 === 0) {
-      if (grid) grids.push(grid);
-      grid = [];
-    }
-    grid.push(list[i]);
-  }
-  grids.push(grid);
-  return grids;
 };
 
 const SummaryCompareView = ({ summaries, markups, showOverlap }) => {

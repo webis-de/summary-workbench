@@ -75,9 +75,8 @@ const Upload = ({ compute, computing }) => {
             </Hint>
           )}
           {!metricIsChoosen && (
-            <Hint type="warning" small>
-              Select at least one metric. The files are not valid because they have different number
-              of lines.
+            <Hint type="info" small>
+              Select at least one metric.
             </Hint>
           )}
         </div>

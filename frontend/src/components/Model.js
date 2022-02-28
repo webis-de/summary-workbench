@@ -1,35 +1,48 @@
 import React, { useMemo } from "react";
+import { FaCheck } from "react-icons/fa";
 
-import { RGBToHex, randomColor } from "../utils/color";
+import { cyrb53 } from "../utils/color";
 import { Pagination, usePagination } from "./utils/Pagination";
+
+const colors = ["bg-red-400", "bg-blue-400"];
 
 const typeToColor = (type) => {
   switch (type) {
     case "lexical":
-      return "blue";
+      return colors[0];
     case "semantic":
-      return "green";
+      return colors[1];
     case "extractive":
-      return "blue";
+      return colors[0];
     case "abstractive":
-      return "green";
+      return colors[1];
     default:
-      return RGBToHex(randomColor());
+      return colors[cyrb53(type || "") % colors.length];
   }
 };
 
+const Bullet = ({ color }) => (
+  <div
+    className={`block min-w-[10px] min-h-[10px] shadow-gray-300 shadow-lg rounded-full ${color}`}
+  />
+);
+
+const ModelText = ({ type, text }) => (
+  <div className="flex items-center gap-2">
+    <Bullet color={typeToColor(type)} />
+    <span title={text} className="block overflow-hidden text-ellipsis">
+      {text}
+    </span>
+  </div>
+);
+
 const Model = ({ info, onClick, isSet }) => (
   <button
+    className="ring-1 ring-slate-300 flex items-center gap-2 px-2 py-1 bg-white hover:bg-slate-200"
     onClick={onClick}
-    className="border-2 border-lg p-2"
-    style={{
-      borderColor: typeToColor(info.type),
-      backgroundColor: isSet ? "#ffcccb" : "white",
-    }}
   >
-    <span title={info.name} className="block overflow-hidden text-ellipsis">
-      {info.name}
-    </span>
+    <FaCheck className={`text-green-600 ${isSet ? "" : "invisible"}`} />
+    <ModelText type={info.type} text={info.name} />
   </button>
 );
 
@@ -43,41 +56,17 @@ const Legend = ({ models }) => {
     [models]
   );
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-2 text-slate-600">
       {types.map(([type, color]) => (
-        <div key={type} className="flex gap-1 items-center whitespace-nowrap text-sm">
-          <div className="p-1" style={{ backgroundColor: color }} />
-          {type}
+        <div key={type} className="flex gap-2 items-center whitespace-nowrap text-sm">
+          <div className="flex items-center gap-1">
+            <Bullet color={color} />
+            {type}
+          </div>
         </div>
       ))}
     </div>
   );
 };
 
-const ModelGrid = ({ keys, models, settings, selectModel }) => {
-  const { numPages, page, setPage, size, setSize } = usePagination(keys.length);
-  return (
-    <div>
-      <Legend models={models} />
-      <div className="grid grid-cols-2 gap-4">
-        {Object.values(models).length ? (
-          keys
-            .slice((page - 1) * size, page * size)
-            .map((key) => (
-              <Model
-                key={key}
-                info={models[key]}
-                onClick={() => selectModel(key)}
-                isSet={settings[key]}
-              />
-            ))
-        ) : (
-          <div>no models configured</div>
-        )}
-      </div>
-      <Pagination page={page} size={size} numPages={numPages} setPage={setPage} setSize={setSize} />
-    </div>
-  );
-};
-
-export { Model, ModelGrid };
+export { Model, Legend, ModelText };

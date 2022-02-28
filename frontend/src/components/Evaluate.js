@@ -10,10 +10,10 @@ import { Saved } from "./Saved";
 import { Settings } from "./Settings";
 import { Upload } from "./Upload";
 import { Button } from "./utils/Button";
-import { Card, CardContent } from "./utils/Card";
+import { Card, CardContent, CardHead } from "./utils/Card";
 import { CenterLoading } from "./utils/Loading";
 import { Tab, TabContent, TabHead, TabPanel, Tabs } from "./utils/Tabs";
-import { HeadingBig, Hint } from "./utils/Text";
+import { HeadingBig, HeadingSemiBig, Hint } from "./utils/Text";
 
 const FileInput = ({ compute, computing }) => (
   <Card full>
@@ -37,7 +37,7 @@ const FileInput = ({ compute, computing }) => (
 );
 
 const Evaluate = () => {
-  const { loading, metrics, retry } = useContext(MetricsContext);
+  const { loading, metrics, retry, settings, toggleSetting } = useContext(MetricsContext);
   const calc = useCalculations();
 
   const [state, doFetch] = useAsyncFn(async (id, chosenMetrics, hypotheses, references) => {
@@ -73,8 +73,22 @@ const Evaluate = () => {
               <FileInput compute={doFetch} computing={state.loading} />
             </div>
           </div>
-          <div>
-            <Settings />
+          <div className="min-w-[600px]">
+            <div>
+              <Card full>
+                <CardHead>
+                  <HeadingSemiBig>Metrics</HeadingSemiBig>
+                </CardHead>
+                <CardContent>
+                  <Settings
+                    models={metrics}
+                    settings={settings}
+                    toggleSetting={toggleSetting}
+                    type="Metrics"
+                  />
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
       </div>

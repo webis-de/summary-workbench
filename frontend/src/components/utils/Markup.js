@@ -63,17 +63,19 @@ const TaggedMarkup = ({ markup, markupState, scrollState, allowScroll, showMarku
   );
   if (scrollState)
     return (
-      <Scroll
-        tag={tag}
-        docIndex={docIndex}
-        matchOrder={matchOrder}
-        groupSizes={groupSizes}
-        markup={content}
-        scrollState={scrollState}
-        allowScroll={allowScroll}
-      >
-        {markupContent}
-      </Scroll>
+      <span className="cursor-pointer">
+        <Scroll
+          tag={tag}
+          docIndex={docIndex}
+          matchOrder={matchOrder}
+          groupSizes={groupSizes}
+          markup={content}
+          scrollState={scrollState}
+          allowScroll={allowScroll}
+        >
+          {markupContent}
+        </Scroll>
+      </span>
     );
   return markupContent;
 };
@@ -112,13 +114,15 @@ const MarkupRoot = ({ markups, markupState, scrollState, allowScroll, showMarkup
 );
 
 const Markup = ({ markups, markupState, scrollState, showMarkup = true }) => (
-  <MarkupRoot
-    markups={markups}
-    markupState={markupState}
-    scrollState={scrollState}
-    allowScroll={showMarkup}
-    showMarkup={showMarkup}
-  />
+  <div className="leading-[23px]">
+    <MarkupRoot
+      markups={markups}
+      markupState={markupState}
+      scrollState={scrollState}
+      allowScroll={showMarkup}
+      showMarkup={showMarkup}
+    />
+  </div>
 );
 
 export { Markup, useMarkupScroll };
