@@ -4,6 +4,7 @@ import { useAsyncFn } from "react-use";
 import { evaluateRequest } from "../api";
 import { MetricsContext } from "../contexts/MetricsContext";
 import { useMarkup } from "../hooks/markup";
+import { getChosen } from "../utils/common";
 import { flatten } from "../utils/flatScores";
 import { ScoreTable } from "./ScoreTable";
 import { Button, LoadingButton } from "./utils/Button";
@@ -17,7 +18,8 @@ const OneHypRefResult = ({ calculation }) => {
   const { scores, hypText, refText } = calculation;
   const [hypothesis, reference] = useMarkup(hypText, refText);
 
-  const { metrics } = useContext(MetricsContext);
+  const { metrics: rawMetrics } = useContext(MetricsContext);
+  const metrics = useMemo(() => Object.fromEntries(Object.entries(rawMetrics).map(([key, {info}]) =>[key,info])), [rawMetrics])
   const flatScores = useMemo(() => flatten(scores, metrics), [scores, metrics]);
   const markupState = useState();
 
@@ -57,23 +59,18 @@ const TextField = ({ value, setValue, placeholder }) => (
   />
 );
 
-const getChosenMetrics = (metrics) =>
-  Object.entries(metrics)
-    .filter((e) => e[1])
-    .map((e) => e[0]);
-
 const OneHypRef = () => {
   const [hypText, setHypText] = useState("");
   const [refText, setRefText] = useState("");
-  const { settings } = useContext(MetricsContext);
+  const { metrics } = useContext(MetricsContext);
 
   const [state, doFetch] = useAsyncFn(async () => {
-    const { scores } = await evaluateRequest(getChosenMetrics(settings), [hypText], [refText]);
+    const { scores } = await evaluateRequest(Object.keys(getChosen(metrics)), [hypText], [refText]);
     return { scores, hypText, refText };
-  }, [settings, hypText, refText]);
+  }, [metrics, hypText, refText]);
 
   const hasInput = hypText.trim() && refText.trim();
-  const metricIsChoosen = Object.values(settings).some((e) => e);
+  const metricIsChoosen = Boolean(Object.keys(getChosen(metrics)).length);
 
   return (
     <SpaceGap>
@@ -82,7 +79,7 @@ const OneHypRef = () => {
         <TextField value={hypText} setValue={setHypText} placeholder="Enter the predicted text." />
       </FlexResponsive>
       {state.loading ? (
-        <LoadingButton />
+        <LoadingButton text="Evaluating" />
       ) : (
         <Button variant="primary" disabled={!hasInput || !metricIsChoosen} onClick={doFetch}>
           Evaluate

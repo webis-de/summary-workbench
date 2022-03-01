@@ -6,6 +6,7 @@ import { feedbackRequest, summarizeRequest } from "../api";
 import { SettingsContext } from "../contexts/SettingsContext";
 import { SummarizersContext } from "../contexts/SummarizersContext";
 import { useMarkups, usePairwiseMarkups } from "../hooks/markup";
+import { getChosen } from "../utils/common";
 import { Settings } from "./Settings";
 import { Badge } from "./utils/Badge";
 import { Button, LoadingButton } from "./utils/Button";
@@ -45,11 +46,6 @@ const Feedback = ({ summary }) => {
   );
 };
 
-const getChosenModels = (models) =>
-  Object.entries(models)
-    .filter((e) => e[1])
-    .map((e) => e[0]);
-
 const sampleText = `Alan Mathison Turing was an English mathematician, computer scientist, logician, cryptanalyst, philosopher, and theoretical biologist. Turing was highly influential in the development of theoretical computer science, providing a formalisation of the concepts of algorithm and computation with the Turing machine, which can be considered a model of a general-purpose computer. Turing is widely considered to be the father of theoretical computer science and artificial intelligence. Despite these accomplishments, he was never fully recognised in his home country, if only because much of his work was covered by the Official Secrets Act.
 During the Second World War, Turing worked for the Government Code and Cypher School (GC&CS) at Bletchley Park, Britain's codebreaking centre that produced Ultra intelligence. For a time he led Hut 8, the section that was responsible for German naval cryptanalysis. Here, he devised a number of techniques for speeding the breaking of German ciphers, including improvements to the pre-war Polish bombe method, an electromechanical machine that could find settings for the Enigma machine.
 Turing played a crucial role in cracking intercepted coded messages that enabled the Allies to defeat the Nazis in many crucial engagements, including the Battle of the Atlantic. Due to the problems of counterfactual history, it is hard to estimate the precise effect Ultra intelligence had on the war, but Professor Jack Copeland has estimated that this work shortened the war in Europe by more than two years and saved over 14 million lives.
@@ -59,14 +55,13 @@ In 2009, following an Internet campaign, British Prime Minister Gordon Brown mad
 
 const InputDocument = ({ summarize, state }) => {
   const [documentText, setDocumentText] = useState("");
-  const { summarizers, settings, toggleSetting } = useContext(SummarizersContext);
+  const { summarizers, types, toggle } = useContext(SummarizersContext);
   const { summaryLength } = useContext(SettingsContext);
 
-  const chosenModels = getChosenModels(settings);
+  const chosenModels = Object.keys(getChosen(summarizers));
+  const modelIsChosen = Boolean(chosenModels.length);
 
-  const insertSampleText = () => {
-    setDocumentText(sampleText);
-  };
+  const insertSampleText = () => setDocumentText(sampleText);
 
   return (
     <div className="flex flex-col lg:flex-row gap-3">
@@ -97,16 +92,16 @@ const InputDocument = ({ summarize, state }) => {
             <CardContent>
               <Settings
                 models={summarizers}
-                settings={settings}
-                toggleSetting={toggleSetting}
+                types={types}
+                toggleSetting={toggle}
                 type="Summarizers"
               />
               <div className="flex items-center gap-5">
                 {state.loading ? (
-                  <LoadingButton />
+                  <LoadingButton text="Summarizing" />
                 ) : (
                   <Button
-                    disabled={!documentText || !chosenModels.length}
+                    disabled={!documentText || !modelIsChosen}
                     onClick={() => summarize(documentText, chosenModels, summaryLength)}
                   >
                     Summarize
@@ -118,7 +113,7 @@ const InputDocument = ({ summarize, state }) => {
                       Input text to summarize
                     </Hint>
                   )}
-                  {!chosenModels.length && (
+                  {!modelIsChosen && (
                     <Hint type="warning" small>
                       Choose at least one metric
                     </Hint>
@@ -213,11 +208,11 @@ const SummaryTabView = ({ title, showOverlap, summaries, markups, documentLength
             <CardHead>
               <TabHead>
                 {summaries.map(({ name }) => (
-                  <Pill key={name}>{summarizers[name].name}</Pill>
+                  <Pill key={name}>{summarizers[name].info.name}</Pill>
                 ))}
               </TabHead>
             </CardHead>
-            <CardContent>
+            <CardContent white>
               <TabContent>
                 {markups.map((markup, index) => (
                   <TabPanel key={index}>
@@ -243,7 +238,7 @@ const SummaryCompareView = ({ summaries, markups, showOverlap }) => {
   const { summarizers } = useContext(SummarizersContext);
   const elements = markups.map((markup, index) => [
     markup,
-    summarizers[summaries[index].name].name,
+    summarizers[summaries[index].name].info.name,
   ]);
 
   return (
@@ -254,7 +249,7 @@ const SummaryCompareView = ({ summaries, markups, showOverlap }) => {
             <CardHead>
               <HeadingBig>{summarizer}</HeadingBig>
             </CardHead>
-            <CardContent>
+            <CardContent white>
               <div className="max-h-72 overflow-auto">
                 <Markup markups={markup} showMarkup={showOverlap} />
               </div>
@@ -336,7 +331,7 @@ const SummaryView = ({ title, summaries, documentLength }) => {
   );
 };
 
-const paragraphSize = 3;
+const paragraphSize = 1;
 const computeParagraphs = (text) => {
   const paragraphs = [];
   for (let index = 0; index < text.length; index += paragraphSize) {

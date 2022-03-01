@@ -19,27 +19,30 @@ const AboutTable = ({ section, content }) => (
         <Th>Embedding Model</Th>
       </Thead>
       <Tbody>
-        {Object.entries(content).map(([metric, { name, type, sourcecode, model, homepage }]) => (
-          <Tr key={metric} hover striped>
-            <Td>{name}</Td>
-            <Td>{type}</Td>
-            <Td>
-              {sourcecode && (
-                <Button appearance="link" variant="primary" href={sourcecode}>
-                  Code
-                </Button>
-              )}
-            </Td>
-            <Td>
-              {homepage && (
-                <Button appearance="link" variant="success" href={homepage}>
-                  Homepage
-                </Button>
-              )}
-            </Td>
-            <Td>{model}</Td>
-          </Tr>
-        ))}
+        {Object.entries(content).map(([key, { info }]) => {
+          const { name, type, sourcecode, model, homepage } = info;
+          return (
+            <Tr key={key} hover striped>
+              <Td>{name}</Td>
+              <Td>{type}</Td>
+              <Td>
+                {sourcecode && (
+                  <Button appearance="link" variant="primary" href={sourcecode}>
+                    Code
+                  </Button>
+                )}
+              </Td>
+              <Td>
+                {homepage && (
+                  <Button appearance="link" variant="success" href={homepage}>
+                    Homepage
+                  </Button>
+                )}
+              </Td>
+              <Td>{model}</Td>
+            </Tr>
+          );
+        })}
       </Tbody>
     </Table>
   </TableWrapper>
@@ -49,9 +52,7 @@ const WaitResource = ({ loading, reloader }) => {
   if (loading) return <CenterLoading />;
   return (
     <div className="flex justify-center">
-      <Button appearance="link" onClick={reloader}>
-        Retry
-      </Button>
+      <Button onClick={reloader}>Retry</Button>
     </div>
   );
 };
@@ -62,7 +63,7 @@ const About = () => {
     loading: summarizersLoading,
     retry: summarizersReload,
   } = useContext(SummarizersContext);
-  const { metrics, loading: metricsLoading, reload: metricsReload } = useContext(MetricsContext);
+  const { metrics, loading: metricsLoading, retry: metricsReload } = useContext(MetricsContext);
 
   return (
     <div className="flex flex-col gap-4">

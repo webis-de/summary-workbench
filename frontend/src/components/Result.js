@@ -15,9 +15,13 @@ const Result = ({ calculation, saveCalculation }) => {
   const { id, scores, hypotheses, references } = calculation;
   const [calcID, setCalcID] = useState(id);
   const [infoText, setInfoText] = useState(null);
-  const { metrics } = useContext(MetricsContext);
   const comparisons = usePairwiseMarkups(hypotheses, references);
 
+  const { metrics: rawMetrics } = useContext(MetricsContext);
+  const metrics = useMemo(
+    () => Object.fromEntries(Object.entries(rawMetrics).map(([key, { info }]) => [key, info])),
+    [rawMetrics]
+  );
   const flatScores = useMemo(() => flatten(scores, metrics), [scores, metrics]);
 
   const scrollRef = useRef();

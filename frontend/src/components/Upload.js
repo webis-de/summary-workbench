@@ -1,25 +1,22 @@
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 
 import { MetricsContext } from "../contexts/MetricsContext";
+import { getChosen } from "../utils/common";
 import { Button, LoadingButton } from "./utils/Button";
 import { ChooseFile, sameLength, useFile } from "./utils/ChooseFile";
 import { FlexResponsive } from "./utils/Layout";
 import { Hint, Label } from "./utils/Text";
 
-const getChosenMetrics = (settings) =>
-  Object.entries(settings)
-    .filter((e) => e[1])
-    .map((e) => e[0]);
-
 const Upload = ({ compute, computing }) => {
   const { fileName: hypFileName, lines: hypotheses, setFile: setHypFile } = useFile();
   const { fileName: refFileName, lines: references, setFile: setRefFile } = useFile();
 
-  const { settings } = useContext(MetricsContext);
+  const { metrics } = useContext(MetricsContext);
 
   const filesAreInput = hypotheses && references;
   const linesAreSame = sameLength([hypotheses, references]);
-  const metricIsChoosen = Object.values(settings).some((e) => e);
+  const chosenMetrics = Object.keys(getChosen(metrics));
+  const metricIsChoosen = Boolean(chosenMetrics.length);
 
   return (
     <>
@@ -45,18 +42,13 @@ const Upload = ({ compute, computing }) => {
       </FlexResponsive>
       <div className="pt-4 flex items-center gap-5">
         {computing ? (
-          <LoadingButton />
+          <LoadingButton text="Evaluating" />
         ) : (
           <Button
             variant="primary"
             disabled={!filesAreInput || !linesAreSame || !metricIsChoosen}
             onClick={() =>
-              compute(
-                `${hypFileName}-${refFileName}`,
-                getChosenMetrics(settings),
-                hypotheses,
-                references
-              )
+              compute(`${hypFileName}-${refFileName}`, chosenMetrics, hypotheses, references)
             }
           >
             Evaluate

@@ -46,27 +46,16 @@ const Model = ({ info, onClick, isSet }) => (
   </button>
 );
 
-const Legend = ({ models }) => {
-  const types = useMemo(
-    () =>
-      [...new Set(Object.values(models).map(({ type }) => type))].map((type) => [
-        type,
-        typeToColor(type),
-      ]),
-    [models]
-  );
-  return (
-    <div className="flex flex-wrap gap-2 text-slate-600">
-      {types.map(([type, color]) => (
-        <div key={type} className="flex gap-2 items-center whitespace-nowrap text-sm">
-          <div className="flex items-center gap-1">
-            <Bullet color={color} />
-            {type}
-          </div>
+const Legend = ({ types }) => (
+  <div className="flex flex-wrap gap-2 text-slate-600">
+    {types.map((type) => (
+      <div key={type} className="flex gap-2 items-center whitespace-nowrap text-sm">
+        <div className="flex items-center gap-1">
+          <Bullet color={typeToColor(type)} />
+          {type}
         </div>
-      ))}
-    </div>
-  );
-};
-
+      </div>
+    ))}
+  </div>
+);
 export { Model, Legend, ModelText };

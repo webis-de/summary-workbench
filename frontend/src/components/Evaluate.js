@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useAsyncFn } from "react-use";
 
 import { evaluateRequest } from "../api";
@@ -14,6 +14,7 @@ import { Card, CardContent, CardHead } from "./utils/Card";
 import { CenterLoading } from "./utils/Loading";
 import { Tab, TabContent, TabHead, TabPanel, Tabs } from "./utils/Tabs";
 import { HeadingBig, HeadingSemiBig, Hint } from "./utils/Text";
+import { unpack } from "../utils/common"
 
 const FileInput = ({ compute, computing }) => (
   <Card full>
@@ -37,7 +38,7 @@ const FileInput = ({ compute, computing }) => (
 );
 
 const Evaluate = () => {
-  const { loading, metrics, retry, settings, toggleSetting } = useContext(MetricsContext);
+  const { loading, metrics, types, retry, toggle } = useContext(MetricsContext);
   const calc = useCalculations();
 
   const [state, doFetch] = useAsyncFn(async (id, chosenMetrics, hypotheses, references) => {
@@ -48,7 +49,7 @@ const Evaluate = () => {
   useEffect(() => setCalculation(state.value), [state.value]);
 
   const saveCalculation = async (id) => {
-    calc.add({ ...state.value, id, metrics });
+    await calc.add({ ...calculation, id, metrics: unpack(metrics, "info") });
     setCalculation(null);
   };
 
@@ -80,12 +81,7 @@ const Evaluate = () => {
                   <HeadingSemiBig>Metrics</HeadingSemiBig>
                 </CardHead>
                 <CardContent>
-                  <Settings
-                    models={metrics}
-                    settings={settings}
-                    toggleSetting={toggleSetting}
-                    type="Metrics"
-                  />
+                  <Settings models={metrics} types={types} toggleSetting={toggle} type="Metrics" />
                 </CardContent>
               </Card>
             </div>

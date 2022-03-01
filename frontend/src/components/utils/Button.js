@@ -125,9 +125,9 @@ const DeleteButton = (props) => (
   </Button>
 );
 
-const LoadingButton = ({ props }) => (
+const LoadingButton = ({ text, ...props }) => (
   <Button {...props} loading>
-    Loading...
+  {typeof(text) === "string" ? text : "Loading"}...
   </Button>
 );
 
