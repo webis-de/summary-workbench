@@ -1,0 +1,9 @@
+wheel
+cython
+scikit-learn
+numpy==1.20
+nltk==3.5
+tensorflow_hub==0.8.0
+discreteMarkovChain==0.22
+absl-py
+tensorflow==2.8.0
