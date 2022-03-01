@@ -44,7 +44,6 @@ def construct_summarizer():
     from summarizer import SummarizerPlugin
 
     print("Constructing Summarizer")
-    print("Current plugin files", list(pathlib.Path("/tldr_plugin_files").iterdir()))
     plugin = SummarizerPlugin()
 
     def index():

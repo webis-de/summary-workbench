@@ -1,0 +1,5 @@
+torch==1.10.2
+transformers==4.16.2
+sentencepiece==0.1.96
+protobuf==3.19.4
+nltk

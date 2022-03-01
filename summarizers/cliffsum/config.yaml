@@ -1,0 +1,8 @@
+version: "1.0"
+name: "{model}"
+devimage: slim
+deployimage: slim
+metadata:
+  type: abstractive
+  homepage: "https://aclanthology.org/2021.emnlp-main.532/"
+  sourcecode: "https://github.com/ShuyangCao/cliff_summ"
