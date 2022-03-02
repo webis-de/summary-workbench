@@ -1,0 +1,1 @@
+pytextrank==3.2.2
