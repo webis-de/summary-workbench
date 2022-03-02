@@ -9,7 +9,7 @@ const loadSetting = (key, defaults) => {
   return setting === "true";
 };
 
-const initPlugins = async (fetchFunction) => {
+const initPlugins = async (fetchFunction, defaults) => {
   const rawPlugins = await fetchFunction();
   if (!rawPlugins) return null;
   const plugins = {};
@@ -17,7 +17,7 @@ const initPlugins = async (fetchFunction) => {
     plugins[key] = { info: value };
   });
   Object.keys(plugins).forEach((key) => {
-    plugins[key].isSet = loadSetting(key);
+    plugins[key].isSet = loadSetting(key, defaults);
   });
   const types = [...new Set(Object.values(plugins).map(({ info: { type } }) => type))];
   return { plugins, types };
