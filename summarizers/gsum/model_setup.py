@@ -1,3 +1,4 @@
+import os
 import shutil
 from statistics import mode
 import tarfile
@@ -6,12 +7,12 @@ from pathlib import Path
 
 CHECKPOINT_URL = "https://files.webis.de/summarization-models/gsum/checkpoints/bart_sentence.pt"
 DATA_URL = "https://files.webis.de/summarization-models/gsum/data.tar.gz"
-CHECKPOINT_PATH = "checkpoint"
-DATA_PATH = "data"
+SAVE_PATH = Path("~/checkpoints").expanduser()
+DATA_PATH = Path("~/data").expanduser()
 
 
 def setup():
-    Path(CHECKPOINT_PATH).mkdir(parents=True, exist_ok=True)
+    Path(SAVE_PATH).mkdir(parents=True, exist_ok=True)
     Path(DATA_PATH).mkdir(parents=True, exist_ok=True)
     response_ckpt = requests.get(CHECKPOINT_URL, stream=True)
     response_data = requests.get(DATA_URL, stream=True)
@@ -20,12 +21,14 @@ def setup():
     data_file = tarfile.open(fileobj=response_data.raw, mode="r|gz")
     data_file.extractall(path=DATA_PATH)
     print("Downloaded and extracted data.")
+    os.remove(DATA_PATH / DATA_URL.split("/")[-1])
+    print("Deleted compressed file.")
     
     # # download model checkpoint
     print("Downloading checkpoint ...")
-    with open(CHECKPOINT_PATH+"/"+"bart_sentence.pt","wb") as outf:
+    with open(SAVE_PATH / "bart_sentence.pt","wb") as outf:
         shutil.copyfileobj(response_ckpt.raw, outf)
-        print("Downloaded and extracted model checkpoint.")
+        print("Downloaded model checkpoint.")
 
 if __name__ == "__main__":
     setup()

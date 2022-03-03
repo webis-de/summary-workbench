@@ -1,14 +1,14 @@
 import sys
+from model_setup import SAVE_PATH, DATA_PATH
 sys.path.insert(0, "/tldr_plugin_files/guided_summarization/bart")
 from fairseq.models.bart.guided_model import GuidedBARTModel
 from pathlib import Path
 
-CHECKPOINT_PATH = "/tldr_plugin_files/checkpoint/"
-DATA_PATH = "/tldr_plugin_files/data/data"
-
+MODEL_PATH = SAVE_PATH / "bart_sentence.pt"
+DATA_PATH = DATA_PATH / "data"
 class GuidedBART(object):
     def __init__(self):
-        self.bart = GuidedBARTModel.from_pretrained(Path(CHECKPOINT_PATH),"bart_sentence.pt", DATA_PATH)
+        self.bart = GuidedBARTModel.from_pretrained(Path(MODEL_PATH),"bart_sentence.pt", DATA_PATH)
         if self.bart:
             print("Initialized GuidedBART.")
             self.bart.eval()

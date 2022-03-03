@@ -3,6 +3,7 @@ import tarfile
 import pathlib
 import inspect
 import logging
+import os
 
 SAVE_PATH = pathlib.Path("~/checkpoints").expanduser()
 URL = "https://files.webis.de/webis-conclugen21-models/dbart.tar.gz"
@@ -14,11 +15,12 @@ def setup():
     print("Creating and downloading checkpoints")
     pathlib.Path(SAVE_PATH).mkdir(parents=True, exist_ok=True)
     response = requests.get(URL, stream=True)
-    file = tarfile.open(fileobj=response.raw, mode="r|gz")
-    file.extractall(path=SAVE_PATH)
     logger = logging.getLogger(inspect.currentframe().f_code.co_name)
     logger.info("Downloading %s", MODEL_NAME)
-    #SummarizerPlugin()
+    file = tarfile.open(fileobj=response.raw, mode="r|gz")
+    file.extractall(path=SAVE_PATH)
+    os.remove(SAVE_PATH / URL.split("/")[-1])
+    print("Deleted compressed file.")
     logger.info("Done")
 
 if __name__ =="__main__":
