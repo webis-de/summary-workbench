@@ -53,9 +53,7 @@ class Subservice {
 
   async wait() {
     console.log(`${this.constructor.name}: waiting`);
-    while (!(await port_used(this.port)) && this.running) {
-      await sleep(1000);
-    }
+    while (!(await port_used(this.port)) && this.running) await sleep(1000);
     if (!this.running) {
       console.log(this.running);
       throw new Error(`${this.constructor.name}: process exited`);
@@ -88,15 +86,28 @@ class SentenceSplitter extends Subservice {
   }
 }
 
+class PdfExtractor extends Subservice {
+  constructor(verbose = false) {
+    super("subservices/pdf_extractor.py", verbose);
+  }
+
+  download(url) {
+    return axios
+      .post(`http://localhost:${this.port}/`, { url })
+      .then((response) => response.data);
+  }
+}
+
 const articleDownloader = new ArticleDownloader();
 const sentenceSplitter = new SentenceSplitter();
+const pdfExtractor = new PdfExtractor();
+
+const services = [articleDownloader, sentenceSplitter, pdfExtractor];
 
 const initSubservices = async () => {
-  const [article_port, sentence_port] = await get_free_ports(2);
-  articleDownloader.init(article_port);
-  sentenceSplitter.init(sentence_port);
-  await articleDownloader.wait();
-  await sentenceSplitter.wait();
+  const freePorts = await get_free_ports(services.length);
+  freePorts.forEach((port, i) => services[i].init(port));
+  for (const service of services) await service.wait();
 };
 
 module.exports = { articleDownloader, sentenceSplitter, initSubservices };

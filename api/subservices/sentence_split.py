@@ -1,20 +1,32 @@
 #!/usr/bin/env python3
+import asyncio
 from sys import argv
-import nltk
-from flask import Flask, request
 
-app = Flask(__name__)
+import nltk
+import uvicorn
+from fastapi import FastAPI
+from pydantic import BaseModel
 
 nltk.download("punkt")
 
-@app.route("/", methods=["POST"])
-def score_route():
-    try:
-        text = request.json["text"]
-        sentences = nltk.sent_tokenize(text)
-        return {"sentences": sentences}, 200, {"Content-Type": "application/json"}
-    except Exception as e:
-        print(e)
-        return {}, 400, {"Content-Type": "application/json"}
+app = FastAPI()
 
-app.run("localhost", port=argv[1], debug=False)
+
+class Body(BaseModel):
+    text: str
+
+
+def split_sentences(text):
+    return nltk.sent_tokenize(text)
+
+
+@app.post("/")
+async def download(body: Body):
+    sentences = await asyncio.get_event_loop().run_in_executor(
+        None, split_sentences, body.text
+    )
+    return {"sentences": sentences}
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=int(argv[1]))
