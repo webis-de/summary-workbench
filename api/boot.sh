@@ -32,4 +32,8 @@ function init_grobid() {
 
 npm install
 init_grobid
-node_modules/.bin/nodemon index.js
+if [[ $NODE_ENV == "production" ]]; then
+  node /app/index.js
+else
+  /app/node_modules/.bin/nodemon /app/index.js
+fi

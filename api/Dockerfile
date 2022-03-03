@@ -18,7 +18,7 @@ COPY . /app/
 RUN rm -f /app/plugin_config.json
 RUN npm ci
 
-CMD node /app/index.js
+CMD ./boot.sh
 
 
 # vi: ft=dockerfile
