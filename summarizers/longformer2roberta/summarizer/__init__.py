@@ -1,6 +1,6 @@
 import math
 
-from transformers import EncoderDecoderModel, LongformerTokenizer
+from transformers import EncoderDecoderModel, LongformerTokenizerFast
 
 MAX_POSITION_EMBEDDINGS = 512
 
@@ -10,7 +10,7 @@ class Longformer2RobertaSummarizer:
         self.encoder_decoder = EncoderDecoderModel.from_pretrained(
             "patrickvonplaten/longformer2roberta-cnn_dailymail-fp16"
         )
-        self.tokenizer = LongformerTokenizer.from_pretrained(
+        self.tokenizer = LongformerTokenizerFast.from_pretrained(
             "allenai/longformer-base-4096"
         )
 
