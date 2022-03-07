@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useAsync } from "react-use";
+import { useAsyncRetry } from "react-use";
 
 const saveSetting = (key, status) => window.localStorage.setItem(key, status ? "true" : "false");
 
@@ -24,7 +24,8 @@ const initPlugins = async (fetchFunction, defaults) => {
 };
 
 const usePlugins = (fetchFunction, defaults) => {
-  const { value, loading, retry, error } = useAsync(() => initPlugins(fetchFunction, defaults));
+  const { value, loading, retry, error } = useAsyncRetry(() => initPlugins(fetchFunction, defaults));
+  console.log(retry)
   const [types, setTypes] = useState(null);
   const [plugins, setPlugins] = useState({});
   useEffect(() => {

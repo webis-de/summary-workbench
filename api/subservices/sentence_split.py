@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import asyncio
 from sys import argv
 
 import nltk
@@ -21,10 +20,8 @@ def split_sentences(text):
 
 
 @app.post("/")
-async def download(body: Body):
-    sentences = await asyncio.get_event_loop().run_in_executor(
-        None, split_sentences, body.text
-    )
+def download(body: Body):
+    sentences = split_sentences(body.text)
     return {"sentences": sentences}
 
 

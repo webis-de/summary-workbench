@@ -1,14 +1,28 @@
-import logging
-import os
-import pathlib
 import sys
 from os import environ
+from typing import Union
+
+import uvicorn
+from fastapi import FastAPI, Response
+from pydantic import BaseModel, Field
 
 sys.path.insert(0, "/tldr_plugin_files")
 
-from flask import Flask, jsonify, request
-
 PLUGIN_TYPE = environ.get("PLUGIN_TYPE")
+
+app = FastAPI()
+
+
+class MetricBody(BaseModel):
+    hypotheses: Union[str, list]
+    references: Union[str, list]
+
+
+class SummarizerBody(BaseModel):
+    text: str
+    ratio: float = Field(
+        ..., gt=0, lt=1, description="The ratio must be in the closed interval (0,1)"
+    )
 
 
 def construct_metric():
@@ -16,12 +30,11 @@ def construct_metric():
 
     plugin = MetricPlugin()
 
-    def index():
+    @app.post("/")
+    def index(body: MetricBody, response: Response):
         try:
-            request_json = request.json
-
-            hypotheses = request_json["hypotheses"]
-            references = request_json["references"]
+            hypotheses = body.hypotheses
+            references = body.references
 
             if isinstance(hypotheses, str):
                 hypotheses = [hypotheses]
@@ -31,41 +44,29 @@ def construct_metric():
 
             score = plugin.evaluate(hypotheses, references)
 
-            headers = {"Content-Type": "application/json"}
-            return jsonify({"score": score}), 200, headers
+            return {"score": score}
         except Exception as error:
-            logging.warning(error)
-            return "", 400
-
-    return index
+            response.status_code = 400
+            return {"message": error.message}
 
 
 def construct_summarizer():
     from summarizer import SummarizerPlugin
 
-    print("Constructing Summarizer")
     plugin = SummarizerPlugin()
 
-    def index():
+    @app.post("/")
+    def index(body: SummarizerBody, response: Response):
         try:
-            request_json = request.json
-
-            text = request_json["text"]
-            ratio = request_json["ratio"]
+            text = body.text
+            ratio = body.ratio
 
             summary = plugin.summarize(text, ratio)
 
-            headers = {"Content-Type": "application/json"}
-            return jsonify({"summary": summary}), 200, headers
+            return {"summary": summary}
         except Exception as error:
-            logging.warning(error)
-            return "", 400
-
-    return index
-
-
-def health():
-    return "", 200
+            response.status_code = 400
+            return {"message": error.message}
 
 
 PLUGIN_TYPES = {
@@ -78,14 +79,18 @@ if not PLUGIN_TYPE:
         f"environment variable PLUGIN_TYPE needs to be defined (one of: {list(PLUGIN_TYPES)})"
     )
 
-construct_method = PLUGIN_TYPES.get(PLUGIN_TYPE)
-if not construct_method:
+if PLUGIN_TYPE not in PLUGIN_TYPES:
     raise ValueError(
         f"environment variable PLUGIN_TYPE needs to be one of: {list(PLUGIN_TYPES)}"
     )
 
-index = construct_method()
+PLUGIN_TYPES.get(PLUGIN_TYPE)()
 
-app = Flask(__name__)
-app.add_url_rule("/", "index", index, methods=["POST"])
-app.add_url_rule("/health", "health", health)
+
+@app.get("/health")
+async def health():
+    return Response(status_code=200)
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=5000)

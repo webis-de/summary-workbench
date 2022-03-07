@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import asyncio
 from sys import argv
 
 import nltk
@@ -25,10 +24,8 @@ def download_article(url):
 
 
 @app.post("/")
-async def download(body: Body):
-    article = await asyncio.get_event_loop().run_in_executor(
-        None, download_article, body.url
-    )
+def download(body: Body):
+    article = download_article(body.url)
     return {"text": article.text, "title": article.title}
 
 

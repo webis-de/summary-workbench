@@ -48,10 +48,5 @@ async def pdf(file: UploadFile, response: Response):
         return {"message": e.message}
 
 
-@app.get("/")
-async def health():
-    return Response(status_code=200)
-
-
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=int(argv[1]))
