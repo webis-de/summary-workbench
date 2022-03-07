@@ -1,4 +1,4 @@
-const readFile = (file) => {
+const readFile = (file, binary=false) => {
   const reader = new FileReader();
 
   return new Promise((resolve, reject) => {
@@ -10,7 +10,8 @@ const readFile = (file) => {
     reader.onload = () => {
       resolve(reader.result);
     };
-    reader.readAsText(file);
+    if (binary) reader.readAsArrayBuffer(file)
+    else reader.readAsText(file);
   });
 };
 

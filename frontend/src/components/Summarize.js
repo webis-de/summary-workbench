@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { CSSTransition } from "react-transition-group";
-import { useAsyncFn } from "react-use";
+import { useAsync, useAsyncFn } from "react-use";
 
-import { feedbackRequest, summarizeRequest } from "../api";
+import { feedbackRequest, pdfExtractRequest, summarizeRequest } from "../api";
 import { SettingsContext } from "../contexts/SettingsContext";
 import { SummarizersContext } from "../contexts/SummarizersContext";
 import { useMarkups, usePairwiseMarkups } from "../hooks/markup";
@@ -11,10 +11,11 @@ import { Settings } from "./Settings";
 import { Badge } from "./utils/Badge";
 import { Button, LoadingButton } from "./utils/Button";
 import { Card, CardContent, CardHead } from "./utils/Card";
+import { FileInput, useFile, useFileInput } from "./utils/ChooseFile";
 import { Textarea } from "./utils/Form";
 import { Bars, EyeClosed, EyeOpen, ThumbsDown, ThumbsUp } from "./utils/Icons";
 import { SpaceGap } from "./utils/Layout";
-import { CenterLoading } from "./utils/Loading";
+import { CenterLoading, Loading } from "./utils/Loading";
 import { Markup, useMarkupScroll } from "./utils/Markup";
 import { Pill, TabContent, TabHead, TabPanel, Tabs } from "./utils/Tabs";
 import { HeadingBig, HeadingSemiBig, Hint } from "./utils/Text";
@@ -53,6 +54,54 @@ After the war, Turing worked at the National Physical Laboratory, where he desig
 Turing was prosecuted in 1952 for homosexual acts; the Labouchere Amendment of 1885 had mandated that "gross indecency" was a criminal offence in the UK. He accepted chemical castration treatment, with DES, as an alternative to prison. Turing died in 1954, 16 days before his 42nd birthday, from cyanide poisoning. An inquest determined his death as a suicide, but it has been noted that the known evidence is also consistent with accidental poisoning.
 In 2009, following an Internet campaign, British Prime Minister Gordon Brown made an official public apology on behalf of the British government for "the appalling way he was treated". Queen Elizabeth II granted Turing a posthumous pardon in 2013. The "Alan Turing law" is now an informal term for a 2017 law in the United Kingdom that retroactively pardoned men cautioned or convicted under historical legislation that outlawed homosexual acts.`;
 
+const makeSection = ({ section, secNum, texts }) => {
+  const textList = [...texts];
+  if (section) {
+    let heading = section;
+    if (secNum !== null) heading += ` ${secNum}`;
+    textList.unshift(heading);
+  }
+  return textList.join("\n");
+};
+
+const pdfJsonToText = ({ title, abstract, sections }) => [title, abstract, ...sections.map(makeSection)].join("\n\n");
+
+const PdfUpload = ({ setText }) => {
+  const [{ loading, error }, setFile] = useAsyncFn(async (file) => {
+    if (file) {
+      if (file.type !== "application/pdf") throw new TypeError("invalid file type");
+      const content = await pdfExtractRequest(file);
+      console.log(content)
+      setText(pdfJsonToText(content));
+    }
+  });
+  const { fileInputRef, dragged, onDrop, onClick } = useFileInput(setFile);
+  return (
+    <div className="flex gap-3">
+      <FileInput fileInputRef={fileInputRef} setFile={setFile} />
+      {loading ? (
+        <Loading />
+      ) : (
+        <div
+          className={
+            dragged ? "outline-dashed outline-2 outline-offset-4 outline-black rounded-lg" : ""
+          }
+          onDrop={onDrop}
+        >
+          <Button onClick={onClick} appearance="link">
+            from pdf
+          </Button>
+        </div>
+      )}
+      {!loading && error && (
+        <Hint type="danger" small>
+          {error.message}
+        </Hint>
+      )}
+    </div>
+  );
+};
+
 const InputDocument = ({ summarize, state }) => {
   const [documentText, setDocumentText] = useState("");
   const { summarizers, types, toggle } = useContext(SummarizersContext);
@@ -70,6 +119,7 @@ const InputDocument = ({ summarize, state }) => {
           <CardHead>
             <div className="w-full flex justify-between items-center">
               <HeadingSemiBig>Document</HeadingSemiBig>
+              <PdfUpload setText={setDocumentText} />
               <Button variant="primary" onClick={insertSampleText}>
                 Sample Text
               </Button>

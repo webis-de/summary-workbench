@@ -6,7 +6,7 @@ import { Button } from "./utils/Button";
 import { SpaceGap } from "./utils/Layout";
 import { CenterLoading } from "./utils/Loading";
 import { Table, TableWrapper, Tbody, Td, Th, Thead, Tr } from "./utils/Table";
-import { HeadingBig, HeadingSemiBig } from "./utils/Text";
+import { HeadingBig, HeadingSemiBig, Hint } from "./utils/Text";
 
 const AboutTable = ({ section, content }) => (
   <TableWrapper>

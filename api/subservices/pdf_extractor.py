@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
-import base64
 from sys import argv
 
 import aiohttp
 import uvicorn
 from bs4 import BeautifulSoup
 from doc2json.grobid2json.tei_to_json import convert_tei_xml_soup_to_s2orc_json
-from fastapi import FastAPI, Response
-from pydantic import BaseModel
+from fastapi import FastAPI, Response, UploadFile
 
 
 async def grobid(pdf_stream):
@@ -38,15 +36,13 @@ async def process_pdf(pdf_stream):
 app = FastAPI()
 
 
-class Body(BaseModel):
-    pdf: str
-
-
 @app.post("/")
-async def pdf(body: Body, response: Response):
+async def pdf(file: UploadFile, response: Response):
+    if file.content_type != "application/pdf":
+        response.status_code = 400
+        return {"message": "file needs to be pdf"}
     try:
-        stream = base64.b64decode(body.pdf)
-        return {"json": await process_pdf(stream)}
+        return await process_pdf(await file.read())
     except aiohttp.ClientResponseError as e:
         response.status_code = e.status
         return {"message": e.message}

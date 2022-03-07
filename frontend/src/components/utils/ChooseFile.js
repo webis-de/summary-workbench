@@ -11,20 +11,27 @@ const sameLength = (elements) => {
   return other.every((e) => e.length === first.length);
 };
 
-const useFile = () => {
+const useFile = (binary = false, allowedTypes = null) => {
   const [state, setFile] = useAsyncFn(async (file) => {
     if (file) {
-      let text = await readFile(file);
-      text = await text.trim();
-      return {
-        lines: text.split("\n").map((line) => line.trim()),
-        fileName: file.name,
-      };
+      if (allowedTypes !== null && !allowedTypes.includes(file.type)) {
+        throw new TypeError("invalid file type");
+      }
+      if (binary)
+        return {
+          file,
+          fileName: file.name,
+        };
+      let content = await readFile(file);
+      content = await content.trim();
+      let lines = content.split("\n");
+      lines = lines.map((line) => line.trim());
+      return { lines, fileName: file.name };
     }
     return {};
   });
 
-  return { ...state.value, setFile };
+  return { ...state.value, error: state.error, setFile };
 };
 
 const processDropEvent = (e) => {
@@ -43,16 +50,34 @@ const processDropEvent = (e) => {
   return files;
 };
 
-const ChooseFile = ({ kind, fileName, setFile, lines, linesAreSame = true }) => {
+const FileInput = ({ fileInputRef, setFile }) => (
+  <input
+    className="hidden"
+    value=""
+    type="file"
+    ref={fileInputRef}
+    onChange={({target}) => {
+      console.log(target)
+      const file = target.files[0];
+      if (file) setFile(file);
+    }}
+  />
+);
+
+const useFileInput = (setFile) => {
+  const fileInputRef = useRef();
   const dragged = useContext(DragContext);
-  const uploadRef = useRef();
 
   const onDrop = (e) => {
     const files = processDropEvent(e);
     if (files.length) setFile(files[0]);
   };
-  const onClick = () => uploadRef.current.click();
+  const onClick = () => fileInputRef.current.click();
+  return { fileInputRef, dragged, onDrop, onClick };
+};
 
+const ChooseFile = ({ kind, fileName, setFile, lines, linesAreSame = true }) => {
+  const { fileInputRef, dragged, onDrop, onClick } = useFileInput(setFile);
   let classExtra = "bg-red-600 text-white";
   if (linesAreSame === null) classExtra = "text-black bg-white";
   else if (linesAreSame) classExtra = "bg-green-600 text-white";
@@ -87,17 +112,9 @@ const ChooseFile = ({ kind, fileName, setFile, lines, linesAreSame = true }) => 
           className={`${classExtra} flex items-center whitespace-nowrap p-2 rounded-r-lg`}
         >{`${lines.length} lines`}</span>
       )}
-      <input
-        className="hidden"
-        type="file"
-        ref={uploadRef}
-        onChange={(e) => {
-          const file = e.currentTarget.files[0];
-          if (file) setFile(file);
-        }}
-      />
+      <FileInput fileInputRef={fileInputRef} setFile={setFile} />
     </button>
   );
 };
 
-export { ChooseFile, useFile, sameLength };
+export { ChooseFile, useFile, sameLength, useFileInput, FileInput };

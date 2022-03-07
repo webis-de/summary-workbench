@@ -1,4 +1,5 @@
 const { spawn } = require("child_process");
+const FormData = require("form-data");
 const net = require("net");
 const axios = require("axios");
 
@@ -91,9 +92,13 @@ class PdfExtractor extends Subservice {
     super("subservices/pdf_extractor.py", verbose);
   }
 
-  download(url) {
+  extract(pdf) {
+    const formData = new FormData();
+    formData.append("file", pdf, "file.pdf");
     return axios
-      .post(`http://localhost:${this.port}/`, { url })
+      .post(`http://localhost:${this.port}/`, formData, {
+        headers: formData.getHeaders(),
+      })
       .then((response) => response.data);
   }
 }
@@ -110,4 +115,9 @@ const initSubservices = async () => {
   for (const service of services) await service.wait();
 };
 
-module.exports = { articleDownloader, sentenceSplitter, initSubservices };
+module.exports = {
+  articleDownloader,
+  sentenceSplitter,
+  pdfExtractor,
+  initSubservices,
+};
