@@ -1,52 +1,65 @@
-import re
 from pathlib import Path
-from marshmallow import Schema, fields, validate, ValidationError
-from .config import DEV_IMAGES, DEPLOY_IMAGES
-from .utils import abort
+from typing import Dict, List, Literal, Optional, Union
+
+from pydantic import BaseModel, HttpUrl, ValidationError, constr
+
+from .config import DEPLOY_IMAGES, DEV_IMAGES
+from .exceptions import ModelValidationError
+
+key_pattern = "^[_A-Za-z]+$"
 
 
-key_pattern = "_A-Za-z"
-
-
-def validate_key(key):
-    return re.match(f"^[{key_pattern}]+$", key)
-
-
-class PluginSchema(Schema):
-    version = fields.Str(required=True)
-    name = fields.Str(required=True)
-    devimage = fields.Str(validate=validate.OneOf(DEV_IMAGES))
-    deployimage = fields.Str(validate=validate.OneOf(DEPLOY_IMAGES))
-    metadata = fields.Dict(
-        fields.String(
-            validate=validate_key,
-            error_messages={"validator_failed": f"only {key_pattern} allowed"},
-        ),
-        fields.Raw(),
-        missing={},
-    )
-
-    def load(self, data):
+class ThrowMixin:
+    @classmethod
+    def load(cls, __origin, *args, **kwargs):
         try:
-            return super().load(data)
+            return cls(*args, **kwargs)
         except ValidationError as error:
-            abort(error)
+            raise ModelValidationError(error.errors(), __origin)
 
 
-class GlobalConfigSchema(Schema):
-    source = fields.Str(required=True)
-    image_url = fields.Str()
-    environment = fields.Dict(
-        fields.String(
-            validate=validate_key,
-            error_messages={"validator_failed": f"only {key_pattern} allowed"},
-        ),
-        fields.Raw(),
-        missing={},
-    )
+class PluginModel(BaseModel, ThrowMixin):
+    version: str
+    name: str
+    devimage: Literal[tuple(DEV_IMAGES)]  # TODO: only one devimage
+    deployimage: Literal[tuple(DEPLOY_IMAGES)]  # TODO: only one devimage
+    metadata: Dict[constr(regex=key_pattern), str] = {}
 
-    def load(self, data):
-        try:
-            return super().load(data)
-        except ValidationError as error:
-            abort(error)
+    class Config:
+        allow_mutation = False
+        extra = "forbid"
+
+
+plugin_source_type = Union[HttpUrl, Path]
+
+
+class ConfigurePluginModel(BaseModel):
+    source: plugin_source_type
+    image_url: Optional[str]
+    environment: Dict[constr(regex=key_pattern), str] = {}
+
+    class Config:
+        allow_mutation = False
+        extra = "forbid"
+
+
+class DeployModel(BaseModel):
+    host: str
+
+    class Config:
+        allow_mutation = False
+        extra = "forbid"
+
+
+plugin_type = List[Union[ConfigurePluginModel, plugin_source_type]]
+
+
+class ConfigModel(BaseModel, ThrowMixin):
+    docker_username: Optional[str]
+    deploy: Optional[DeployModel]
+    metrics: plugin_type = []
+    summarizers: plugin_type = []
+
+    class Config:
+        allow_mutation = False
+        extra = "forbid"

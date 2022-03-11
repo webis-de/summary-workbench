@@ -1,323 +1,287 @@
-import base64
-import json
 import os
-import secrets
-import shutil
-from abc import ABC, abstractmethod
 from pathlib import Path
-
-import click
-import docker
-import ruamel
-from ruamel.yaml.comments import CommentedMap
-from termcolor import colored
-
-from .config import CONFIG_PATH, KUBERNETES_PATH
-from .plugins import (Plugin, Plugins)
-from .utils import (abort, add_newlines, dump_yaml, get_config, load_yaml,
-                    remove_comments)
 
 os.chdir(Path(__file__).absolute().parent.parent)
 
+import json
+import shutil
 
-class Volumes:
-    def __init__(self):
-        self.volumes = {}
+import click
+from termcolor import colored
 
-    def extend(self, vols):
-        for key in vols:
-            if key in self.volumes:
-                raise ValueError(f"duplicate volume key: {key}")
-        self.volumes.update(vols)
-
-    def to_dict(self):
-        return self.volumes.copy()
-
-
-def get_plugins():
-    metric_plugins = Plugins.load("METRIC")
-    summarizer_plugins = Plugins.load("SUMMARIZER")
-    return metric_plugins, summarizer_plugins
+from .config import (CONFIG_PATH, DEPLOY_PATH, DOCKER_COMPOSE_YAML_PATH,
+                     DOCKER_TEMPLATES_PATH, KUBERNETES_TEMPLATES_PATH,
+                     PLUGIN_CONFIG_PATH)
+from .docker_interface import Docker, DockerMixin
+from .exceptions import BaseManageError, DoubleServicesError
+from .plugins import Plugins
+from .utils import Yaml, dict_path, gen_secret, get_config
 
 
-def init_compose_file():
-    compose_data = CommentedMap()
-    compose_data["version"] = "3"
-
-    volumes = Volumes()
-    part_files = sorted(Path("./templates/docker").glob("*.yaml"))
-    services_data = CommentedMap()
-    for part_file in part_files:
-        part_data = load_yaml(part_file)
-        if "volumes" in part_data:
-            volumes.extend(part_data.pop("volumes"))
-        services_data.update(part_data)
-    return compose_data, services_data, volumes
+def remove_old_deploy_files():
+    for path in DEPLOY_PATH.glob("*"):
+        if path.is_dir():
+            shutil.rmtree(path, ignore_errors=True)
 
 
-def gen_plugin_config(plugins_list):
-    plugin_config = {}
-    for plugins in plugins_list:
-        plugin_config.update(plugins.plugin_config())
-    return json.dumps(plugin_config, indent=2)
+class ComposeFile:
+    def __init__(self, plugins):
+        self.compose_data = {"version": "3", "services": {}, "volumes": {}}
+        self.populate_templates()
+        for plugin in plugins:
+            self.add_service_from_plugin(plugin)
+
+    def populate_templates(self):
+        service_files = sorted(DOCKER_TEMPLATES_PATH.glob("*.yaml"))
+        for path in service_files:
+            self.add_service_from_file(path)
+
+    def add_volumes(self, volumes):
+        compose_volumes = self.compose_data["volumes"]
+        for key in volumes.keys():
+            if key in compose_volumes:
+                raise ValueError(f"{key} is already present")
+        compose_volumes.update(volumes)
+
+    def add_service(self, service):
+        self.add_volumes(service.pop("volumes", {}))
+        self.compose_data["services"].update(service)
+
+    def add_service_from_file(self, path):
+        self.add_service(Yaml.load(path, json=True))
+
+    def add_service_from_plugin(self, plugin):
+        self.add_volumes(plugin.docker_compose_named_volumes)
+        self.add_environment("api", plugin.docker_compose_url_env)
+        self.add_service(plugin.to_service())
+
+    def add_environment(self, service_name, environment):
+        self.compose_data["services"][service_name]["environment"].extend(environment)
+
+    def save(self):
+        Yaml(self.compose_data).dump(DOCKER_COMPOSE_YAML_PATH, space_keys=["services"])
 
 
-def _gen_docker_compose():
-    compose_data, services_data, volumes = init_compose_file()
-    metric_plugins, summarizer_plugins = get_plugins()
+class PluginConfig:
+    def __init__(self, plugins):
+        self.config = plugins.plugin_config()
 
-    for plugin in list(metric_plugins) + list(summarizer_plugins):
-        volumes.extend(plugin.named_volumes_to_config())
-        services_data["api"]["environment"].append("=".join(plugin.url_env))
-        services_data.update(plugin.to_yaml())
+    def __str__(self):
+        return json.dumps(self.config, indent=2)
 
-    plugin_config = gen_plugin_config([metric_plugins, summarizer_plugins])
-    with open("./api/plugin_config.json", "w") as file:
-        file.write(plugin_config)
-
-    compose_data["services"] = services_data
-    compose_data["volumes"] = volumes.to_dict()
-
-    remove_comments(compose_data)
-    add_newlines(services_data)
-    add_newlines(compose_data)
-    dump_yaml(compose_data, Path("./docker-compose.yaml"))
+    def save(self):
+        with open(PLUGIN_CONFIG_PATH, "w") as f:
+            json.dump(self.config, f, indent=2)
 
 
-class Service(ABC):
-    __type__ = None
-    __deploy_path__ = KUBERNETES_PATH / "basic"
-
-    def __init__(self):
-        if not self.__type__:
-            abort("trying to instantiate abstract service")
-        self.config = get_config()
-        self.path = f"./{self.__type__}/"
-        self.name = self.__type__
-        self.host = self.config.get("deploy", {}).get("host")
-        self.load_version()
-
-    def load_version(self):
-        package_json_path = Path(f"./{self.__type__}/package.json")
+class NodeMixin:
+    def get_version(self):
+        package_json_path = self.path / "package.json"
         if package_json_path.exists():
             with open(package_json_path) as file:
-                self.version= json.load(file)["version"]
+                return json.load(file)["version"]
 
-    def docker_username(self):
-        try:
-            return self.config["docker_username"]
-        except AttributeError:
-            abort("docker_username needs to be defined for tagging the image", self.name())
-
-    def repository(self):
-        return f"{self.docker_username()}/tldr-{self.name}"
-
-    def tag(self):
-        return f"{self.repository()}:{self.version}"
-
-    def image_url(self):
-        return f"docker.io/{self.tag()}"
-
-    def build(self):
-        colored_tag = colored(self.tag(), "green")
-        print(f"building " + colored_tag)
-
-        with open(Path(self.path) / "Dockerfile", "r") as file:
-            print(colored("--- DOCKERFILE BEGIN ---", "yellow"))
-            print(file.read())
-            print(colored("--- DOCKERFILE END   ---", "yellow"))
-
-        client = docker.from_env()
-        for status in client.api.build(path=self.path, decode=True):
-            error = status.get("error")
-            if error:
-                abort(error, self.name)
-            stream = status.get("stream")
-            if stream:
-                print(stream, end="")
-        image = client.images.build(path=self.path)[0]
-        image.tag(self.tag())
-        print(f"done building " + colored_tag)
-
-    def push(self):
-        colored_tag = colored(self.tag(), "green")
-        print(f"pushing " + colored_tag)
-        for line in docker.from_env().images.push(
-            repository=self.repository(), tag=self.version, stream=True
-        ):
-            if b"error" in line:
-                status = json.loads(line)
-                error = status.get("error")
-                if error:
-                    abort(
-                        [
-                            [self.name, error],
-                            ["push", "failed (maybe you need to login first)"],
-                        ]
-                    )
-        print(f"done pushing " + colored_tag)
+    def build_chain_args(self):
+        return [
+            {
+                "dockerfile": (self.path / "Dockerfile").read_text(),
+                "context_path": self.path,
+            }
+        ]
 
 
-class Api(Service):
-    __type__ = "api"
+class Service(DockerMixin):
+    def __init__(self, service_type, sub_path="basic"):
+        self.path = Path(f"./{service_type}")
+        self.name, self.owner = service_type, ""
 
-    def gen_kubernetes(self, plugin_envs, plugin_config):
-        docs = load_yaml(
-            f"./templates/kubernetes/basic/{self.__type__}.yaml", multiple=True
+        filename = f"{service_type}.yaml"
+        DockerMixin.__init__(
+            self,
+            deploy_src=KUBERNETES_TEMPLATES_PATH / sub_path / filename,
+            deploy_dest=DEPLOY_PATH / sub_path / filename,
+            docker_username=get_config().docker_username,
+            name=service_type,
+            image_url=None,  # TODO: make configurable
         )
-        docs[0]["data"] = {
-            "plugin_config.json": ruamel.yaml.scalarstring.PreservedScalarString(
-                plugin_config
-            )
+
+
+class Api(NodeMixin, Service):
+    def __init__(self):
+        Service.__init__(self, "api")
+
+    def patch(self):
+        plugins = Plugins.load()
+        return {
+            0: dict_path(
+                ["data", "plugin_config.json"], Yaml.PreservedString(str(PluginConfig(plugins)))
+            ),
+            1: dict_path(
+                ["spec", "template", "spec", "containers", 0],
+                {
+                    "image": self.image_url,
+                    "env": plugins.api_kubernetes_env(),  # TODO: extend
+                },
+            ),
         }
-        container = docs[1]["spec"]["template"]["spec"]["containers"][0]
-        container["image"] = self.image_url()
-        container["env"].extend(plugin_envs)
-
-        path = Path(self.__deploy_path__ / f"{self.__type__}.yaml")
-        path.parent.mkdir(exist_ok=True, parents=True)
-        dump_yaml(docs, path, multiple=True)
 
 
-class Frontend(Service):
-    __type__ = "frontend"
+class Frontend(NodeMixin, Service):
+    def __init__(self):
+        Service.__init__(self, "frontend")
 
-    def gen_kubernetes(self):
-        docs = load_yaml(
-            f"./templates/kubernetes/basic/{self.__type__}.yaml", multiple=True
+    def patch(self):
+        return dict_path(
+            [0, "spec", "template", "spec", "containers", 0, "image"], self.image_url
         )
-        container = docs[0]["spec"]["template"]["spec"]["containers"][0]
-        container["image"] = self.image_url()
 
-        path = Path(self.__deploy_path__ / f"{self.__type__}.yaml")
-        path.parent.mkdir(exist_ok=True, parents=True)
-        dump_yaml(docs, path, multiple=True)
 
 class Ingress(Service):
-    __type__ = "ingress"
+    def __init__(self):
+        super().__init__("ingress")
 
-    def gen_kubernetes(self):
-        if not self.host:
-            return
-        ingress = load_yaml(
-            f"./templates/kubernetes/basic/{self.__type__}.yaml"
-        )
-        ingress["spec"]["rules"][0]["host"] = self.host
-        path = Path(self.__deploy_path__ / f"{self.__type__}.yaml")
-        path.parent.mkdir(exist_ok=True, parents=True)
-        dump_yaml(ingress, path)
-
-
-class MongoDB(Service):
-    __type__ = "mongodb"
-
-    def gen_kubernetes(self):
-        shutil.copyfile(
-            f"./templates/kubernetes/basic/{self.__type__}.yaml",
-            Path(self.__deploy_path__ / f"{self.__type__}.yaml"),
-        )
+    def patch(self):
+        return dict_path(["spec", "rules", 0, "host"], get_config().deploy.host)
 
 
 class Proxy(Service):
-    __type__ = "proxy"
-
-    def gen_kubernetes(self):
-        docs = load_yaml(
-            f"./templates/kubernetes/basic/{self.__type__}.yaml", multiple=True
-        )
-        port = docs[2]["spec"]["ports"][0]
-
-        path = Path(self.__deploy_path__ / f"{self.__type__}.yaml")
-        path.parent.mkdir(exist_ok=True, parents=True)
-        dump_yaml(docs, path, multiple=True)
-
-
-class BaseServices(dict):
     def __init__(self):
-        for cls in (Api, Frontend):
-            self[cls.__type__] = cls()
-
-    def __iter__(self):
-        return iter(self.values())
+        super().__init__("proxy")
 
 
-class Docker:
+class Mongodb(Service):
     def __init__(self):
+        super().__init__("mongodb")
+
+
+class Volumes(Service):
+    def __init__(self):
+        super().__init__("volumes", "")
+
+
+SERVICES_THAT_NEED_BUILD = [Api, Frontend]
+
+
+def extract_qualified_name(qualified_name):
+    components = qualified_name.split(":")
+    try:
+        (name,) = components
+        return (name,)
+    except ValueError:
         try:
-            self.client = docker.from_env()
-        except docker.errors.DockerException:
-            abort("the docker service is not running", "docker")
-        self.services = {
-            "base": BaseServices(),
-            "metric": Plugins.load("METRIC"),
-            "summarizer": Plugins.load("SUMMARIZER"),
-        }
-
-    def print_images(self, service_type):
-        print(colored(service_type, "green"))
-        for service in self.services[service_type]:
-            print(f"  {service.name} (version: {service.version})")
-        print()
-
-    def get_service(self, name):
-        components = name.split(":")
-        if len(components) == 2:
             plugin_type, name = components
-            services = self.services.get(plugin_type)
-            if not services:
-                abort(f"there is no type {plugin_type}", name)
-            return services.get(name)
-        mult_service = []
-        found_service = None
-        for service_type, services in self.services.items():
-            service = services.get(name)
-            if service is not None:
-                found_service = service
-                mult_service.append(service_type)
-        if len(mult_service) > 1:
-            commands = ", ".join(
-                f"build {service_type}:{name}" for service_type in mult_service
-            )
-            abort(
-                f"there are multiple services with the name {name}, build one with one of the following commands: {commands}",
-                name,
-            )
-        return found_service
+            return name, plugin_type
+        except ValueError:
+            try:
+                plugin_type, owner, name = components
+                return name, plugin_type, owner
+            except ValueError:
+                raise BaseException(
+                    f"name {qualified_name} has too many components", ""
+                )
 
-    def list_images(self):
-        for key in self.services.keys():
-            self.print_images(key)
 
-    def exists(self, image):
+def collect(root):
+    collected = []
+    if not isinstance(root, dict):
+        return [([], root)]
+    for key, sub_root in root.items():
+        for l, e in collect(sub_root):
+            if l or len(root) > 1:
+                collected.append(([key] + l, e))
+            else:
+                collected.append((l, e))
+    return collected
+
+
+def qualified_collect(root, pre_components=None):
+    collected = collect(root)
+    if pre_components is not None:
+        pre_components = list(pre_components)
+        collected = [(pre_components + l, e) for l, e in collected]
+    return collected
+
+
+def reduce_path(path):
+    try:
+        (name,) = path
+        return name
+    except ValueError:
         try:
-            self.client.images.get(image)
-            return True
-        except docker.errors.ImageNotFound:
-            return False
+            name, plugin_type = path
+            return f"{plugin_type}:{name}"
+        except ValueError:
+            name, plugin_type, owner = path
+            return f"{plugin_type}:{owner}:{name}"
 
-    def build(self, name, force=False):
-        service = self.get_service(name)
-        if not service:
-            abort(f"service '{name}' does not exit", "build")
-        if not force and self.exists(service.tag()):
-            service_tag = colored(service.tag(), "green")
-            print(f"image {service_tag} already present")
+
+class ServiceManager:
+    def __init__(self):
+        self.docker = Docker()
+        self.services_by_type = {
+            "base": [service() for service in SERVICES_THAT_NEED_BUILD],
+            **Plugins.load().to_dict(),
+        }
+        self.services = {}
+        for service_type, services in self.services_by_type.items():
+            for service in services:
+                service_map = self.services.setdefault(service.name, {}).setdefault(
+                    service_type, {}
+                )  # TODO: safe name bzw. avoid collision
+                # TODO: also integrate save name into frontend
+                if service.owner in service_map:
+                    raise DoubleServicesError(
+                        f"{service_type} service {service.name} for user '{service.owner}' is configured twice",
+                    )
+                service_map[service.owner] = service
+                # TODO: test owner collision with external plugin
+
+    def print_images(self):
+        for service_type, services in self.services_by_type.items():
+            print(colored(service_type, "green"))
+            for service in services:
+                version = colored(f"version: {service.get_version()}", "yellow")
+                service_string = f"  {service.name} ({version})"
+                if service.owner != "":
+                    owner = colored(f"owner: {service.owner}", "blue")
+                    service_string += f" ({owner})"
+                print(service_string)
+            print()
+
+    def get_service(self, qualified_name):
+        path = extract_qualified_name(qualified_name)
+        service_root = self.services
+        try:
+            for key in path:
+                service_root = service_root[key]
+        except KeyError:
+            raise BaseManageError("no service found for this key", qualified_name)
+        services = qualified_collect(service_root, path)
+        if not services:
+            raise BaseException(f"no service was found for key {qualified_name}")
+        if len(services) == 1:
+            return services[0][1]
+        raise BaseException(
+            f"there are multiple services with the name {qualified_name}, use the following names to resolve: {', '.join(reduce_path)}"
+        )
+
+    def _build(self, service, force):
+        if not force and Docker().exists(service.tag):
+            print(f"image {colored(service.tag, 'green')} already present")
         else:
             service.build()
 
-    def build_all(self, force):
+    def build(self, name, force=False):
+        service = self.get_service(name)
+        self._build(service, force)
+
+    def build_all(self, force=False):
         for services in self.services.values():
             for service in services:
-                if not force and self.exists(service.tag()):
-                    service_tag = colored(service.tag(), "green")
-                    print(f"image {service_tag} already present")
-                else:
-                    service.build()
+                self._build(service, force)
 
     def push(self, name):
         service = self.get_service(name)
-        if not service:
-            abort(f"service '{name}' does not exit", "push")
         service.push()
 
     def push_all(self):
@@ -325,47 +289,40 @@ class Docker:
             for service in services:
                 service.push()
 
+    def gen_docker_compose(_):
+        plugins = Plugins.load()
+        ComposeFile(plugins).save()
+        PluginConfig(plugins).save()
 
-def gen_secret(nbytes):
-    return base64.b64encode(secrets.token_bytes(nbytes)).decode("ascii")
+    def gen_kubernetes(_):
+        if get_config().deploy is None:
+            raise BaseManageError(
+                "the 'deploy' key in your config is not present or is None, but is required for the deployment generation"
+            )
+        remove_old_deploy_files()
+        for service in [
+            Api(),
+            Frontend(),
+            Ingress(),
+            Mongodb(),
+            Proxy(),
+            Volumes(),
+            Plugins.load(),
+        ]:
+            service.gen_kubernetes()
 
-
-def gen_token_secrets(nbytes=256):
-    token_secrets = load_yaml(f"./templates/kubernetes/token_secrets.yaml")
-    data = token_secrets["stringData"]
-    data["access-token-secret"] = gen_secret(nbytes)
-    data["refresh-token-secret"] = gen_secret(nbytes)
-    dump_yaml(token_secrets, KUBERNETES_PATH / "token_secrets.yaml")
-
-
-def _gen_kubernetes():
-    metric_plugins, summarizer_plugins = get_plugins()
-    api_env = metric_plugins.api_kubernetes_env + summarizer_plugins.api_kubernetes_env
-    shutil.rmtree("./deploy/basic", ignore_errors=True)
-    shutil.rmtree("./deploy/metrics", ignore_errors=True)
-    shutil.rmtree("./deploy/summarizers", ignore_errors=True)
-    Api().gen_kubernetes(
-        api_env, gen_plugin_config([metric_plugins, summarizer_plugins])
-    )
-    Frontend().gen_kubernetes()
-    MongoDB().gen_kubernetes()
-    Proxy().gen_kubernetes()
-    Ingress().gen_kubernetes()
-    shutil.copyfile(
-        f"./templates/kubernetes/volumes.yaml",
-        KUBERNETES_PATH / "volumes.yaml",
-    )
-    metric_plugins.gen_kubernetes()
-    summarizer_plugins.gen_kubernetes()
-
-
-@click.command()
-@click.option("--secrets", is_flag=True)
-def gen_kubernetes(secrets):
-    if secrets:
-        gen_token_secrets()
-    else:
-        _gen_kubernetes()
+    @staticmethod
+    def gen_token_secrets(nbytes=256):
+        token_secrets = Yaml.load(KUBERNETES_TEMPLATES_PATH / "token_secrets.yaml")
+        token_secrets.extend(
+            {
+                "stringData": {
+                    "access-token-secret": gen_secret(nbytes),
+                    "refresh-token-secret": gen_secret(nbytes),
+                }
+            }
+        )
+        token_secrets.dump(DEPLOY_PATH / "token_secrets.yaml")
 
 
 @click.command()
@@ -373,45 +330,62 @@ def gen_kubernetes(secrets):
 @click.option("--force", is_flag=True)
 @click.argument("names", nargs=-1)
 def build(names, force, all):
-    docker = Docker()
+    manager = ServiceManager()
     if all:
-        docker.build_all(force)
+        manager.build_all(force)
     elif not names:
         print("give the names of the services to build or --all for all")
-        docker.list_images()
+        manager.print_images()
     else:
         for name in names:
-            docker.build(name, force=force)
+            manager.build(name, force=force)
 
 
 @click.command()
 @click.option("--all", is_flag=True)
 @click.argument("names", nargs=-1)
 def push(names, all):
-    docker = Docker()
+    manager = ServiceManager()
     if all:
-        docker.push_all()
+        manager.push_all()
     elif not names:
         print("give the names of the plugins to push or --all for all")
-        docker.list_images()
+        manager.print_images()
     else:
         for name in names:
-            docker.push(name)
+            manager.push(name)
 
 
 @click.command()
 def gen_docker_compose():
-    _gen_docker_compose()
+    ServiceManager().gen_docker_compose()
+
+
+@click.command()
+@click.option("--secrets", is_flag=True)
+def gen_kubernetes(secrets):
+    manager = ServiceManager()
+    if secrets:
+        manager.gen_token_secrets()
+    else:
+        manager.gen_kubernetes()
 
 
 @click.group()
 @click.option("--config", default="./config.yaml")
-def main(config):
+def _main(config):
     CONFIG_PATH["path"] = config
     pass
 
 
-main.add_command(gen_docker_compose)
-main.add_command(gen_kubernetes)
-main.add_command(build)
-main.add_command(push)
+_main.add_command(gen_docker_compose)
+_main.add_command(gen_kubernetes)
+_main.add_command(build)
+_main.add_command(push)
+
+
+def main():
+    try:
+        _main()
+    except BaseManageError as error:
+        error.print()

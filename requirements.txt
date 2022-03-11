@@ -1,8 +1,8 @@
+GitPython
 click
 docker
-ruamel.yaml
-marshmallow
-termcolor
-GitPython
 giturlparse
+pydantic
 requests
+ruamel.yaml
+termcolor

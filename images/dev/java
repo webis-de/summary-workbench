@@ -1,5 +1,5 @@
-ARG image_version=3.8
-ARG image=python:${image_version}
+ARG python_version=3.8
+ARG image=python:${python_version}
 
 FROM ${image} as lock-stage
 

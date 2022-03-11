@@ -13,11 +13,12 @@ metrics:
   - ./metrics/rouge
   - ./metrics/sentence_transformers
   - ./metrics/cosine_similarity
-  - ./metrics/bartscore
 
 summarizers:
   - ./summarizers/bertsum
-  - ./summarizers/textrank
+  - source: ./summarizers/textrank
+    environment:
+      model: textrank
   - ./summarizers/newspaper3k
   - ./summarizers/longformer2roberta
   - source: ./summarizers/neuralsum
