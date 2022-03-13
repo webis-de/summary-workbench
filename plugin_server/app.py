@@ -70,8 +70,8 @@ def construct_summarizer():
 
 
 PLUGIN_TYPES = {
-    "METRIC": construct_metric,
-    "SUMMARIZER": construct_summarizer,
+    "metric": construct_metric,
+    "summarizer": construct_summarizer,
 }
 
 if not PLUGIN_TYPE:

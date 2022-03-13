@@ -16,7 +16,8 @@ def docker_context(dockerfile, path):
     fh = io.BytesIO()
     with tarfile.open(fileobj=fh, mode="w:gz") as tar:
         data = dockerfile.encode("utf-8")
-        tar.add(path, arcname=".")
+        if path is not None:
+            tar.add(path, arcname=".")
         info = tarfile.TarInfo("Dockerfile")
         info.size = len(data)
         tar.addfile(info, io.BytesIO(data))
@@ -38,7 +39,7 @@ class Docker:
         except docker.errors.ImageNotFound:
             return False
 
-    def build_image(self, dockerfile, context_path, buildargs=None):
+    def build_image(self, dockerfile, context_path=None, buildargs=None):
         context = docker_context(dockerfile, context_path)
         print(colored("--- DOCKERFILE BEGIN ---", "yellow"))
         print(colored(dockerfile, "yellow"))
@@ -115,8 +116,6 @@ class DockerMixin:
 
     @property
     def repository(self):
-        # TODO: tldr-{self.name} or {self.safe_name}
-        # TODO: safe_name for plugin
         return f"{self.__docker_username}/{self.__name}"
 
     @property

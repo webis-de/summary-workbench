@@ -1,7 +1,5 @@
 version: "1.0"
 name: MoverScore
-devimage: default
-deployimage: default
 metadata:
   type: semantic
   model: MoverScoreV1

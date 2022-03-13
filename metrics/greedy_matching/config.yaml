@@ -1,7 +1,5 @@
 version: "1.0"
 name: Greedy Matching
-devimage: slim
-deployimage: slim
 metadata:
   type: lexical
   model: glove.6B.300d

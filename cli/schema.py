@@ -1,12 +1,12 @@
 from pathlib import Path
-from typing import Dict, List, Literal, Optional, Union
+from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, HttpUrl, ValidationError, constr
 
-from .config import DEPLOY_IMAGES, DEV_IMAGES
 from .exceptions import ModelValidationError
 
-key_pattern = "^[_A-Za-z]+$"
+key_pattern = "^[_a-zA-Z]+$"
+name_pattern = "^[ _a-zA-Z0-9{}]+$"
 
 
 class ThrowMixin:
@@ -20,9 +20,7 @@ class ThrowMixin:
 
 class PluginModel(BaseModel, ThrowMixin):
     version: str
-    name: str
-    devimage: Literal[tuple(DEV_IMAGES)]  # TODO: only one devimage
-    deployimage: Literal[tuple(DEPLOY_IMAGES)]  # TODO: only one devimage
+    name: constr(regex=name_pattern)
     metadata: Dict[constr(regex=key_pattern), str] = {}
 
     class Config:

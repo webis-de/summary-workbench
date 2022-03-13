@@ -7,7 +7,6 @@ import { Input } from "./Form";
 const LiveSearch = ({ query, setQuery }) => (
   <Input
     Icon={FaSearch}
-    flatBottom
     placeholder="Search"
     value={query}
     small

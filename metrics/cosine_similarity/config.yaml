@@ -1,7 +1,5 @@
 version: "1.0"
 name: Cosine Similarity
-devimage: slim
-deployimage: slim
 metadata:
   type: semantic
   model: en_core_web_lg

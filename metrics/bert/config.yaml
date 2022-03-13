@@ -1,7 +1,5 @@
 version: "1.0"
 name: BERTScore
-devimage: slim
-deployimage: slim
 metadata:
   type: semantic
   model: roberta-large-mnli

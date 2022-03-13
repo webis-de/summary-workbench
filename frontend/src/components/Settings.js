@@ -44,7 +44,7 @@ const Settings = ({ models, types, toggleSetting, type }) => {
                 <button onClick={() => toggleSetting(key)}>
                   <FaTimes />
                 </button>
-                <ModelText type={info.type} text={info.name} />
+                <ModelText type={info.metadata.type} text={info.name} />
               </div>
             ))}
           </div>

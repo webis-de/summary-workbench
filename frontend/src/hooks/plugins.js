@@ -19,13 +19,14 @@ const initPlugins = async (fetchFunction, defaults) => {
   Object.keys(plugins).forEach((key) => {
     plugins[key].isSet = loadSetting(key, defaults);
   });
-  const types = [...new Set(Object.values(plugins).map(({ info: { type } }) => type))];
+  const types = [...new Set(Object.values(plugins).map(({ info }) => info.metadata.type))];
   return { plugins, types };
 };
 
 const usePlugins = (fetchFunction, defaults) => {
-  const { value, loading, retry, error } = useAsyncRetry(() => initPlugins(fetchFunction, defaults));
-  console.log(retry)
+  const { value, loading, retry, error } = useAsyncRetry(() =>
+    initPlugins(fetchFunction, defaults)
+  );
   const [types, setTypes] = useState(null);
   const [plugins, setPlugins] = useState({});
   useEffect(() => {

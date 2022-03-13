@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { CSSTransition } from "react-transition-group";
-import { useAsync, useAsyncFn } from "react-use";
+import { useAsyncFn } from "react-use";
 
 import { feedbackRequest, pdfExtractRequest, summarizeRequest } from "../api";
 import { SettingsContext } from "../contexts/SettingsContext";
@@ -11,7 +11,7 @@ import { Settings } from "./Settings";
 import { Badge } from "./utils/Badge";
 import { Button, LoadingButton } from "./utils/Button";
 import { Card, CardContent, CardHead } from "./utils/Card";
-import { FileInput, useFile, useFileInput } from "./utils/ChooseFile";
+import { FileInput, useFileInput } from "./utils/ChooseFile";
 import { Textarea } from "./utils/Form";
 import { Bars, EyeClosed, EyeOpen, ThumbsDown, ThumbsUp } from "./utils/Icons";
 import { SpaceGap } from "./utils/Layout";
@@ -71,7 +71,6 @@ const PdfUpload = ({ setText }) => {
     if (file) {
       if (file.type !== "application/pdf") throw new TypeError("invalid file type");
       const content = await pdfExtractRequest(file);
-      console.log(content)
       setText(pdfJsonToText(content));
     }
   });

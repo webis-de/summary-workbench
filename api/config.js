@@ -1,39 +1,38 @@
-const fs = require("fs")
-const path = require("path")
+const fs = require("fs");
 
 let data;
 try {
-  data = fs.readFileSync(path.join(__dirname, "plugin_config.json"))
+  data = fs.readFileSync("/plugin_config/plugin_config.json");
 } catch (err) {
-  console.log("no plugin config found")
-  process.exit(1)
+  console.log("no plugin config found");
+  process.exit(1);
 }
 
 try {
-  data = JSON.parse(data)
+  data = JSON.parse(data);
 } catch (err) {
-  console.log("invalid plugin config content")
-  process.exit(1)
+  console.log("invalid plugin config content");
+  process.exit(1);
 }
 
-METRICS_INFO = data.METRICS
-SUMMARIZERS_INFO = data.SUMMARIZERS
+METRICS_INFO = data.metrics;
+SUMMARIZERS_INFO = data.summarizers;
 
-METRICS = Object.keys(METRICS_INFO)
-SUMMARIZERS = Object.keys(SUMMARIZERS_INFO)
+METRICS = Object.keys(METRICS_INFO);
+SUMMARIZERS = Object.keys(SUMMARIZERS_INFO);
 
 console.log("Metrics: ", METRICS);
 console.log("Summarizers: ", SUMMARIZERS);
 
-const to_envvar = (name) => name.toUpperCase().replace(/-/g, "_")
+const to_envvar = (name) => name.toUpperCase().replace(/-/g, "_");
 
 const METRIC_URLS = METRICS.reduce((acc, val) => {
-  url = `${to_envvar(val)}_METRIC_URL`;
+  url = `${to_envvar(val)}_URL`;
   return { [val]: process.env[url], ...acc };
 }, {});
 
 const SUMMARIZER_URLS = SUMMARIZERS.reduce((acc, val) => {
-  const url = `${to_envvar(val)}_SUMMARIZER_URL`;
+  const url = `${to_envvar(val)}_URL`;
   return { [val]: process.env[url], ...acc };
 }, {});
 

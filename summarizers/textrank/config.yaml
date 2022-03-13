@@ -1,7 +1,5 @@
 version: "1.0"
 name: "{model}"
-devimage: slim
-deployimage: slim
 metadata:
-  type: Extractive
+  type: extractive
   sourcecode: "https://github.com/DerwenAI/pytextrank"

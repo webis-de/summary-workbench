@@ -1,7 +1,5 @@
 version: "1.0"
 name: METEOR
-devimage: java
-deployimage: java
 metadata:
   type: lexical
   homepage: https://www.aclweb.org/anthology/W05-0909.pdf

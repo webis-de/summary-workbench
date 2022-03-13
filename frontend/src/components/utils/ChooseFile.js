@@ -57,7 +57,6 @@ const FileInput = ({ fileInputRef, setFile }) => (
     type="file"
     ref={fileInputRef}
     onChange={({target}) => {
-      console.log(target)
       const file = target.files[0];
       if (file) setFile(file);
     }}

@@ -1,7 +1,5 @@
 version: "1.0"
 name: BERTSummarizer
-devimage: slim
-deployimage: slim
 metadata:
   type: extractive
   homepage: https://arxiv.org/abs/1906.04165

@@ -1,0 +1,5 @@
+ARG python_version=3.8
+
+FROM python:${python_version}
+
+RUN apt update && apt --yes install default-jre-headless

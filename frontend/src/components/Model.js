@@ -1,8 +1,7 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { FaCheck } from "react-icons/fa";
 
 import { cyrb53 } from "../utils/color";
-import { Pagination, usePagination } from "./utils/Pagination";
 
 const colors = ["bg-red-400", "bg-blue-400"];
 
@@ -42,7 +41,7 @@ const Model = ({ info, onClick, isSet }) => (
     onClick={onClick}
   >
     <FaCheck className={`text-green-600 ${isSet ? "" : "invisible"}`} />
-    <ModelText type={info.type} text={info.name} />
+    <ModelText type={info.metadata.type} text={info.name} />
   </button>
 );
 

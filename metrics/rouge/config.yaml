@@ -1,7 +1,5 @@
 version: "1.0"
 name: ROUGE
-devimage: slim
-deployimage: slim
 metadata:
   type: lexical
   homepage: https://www.aclweb.org/anthology/W04-1013.pdf

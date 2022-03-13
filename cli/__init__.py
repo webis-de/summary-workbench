@@ -70,6 +70,7 @@ class PluginConfig:
         return json.dumps(self.config, indent=2)
 
     def save(self):
+        PLUGIN_CONFIG_PATH.parent.mkdir(exist_ok=True, parents=True)
         with open(PLUGIN_CONFIG_PATH, "w") as f:
             json.dump(self.config, f, indent=2)
 
@@ -93,7 +94,7 @@ class NodeMixin:
 class Service(DockerMixin):
     def __init__(self, service_type, sub_path="basic"):
         self.path = Path(f"./{service_type}")
-        self.name, self.owner = service_type, ""
+        self.clean_name, self.clean_owner = service_type, ""
 
         filename = f"{service_type}.yaml"
         DockerMixin.__init__(
@@ -114,13 +115,14 @@ class Api(NodeMixin, Service):
         plugins = Plugins.load()
         return {
             0: dict_path(
-                ["data", "plugin_config.json"], Yaml.PreservedString(str(PluginConfig(plugins)))
+                ["data", "plugin_config.json"],
+                Yaml.PreservedString(str(PluginConfig(plugins))),
             ),
             1: dict_path(
                 ["spec", "template", "spec", "containers", 0],
                 {
                     "image": self.image_url,
-                    "env": plugins.api_kubernetes_env(),  # TODO: extend
+                    "env": plugins.api_kubernetes_env(),
                 },
             ),
         }
@@ -225,25 +227,24 @@ class ServiceManager:
         self.services = {}
         for service_type, services in self.services_by_type.items():
             for service in services:
-                service_map = self.services.setdefault(service.name, {}).setdefault(
-                    service_type, {}
-                )  # TODO: safe name bzw. avoid collision
-                # TODO: also integrate save name into frontend
-                if service.owner in service_map:
+                service_map = self.services.setdefault(
+                    service.clean_name, {}
+                ).setdefault(service_type, {})
+                if service.clean_owner in service_map:
                     raise DoubleServicesError(
-                        f"{service_type} service {service.name} for user '{service.owner}' is configured twice",
+                        f"{service_type} service {service.clean_name} for user '{service.clean_owner}' is configured twice",
                     )
-                service_map[service.owner] = service
-                # TODO: test owner collision with external plugin
+                service_map[service.clean_owner] = service
 
     def print_images(self):
+        # TODO: ignore images with image_url
         for service_type, services in self.services_by_type.items():
             print(colored(service_type, "green"))
             for service in services:
                 version = colored(f"version: {service.get_version()}", "yellow")
-                service_string = f"  {service.name} ({version})"
-                if service.owner != "":
-                    owner = colored(f"owner: {service.owner}", "blue")
+                service_string = f"  {service.clean_name} ({version})"
+                if service.clean_owner != "":
+                    owner = colored(f"owner: {service.clean_owner}", "blue")
                     service_string += f" ({owner})"
                 print(service_string)
             print()
@@ -258,11 +259,11 @@ class ServiceManager:
             raise BaseManageError("no service found for this key", qualified_name)
         services = qualified_collect(service_root, path)
         if not services:
-            raise BaseException(f"no service was found for key {qualified_name}")
+            raise BaseManageError(f"no service was found for key {qualified_name}")
         if len(services) == 1:
             return services[0][1]
-        raise BaseException(
-            f"there are multiple services with the name {qualified_name}, use the following names to resolve: {', '.join(reduce_path)}"
+        raise BaseManageError(
+            f"there are multiple services with the name {qualified_name}, use one of the following names to resolve [{', '.join([reduce_path(s[0]) for s in services])}]"
         )
 
     def _build(self, service, force):
@@ -271,23 +272,31 @@ class ServiceManager:
         else:
             service.build()
 
-    def build(self, name, force=False):
-        service = self.get_service(name)
+    def build(self, qualified_name, force=False):
+        service = self.get_service(qualified_name)
         self._build(service, force)
 
     def build_all(self, force=False):
-        for services in self.services.values():
+        for services in self.services_by_type.values():
             for service in services:
                 self._build(service, force)
 
-    def push(self, name):
-        service = self.get_service(name)
+    def push(self, qualified_name):
+        service = self.get_service(qualified_name)
         service.push()
 
     def push_all(self):
-        for services in self.services.values():
+        for services in self.services_by_type.values():
             for service in services:
                 service.push()
+
+    def pull(self):
+        for services in self.services_by_type.values():
+            for service in services:
+                try:
+                    service.pull()
+                except AttributeError:
+                    pass
 
     def gen_docker_compose(_):
         plugins = Plugins.load()
@@ -325,7 +334,7 @@ class ServiceManager:
         token_secrets.dump(DEPLOY_PATH / "token_secrets.yaml")
 
 
-@click.command()
+@click.command(help="build images for deployment")
 @click.option("--all", is_flag=True)
 @click.option("--force", is_flag=True)
 @click.argument("names", nargs=-1)
@@ -334,14 +343,14 @@ def build(names, force, all):
     if all:
         manager.build_all(force)
     elif not names:
-        print("give the names of the services to build or --all for all")
+        print("give the names of the services to build or --all for all (e.g. ./manage.py build frontend)", end="\n\n")
         manager.print_images()
     else:
         for name in names:
             manager.build(name, force=force)
 
 
-@click.command()
+@click.command(help="push images to dockerhub for deployment")
 @click.option("--all", is_flag=True)
 @click.argument("names", nargs=-1)
 def push(names, all):
@@ -349,19 +358,24 @@ def push(names, all):
     if all:
         manager.push_all()
     elif not names:
-        print("give the names of the plugins to push or --all for all")
+        print("give the names of the plugins to push or --all for all (e.g. ./manage.py push frontend)", end="\n\n")
         manager.print_images()
     else:
         for name in names:
             manager.push(name)
 
 
-@click.command()
+@click.command(help="update plugins from git")
+def pull():
+    ServiceManager().pull()
+
+
+@click.command(help="generate a local application using docker-compose")
 def gen_docker_compose():
     ServiceManager().gen_docker_compose()
 
 
-@click.command()
+@click.command(help="generate the deployment files for the kubernetes")
 @click.option("--secrets", is_flag=True)
 def gen_kubernetes(secrets):
     manager = ServiceManager()
@@ -382,6 +396,7 @@ _main.add_command(gen_docker_compose)
 _main.add_command(gen_kubernetes)
 _main.add_command(build)
 _main.add_command(push)
+_main.add_command(pull)
 
 
 def main():

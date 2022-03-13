@@ -1,19 +1,20 @@
 import re
 from collections import defaultdict
 from itertools import chain
+from .git_interface import pull
 
 from .config import (CONTAINER_PLUGIN_FILES_PATH, CONTAINER_PLUGIN_SERVER_PATH,
-                     COPY_PLUGIN_DOCKER_FILE, COPY_SERVER_DOCKER_FILE,
-                     DEPLOY_IMAGE_PATH, DEPLOY_PATH, DEV_IMAGE_PATH,
-                     KUBERNETES_TEMPLATES_PATH, PIPENV_COMMAND,
-                     PLUGIN_SERVER_PATH, REQUIREMENTS_TXT_COMMAND)
+                     DEPLOY_PATH, DEV_BOOT_PATH, KUBERNETES_TEMPLATES_PATH,
+                     PLUGIN_DOCKERFILE_PATH, PLUGIN_SERVER_PATH,
+                     REQUIRED_FILE_GROUPS, SETUP_PLUGIN_FILES_DOCKER_FILE,
+                     SETUP_SERVER_FILES_DOCKER_FILE)
 from .docker_interface import DockerMixin
 from .exceptions import BaseManageError, InvalidPluginTypeError
 from .git_interface import resolve_source
 from .schema import ConfigurePluginModel, PluginModel
 from .utils import Yaml, get_config, python_version_from_path
 
-name_pattern = "-_a-zA-Z0-9 "
+name_pattern = "_a-zA-Z0-9 "
 
 
 def resolve_path(path):
@@ -25,7 +26,7 @@ def resolve_path(path):
 
 def expand_name(name, args, origin):
     try:
-        name = name.format(**args)  # TODO: handle if not expanded
+        name = name.format(**args)
     except KeyError as e:
         (key,) = e.args
         raise BaseManageError(
@@ -39,31 +40,32 @@ def expand_name(name, args, origin):
     return name
 
 
-PLUGIN_TYPES = {"metrics": "METRIC", "summarizers": "SUMMARIZER"}
+PLUGIN_TYPES = {"metric", "summarizer"}
 
 
-def clean_name(name):
-    return re.sub("(^-+)|(-+$)", "", re.sub("[^a-z0-9]", "-", name.lower()))
+def clean_string(s):
+    s = s.lower()
+    s = re.sub(r"\s", "_", s)
+    s = re.sub("[^a-z0-9]", "_", s)
+    s = re.sub("_+", "_", s)
+    s = s.strip("_")
+    return s or "_"
 
 
 def quote(string):
     return string.replace('"', r"\"").replace("$", r"\$")
 
 
-COMMAND_MAP = {
-    "Pipfile.lock": PIPENV_COMMAND,
-    "Pipfile": PIPENV_COMMAND,
-    "requirements.txt": REQUIREMENTS_TXT_COMMAND,
-}
-
-
-def get_service_command(plugin_path, name):
-    for filename, command in COMMAND_MAP.items():
-        if (plugin_path / filename).exists():
-            return command
-    raise BaseManageError(
-        f"none of [{', '.join(COMMAND_MAP)}] exists, provide at least one", name
-    )
+def check_if_required_files_present(path):
+    for filegroup in REQUIRED_FILE_GROUPS:
+        for filename in filegroup:
+            if (path / filename).exists():
+                break
+        else:
+            raise BaseManageError(
+                f"none of [{', '.join(filegroup)}] exists, provide at least one",
+                path,
+            )
 
 
 class Plugin(DockerMixin):
@@ -75,10 +77,13 @@ class Plugin(DockerMixin):
         environment,
         docker_username,
     ):
-        if plugin_type not in PLUGIN_TYPES.values():
+        if plugin_type not in PLUGIN_TYPES:
             raise InvalidPluginTypeError(f"invalid type {plugin_type}")
         self.plugin_type = plugin_type
         self.plugin_path, self.owner = resolve_source(source)
+        self.clean_owner = clean_string(self.owner) if self.owner else ""
+
+        check_if_required_files_present(self.plugin_path)
 
         config_path = self.plugin_path / "config.yaml"
         config = PluginModel.load(config_path, **Yaml.load(config_path, json=True))
@@ -88,29 +93,21 @@ class Plugin(DockerMixin):
         self.environment["PLUGIN_TYPE"] = self.plugin_type
 
         self.name = expand_name(config.name, self.environment, source)
+        self.clean_name = clean_string(self.name)
 
-        self.devimage_path = (
-            DEV_IMAGE_PATH / config.devimage
-            if config.devimage
-            else self.plugin_path / "Dockerfile.dev"
-        )
-        self.deployimage_path = (
-            DEPLOY_IMAGE_PATH / config.deployimage
-            if config.deployimage
-            else self.plugin_path / "Dockerfile"
-        )
+        self.dockerfile_path = self.plugin_path / "Dockerfile"
+        if not self.dockerfile_path.exists():
+            self.dockerfile_path = PLUGIN_DOCKERFILE_PATH
 
-        self.short_safe_name = clean_name(f"{self.owner}-{self.name}")
-
-        self.safe_name = f"tldr-{self.plugin_type.lower()}-{self.short_safe_name}"
-        self.url = f"http://{self.safe_name}:5000"
+        self.unique_name = (
+            f"{self.plugin_type.lower()}-{self.clean_owner}-{self.clean_name}"
+        ).strip("-")
+        self.url = f"http://{self.unique_name}:5000"
         self.url_env = (
-            f"{self.short_safe_name.upper().replace('-', '_')}_{self.plugin_type}_URL",
+            f"{self.unique_name.replace('-', '_')}_URL".upper(),
             f"{self.url}",
         )
         self.docker_compose_url_env = ["=".join(self.url_env)]
-        self.kubernetes_name = f"{self.plugin_type.lower()}-{self.short_safe_name}"
-        self.deployment_name = f"tldr-{self.kubernetes_name}"
 
         self.dev_environment = [
             f"{key}={value}" for key, value in self.environment.items()
@@ -123,21 +120,19 @@ class Plugin(DockerMixin):
             ]
         )
         self.named_volumes = {
-            f"{self.safe_name}_root": "/root",
+            f"{self.unique_name}_root": "/root",
         }
         self.docker_compose_named_volumes = {key: None for key in self.named_volumes}
         self.path_volumes = {
-            str(PLUGIN_SERVER_PATH): CONTAINER_PLUGIN_SERVER_PATH,
-            str(self.plugin_path): CONTAINER_PLUGIN_FILES_PATH,
+            str(PLUGIN_SERVER_PATH): str(CONTAINER_PLUGIN_SERVER_PATH),
+            str(self.plugin_path): str(CONTAINER_PLUGIN_FILES_PATH),
         }
         self.volumes = {**self.named_volumes, **self.path_volumes}
         self.path_volumes = {
-            str(PLUGIN_SERVER_PATH): CONTAINER_PLUGIN_SERVER_PATH,
-            str(self.plugin_path): CONTAINER_PLUGIN_FILES_PATH,
+            str(PLUGIN_SERVER_PATH): str(CONTAINER_PLUGIN_SERVER_PATH),
+            str(self.plugin_path): str(CONTAINER_PLUGIN_FILES_PATH),
         }
         self.version = config.version
-        self.command = f'bash -c "{get_service_command(self.plugin_path, self.name)}"'
-        # TODO: rename
         DockerMixin.__init__(
             self,
             deploy_src=KUBERNETES_TEMPLATES_PATH / "plugin.yaml",
@@ -145,9 +140,13 @@ class Plugin(DockerMixin):
             / f"{self.plugin_type.lower()}"
             / f"{self.name}.yaml",
             docker_username=docker_username,
-            name=self.safe_name,
+            name=self.unique_name,
             image_url=image_url,
         )
+
+    def pull(self):
+        if self.owner is not None:
+            pull(self.plugin_path)
 
     def get_version(self):
         return self.version
@@ -156,8 +155,7 @@ class Plugin(DockerMixin):
         return python_version_from_path(self.plugin_path)
 
     def build_chain_args(self):
-        self.load_docker()
-        dockerfile = resolve_path(self.deployimage_path).read_text()
+        dockerfile = resolve_path(self.dockerfile_path).read_text()
         return [
             {
                 "dockerfile": dockerfile,
@@ -165,60 +163,65 @@ class Plugin(DockerMixin):
                 "buildargs": self.python_version_arg(),
             },
             {
-                "dockerfile": COPY_PLUGIN_DOCKER_FILE.format(
-                    environment=self.build_environment()
+                "dockerfile": SETUP_PLUGIN_FILES_DOCKER_FILE.format(
+                    environment=self.build_environment
                 ),
                 "context_path": self.plugin_path,
             },
             {
-                "dockerfile": COPY_SERVER_DOCKER_FILE,
+                "dockerfile": SETUP_SERVER_FILES_DOCKER_FILE,
                 "context_path": PLUGIN_SERVER_PATH,
             },
         ]
 
     def patch(self):
-        labels = {"tier": self.kubernetes_name, "version": self.version}
+        labels = {"tier": self.unique_name, "version": self.version}
         deployment = {
-            "metadata": {"name": self.deployment_name, "labels": labels},
+            "metadata": {"name": self.unique_name, "labels": labels},
             "spec": {
                 "selector": {"matchLabels": labels},
                 "template": {
                     "metadata": {"labels": labels},
                     "spec": {
                         "containers": {
-                            0: {"name": self.kubernetes_name, "image": self.image_url}
+                            0: {"name": self.unique_name, "image": self.image_url}
                         }
                     },
                 },
             },
         }
         service = {
-            "metadata": {"name": self.deployment_name},
+            "metadata": {"name": self.unique_name},
             "spec": {"selector": labels},
         }
         return {0: deployment, 1: service}
 
     def to_service(self):
-        devimage_path = resolve_path(self.devimage_path)
+        dockerfile_path = resolve_path(self.dockerfile_path)
         python_version = self.python_version_arg()
-        args = {"args": python_version} if python_version is not None else {}
+        build_args = {"args": python_version} if python_version is not None else {}
         return {
-            self.safe_name: {
-                "image": f"{self.safe_name}:latest",
+            self.unique_name: {
+                "image": f"{self.unique_name}:latest",
                 "build": {
-                    "context": str(devimage_path.parent),
-                    "dockerfile": devimage_path.name,
-                    **args,
+                    "context": str(dockerfile_path.parent),
+                    "dockerfile": dockerfile_path.name,
+                    **build_args,
                 },
-                "working_dir": CONTAINER_PLUGIN_FILES_PATH,
+                "working_dir": str(CONTAINER_PLUGIN_FILES_PATH),
                 "volumes": [":".join(item) for item in self.volumes.items()],
-                "command": self.command,
+                "command": f"bash {DEV_BOOT_PATH}",
                 "environment": self.dev_environment,
             }
         }
 
     def plugin_config(self):
-        return {**self.metadata, "name": self.name, "owner": self.owner}
+        return {
+            "metadata": self.metadata,
+            "name": self.name,
+            "owner": self.owner,
+            "key": self.unique_name,
+        }
 
 
 class Plugins:
@@ -236,8 +239,8 @@ class Plugins:
 
     def plugin_config(self):
         return {
-            f"{plugin_type.upper()}": {
-                plugin.short_safe_name: plugin.plugin_config() for plugin in plugins
+            f"{plugin_type}": {
+                plugin.unique_name: plugin.plugin_config() for plugin in plugins
             }
             for plugin_type, plugins in self.plugin_dict.items()
         }
@@ -260,14 +263,15 @@ class Plugins:
         config = get_config()
         plugins = defaultdict(list)
         for plugin_type in PLUGIN_TYPES:
-            init_args_list = getattr(config, plugin_type)
+            config_key = f"{plugin_type}s"
+            init_args_list = getattr(config, config_key)
             for init_args in init_args_list:
                 if not isinstance(init_args, ConfigurePluginModel):
                     init_args = ConfigurePluginModel(source=init_args)
                 init_args = init_args.dict()
-                plugins[plugin_type].append(
+                plugins[config_key].append(
                     Plugin(
-                        plugin_type=PLUGIN_TYPES[plugin_type],
+                        plugin_type=plugin_type,
                         **init_args,
                         docker_username=config.docker_username,
                     )

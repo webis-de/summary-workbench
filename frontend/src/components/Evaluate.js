@@ -39,7 +39,6 @@ const FileInput = ({ compute, computing }) => (
 
 const Evaluate = () => {
   const { loading, metrics, types, retry, toggle } = useContext(MetricsContext);
-  console.log(retry)
   const calc = useCalculations();
 
   const [state, doFetch] = useAsyncFn(async (id, chosenMetrics, hypotheses, references) => {

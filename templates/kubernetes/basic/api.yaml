@@ -52,7 +52,7 @@ spec:
           volumeMounts:
             - name: plugin-config
               subPath: plugin_config.json
-              mountPath: "/app/plugin_config.json"
+              mountPath: /plugin_config/plugin_config.json
               readOnly: true
           readinessProbe:
             httpGet:

@@ -1,8 +1,6 @@
 version: "1.0"
 name: Sentence Transformers
-devimage: slim
-deployimage: slim
 metadata:
-  model: roberta-large-nli-stsb-mean-tokens
   type: semantic
+  model: roberta-large-nli-stsb-mean-tokens
   sourcecode: https://github.com/UKPLab/sentence-transformers

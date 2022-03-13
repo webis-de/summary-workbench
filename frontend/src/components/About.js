@@ -6,7 +6,7 @@ import { Button } from "./utils/Button";
 import { SpaceGap } from "./utils/Layout";
 import { CenterLoading } from "./utils/Loading";
 import { Table, TableWrapper, Tbody, Td, Th, Thead, Tr } from "./utils/Table";
-import { HeadingBig, HeadingSemiBig, Hint } from "./utils/Text";
+import { HeadingBig, HeadingSemiBig } from "./utils/Text";
 
 const AboutTable = ({ section, content }) => (
   <TableWrapper>
@@ -20,7 +20,10 @@ const AboutTable = ({ section, content }) => (
       </Thead>
       <Tbody>
         {Object.entries(content).map(([key, { info }]) => {
-          const { name, type, sourcecode, model, homepage } = info;
+          const {
+            name,
+            metadata: { sourcecode, model, homepage, type },
+          } = info;
           return (
             <Tr key={key} hover striped>
               <Td>{name}</Td>
