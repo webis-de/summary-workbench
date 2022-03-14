@@ -7,7 +7,7 @@ import { ChooseFile, sameLength, useFile } from "./utils/ChooseFile";
 import { FlexResponsive } from "./utils/Layout";
 import { Hint, Label } from "./utils/Text";
 
-const Upload = ({ compute, computing }) => {
+const Upload = ({ compute, computing, error }) => {
   const { fileName: hypFileName, lines: hypotheses, setFile: setHypFile } = useFile();
   const { fileName: refFileName, lines: references, setFile: setRefFile } = useFile();
 
@@ -70,6 +70,9 @@ const Upload = ({ compute, computing }) => {
             <Hint type="info" small>
               Select at least one metric.
             </Hint>
+          )}
+          {!computing && error && (
+            <Hint type="danger">{error.message}</Hint>
           )}
         </div>
       </div>

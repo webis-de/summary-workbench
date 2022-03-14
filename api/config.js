@@ -15,11 +15,11 @@ try {
   process.exit(1);
 }
 
-METRICS_INFO = data.metrics;
-SUMMARIZERS_INFO = data.summarizers;
+ALL_METRICS = data.metrics;
+ALL_SUMMARIZERS = data.summarizers;
 
-METRICS = Object.keys(METRICS_INFO);
-SUMMARIZERS = Object.keys(SUMMARIZERS_INFO);
+METRICS = Object.entries(ALL_METRICS).filter(([,value]) => !value.disabled).map(([key]) => key);
+SUMMARIZERS = Object.entries(ALL_SUMMARIZERS).filter(([,value]) => !value.disabled).map(([key]) => key);
 
 console.log("Metrics: ", METRICS);
 console.log("Summarizers: ", SUMMARIZERS);
@@ -60,8 +60,8 @@ if (!ACCESS_TOKEN_SECRET || !REFRESH_TOKEN_SECRET) {
 const MONGODB_HOST = process.env.MONGODB_HOST;
 
 module.exports = {
-  METRICS_INFO,
-  SUMMARIZERS_INFO,
+  ALL_METRICS,
+  ALL_SUMMARIZERS,
   METRICS,
   SUMMARIZERS,
   METRIC_URLS,

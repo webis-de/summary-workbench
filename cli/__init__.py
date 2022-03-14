@@ -96,6 +96,7 @@ class Service(DockerMixin):
     def __init__(self, service_type, sub_path="basic"):
         self.path = Path(f"./{service_type}")
         self.clean_name, self.clean_owner = service_type, ""
+        self.disabled = False
 
         filename = f"{service_type}.yaml"
         DockerMixin.__init__(
@@ -239,7 +240,7 @@ class ServiceManager:
 
     def print_images(self):
         # TODO: ignore images with image_url
-        for service_type, services in self.services_by_type.items():
+        for service_type, services in sorted(self.services_by_type.items()):
             print(colored(service_type, "green"))
             for service in services:
                 version = colored(f"version: {service.get_version()}", "yellow")
@@ -247,6 +248,9 @@ class ServiceManager:
                 if service.clean_owner != "":
                     owner = colored(f"owner: {service.clean_owner}", "blue")
                     service_string += f" ({owner})"
+                if service.disabled:
+                    disabled = colored(f"disabled", "red")
+                    service_string += f" ({disabled})"
                 print(service_string)
             print()
 
@@ -262,7 +266,10 @@ class ServiceManager:
         if not services:
             raise BaseManageError(f"no service was found for key {qualified_name}")
         if len(services) == 1:
-            return services[0][1]
+            service = services[0][1]
+            if service.disabled:
+                raise BaseManageError(f"the service for {qualified_name} is disabled")
+            return service
         raise BaseManageError(
             f"there are multiple services with the name {qualified_name}, use one of the following names to resolve [{', '.join([reduce_path(s[0]) for s in services])}]"
         )
@@ -280,7 +287,8 @@ class ServiceManager:
     def build_all(self, force=False):
         for services in self.services_by_type.values():
             for service in services:
-                self._build(service, force)
+                if not service.disabled:
+                    self._build(service, force)
 
     def push(self, qualified_name):
         service = self.get_service(qualified_name)
@@ -289,19 +297,21 @@ class ServiceManager:
     def push_all(self):
         for services in self.services_by_type.values():
             for service in services:
-                service.push()
+                if not service.disabled:
+                    service.push()
 
     def pull(self):
         for services in self.services_by_type.values():
             for service in services:
-                try:
-                    service.pull()
-                except AttributeError:
-                    pass
+                if not service.disabled:
+                    try:
+                        service.pull()
+                    except AttributeError:
+                        pass
 
     def gen_docker_compose(_):
         plugins = Plugins.load()
-        ComposeFile(plugins).save()
+        ComposeFile(plugins.enabled()).save()
         PluginConfig(plugins).save()
 
     def gen_kubernetes(_):

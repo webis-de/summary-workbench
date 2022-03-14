@@ -37,7 +37,9 @@ const ModelText = ({ type, text }) => (
 
 const Model = ({ info, onClick, isSet }) => (
   <button
-    className="ring-1 ring-slate-300 flex items-center gap-2 px-2 py-1 bg-white hover:bg-slate-200"
+    className={`ring-1 ring-slate-300 flex items-center gap-2 px-2 py-1 bg-white ${
+      info.disabled ? "opacity-30" : "hover:bg-slate-200"
+    }`}
     onClick={onClick}
   >
     <FaCheck className={`text-green-600 ${isSet ? "" : "invisible"}`} />

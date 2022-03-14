@@ -42,6 +42,7 @@ class ConfigurePluginModel(BaseModel):
     source: plugin_source_type = Field(
         description="path to the plugin or url to a git repository for that plugin"
     )
+    disabled: bool = Field(False, description="if the plugin is disabled it will be shown in the selection but will not be loaded in the backend")
     image_url: Optional[str] = Field(
         description="dockerhub source of an already build image (allows you to skip the build phase)"
     )
@@ -57,7 +58,6 @@ class ConfigurePluginModel(BaseModel):
 
 class DeployModel(BaseModel):
     host: str = Field(
-        regex=name_pattern,
         description="host name where the application is exposed on the kubernetes cluster",
     )
 

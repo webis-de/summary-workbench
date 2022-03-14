@@ -16,7 +16,7 @@ import { Tab, TabContent, TabHead, TabPanel, Tabs } from "./utils/Tabs";
 import { HeadingBig, HeadingSemiBig, Hint } from "./utils/Text";
 import { unpack } from "../utils/common"
 
-const FileInput = ({ compute, computing }) => (
+const FileInput = ({ compute, computing, error }) => (
   <Card full>
     <Tabs>
       <CardContent>
@@ -29,7 +29,7 @@ const FileInput = ({ compute, computing }) => (
             <OneHypRef />
           </TabPanel>
           <TabPanel>
-            <Upload compute={compute} computing={computing} />
+            <Upload compute={compute} computing={computing} error={error} />
           </TabPanel>
         </TabContent>
       </CardContent>
@@ -71,7 +71,7 @@ const Evaluate = () => {
         <div className="flex flex-col lg:flex-row gap-3">
           <div className="grow min-w-[400px]">
             <div>
-              <FileInput compute={doFetch} computing={state.loading} />
+              <FileInput compute={doFetch} computing={state.loading} error={state.error} />
             </div>
           </div>
           <div className="min-w-[600px]">

@@ -64,7 +64,8 @@ const makeSection = ({ section, secNum, texts }) => {
   return textList.join("\n");
 };
 
-const pdfJsonToText = ({ title, abstract, sections }) => [title, abstract, ...sections.map(makeSection)].join("\n\n");
+const pdfJsonToText = ({ title, abstract, sections }) =>
+  [title, abstract, ...sections.map(makeSection)].join("\n\n");
 
 const PdfUpload = ({ setText }) => {
   const [{ loading, error }, setFile] = useAsyncFn(async (file) => {
@@ -209,12 +210,14 @@ const Summary = ({ markup, summary, markupState, scrollState, showMarkup }) => {
         <Badge>{`${numWords} words`}</Badge>
         <Badge>{`${(percentOverlap * 100).toFixed(0)}% overlap`}</Badge>
       </div>
-      <Markup
-        markups={markup[1]}
-        markupState={markupState}
-        scrollState={scrollState}
-        showMarkup={showMarkup}
-      />
+      <div className="max-h-[60vh] overflow-auto">
+        <Markup
+          markups={markup[1]}
+          markupState={markupState}
+          scrollState={scrollState}
+          showMarkup={showMarkup}
+        />
+      </div>
       <div className="pt-4 flex justify-end">
         <Feedback summary={summary} />
       </div>

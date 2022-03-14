@@ -12,7 +12,7 @@ import { Textarea } from "./utils/Form";
 import { FlexResponsive, SpaceGap } from "./utils/Layout";
 import { Markup } from "./utils/Markup";
 import { Table, TableWrapper, Tbody, Td, Tr } from "./utils/Table";
-import { HeadingMedium } from "./utils/Text";
+import { HeadingMedium, Hint } from "./utils/Text";
 
 const OneHypRefResult = ({ calculation }) => {
   const { scores, hypText, refText } = calculation;
@@ -91,6 +91,9 @@ const OneHypRef = () => {
             <OneHypRefResult calculation={state.value} />
           </div>
         </div>
+      )}
+      {!state.loading && state.error && (
+        <Hint type="danger">{state.error.message}</Hint>
       )}
     </SpaceGap>
   );

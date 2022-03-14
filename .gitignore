@@ -1,5 +1,5 @@
 .venv
-config.dev.yaml
+dev.sw-config.yaml
 plugin_config.json
 experiments.py
 docker-compose.yaml

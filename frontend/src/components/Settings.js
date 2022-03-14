@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { FaTimes } from "react-icons/fa";
 
 import { getChosen } from "../utils/common";

@@ -73,6 +73,7 @@ class Plugin(DockerMixin):
         self,
         plugin_type,
         source,
+        disabled,
         image_url,
         environment,
         docker_username,
@@ -82,6 +83,7 @@ class Plugin(DockerMixin):
         self.plugin_type = plugin_type
         self.plugin_path, self.owner = resolve_source(source)
         self.clean_owner = clean_string(self.owner) if self.owner else ""
+        self.disabled = disabled
 
         check_if_required_files_present(self.plugin_path)
 
@@ -218,6 +220,7 @@ class Plugin(DockerMixin):
     def plugin_config(self):
         return {
             "metadata": self.metadata,
+            "disabled": self.disabled,
             "name": self.name,
             "owner": self.owner,
             "key": self.unique_name,
@@ -247,16 +250,17 @@ class Plugins:
 
     def api_kubernetes_env(self):
         envs = []
-        for plugins in self.plugin_dict.values():
-            for plugin in plugins:
-                name, value = plugin.url_env
-                envs.append({"name": name, "value": value})
+        for plugin in self.enabled():
+            name, value = plugin.url_env
+            envs.append({"name": name, "value": value})
         return envs
 
+    def enabled(self):
+        return [plugin for plugin in self if not plugin.disabled]
+
     def gen_kubernetes(self):
-        for plugins in self.plugin_dict.values():
-            for plugin in plugins:
-                plugin.gen_kubernetes()
+        for plugin in self.enabled():
+            plugin.gen_kubernetes()
 
     @classmethod
     def load(cls):

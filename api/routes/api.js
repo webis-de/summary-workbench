@@ -3,8 +3,8 @@ const validateMiddleware = require("../middleware/validate");
 const {
   METRICS,
   SUMMARIZERS,
-  SUMMARIZERS_INFO,
-  METRICS_INFO,
+  ALL_SUMMARIZERS,
+  ALL_METRICS,
 } = require("../config");
 
 const { body } = require("express-validator");
@@ -42,7 +42,7 @@ const setDefault = (defaultValue) => (v) => v === undefined ? defaultValue : v;
 
 router.get("/metrics", async (req, res, next) => {
   try {
-    return res.json(METRICS_INFO);
+    return res.json(ALL_METRICS);
   } catch (err) {
     return next(err);
   }
@@ -62,7 +62,7 @@ router.get("/metrics", async (req, res, next) => {
 
 router.get("/summarizers", async (req, res, next) => {
   try {
-    return res.json(SUMMARIZERS_INFO);
+    return res.json(ALL_SUMMARIZERS);
   } catch (err) {
     return next(err);
   }
