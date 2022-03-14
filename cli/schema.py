@@ -19,7 +19,9 @@ class ThrowMixin:
 
 
 class PluginModel(BaseModel, ThrowMixin):
-    version: str = Field(description="version of the plugin (e.g. 1.0)")
+    version: str = Field(
+        description="version of the plugin (e.g. 1.0), which will be used to tag the image"
+    )
     name: str = Field(
         regex=name_pattern, description="name of the plugin (e.g. BERT-model)"
     )
