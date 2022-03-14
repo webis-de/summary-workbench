@@ -1,20 +1,20 @@
 import re
 from collections import defaultdict
 from itertools import chain
-from .git_interface import pull
 
 from .config import (CONTAINER_PLUGIN_FILES_PATH, CONTAINER_PLUGIN_SERVER_PATH,
-                     DEPLOY_PATH, DEV_BOOT_PATH, KUBERNETES_TEMPLATES_PATH,
-                     PLUGIN_DOCKERFILE_PATH, PLUGIN_SERVER_PATH,
-                     REQUIRED_FILE_GROUPS, SETUP_PLUGIN_FILES_DOCKER_FILE,
+                     DEFAULT_PLUGIN_CONFIG, DEPLOY_PATH, DEV_BOOT_PATH,
+                     KUBERNETES_TEMPLATES_PATH, PLUGIN_DOCKERFILE_PATH,
+                     PLUGIN_SERVER_PATH, REQUIRED_FILE_GROUPS,
+                     SETUP_PLUGIN_FILES_DOCKER_FILE,
                      SETUP_SERVER_FILES_DOCKER_FILE)
 from .docker_interface import DockerMixin
 from .exceptions import BaseManageError, InvalidPluginTypeError
-from .git_interface import resolve_source
+from .git_interface import pull, resolve_source
 from .schema import ConfigurePluginModel, PluginModel
 from .utils import Yaml, get_config, python_version_from_path
 
-name_pattern = "_a-zA-Z0-9 "
+name_pattern = "-_a-zA-Z0-9 "
 
 
 def resolve_path(path):
@@ -85,7 +85,7 @@ class Plugin(DockerMixin):
 
         check_if_required_files_present(self.plugin_path)
 
-        config_path = self.plugin_path / "config.yaml"
+        config_path = self.plugin_path / DEFAULT_PLUGIN_CONFIG
         config = PluginModel.load(config_path, **Yaml.load(config_path, json=True))
         self.metadata = config.metadata
         self.metadata.update(environment)

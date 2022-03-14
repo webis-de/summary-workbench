@@ -1,0 +1,47 @@
+docker_username: ds40bamo
+
+metrics:
+  #   - ./metrics/bert
+  - https://github.com/dominik-schwabe/tldr-bleu
+  - ./metrics/bleu
+  #   - ./metrics/bleurt
+  # - ./metrics/cider
+  #   - ./metrics/greedy_matching
+  #   - ./metrics/meteor
+  #   - ./metrics/moverscore
+  # - ./metrics/rouge
+  #   - ./metrics/cosine_similarity
+  #   - ./metrics/sentence_transformers
+  # - ./metrics/bartscore
+
+summarizers:
+  - source: ./summarizers/textrank
+    environment:
+      model: textrank
+  # - ./summarizers/newspaper3k
+  # - ./summarizers/conclugen
+  # - source: ./summarizers/coopsum
+  #   environment:
+  #     model: COOP-Amazon
+  # - ./summarizers/lobart
+  # - ./summarizers/gsum
+  # - ./summarizers/bertsum
+  # - ./summarizers/longformer2roberta
+  # - source: ./summarizers/neuralsum
+  #   environment:
+  #     model: T5
+#   - source: ./summarizers/neuralsum
+#     environment:
+#       model: BART-CNN
+#   - source: ./summarizers/neuralsum
+#     environment:
+#       model: BART-XSum
+#   - source: ./summarizers/neuralsum
+#     environment:
+#       model: Pegasus-CNN
+#   - source: ./summarizers/neuralsum
+#     environment:
+#       model: Pegasus-XSum
+#   - source: ./summarizers/neuralsum
+#     environment:
+#       model: Longformer2Roberta

@@ -9,13 +9,14 @@ import shutil
 import click
 from termcolor import colored
 
-from .config import (CONFIG_PATH, DEPLOY_PATH, DOCKER_COMPOSE_YAML_PATH,
-                     DOCKER_TEMPLATES_PATH, KUBERNETES_TEMPLATES_PATH,
-                     PLUGIN_CONFIG_PATH)
+from .config import (DEFAULT_CONFIG, DEFAULTS, DEPLOY_PATH, SCHEMA_FOLDER,
+                     DOCKER_COMPOSE_YAML_PATH, DOCKER_TEMPLATES_PATH,
+                     KUBERNETES_TEMPLATES_PATH, PLUGIN_CONFIG_PATH)
 from .docker_interface import Docker, DockerMixin
 from .exceptions import BaseManageError, DoubleServicesError
 from .plugins import Plugins
 from .utils import Yaml, dict_path, gen_secret, get_config
+from .schema import ConfigModel, PluginModel
 
 
 def remove_old_deploy_files():
@@ -343,7 +344,10 @@ def build(names, force, all):
     if all:
         manager.build_all(force)
     elif not names:
-        print("give the names of the services to build or --all for all (e.g. ./manage.py build frontend)", end="\n\n")
+        print(
+            "give the names of the services to build or --all for all (e.g. ./manage.py build frontend)",
+            end="\n\n",
+        )
         manager.print_images()
     else:
         for name in names:
@@ -358,7 +362,10 @@ def push(names, all):
     if all:
         manager.push_all()
     elif not names:
-        print("give the names of the plugins to push or --all for all (e.g. ./manage.py push frontend)", end="\n\n")
+        print(
+            "give the names of the plugins to push or --all for all (e.g. ./manage.py push frontend)",
+            end="\n\n",
+        )
         manager.print_images()
     else:
         for name in names:
@@ -374,6 +381,11 @@ def pull():
 def gen_docker_compose():
     ServiceManager().gen_docker_compose()
 
+@click.command(help="generate json/yaml-schema of configuration files")
+def gen_schema():
+    Path(SCHEMA_FOLDER / "sw-config.schema.json").write_text(ConfigModel.schema_json(indent=2))
+    Path(SCHEMA_FOLDER / "sw-plugin-config.schema.json").write_text(PluginModel.schema_json(indent=2))
+
 
 @click.command(help="generate the deployment files for the kubernetes")
 @click.option("--secrets", is_flag=True)
@@ -386,14 +398,15 @@ def gen_kubernetes(secrets):
 
 
 @click.group()
-@click.option("--config", default="./config.yaml")
+@click.option("--config", default=DEFAULT_CONFIG)
 def _main(config):
-    CONFIG_PATH["path"] = config
+    DEFAULTS["path"] = config
     pass
 
 
 _main.add_command(gen_docker_compose)
 _main.add_command(gen_kubernetes)
+_main.add_command(gen_schema)
 _main.add_command(build)
 _main.add_command(push)
 _main.add_command(pull)

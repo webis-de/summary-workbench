@@ -12,7 +12,7 @@ from ruamel.yaml.parser import ParserError
 from ruamel.yaml.scanner import ScannerError
 from ruamel.yaml.scalarstring import PreservedScalarString
 
-from .config import CONFIG_PATH
+from .config import DEFAULTS
 from .exceptions import InvalidPathError, InvalidYamlError
 from .schema import ConfigModel
 
@@ -116,7 +116,7 @@ class Yaml:
 
 def get_config():
     if not hasattr(get_config, "config"):
-        path = CONFIG_PATH["path"]
+        path = DEFAULTS["path"]
         conf = Yaml.load(path, json=True)
         get_config.config = ConfigModel.load(path, **conf)
     return get_config.config

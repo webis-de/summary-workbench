@@ -12,7 +12,10 @@ DEV_BOOT_PATH = CONTAINER_PLUGIN_SERVER_PATH / "dev.boot.sh"
 PLUGIN_SERVER_PATH = Path("./plugin_server").absolute()
 REMOTE_PLUGIN_FOLDER = Path("~/.tldr_plugins").expanduser()
 REQUIRED_FILE_GROUPS = [{"Pipfile.lock", "Pipfile", "requirements.txt"}]
-CONFIG_PATH = {"path": "./config.yaml"}
+SCHEMA_FOLDER = Path("./schema")
+DEFAULT_CONFIG = "sw-config.yaml"
+DEFAULT_PLUGIN_CONFIG =  "sw-plugin-config.yaml"
+DEFAULTS = {}
 
 SETUP_PLUGIN_FILES_DOCKER_FILE = f"""
 {{environment}}
