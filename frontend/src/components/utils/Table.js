@@ -8,11 +8,7 @@ const TableWrapper = ({ children }) => (
 
 const Table = ({ children, fixed }) => (
   <div className="overflow-auto">
-    <table
-      className={`w-full divide-y divide-gray-200 ${
-        fixed ? "table-fixed" : "table-auto"
-      }`}
-    >
+    <table className={`w-full divide-y divide-gray-200 ${fixed ? "table-fixed" : "table-auto"}`}>
       {children}
     </table>
   </div>
@@ -34,31 +30,35 @@ const Tbody = ({ children }) => (
   <tbody className="bg-white divide-y divide-gray-200">{children}</tbody>
 );
 
-const Tr = ({ children, hover, striped }) => (
-  <tr
-    className={`bg-white ${striped ? "even:bg-gray-50" : ""} ${hover ? "hover:bg-gray-100" : ""}`}
-  >
-    {children}
-  </tr>
-);
+const Tr = ({ children, hover, striped, red }) => {
+  let className = "";
 
-const Td = ({ children, nowrap, center, right, strong, loose }) => {
-  let direction = "text-left";
-  if (center) direction = "text-center";
-  else if (right) direction = "text-right";
+  if (red) className += "bg-red-200";
+  else className += "bg-white";
 
-  let padding = "py-4 px-6";
-  if (loose) padding = "p-2";
+  if (striped) className += " even:bg-gray-50";
 
-  return (
-    <td
-      className={`${padding} text-sm font-medium ${
-        strong ? "text-gray-900" : "text-gray-500"
-      } ${direction} ${nowrap ? "whitespace-nowrap" : ""}`}
-    >
-      {children}
-    </td>
-  );
+  if (hover) className += " hover:bg-gray-100";
+
+  return <tr className={className}>{children}</tr>;
+};
+
+const Td = ({ children, nowrap, center, right, strong, loose, colSpan }) => {
+  let className = "text-sm font-medium";
+
+  if (center) className += " text-center";
+  else if (right) className += " text-right";
+  else className += " text-left";
+
+  if (loose) className += " p-2";
+  else className += " py-4 px-6";
+
+  if (nowrap) className += " whitespace-nowrap";
+
+  if (strong) className += " text-gray-900";
+  else className += " text-gray-500";
+
+  return <td colSpan={colSpan} className={className}>{children}</td>;
 };
 
 export { TableWrapper, Table, Thead, Tbody, Th, Tr, Td };

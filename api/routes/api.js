@@ -1,10 +1,7 @@
 const express = require("express");
 const validateMiddleware = require("../middleware/validate");
 const {
-  METRICS,
-  SUMMARIZERS,
-  ALL_SUMMARIZERS,
-  ALL_METRICS,
+  currentConfig
 } = require("../config");
 
 const { body } = require("express-validator");
@@ -23,8 +20,10 @@ const { summarize } = require("../summarizers");
 
 const router = express.Router();
 
-const allIsIn = (validElements) => (list) =>
-  list.every((el) => validElements.includes(el));
+const allIsIn = (validElements, key) => (list) => {
+  if (key) return list.every((el) => validElements[key].includes(el));
+  return list.every((el) => validElements.includes(el));
+}
 
 const setDefault = (defaultValue) => (v) => v === undefined ? defaultValue : v;
 
@@ -42,7 +41,7 @@ const setDefault = (defaultValue) => (v) => v === undefined ? defaultValue : v;
 
 router.get("/metrics", async (req, res, next) => {
   try {
-    return res.json(ALL_METRICS);
+    return res.json(currentConfig.METRICS);
   } catch (err) {
     return next(err);
   }
@@ -62,13 +61,13 @@ router.get("/metrics", async (req, res, next) => {
 
 router.get("/summarizers", async (req, res, next) => {
   try {
-    return res.json(ALL_SUMMARIZERS);
+    return res.json(currentConfig.SUMMARIZERS);
   } catch (err) {
     return next(err);
   }
 });
 
-const isListOfStrings = (field, validElements) => {
+const isListOfStrings = (field, validElements, key) => {
   let val = field
     .isArray()
     .withMessage("has to be non-empty List of Strings")
@@ -80,7 +79,7 @@ const isListOfStrings = (field, validElements) => {
     .withMessage("has to be non-empty List of Strings");
   if (validElements !== undefined) {
     val = val
-      .custom(allIsIn(validElements))
+      .custom(allIsIn(validElements, key))
       .withMessage(
         `has to only contain elements from ${JSON.stringify(
           Array.from(validElements)
@@ -90,10 +89,12 @@ const isListOfStrings = (field, validElements) => {
   return val;
 };
 
+// TODO: remove validator
+
 const evaluateValidator = [
   isListOfStrings(body("hypotheses")),
   isListOfStrings(body("references")),
-  isListOfStrings(body("metrics"), METRICS),
+  isListOfStrings(body("metrics"), currentConfig, "METRIC_KEYS"),
 ];
 
 const validateHypRefMiddleware = (req, res, next) => {
@@ -167,7 +168,7 @@ const summarizeValidator = [
     .customSanitizer(setDefault(0.2))
     .isFloat({ gt: 0.0, lt: 1.0 })
     .withMessage("has to be between 0.0 and 1.0"),
-  isListOfStrings(body("summarizers"), SUMMARIZERS),
+  isListOfStrings(body("summarizers"), currentConfig, "SUMMARIZER_KEYS"),
 ];
 
 /**
@@ -294,7 +295,7 @@ router.post("/pdf/extract", async (req, res, next) => {
 });
 
 const feedbackValidator = [
-  body("summarizer").isIn(SUMMARIZERS),
+  body("summarizer").isString(),
   body("summary").isString(),
   body("reference").isString(),
   body("url").optional().isURL(),

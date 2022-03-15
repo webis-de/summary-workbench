@@ -1,3 +1,4 @@
+import json
 import re
 from collections import defaultdict
 from itertools import chain
@@ -14,7 +15,7 @@ from .git_interface import pull, resolve_source
 from .schema import ConfigurePluginModel, PluginModel
 from .utils import Yaml, get_config, python_version_from_path
 
-name_pattern = "-_a-zA-Z0-9 "
+name_pattern = "-_a-zA-Z0-9() "
 
 
 def resolve_path(path):
@@ -89,10 +90,10 @@ class Plugin(DockerMixin):
 
         config_path = self.plugin_path / DEFAULT_PLUGIN_CONFIG
         config = PluginModel.load(config_path, **Yaml.load(config_path, json=True))
+        self.version = config.version
         self.metadata = config.metadata
         self.metadata.update(environment)
         self.environment = self.metadata.copy()
-        self.environment["PLUGIN_TYPE"] = self.plugin_type
 
         self.name = expand_name(config.name, self.environment, source)
         self.clean_name = clean_string(self.name)
@@ -105,11 +106,16 @@ class Plugin(DockerMixin):
             f"{self.plugin_type.lower()}-{self.clean_owner}-{self.clean_name}"
         ).strip("-")
         self.url = f"http://{self.unique_name}:5000"
-        self.url_env = (
-            f"{self.unique_name.replace('-', '_')}_URL".upper(),
-            f"{self.url}",
-        )
-        self.docker_compose_url_env = ["=".join(self.url_env)]
+
+        self.plugin_config = {
+            "metadata": self.metadata,
+            "name": self.name,
+            "owner": self.owner,
+            "key": self.unique_name,
+            "type": self.plugin_type,
+            "version": self.version,
+        }
+        self.environment["PLUGIN_CONFIG"] = json.dumps(self.plugin_config)
 
         self.dev_environment = [
             f"{key}={value}" for key, value in self.environment.items()
@@ -134,7 +140,6 @@ class Plugin(DockerMixin):
             str(PLUGIN_SERVER_PATH): str(CONTAINER_PLUGIN_SERVER_PATH),
             str(self.plugin_path): str(CONTAINER_PLUGIN_FILES_PATH),
         }
-        self.version = config.version
         DockerMixin.__init__(
             self,
             deploy_src=KUBERNETES_TEMPLATES_PATH / "plugin.yaml",
@@ -217,15 +222,6 @@ class Plugin(DockerMixin):
             }
         }
 
-    def plugin_config(self):
-        return {
-            "metadata": self.metadata,
-            "disabled": self.disabled,
-            "name": self.name,
-            "owner": self.owner,
-            "key": self.unique_name,
-        }
-
 
 class Plugins:
     def __init__(self, plugin_dict):
@@ -241,19 +237,13 @@ class Plugins:
         return iter(self.to_list())
 
     def plugin_config(self):
-        return {
-            f"{plugin_type}": {
-                plugin.unique_name: plugin.plugin_config() for plugin in plugins
-            }
-            for plugin_type, plugins in self.plugin_dict.items()
+        enabled_plugins = {
+            plugin.unique_name: plugin.url for plugin in self if not plugin.disabled
         }
-
-    def api_kubernetes_env(self):
-        envs = []
-        for plugin in self.enabled():
-            name, value = plugin.url_env
-            envs.append({"name": name, "value": value})
-        return envs
+        disabled_plugins = {
+            plugin.unique_name: plugin.plugin_config for plugin in self if plugin.disabled
+        }
+        return {**enabled_plugins, **disabled_plugins}
 
     def enabled(self):
         return [plugin for plugin in self if not plugin.disabled]

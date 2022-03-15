@@ -17,7 +17,7 @@ const initPlugins = async (fetchFunction, defaults) => {
     plugins[key] = { info: value };
   });
   Object.keys(plugins).forEach((key) => {
-    plugins[key].isSet = loadSetting(key, defaults) && !plugins[key].info.disabled;
+    plugins[key].isSet = loadSetting(key, defaults) && !plugins[key].info.disabled && plugins[key].info.healthy;
   });
   const types = [...new Set(Object.values(plugins).map(({ info }) => info.metadata.type))];
   return { plugins, types };
@@ -41,7 +41,7 @@ const usePlugins = (fetchFunction, defaults) => {
 
   const toggle = useCallback(
     (key) => {
-      if (plugins[key].info.disabled) return
+      if (plugins[key].info.disabled || !plugins[key].info.healthy) return
       const updatedPlugins = { ...plugins };
       const plugin = { ...updatedPlugins[key] };
       plugin.isSet = !plugin.isSet;

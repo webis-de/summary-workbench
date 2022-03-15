@@ -1,40 +1,85 @@
 const fs = require("fs");
+const axios = require("axios");
 
-let data;
-try {
-  data = fs.readFileSync("/plugin_config/plugin_config.json");
-} catch (err) {
-  console.log("no plugin config found");
-  process.exit(1);
-}
+const fetchConfig = async (url) => {
+  try {
+    const config = (await axios.get(`${url}/config`)).data;
+    config.url = url
+    config.disabled = false;
+    config.healthy = true;
+    return config
+  } catch (err) {
+    console.error(`service for ${url} is unavailable`);
+    return { disabled: false, healthy: false };
+  }
+};
 
-try {
-  data = JSON.parse(data);
-} catch (err) {
-  console.log("invalid plugin config content");
-  process.exit(1);
-}
+const gatherConfigs = async () => {
+  let pluginConfig;
+  try {
+    pluginConfig = fs.readFileSync("/plugin_config/plugin_config.json");
+  } catch (err) {
+    console.log("no plugin config found");
+    process.exit(1);
+  }
 
-ALL_METRICS = data.metrics;
-ALL_SUMMARIZERS = data.summarizers;
+  try {
+    pluginConfig = JSON.parse(pluginConfig);
+  } catch (err) {
+    console.log("invalid plugin config content");
+    process.exit(1);
+  }
 
-METRICS = Object.entries(ALL_METRICS).filter(([,value]) => !value.disabled).map(([key]) => key);
-SUMMARIZERS = Object.entries(ALL_SUMMARIZERS).filter(([,value]) => !value.disabled).map(([key]) => key);
+  const collectedConfig = {};
+  const fetchConfigs = {};
+  Object.entries(pluginConfig).map(([key, value]) => {
+    if (typeof value == "string") {
+      fetchConfigs[key] = fetchConfig(value);
+    } else {
+      value.disabled = true;
+      collectedConfig[key] = value;
+    }
+  });
 
-console.log("Metrics: ", METRICS);
-console.log("Summarizers: ", SUMMARIZERS);
+  for ([key, request] of Object.entries(fetchConfigs)) {
+    const config = await request;
+    if (key != config.key) {
+      console.error(
+        `plugin is configured as ${key} but container has key ${config.key}`
+      );
+    }
+    collectedConfig[key] = config
+  }
 
-const to_envvar = (name) => name.toUpperCase().replace(/-/g, "_");
+  const config = { summarizer: {}, metric: {} };
 
-const METRIC_URLS = METRICS.reduce((acc, val) => {
-  url = `${to_envvar(val)}_URL`;
-  return { [val]: process.env[url], ...acc };
-}, {});
+  Object.entries(collectedConfig).forEach(([key, pluginConfig]) => {
+    if (!pluginConfig.type) pluginConfig.type = key.split("-")[0];
+    if (!pluginConfig.name) pluginConfig.name = key.split("-")[2];
+    if (!pluginConfig.metadata) pluginConfig.metadata = {};
+    if (!config[pluginConfig.type]) config[pluginConfig.type] = {};
+    config[pluginConfig.type][key] = pluginConfig
+  });
 
-const SUMMARIZER_URLS = SUMMARIZERS.reduce((acc, val) => {
-  const url = `${to_envvar(val)}_URL`;
-  return { [val]: process.env[url], ...acc };
-}, {});
+  return config;
+};
+
+const currentConfig = {};
+
+const initConfig = async (timeout=30000) => {
+  console.log("updating config...");
+  const config = await gatherConfigs();
+  currentConfig.METRICS = config.metric;
+  currentConfig.SUMMARIZERS = config.summarizer;
+  currentConfig.METRIC_KEYS = Object.entries(currentConfig.METRICS)
+    .filter(([, value]) => !value.disabled && value.healthy)
+    .map(([key]) => key);
+  currentConfig.SUMMARIZER_KEYS = Object.entries(currentConfig.SUMMARIZERS)
+    .filter(([, value]) => !value.disabled && value.healthy)
+    .map(([key]) => key);
+  console.log("config updated...");
+  setTimeout(initConfig, timeout);
+};
 
 const PORT = process.env.PORT || 5000;
 console.log("Modus:", process.env.NODE_ENV);
@@ -60,12 +105,8 @@ if (!ACCESS_TOKEN_SECRET || !REFRESH_TOKEN_SECRET) {
 const MONGODB_HOST = process.env.MONGODB_HOST;
 
 module.exports = {
-  ALL_METRICS,
-  ALL_SUMMARIZERS,
-  METRICS,
-  SUMMARIZERS,
-  METRIC_URLS,
-  SUMMARIZER_URLS,
+  currentConfig,
+  initConfig,
   MONGODB_HOST,
   PORT,
   ACCESS_TOKEN_SECRET,

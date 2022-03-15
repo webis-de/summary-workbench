@@ -16,11 +16,39 @@ metrics:
 
 summarizers:
   - ./summarizers/bertsum
+  - ./summarizers/gsum
+  - ./summarizers/argpagerank
+  - ./summarizers/conclugen
+  - ./summarizers/lobart
+  - ./summarizers/newspaper3k
+  - ./summarizers/longformer2roberta
+  - source: ./summarizers/coopsum
+    environment:
+      model: COOP-Amazon
+  - source: ./summarizers/coopsum
+    environment:
+      model: COOP-Yelp
+  - source: ./summarizers/cliffsum
+    environment:
+      model: MaskEnt
+  - source: ./summarizers/cliffsum
+    environment:
+      model: MaskRel
+  - source: ./summarizers/cliffsum
+    environment:
+      model: RegenEnt
+  - source: ./summarizers/cliffsum
+    environment:
+      model: RegenRel
+  - source: ./summarizers/cliffsum
+    environment:
+      model: SwapEnt
+  - source: ./summarizers/cliffsum
+    environment:
+      model: SysLowCon
   - source: ./summarizers/textrank
     environment:
       model: textrank
-  - ./summarizers/newspaper3k
-  - ./summarizers/longformer2roberta
   - source: ./summarizers/neuralsum
     environment:
       model: T5

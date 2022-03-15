@@ -1,12 +1,13 @@
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel, Field, HttpUrl, ValidationError, constr
 
 from .exceptions import ModelValidationError
 
 key_pattern = "^[_a-zA-Z]+$"
-name_pattern = "^[- _a-zA-Z0-9{}]+$"
+variable_pattern = "^[_a-zA-Z]+[_a-zA-Z0-9]*$"
+name_pattern = "^[- _a-zA-Z0-9{}()]+$"
 
 
 class ThrowMixin:
@@ -18,12 +19,31 @@ class ThrowMixin:
             raise ModelValidationError(error.errors(), __origin)
 
 
+class Argument(BaseModel):
+    type: Literal["bool", "str", "categorical", "int", "float"] = Field(
+        description="type of the argument"
+    )
+    default: Optional[Union[bool, str, int, float, List[str]]] = Field(
+        description="default argument for that field"
+    )
+    min: Optional[Union[int, float]] = Field(
+        description="minimal value for that argument"
+    )
+    max: Optional[Union[int, float]] = Field(
+        description="maximal vlaue for that argument"
+    )
+
+
 class PluginModel(BaseModel, ThrowMixin):
     version: str = Field(
         description="version of the plugin (e.g. 1.0), which will be used to tag the image"
     )
     name: str = Field(
         regex=name_pattern, description="name of the plugin (e.g. BERT-model)"
+    )
+    arguments: Dict[constr(regex=variable_pattern), Argument] = Field(
+        {},
+        description="Defines extra arguments for your plugin, which will be passed to your summarizer/metric as keyword arguments. For number types min and max value can be provided. If the type of the plugin is 'categorical' the default argument is required and has to be a list of strings.",
     )
     metadata: Dict[constr(regex=key_pattern), str] = Field(
         {},
@@ -42,7 +62,10 @@ class ConfigurePluginModel(BaseModel):
     source: plugin_source_type = Field(
         description="path to the plugin or url to a git repository for that plugin"
     )
-    disabled: bool = Field(False, description="if the plugin is disabled it will be shown in the selection but will not be loaded in the backend")
+    disabled: bool = Field(
+        False,
+        description="if the plugin is disabled it will be shown in the selection but will not be loaded in the backend",
+    )
     image_url: Optional[str] = Field(
         description="dockerhub source of an already build image (allows you to skip the build phase)"
     )

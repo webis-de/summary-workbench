@@ -134,50 +134,48 @@ const InputDocument = ({ summarize, state }) => {
       </div>
 
       <div className="min-w-[600px]">
-        <div>
-          <Card full>
-            <CardHead>
-              <HeadingSemiBig>Models</HeadingSemiBig>
-            </CardHead>
-            <CardContent>
-              <Settings
-                models={summarizers}
-                types={types}
-                toggleSetting={toggle}
-                type="Summarizers"
-              />
-              <div className="flex items-center gap-5">
-                {state.loading ? (
-                  <LoadingButton text="Summarizing" />
-                ) : (
-                  <Button
-                    disabled={!documentText || !modelIsChosen}
-                    onClick={() => summarize(documentText, chosenModels, summaryLength)}
-                  >
-                    Summarize
-                  </Button>
+        <Card full>
+          <CardHead>
+            <HeadingSemiBig>Models</HeadingSemiBig>
+          </CardHead>
+          <CardContent>
+            <Settings
+              models={summarizers}
+              types={types}
+              toggleSetting={toggle}
+              type="Summarizers"
+            />
+            <div className="flex items-center gap-5">
+              {state.loading ? (
+                <LoadingButton text="Summarizing" />
+              ) : (
+                <Button
+                  disabled={!documentText || !modelIsChosen}
+                  onClick={() => summarize(documentText, chosenModels, summaryLength)}
+                >
+                  Summarize
+                </Button>
+              )}
+              <div className="flex flex-col">
+                {!documentText && (
+                  <Hint type="info" small>
+                    Input text to summarize
+                  </Hint>
                 )}
-                <div className="flex flex-col">
-                  {!documentText && (
-                    <Hint type="info" small>
-                      Input text to summarize
-                    </Hint>
-                  )}
-                  {!modelIsChosen && (
-                    <Hint type="warning" small>
-                      Choose at least one metric
-                    </Hint>
-                  )}
-                  {!state.loading && state.error && (
-                    <Hint type="danger" small>
-                      {state.error.message}
-                    </Hint>
-                  )}
-                </div>
+                {!modelIsChosen && (
+                  <Hint type="warning" small>
+                    Choose at least one metric
+                  </Hint>
+                )}
+                {!state.loading && state.error && (
+                  <Hint type="danger" small>
+                    {state.error.message}
+                  </Hint>
+                )}
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
@@ -237,7 +235,7 @@ const SummaryTabView = ({ title, showOverlap, summaries, markups, documentLength
 
   if (!markups.length) return <div>some error occured</div>;
   return (
-    <div className="flex items-start gap-3">
+    <div className="grow flex items-start gap-3">
       <div className="basis-[60%]">
         <Card full>
           <CardHead>
@@ -294,7 +292,7 @@ const SummaryCompareView = ({ summaries, markups, showOverlap }) => {
   ]);
 
   return (
-    <div className="flex flex-wrap gap-3">
+    <div className="grow flex flex-wrap gap-3">
       {elements.map(([markup, summarizer], markupIndex) => (
         <div key={markupIndex} className="grow w-full lg:w-[45%] xl:w-[30%]">
           <Card full>
@@ -356,7 +354,7 @@ const SummaryView = ({ title, summaries, documentLength }) => {
   return (
     <div className="scroll-mt-20" ref={scrollRef}>
       <div className="flex gap-2">
-        <div>
+        <div className="flex flex-grow">
           {showTab ? (
             <SummaryTabView
               key={tabViewKey.current}

@@ -1,3 +1,4 @@
+import json
 import sys
 from os import environ
 from typing import Union
@@ -8,7 +9,8 @@ from pydantic import BaseModel, Field
 
 sys.path.insert(0, "/tldr_plugin_files")
 
-PLUGIN_TYPE = environ.get("PLUGIN_TYPE")
+PLUGIN_CONFIG = json.loads(environ.get("PLUGIN_CONFIG"))
+PLUGIN_TYPE = PLUGIN_CONFIG["type"]
 
 app = FastAPI()
 
@@ -87,9 +89,9 @@ if PLUGIN_TYPE not in PLUGIN_TYPES:
 PLUGIN_TYPES.get(PLUGIN_TYPE)()
 
 
-@app.get("/health")
-async def health():
-    return Response(status_code=200)
+@app.get("/config")
+async def config():
+    return PLUGIN_CONFIG
 
 
 if __name__ == "__main__":

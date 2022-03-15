@@ -24,8 +24,10 @@ const AboutTable = ({ section, content }) => (
             name,
             metadata: { sourcecode, model, homepage, type },
           } = info;
-          return (
-            <Tr key={key} hover striped>
+            if (!info.healthy && !info.disabled) {
+              return <Tr key={key} red><Td>{name}</Td><Td colSpan={100} center>unhealthy</Td></Tr>
+            }
+            return <Tr key={key} hover striped>
               <Td>{name}</Td>
               <Td>{type}</Td>
               <Td>
@@ -44,8 +46,7 @@ const AboutTable = ({ section, content }) => (
               </Td>
               <Td>{model}</Td>
             </Tr>
-          );
-        })}
+          })}
       </Tbody>
     </Table>
   </TableWrapper>

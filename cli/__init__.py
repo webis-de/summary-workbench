@@ -18,6 +18,7 @@ from .plugins import Plugins
 from .utils import Yaml, dict_path, gen_secret, get_config
 from .schema import ConfigModel, PluginModel
 
+import __main__
 
 def remove_old_deploy_files():
     for path in DEPLOY_PATH.glob("*"):
@@ -53,11 +54,7 @@ class ComposeFile:
 
     def add_service_from_plugin(self, plugin):
         self.add_volumes(plugin.docker_compose_named_volumes)
-        self.add_environment("api", plugin.docker_compose_url_env)
         self.add_service(plugin.to_service())
-
-    def add_environment(self, service_name, environment):
-        self.compose_data["services"][service_name]["environment"].extend(environment)
 
     def save(self):
         Yaml(self.compose_data).dump(DOCKER_COMPOSE_YAML_PATH, space_keys=["services"])
@@ -124,7 +121,6 @@ class Api(NodeMixin, Service):
                 ["spec", "template", "spec", "containers", 0],
                 {
                     "image": self.image_url,
-                    "env": plugins.api_kubernetes_env(),
                 },
             ),
         }
@@ -355,7 +351,7 @@ def build(names, force, all):
         manager.build_all(force)
     elif not names:
         print(
-            "give the names of the services to build or --all for all (e.g. ./manage.py build frontend)",
+            f"give the names of the services to build or --all for all (e.g. {Path(__main__.__file__).name} build frontend)",
             end="\n\n",
         )
         manager.print_images()
@@ -373,7 +369,7 @@ def push(names, all):
         manager.push_all()
     elif not names:
         print(
-            "give the names of the plugins to push or --all for all (e.g. ./manage.py push frontend)",
+            f"give the names of the services to push or --all for all (e.g. {Path(__main__.__file__).name} push frontend)",
             end="\n\n",
         )
         manager.print_images()

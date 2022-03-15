@@ -26,26 +26,35 @@ const Bullet = ({ color }) => (
   />
 );
 
-const ModelText = ({ type, text }) => (
+const ModelText = ({ type, text, healthy = true }) => (
   <div className="flex items-center gap-2">
     <Bullet color={typeToColor(type)} />
-    <span title={text} className="block overflow-hidden text-ellipsis">
-      {text}
+    <span className="block overflow-hidden whitespace-nowrap text-ellipsis">
+      <span title={text} className={healthy ? "" : "line-through"}>
+        {text}
+      </span>{" "}
+      {!healthy && "(unhealthy)"}
     </span>
   </div>
 );
 
-const Model = ({ info, onClick, isSet }) => (
-  <button
-    className={`ring-1 ring-slate-300 flex items-center gap-2 px-2 py-1 bg-white ${
-      info.disabled ? "opacity-30" : "hover:bg-slate-200"
-    }`}
-    onClick={onClick}
-  >
-    <FaCheck className={`text-green-600 ${isSet ? "" : "invisible"}`} />
-    <ModelText type={info.metadata.type} text={info.name} />
-  </button>
-);
+const Model = ({ info, onClick, isSet }) => {
+  let className = "ring-1 ring-slate-300 flex items-center gap-2 px-2 py-1 bg-white";
+  if (info.disabled) className += " opacity-30";
+  else if (!info.healthy) className += " opacity-60 bg-red-300";
+  else className += " hover:bg-slate-200";
+
+  return (
+    <button className={className} onClick={onClick}>
+      <FaCheck className={`text-green-600 ${isSet ? "" : "invisible"}`} />
+      <ModelText
+        type={info.metadata.type}
+        text={info.name}
+        healthy={info.disabled || info.healthy}
+      />
+    </button>
+  );
+};
 
 const Legend = ({ types }) => (
   <div className="flex flex-wrap gap-2 text-slate-600">
