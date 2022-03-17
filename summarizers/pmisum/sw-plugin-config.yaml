@@ -1,0 +1,6 @@
+version: "1.0"
+name: "PMISum"
+metadata:
+  type: abstractive
+  homepage: https://aclanthology.org/2021.eacl-main.213/
+  sourcecode: https://github.com/vishakhpk/mi-unsup-summ

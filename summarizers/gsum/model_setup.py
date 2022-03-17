@@ -1,6 +1,5 @@
 import os
 import shutil
-from statistics import mode
 import tarfile
 import requests
 from pathlib import Path
@@ -21,8 +20,6 @@ def setup():
     data_file = tarfile.open(fileobj=response_data.raw, mode="r|gz")
     data_file.extractall(path=DATA_PATH)
     print("Downloaded and extracted data.")
-    os.remove(DATA_PATH / DATA_URL.split("/")[-1])
-    print("Deleted compressed file.")
     
     # # download model checkpoint
     print("Downloading checkpoint ...")
