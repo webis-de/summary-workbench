@@ -1,0 +1,5 @@
+version: "1.0"
+name: "Position Rank"
+metadata:
+  type: extractive
+  sourcecode: "https://github.com/DerwenAI/pytextrank"
