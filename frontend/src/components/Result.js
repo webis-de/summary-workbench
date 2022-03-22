@@ -22,6 +22,7 @@ const Result = ({ calculation, saveCalculation }) => {
     () => Object.fromEntries(Object.entries(rawMetrics).map(([key, { info }]) => [key, info])),
     [rawMetrics]
   );
+
   const flatScores = useMemo(() => flatten(scores, metrics), [scores, metrics]);
 
   const scrollRef = useRef();

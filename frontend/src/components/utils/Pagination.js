@@ -21,13 +21,17 @@ const InputField = ({ value: initValue, onDone }) => {
   }, [initValue, setValue]);
 
   return (
-    <Input
-      value={value}
-      onChange={(e) => setValue(e.currentTarget.value)}
-      onKeyDown={(e) => e.keyCode === 13 && accept()}
-      onBlur={accept}
-      className="w-16 rounded-none border-none bg-white ring-1 ring-gray-300 text-gray-900 focus:ring-blue-500 focus:z-10 block text-right"
-    />
+    <div className="w-16">
+      <Input
+        value={value}
+        flatRight
+        flatLeft
+        right
+        onChange={(e) => setValue(e.currentTarget.value)}
+        onKeyDown={(e) => e.keyCode === 13 && accept()}
+        onBlur={accept}
+      />
+    </div>
   );
 };
 

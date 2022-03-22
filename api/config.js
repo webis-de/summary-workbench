@@ -1,16 +1,21 @@
 const fs = require("fs");
 const axios = require("axios");
 
-const fetchConfig = async (url) => {
+const fetchConfig = async (url, key) => {
   try {
-    const config = (await axios.get(`${url}/config`)).data;
-    config.url = url
+    const response = await axios({
+      method: "get",
+      url: `${url}/config`,
+      timeout: 2000,
+    })
+    const config = response.data;
+    config.url = url;
     config.disabled = false;
     config.healthy = true;
-    return config
+    return config;
   } catch (err) {
     console.error(`service for ${url} is unavailable`);
-    return { disabled: false, healthy: false };
+    return { disabled: false, healthy: false, key };
   }
 };
 
@@ -30,43 +35,29 @@ const gatherConfigs = async () => {
     process.exit(1);
   }
 
-  const collectedConfig = {};
-  const fetchConfigs = {};
-  Object.entries(pluginConfig).map(([key, value]) => {
-    if (typeof value == "string") {
-      fetchConfigs[key] = fetchConfig(value);
-    } else {
-      value.disabled = true;
-      collectedConfig[key] = value;
-    }
-  });
+  const configs = { summarizer: {}, metric: {} };
 
-  for ([key, request] of Object.entries(fetchConfigs)) {
-    const config = await request;
-    if (key != config.key) {
-      console.error(
-        `plugin is configured as ${key} but container has key ${config.key}`
-      );
-    }
-    collectedConfig[key] = config
-  }
+  await Promise.all(
+    Object.entries(pluginConfig).map(async ([key, value]) => {
+      let c = { ...value, disabled: true };
+      if (typeof value === "string") c = await fetchConfig(value, key);
+      if (key !== c.key) {
+        console.error(`plugin is configured as ${key} but container has key ${c.key}`);
+      }
+      if (!c.type) [c.type] = key.split("-");
+      if (!c.name) [, , c.name] = key.split("-");
+      if (!c.metadata) c.metadata = {};
+      if (!configs[c.type]) configs[c.type] = {};
+      configs[c.type][key] = c;
+    })
+  );
 
-  const config = { summarizer: {}, metric: {} };
-
-  Object.entries(collectedConfig).forEach(([key, pluginConfig]) => {
-    if (!pluginConfig.type) pluginConfig.type = key.split("-")[0];
-    if (!pluginConfig.name) pluginConfig.name = key.split("-")[2];
-    if (!pluginConfig.metadata) pluginConfig.metadata = {};
-    if (!config[pluginConfig.type]) config[pluginConfig.type] = {};
-    config[pluginConfig.type][key] = pluginConfig
-  });
-
-  return config;
+  return configs;
 };
 
 const currentConfig = {};
 
-const initConfig = async (timeout=30000) => {
+const initConfig = async (timeout = 30000) => {
   console.log("updating config...");
   const config = await gatherConfigs();
   currentConfig.METRICS = config.metric;
@@ -84,8 +75,7 @@ const initConfig = async (timeout=30000) => {
 const PORT = process.env.PORT || 5000;
 console.log("Modus:", process.env.NODE_ENV);
 
-let ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
-let REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
+let { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } = process.env;
 
 if (!ACCESS_TOKEN_SECRET || !REFRESH_TOKEN_SECRET) {
   if (process.env.NODE_ENV === "development") {
@@ -102,7 +92,7 @@ if (!ACCESS_TOKEN_SECRET || !REFRESH_TOKEN_SECRET) {
   REFRESH_TOKEN_SECRET = Buffer.from(ACCESS_TOKEN_SECRET, "base64");
 }
 
-const MONGODB_HOST = process.env.MONGODB_HOST;
+const { MONGODB_HOST } = process.env;
 
 module.exports = {
   currentConfig,

@@ -1,4 +1,5 @@
 FROM nikolaik/python-nodejs:python3.9-nodejs16-slim
+
 ENV PDF_EXTRACTOR_HOME=/pdf_extractor
 
 RUN apt update && apt -y install openjdk-11-jdk git unzip curl
@@ -14,7 +15,6 @@ RUN pip3 install --no-cache-dir $PDF_EXTRACTOR_HOME/s2orc-doc2json newspaper3k n
 
 WORKDIR /app
 COPY . /app/
-RUN rm -f /app/plugin_config.json
 RUN npm ci
 
 CMD ./boot.sh

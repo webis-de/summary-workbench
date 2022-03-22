@@ -15,6 +15,8 @@ const typeToColor = (type) => {
       return colors[0];
     case "abstractive":
       return colors[1];
+    case "unknown":
+      return "bg-black"
     default:
       return colors[cyrb53(type || "") % colors.length];
   }

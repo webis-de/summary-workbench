@@ -1,20 +1,19 @@
+const { pluginRequest, validationRequest } = require("./plugin");
 const { currentConfig } = require("./config");
-const axios = require("axios");
 
 const evaluate = async (metrics, hypotheses, references) => {
-  const { METRICS, METRIC_KEYS } = currentConfig;
-  const requested_metrics = [...new Set(metrics)].filter((x) =>
-    METRIC_KEYS.includes(x)
-  );
-  const requests = requested_metrics.map((metric) =>
-    axios.post(METRICS[metric].url, { hypotheses, references })
-  );
-  const results = (await axios.all(requests)).map((response) => response.data);
-  const scores = {};
-  requested_metrics.forEach((metric, index) => {
-    scores[metric] = results[index]["score"];
-  });
-  return scores;
+  const { METRICS } = currentConfig;
+  let plugins = Object.entries(metrics).map(([metric, args]) => [
+    metric,
+    {
+      url: METRICS[metric].url,
+      args: { hypotheses, references, ...args },
+    },
+  ]);
+  plugins = Object.fromEntries(plugins);
+  const validationResults = await validationRequest(plugins);
+  if (Object.keys(validationResults).length) return validationResults;
+  return pluginRequest(plugins, ({ score }) => ({ score }));
 };
 
 module.exports = { evaluate };

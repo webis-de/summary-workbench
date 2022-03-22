@@ -1,7 +1,20 @@
-extends: "airbnb"
 env:
-  nodejs: true
+  commonjs: true
   es2021: true
+  node: true
+extends:
+  - airbnb-base
+  - prettier
+  - eslint:recommended
+plugins:
+  - prettier
+  - simple-import-sort
+  - import
+  - promise
 parserOptions:
-  ecmaVersion: 12
-rules: {}
+  ecmaVersion: latest
+rules:
+  no-console: 0
+  max-classes-per-file: 0
+  no-await-in-loop: 0
+  no-restricted-syntax: 0

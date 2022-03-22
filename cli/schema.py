@@ -1,7 +1,8 @@
 from pathlib import Path
 from typing import Dict, List, Literal, Optional, Union
 
-from pydantic import BaseModel, Field, HttpUrl, ValidationError, constr
+from pydantic import (BaseModel, Field, HttpUrl, ValidationError, constr,
+                      validator)
 
 from .exceptions import ModelValidationError
 
@@ -19,19 +20,40 @@ class ThrowMixin:
             raise ModelValidationError(error.errors(), __origin)
 
 
-class Argument(BaseModel):
-    type: Literal["bool", "str", "categorical", "int", "float"] = Field(
-        description="type of the argument"
-    )
-    default: Optional[Union[bool, str, int, float, List[str]]] = Field(
-        description="default argument for that field"
-    )
-    min: Optional[Union[int, float]] = Field(
-        description="minimal value for that argument"
-    )
-    max: Optional[Union[int, float]] = Field(
-        description="maximal vlaue for that argument"
-    )
+class IntArgument(BaseModel):
+    type: Literal["int"] = Field(description="type of the argument")
+    default: Optional[int] = Field(description="default argument for that field")
+    min: Optional[int] = Field(description="minimal value for that argument")
+    max: Optional[int] = Field(description="maximal vlaue for that argument")
+
+
+class FloatArgument(BaseModel):
+    type: Literal["float"] = Field(description="type of the argument")
+    default: Optional[float] = Field(description="default argument for that field")
+    min: Optional[float] = Field(description="minimal value for that argument")
+    max: Optional[float] = Field(description="maximal vlaue for that argument")
+
+
+class BoolArgument(BaseModel):
+    type: Literal["bool"] = Field(description="type of the argument")
+    default: Optional[bool] = Field(description="default argument for that field")
+
+
+class StringArgument(BaseModel):
+    type: Literal["str"] = Field(description="type of the argument")
+    default: Optional[str] = Field(description="default argument for that field")
+
+
+class CategoricalArgument(BaseModel):
+    type: Literal["categorical"] = Field(description="type of the argument")
+    categories: List[str] = Field(description="list of categories")
+    default: Optional[str] = Field(description="default argument for that field")
+
+    @validator("default")
+    def in_categories(cls, value, values):
+        if value is not None and value not in values["categories"]:
+            raise ValueError(f"{value} must be one of {values['categories']}")
+        return value
 
 
 class PluginModel(BaseModel, ThrowMixin):
@@ -41,7 +63,16 @@ class PluginModel(BaseModel, ThrowMixin):
     name: str = Field(
         regex=name_pattern, description="name of the plugin (e.g. BERT-model)"
     )
-    arguments: Dict[constr(regex=variable_pattern), Argument] = Field(
+    arguments: Dict[
+        constr(regex=variable_pattern),
+        Union[
+            IntArgument,
+            FloatArgument,
+            BoolArgument,
+            StringArgument,
+            CategoricalArgument,
+        ],
+    ] = Field(
         {},
         description="Defines extra arguments for your plugin, which will be passed to your summarizer/metric as keyword arguments. For number types min and max value can be provided. If the type of the plugin is 'categorical' the default argument is required and has to be a list of strings.",
     )

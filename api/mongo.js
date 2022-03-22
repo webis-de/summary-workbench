@@ -1,5 +1,5 @@
-const { MONGODB_HOST } = require("./config");
 const mongoose = require("mongoose");
+const { MONGODB_HOST } = require("./config");
 
 const connectDB = () =>
   new Promise((resolve, reject) => {

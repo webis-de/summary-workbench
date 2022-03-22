@@ -31,7 +31,7 @@ const feedbackSchema = new mongoose.Schema(
   { versionKey: false }
 );
 
-feedbackSchema.statics.insert = async function (obj) {
+feedbackSchema.statics.insert = async function insert(obj) {
   const entry = await this.create(obj);
   await entry.save();
 };

@@ -28,7 +28,7 @@ const app = express();
 
 app.use("/api/doc", swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
-const errorMiddleware = (err, req, res, next) => {
+const errorMiddleware = (err, req, res) => {
   console.error(err.message);
   res.status(400).json({ error: err.message });
 };

@@ -30,8 +30,8 @@ const Input = ({ Icon, flatLeft, flatRight, small, right, ...props }) => {
       )}
       <input
         type="text"
-        className={`${classExtra} focus:z-10 bg-white text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 block min-w-0 w-full text-sm`}
         {...props}
+        className={`${classExtra} focus:z-10 bg-white text-gray-900 border-none ring-1 ring-gray-300 focus:ring-2 focus:ring-blue-500 block min-w-0 w-full text-sm`}
       />
     </div>
   );

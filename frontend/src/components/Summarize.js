@@ -7,11 +7,13 @@ import { SettingsContext } from "../contexts/SettingsContext";
 import { SummarizersContext } from "../contexts/SummarizersContext";
 import { useMarkups, usePairwiseMarkups } from "../hooks/markup";
 import { getChosen } from "../utils/common";
+import { collectPluginErrors } from "../utils/data";
 import { Settings } from "./Settings";
 import { Badge } from "./utils/Badge";
 import { Button, LoadingButton } from "./utils/Button";
 import { Card, CardContent, CardHead } from "./utils/Card";
 import { FileInput, useFileInput } from "./utils/ChooseFile";
+import { Errors } from "./utils/Error";
 import { Textarea } from "./utils/Form";
 import { Bars, EyeClosed, EyeOpen, ThumbsDown, ThumbsUp } from "./utils/Icons";
 import { SpaceGap } from "./utils/Layout";
@@ -104,7 +106,7 @@ const PdfUpload = ({ setText }) => {
 
 const InputDocument = ({ summarize, state }) => {
   const [documentText, setDocumentText] = useState("");
-  const { summarizers, types, toggle } = useContext(SummarizersContext);
+  const { summarizers, types, toggle, setArgument } = useContext(SummarizersContext);
   const { summaryLength } = useContext(SettingsContext);
 
   const chosenModels = Object.keys(getChosen(summarizers));
@@ -114,7 +116,7 @@ const InputDocument = ({ summarize, state }) => {
 
   return (
     <div className="flex flex-col lg:flex-row gap-3">
-      <div className="grow flex flex-col min-w-[400px] min-h-[400px]">
+      <div className="grow flex flex-col min-w-[400px] min-h-[400px] basis-1">
         <Card full>
           <CardHead>
             <div className="w-full flex justify-between items-center">
@@ -133,7 +135,7 @@ const InputDocument = ({ summarize, state }) => {
         </Card>
       </div>
 
-      <div className="min-w-[600px]">
+      <div className="min-w-[600px] basis-1">
         <Card full>
           <CardHead>
             <HeadingSemiBig>Models</HeadingSemiBig>
@@ -142,6 +144,7 @@ const InputDocument = ({ summarize, state }) => {
             <Settings
               models={summarizers}
               types={types}
+              setArgument={setArgument}
               toggleSetting={toggle}
               type="Summarizers"
             />
@@ -167,10 +170,24 @@ const InputDocument = ({ summarize, state }) => {
                     Choose at least one metric
                   </Hint>
                 )}
-                {!state.loading && state.error && (
-                  <Hint type="danger" small>
-                    {state.error.message}
-                  </Hint>
+                {!state.loading && (
+                  <>
+                    {state.error && (
+                      <Hint type="danger" small>
+                        {state.error.message}
+                      </Hint>
+                    )}
+                    {state.value && (
+                      <>
+                        {state.value.errors && <Errors errors={state.value.errors} />}
+                        {state.value.summaries && !state.value.summaries.length && (
+                          <Hint type="danger" small>
+                            no summaries were generated
+                          </Hint>
+                        )}
+                      </>
+                    )}
+                  </>
                 )}
               </div>
             </div>
@@ -233,7 +250,6 @@ const SummaryTabView = ({ title, showOverlap, summaries, markups, documentLength
     return index;
   }, 0);
 
-  if (!markups.length) return <div>some error occured</div>;
   return (
     <div className="grow flex items-start gap-3">
       <div className="basis-[60%]">
@@ -391,37 +407,40 @@ const computeParagraphs = (text) => {
   return paragraphs.join("\n\n");
 };
 
+
 const Summarize = () => {
   const { summarizers, loading, retry } = useContext(SummarizersContext);
 
-  const [state, doFetch] = useAsyncFn(async (rawText, models, summaryLength) => {
-    const requestText = rawText.trim();
-    const ratio = parseInt(summaryLength, 10) / 100;
-    const response = await summarizeRequest(requestText, models, ratio);
-    const { summaries, original, url } = response;
-    if (Object.values(summaries).every((summarySentences) => !summarySentences.length)) {
-      throw new Error("No summaries could be generated. The input is probably too short.");
-    }
-    const originalText = computeParagraphs(original.text);
-    const newSummaries = Object.entries(summaries).map(([name, summarySentences]) => {
-      const summaryText = computeParagraphs(summarySentences);
-      return {
-        name,
-        originalText,
-        summaryText,
-        url,
-      };
-    });
-    newSummaries.sort((a, b) => a.name > b.name);
-    return {
-      summaries: newSummaries,
-      title: original.title,
-      documentLength: computeNumWords(originalText),
-    };
-  }, []);
+  const [state, doFetch] = useAsyncFn(
+    async (rawText, models, summaryLength) => {
+      const modelsWithArguments = Object.fromEntries(
+        models.map((model) => [model, summarizers[model].arguments])
+      );
+      const requestText = rawText.trim();
+      const ratio = parseInt(summaryLength, 10) / 100;
+      const response = await summarizeRequest(requestText, modelsWithArguments, ratio);
+      if (response.errors) return response;
+      const { summaries, original, url } = response.data;
+      const originalText = computeParagraphs(original.text);
+      return collectPluginErrors(
+        summaries,
+        (name, { summary }) =>
+          summary
+            ? { name, originalText, summaryText: computeParagraphs(summary), url }
+            : undefined,
+        (elements) => ({
+          summaries: elements,
+          title: original.title,
+          documentLength: computeNumWords(originalText),
+        })
+      );
+    },
+    [summarizers]
+  );
 
   if (loading) return <CenterLoading />;
   if (!summarizers) return <Button onClick={retry}>Retry</Button>;
+
   return (
     <SpaceGap big>
       <div>
@@ -433,7 +452,7 @@ const Summarize = () => {
         </Hint>
       </div>
       <InputDocument summarize={doFetch} state={state} />
-      {!state.loading && state.value && <SummaryView {...state.value} />}
+      {!state.loading && state.value && state.value.data && <SummaryView {...state.value.data} />}
     </SpaceGap>
   );
 };

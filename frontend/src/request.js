@@ -10,8 +10,7 @@ const request = async (method, path, json, auth) => {
   if (auth !== null) headers.Authorization = `Bearer ${auth}`;
   args.headers = headers;
   const response = await fetch(`${apiBase}${path}`, args);
-  if (!response.ok) throw new Error(`request failed with status ${response.status}`);
-  return response.json();
+  return response.json()
 };
 
 const post = async (path, json = null, auth = null) => request("POST", path, json, auth);

@@ -5,7 +5,7 @@ const axios = require("axios");
 
 const { PORT } = require("./config");
 
-const port_used = (port) =>
+const portUsed = (port) =>
   new Promise((resolve) => {
     const client = net.connect({ port, host: "localhost" });
     client.on("connect", () => {
@@ -21,18 +21,20 @@ const getServer = (port) => {
   return srv;
 };
 
-const get_free_ports = async (count) => {
+const getFreePorts = async (count) => {
   let dummyServer = null;
-  const servers = [];
-  if (!(await port_used(PORT))) dummyServer = getServer(PORT);
-  for (let i = 0; i < count; i++) servers.push(getServer(0));
+  if (!(await portUsed(PORT))) dummyServer = getServer(PORT);
+  const servers = [...Array(count)].map(() => getServer(0));
   const ports = servers.map((server) => server.address().port);
   if (dummyServer) dummyServer.close();
   servers.forEach((server) => server.close());
   return ports;
 };
 
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const sleep = (ms) =>
+  new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 
 class Subservice {
   constructor(command, verbose = false) {
@@ -48,13 +50,15 @@ class Subservice {
     }
     this.port = port;
     this.running = true;
-    this.process.on("exit", () => (this.running = false));
+    this.process.on("exit", () => {
+      this.running = false;
+    });
     console.log(`${this.constructor.name}: listening on port ${port}`);
   }
 
   async wait() {
     console.log(`${this.constructor.name}: waiting`);
-    while (!(await port_used(this.port)) && this.running) await sleep(1000);
+    while (!(await portUsed(this.port)) && this.running) await sleep(1000);
     if (!this.running) {
       console.log(this.running);
       throw new Error(`${this.constructor.name}: process exited`);
@@ -69,9 +73,7 @@ class ArticleDownloader extends Subservice {
   }
 
   download(url) {
-    return axios
-      .post(`http://localhost:${this.port}/`, { url })
-      .then((response) => response.data);
+    return axios.post(`http://localhost:${this.port}/`, { url }).then((response) => response.data);
   }
 }
 
@@ -110,9 +112,9 @@ const pdfExtractor = new PdfExtractor();
 const services = [articleDownloader, sentenceSplitter, pdfExtractor];
 
 const initSubservices = async () => {
-  const freePorts = await get_free_ports(services.length);
+  const freePorts = await getFreePorts(services.length);
   freePorts.forEach((port, i) => services[i].init(port));
-  for (const service of services) await service.wait();
+  await Promise.all(services.map((service) => service.wait()));
 };
 
 module.exports = {

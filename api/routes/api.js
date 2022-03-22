@@ -1,17 +1,10 @@
 const express = require("express");
-const validateMiddleware = require("../middleware/validate");
-const {
-  currentConfig
-} = require("../config");
-
 const { body } = require("express-validator");
-const {
-  sentenceSplitter,
-  articleDownloader,
-  pdfExtractor,
-} = require("../subservices");
-
 const { isURL } = require("validator");
+const validateMiddleware = require("../middleware/validate");
+const { currentConfig } = require("../config");
+
+const { sentenceSplitter, articleDownloader, pdfExtractor } = require("../subservices");
 
 const Feedbacks = require("../models/feedbacks");
 
@@ -23,7 +16,7 @@ const router = express.Router();
 const allIsIn = (validElements, key) => (list) => {
   if (key) return list.every((el) => validElements[key].includes(el));
   return list.every((el) => validElements.includes(el));
-}
+};
 
 const setDefault = (defaultValue) => (v) => v === undefined ? defaultValue : v;
 
@@ -81,28 +74,27 @@ const isListOfStrings = (field, validElements, key) => {
     val = val
       .custom(allIsIn(validElements, key))
       .withMessage(
-        `has to only contain elements from ${JSON.stringify(
-          Array.from(validElements)
-        )}`
+        `has to only contain elements from ${JSON.stringify(Array.from(validElements))}`
       );
   }
   return val;
 };
 
-// TODO: remove validator
+const isValidPlugins = (field, key) =>
+  field
+    .custom((obj) => allIsIn(currentConfig[key])(Object.keys(obj)))
+    .withMessage(`unknown key provided`);
 
 const evaluateValidator = [
   isListOfStrings(body("hypotheses")),
   isListOfStrings(body("references")),
-  isListOfStrings(body("metrics"), currentConfig, "METRIC_KEYS"),
+  isValidPlugins(body("metrics"), "METRIC_KEYS"),
 ];
 
 const validateHypRefMiddleware = (req, res, next) => {
   const { references, hypotheses } = req.body;
   if (references.length !== hypotheses.length) {
-    return res
-      .status(400)
-      .json({ message: "hypotheses and references have to be same size" });
+    return res.status(400).json({ message: "hypotheses and references have to be same size" });
   }
   return next();
 };
@@ -153,9 +145,7 @@ router.post(
   async (req, res, next) => {
     try {
       const { metrics, references, hypotheses } = req.body;
-      return res.json({
-        scores: await evaluate(metrics, hypotheses, references),
-      });
+      return res.json({ data: { scores: await evaluate(metrics, hypotheses, references) } });
     } catch (err) {
       return next(err);
     }
@@ -168,7 +158,7 @@ const summarizeValidator = [
     .customSanitizer(setDefault(0.2))
     .isFloat({ gt: 0.0, lt: 1.0 })
     .withMessage("has to be between 0.0 and 1.0"),
-  isListOfStrings(body("summarizers"), currentConfig, "SUMMARIZER_KEYS"),
+  isValidPlugins(body("summarizers"), "SUMMARIZER_KEYS"),
 ];
 
 /**
@@ -207,31 +197,31 @@ const summarizeValidator = [
  *         description: Failure
  *
  */
-router.post(
-  "/summarize",
-  summarizeValidator,
-  validateMiddleware,
-  async (req, res, next) => {
-    try {
-      const { summarizers, text, ratio } = req.body;
-      const textIsURL = isURL(text);
-      const original = textIsURL
-        ? await articleDownloader.download(text)
-        : { text };
-      let summariesText = await summarize(summarizers, original.text, ratio);
-      let summaries = {};
-      for (const [metric, result] of Object.entries(summariesText)) {
-        summaries[metric] = await sentenceSplitter.split(result);
-      }
-      original["text"] = await sentenceSplitter.split(original["text"]);
-      response = { original, summaries };
-      if (textIsURL) response["url"] = text;
-      return res.json(response);
-    } catch (err) {
-      return next(err);
-    }
+router.post("/summarize", summarizeValidator, validateMiddleware, async (req, res, next) => {
+  try {
+    const { summarizers, text, ratio } = req.body;
+    const textIsURL = isURL(text);
+    const original = textIsURL ? await articleDownloader.download(text) : { text };
+    let summaries = await summarize(summarizers, original.text, ratio);
+    summaries = await Promise.all(
+      Object.entries(summaries).map(async ([key, value]) => {
+        const { summary } = value;
+        const newValue = { ...value };
+        if (typeof summary === "string") {
+          newValue.summary = await sentenceSplitter.split(summary);
+        }
+        return [key, newValue];
+      })
+    );
+    summaries = Object.fromEntries(summaries);
+    original.text = await sentenceSplitter.split(original.text);
+    const response = { data: { original, summaries } };
+    if (textIsURL) response.url = text;
+    return res.json(response);
+  } catch (err) {
+    return next(err);
   }
-);
+});
 
 const extractPdfs = (files) =>
   Object.values(files)
@@ -284,8 +274,7 @@ router.post("/pdf/extract", async (req, res, next) => {
     const { files } = req;
     if (!files) return res.status(400).send("No files were uploaded.");
     const pdfFiles = extractPdfs(files);
-    if (!pdfFiles.length)
-      return res.status(400).send("No pdf files were uploaded.");
+    if (!pdfFiles.length) return res.status(400).send("No pdf files were uploaded.");
     const pdf = pdfFiles[0];
     const json = await pdfExtractor.extract(pdf);
     return res.json(extractPdfJson(json));
@@ -301,18 +290,13 @@ const feedbackValidator = [
   body("url").optional().isURL(),
   body("feedback").isString(),
 ];
-router.post(
-  "/feedback",
-  feedbackValidator,
-  validateMiddleware,
-  async (req, res, next) => {
-    try {
-      await Feedbacks.insert(req.body);
-      return res.json({ sucess: true });
-    } catch (err) {
-      return next(err);
-    }
+router.post("/feedback", feedbackValidator, validateMiddleware, async (req, res, next) => {
+  try {
+    await Feedbacks.insert(req.body);
+    return res.json({ sucess: true });
+  } catch (err) {
+    return next(err);
   }
-);
+});
 
 module.exports = router;

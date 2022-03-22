@@ -2,7 +2,6 @@ import math
 import os
 import sys
 from transformers import PegasusTokenizerFast, PegasusForConditionalGeneration, pipeline
-sys.path.insert(0, "/tldr_plugin_files/")
 from model_setup import SAVE_DIR
 
 MODEL = os.environ["model"]

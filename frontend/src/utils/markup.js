@@ -326,6 +326,7 @@ class Textblock {
 
 
 const computeMarkup = (docs, colorMap, min_length = 3, allow_self_similarities = false, ignore_stopwords = true) => {
+  if (!docs.length) return []
   const textblocks = docs.map((doc) => new Textblock(doc));
   const clean_docs_idx = textblocks.map((textblock) => textblock.clean_word_list(ignore_stopwords));
 

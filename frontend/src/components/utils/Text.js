@@ -40,7 +40,7 @@ const Hint = ({ children, type = "default", noicon, small }) => {
 };
 
 const Label = ({ text, children }) => (
-  <label className="w-full flex flex-col gap-1 text-sm font-medium text-gray-900 capitalize">
+  <label className="w-full flex flex-col text-sm font-medium text-gray-900">
     {text}
     {children}
   </label>

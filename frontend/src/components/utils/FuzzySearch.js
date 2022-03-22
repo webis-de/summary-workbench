@@ -15,11 +15,7 @@ const LiveSearch = ({ query, setQuery }) => (
 );
 
 const useFilter = (keys) => {
-  const cleanedKeys = useMemo(
-    () => keys.map((key) => key.toLowerCase().replace(/[^a-zA-Z0-9]/, "")),
-    [keys]
-  );
-  const fuse = useMemo(() => new Fuse(cleanedKeys), [cleanedKeys]);
+  const fuse = useMemo(() => new Fuse(keys), [keys]);
   const [query, setQuery] = useState("");
   const filteredKeys = useMemo(() => {
     if (!query) return keys;

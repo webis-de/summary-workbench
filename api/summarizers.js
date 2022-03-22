@@ -1,20 +1,17 @@
+const { pluginRequest, validationRequest } = require("./plugin");
 const { currentConfig } = require("./config");
-const axios = require("axios");
 
 const summarize = async (summarizers, text, ratio) => {
-  const { SUMMARIZERS, SUMMARIZER_KEYS } = currentConfig;
-  const requested_summarizers = [...new Set(summarizers)].filter((x) =>
-    SUMMARIZER_KEYS.includes(x)
-  );
-  const requests = requested_summarizers.map((summarizer) =>
-    axios.post(SUMMARIZERS[summarizer].url, { text, ratio })
-  );
-  const results = (await axios.all(requests)).map((response) => response.data);
-  const summaries = {};
-  requested_summarizers.forEach((summarizer, index) => {
-    summaries[summarizer] = results[index]["summary"];
-  });
-  return summaries;
+  const { SUMMARIZERS } = currentConfig;
+  let plugins = Object.entries(summarizers).map(([summarizer, args]) => [
+    summarizer,
+    {
+      url: SUMMARIZERS[summarizer].url,
+      args: { text, ratio, ...args },
+    },
+  ]);
+  plugins = Object.fromEntries(plugins);
+  return pluginRequest(plugins, ({ summary }) => ({ summary }));
 };
 
 module.exports = { summarize };

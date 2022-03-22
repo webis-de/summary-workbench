@@ -11,7 +11,7 @@ const verifyAccessToken = (token) => {
   try {
     return jwt.verify(token, ACCESS_TOKEN_SECRET).userID;
   } catch (error) {
-    throw { error: "invalid token", type: "INVALID_TOKEN" };
+    throw new Error({ error: "invalid token", type: "INVALID_TOKEN" });
   }
 };
 
@@ -19,7 +19,7 @@ const verifyRefreshToken = (token) => {
   try {
     return jwt.verify(token, REFRESH_TOKEN_SECRET).userID;
   } catch (error) {
-    throw { error: "invalid token", type: "INVALID_TOKEN" };
+    throw new Error({ error: "invalid token", type: "INVALID_TOKEN" });
   }
 };
 
