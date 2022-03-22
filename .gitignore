@@ -4,6 +4,10 @@ plugin_config.json
 experiments.py
 docker-compose.yaml
 /deploy
+
+# Model checkpoints and data files used for local testing
+**/checkpoint*
+**/data
 # Created by https://www.gitignore.io/api/flask,python,vim,dotenv,node,react
 # Edit at https://www.gitignore.io/?templates=flask,python,vim,dotenv,node,react
 
