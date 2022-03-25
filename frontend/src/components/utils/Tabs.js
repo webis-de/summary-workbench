@@ -43,6 +43,10 @@ const Pill = ({ children }) => (
 
 const TabPanel = ({ children }) => <HTab.Panel>{children}</HTab.Panel>;
 
-const Tabs = ({ onChange, children }) => <HTab.Group onChange={onChange}>{children}</HTab.Group>;
+const Tabs = ({ onChange, children }) => (
+  <HTab.Group manual onChange={onChange}>
+    {children}
+  </HTab.Group>
+);
 
 export { Tabs, Tab, TabHead, TabContent, TabPanel, Pill };

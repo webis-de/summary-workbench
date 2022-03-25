@@ -1,34 +1,31 @@
-const transformScores = (scores, precision) => {
-  scores.sort();
-  const names = scores.map((row) => row[0]);
-  const values = scores.map((row) => row[1].toFixed(precision));
-  return [names, values];
+import { range } from "./python";
+
+const tableToStrings = (table, precision) =>
+  table.map((row) => row.map((cell) => (typeof cell === "number" ? cell.toFixed(precision) : " ")));
+
+const transposeTable = (table) =>
+  range(table[0].length).map((index) => table.map((row) => row[index]));
+
+const prepareTable = (rownames, colnames, table, transpose, precision) => {
+  const stringTable = tableToStrings(table, precision);
+  if (transpose) return [colnames, rownames, transposeTable(stringTable)];
+  return [rownames, colnames, stringTable];
 };
 
-const latex = (scores, transpose, precision) => {
-  const [names, values] = transformScores(scores, precision);
-  if (transpose) {
-    return `\\begin{tabular}{l${"r".repeat(scores.length)}}
+const latex = (rownames, colnames, table, transpose, precision) => {
+  const [rnames, cnames, tab] = prepareTable(rownames, colnames, table, transpose, precision);
+  return `\\begin{tabular}{l${"r".repeat(cnames.length)}}
 \\toprule
-{} & ${names.join(" & ")} \\\\
+{} & ${cnames.join(" & ")} \\\\
 \\midrule
-\\textbf{score} & ${values.join(" & ")} \\\\
-\\bottomrule
-\\end{tabular}`;
-  }
-  return `\\begin{tabular}{lr}
-\\toprule
-{} & score \\\\
-\\midrule
-${names.map((name, i) => `\\textbf{${name}} & ${values[i]} \\\\`).join("\n")}
+${rnames.map((name, i) => `\\textbf{${name}} & ${tab[i].join(" & ")} \\\\`).join("\n")}
 \\bottomrule
 \\end{tabular}`;
 };
 
-const csv = (scores, transpose, precision) => {
-  const [names, values] = transformScores(scores, precision);
-  if (transpose) return `${names.join(",")}\n${values.join(",")}`;
-  return `metric,score\n${names.map((name, i) => `${name},${values[i]}`).join("\n")}`;
+const csv = (rownames, colnames, table, transpose, precision) => {
+  const [rnames, cnames, tab] = prepareTable(rownames, colnames, table, transpose, precision);
+  return `,${cnames.join(",")}\n${rnames.map((name, i) => `${name},${tab[i].join(",")}`).join("\n")}`;
 };
 
 export default { latex, csv };

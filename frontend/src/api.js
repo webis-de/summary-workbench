@@ -3,8 +3,8 @@ import { get, post, wrappedFetch } from "./request";
 const getMetricsRequest = () => get("/api/metrics");
 const getSummarizersRequest = () => get("/api/summarizers");
 
-const evaluateRequest = (metrics, hypotheses, references) =>
-  post("/api/evaluate", { metrics, hypotheses, references });
+const evaluateRequest = (metrics, references, hypotheses) =>
+  post("/api/evaluate", { metrics, references, hypotheses });
 
 const summarizeRequest = (text, summarizers, ratio) =>
   post("/api/summarize", { text, summarizers, ratio });

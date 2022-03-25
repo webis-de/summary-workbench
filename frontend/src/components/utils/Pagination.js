@@ -63,8 +63,12 @@ const Pagination = ({ numPages, page, setPage, size, setSize }) => (
     <Label>
       / &nbsp;<span className="font-bold">{numPages}</span>&nbsp;
     </Label>
-    <InputField value={size} onDone={setSize} />
-    <Label>items per page</Label>
+    {size !== undefined && (
+      <>
+        <InputField value={size} onDone={setSize} />
+        <Label>items per page</Label>
+      </>
+    )}
     <Button isRight disabled={page >= numPages} onClick={() => setPage((old) => old + 1)}>
       Next
     </Button>

@@ -4,8 +4,9 @@ import { useAsyncFn } from "react-use";
 import { evaluateRequest } from "../api";
 import { MetricsContext } from "../contexts/MetricsContext";
 import { useCalculations } from "../hooks/calculations";
-import { getChosen, unpack } from "../utils/common";
+import { getChosen } from "../utils/common";
 import { collectPluginErrors } from "../utils/data";
+import { flatten } from "../utils/flatScores";
 import { OneHypRef } from "./OneHypRef";
 import { Result } from "./Result";
 import { Saved } from "./Saved";
@@ -13,7 +14,6 @@ import { Settings } from "./Settings";
 import { Upload } from "./Upload";
 import { Button, LoadingButton } from "./utils/Button";
 import { Card, CardContent, CardHead } from "./utils/Card";
-import { sameLength } from "./utils/ChooseFile";
 import { Errors } from "./utils/Error";
 import { CenterLoading } from "./utils/Loading";
 import { Tab, TabContent, TabHead, TabPanel, Tabs } from "./utils/Tabs";
@@ -56,53 +56,115 @@ const FileInput = ({ loading, compute, setComputeData, disableErrors }) => (
   </Card>
 );
 
+const zipLines = (lines) => {
+  const {
+    document: documents,
+    reference: references,
+    ...models
+  } = Object.fromEntries(Object.keys(lines[0]).map((key) => [key, lines.map((line) => line[key])]));
+  return [documents, references, models];
+};
+
+const evaluate = async (modelsWithArguments, references, hypotheses) => {
+  const response = await evaluateRequest(modelsWithArguments, references, hypotheses);
+  if (response.errors) return response;
+  const { scores } = response.data;
+  return collectPluginErrors(
+    scores,
+    (name, { score }) => {
+      if (score) return { name, score };
+      return undefined;
+    },
+    (elements) => ({
+      scores: Object.fromEntries(elements.map(({ name, score }) => [name, score])),
+    })
+  );
+};
+
+class ScoreBuilder {
+  constructor(id, metrics, documents, references, modeltexts) {
+    this.id = id;
+    this.scores = {};
+    this.documents = documents;
+    this.references = references;
+    this.modeltexts = modeltexts;
+    this.metrics = metrics;
+    this.usedMetrics = new Set();
+    this.usedScores = new Set();
+  }
+
+  empty() {
+    return !this.usedMetrics.size;
+  }
+
+  add(model, scores) {
+    Object.keys(scores).forEach((key) => this.usedMetrics.add(this.metrics[key].info.name));
+    const flattened = Object.fromEntries(flatten(scores, this.metrics));
+    Object.keys(flattened).forEach((key) => this.usedScores.add(key));
+    this.scores[model] = flattened;
+  }
+
+  compile() {
+    const rows = [...this.usedScores];
+    const columns = [...Object.keys(this.scores)];
+    rows.sort();
+    columns.sort();
+    const table = rows.map((row) => columns.map((column) => this.scores[column][row]));
+    const metrics = [...this.usedMetrics];
+    const { id, documents, references, modeltexts } = this;
+    return {
+      id,
+      documents,
+      references,
+      modeltexts,
+      rows,
+      columns,
+      table,
+      metrics,
+    };
+  }
+}
+
 const SubEvaluate = () => {
   const { metrics, types, toggle, setArgument } = useContext(MetricsContext);
   const calc = useCalculations();
 
   const chosenMetrics = useMemo(() => Object.keys(getChosen(metrics)), [metrics]);
   const [state, doFetch] = useAsyncFn(
-    async ({ id, hypotheses, references, reset = false }) => {
+    async ({ id, lines, reset = false }) => {
       if (reset) return null;
       const modelsWithArguments = Object.fromEntries(
         chosenMetrics.map((model) => [model, metrics[model].arguments])
       );
-      const response = await evaluateRequest(modelsWithArguments, hypotheses, references);
-      if (response.errors) return response;
-      const { scores } = response.data;
-      return collectPluginErrors(
-        scores,
-        (name, { score }) => {
-          if (score) return { name, score };
-          return undefined;
-        },
-        (elements) => ({
-          id,
-          scores: Object.fromEntries(elements.map(({ name, score }) => [name, score])),
-          hypotheses,
-          references,
-        })
+      const [documents, references, models] = zipLines(lines);
+      const responses = await Promise.all(
+        Object.entries(models).map(async ([key, hypotheses]) => [
+          key,
+          await evaluate(modelsWithArguments, references, hypotheses),
+        ])
       );
+      const scoreBuilder = new ScoreBuilder(id, metrics, documents, references, models);
+      const collectedErrors = [];
+      responses.forEach(([key, { data, errors }]) => {
+        if (data) scoreBuilder.add(key, data.scores);
+        if (errors) collectedErrors.push(...errors);
+      });
+      const data = {};
+      if (!scoreBuilder.empty()) data.data = scoreBuilder.compile();
+      if (collectedErrors.length) data.errors = collectedErrors;
+      return data;
     },
     [metrics, chosenMetrics]
   );
-  const [computeData, setComputeData] = useState({});
+  const [{ data, errors }, setComputeData] = useState({});
 
-  const saveCalculation = async (saveId) => {
-    await calc.add({ ...state.value.data, id: saveId, metrics: unpack(metrics, "info") });
+  const saveCalculation = async (calculation) => {
+    await calc.add(calculation);
     doFetch({ reset: true });
   };
 
   const disableErrors = [];
-  if (!computeData.hypotheses) {
-    disableErrors.push("Input for hypotheses is missing");
-  }
-  if (!computeData.references) {
-    disableErrors.push("Input for references is missing");
-  }
-  if (!sameLength([computeData.hypotheses, computeData.references])) {
-    disableErrors.push("The files are not valid because they have different number of lines.");
-  }
+  if (errors) disableErrors.push(...errors);
   if (!chosenMetrics.length) {
     disableErrors.push("Select at least one metric.");
   }
@@ -124,7 +186,7 @@ const SubEvaluate = () => {
             <div>
               <FileInput
                 loading={state.loading}
-                compute={() => doFetch(computeData)}
+                compute={() => doFetch(data)}
                 setComputeData={setComputeData}
                 disableErrors={disableErrors}
               />
@@ -161,7 +223,7 @@ const SubEvaluate = () => {
             {state.value && (
               <>
                 {state.value.errors && <Errors errors={state.value.errors} />}
-                {state.value.metrics && !state.value.metrics.length && (
+                {!state.value.data && (
                   <Hint type="danger" small>
                     no scores were computed
                   </Hint>

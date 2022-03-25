@@ -68,7 +68,7 @@ const initConfig = async (timeout = 30000) => {
   currentConfig.SUMMARIZER_KEYS = Object.entries(currentConfig.SUMMARIZERS)
     .filter(([, value]) => !value.disabled && value.healthy)
     .map(([key]) => key);
-  console.log("config updated...");
+  console.log("config updated");
   setTimeout(initConfig, timeout);
 };
 

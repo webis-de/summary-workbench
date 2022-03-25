@@ -58,7 +58,7 @@ const CompareTable = ({ comparisons }) => {
 
   return (
     <>
-      <Hint type="danger" noicon>{`Minimum Overlap Highlighted: ${minOverlap} grams`}</Hint>
+      <Hint type="info" noicon>{`Minimum Overlap Highlighted: ${minOverlap} grams`}</Hint>
       <ComparisonDisplay
         page={page}
         size={size}

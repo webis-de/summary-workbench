@@ -1,35 +1,42 @@
 import React from "react";
 import { FaQuestionCircle } from "react-icons/fa";
 
-import { SavedInfo } from "./SavedInfo";
+import { HoverProvider } from "../contexts/HoverContext";
+import { ScoreWorkbench } from "./ScoreWorkbench";
 import { Badge, BadgeGroup } from "./utils/Badge";
+import { DeleteButton } from "./utils/Button";
 import { Disclosure, DisclosureContent, DisclosureToggle } from "./utils/Disclosure";
 import { HeadingBig, HeadingMedium } from "./utils/Text";
 import { Tooltip } from "./utils/Tooltip";
 
 const SavedEntry = ({ calculation, deleteCalculation }) => {
-  const badges = Object.keys(calculation.scores).map((name) => calculation.metrics[name].name);
+  const { id, metrics } = calculation;
   return (
     <div className="shadow-md rounded-lg">
-      <Disclosure key={calculation.id}>
-        <div className="border border-black rounded-lg divide-y divide-gray-300">
-          <DisclosureToggle>
-            <div className="px-4 h-12 flex justify-between items-center w-full">
-              <HeadingMedium raw>{calculation.id}</HeadingMedium>
-              <BadgeGroup>
-                {badges.map((badge, i) => (
-                  <Badge key={i}>{badge}</Badge>
-                ))}
-              </BadgeGroup>
-            </div>
-          </DisclosureToggle>
-          <DisclosureContent>
-            <div className="p-4">
-              <SavedInfo calculation={calculation} deleteCalculation={deleteCalculation} />
-            </div>
-          </DisclosureContent>
-        </div>
-      </Disclosure>
+      <HoverProvider>
+        <Disclosure>
+          <div className="border border-black rounded-lg divide-y divide-gray-300">
+            <DisclosureToggle>
+              <div className="px-4 h-12 flex justify-between items-center w-full">
+                <HeadingMedium raw>{id}</HeadingMedium>
+                <BadgeGroup>
+                  {metrics.map((metric, i) => (
+                    <Badge key={i}>{metric}</Badge>
+                  ))}
+                </BadgeGroup>
+              </div>
+            </DisclosureToggle>
+            <DisclosureContent>
+              <div className="p-4">
+                <ScoreWorkbench
+                  calculation={calculation}
+                  RightToken={<DeleteButton onClick={deleteCalculation} />}
+                />
+              </div>
+            </DisclosureContent>
+          </div>
+        </Disclosure>
+      </HoverProvider>
     </div>
   );
 };

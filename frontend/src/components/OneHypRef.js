@@ -16,15 +16,25 @@ const OneHypRef = ({ setComputeData }) => {
   const [hypText, setHypText] = useState("");
   const [refText, setRefText] = useState("");
 
-  useEffect(
-    () =>
+  useEffect(() => {
+    const errors = [];
+    if (!refText) errors.push("reference text is missing");
+    if (!hypText) errors.push("hypothesis text is missing");
+    if (errors.length) {
+      setComputeData({ errors });
+      return;
+    }
+    try {
       setComputeData({
-        id: "",
-        hypotheses: hypText ? [hypText] : undefined,
-        references: refText ? [refText] : undefined,
-      }),
-    [hypText, refText]
-  );
+        data: {
+          id: "",
+          lines: [{ document: "", reference: refText, hypothesis: hypText }],
+        },
+      });
+    } catch (error) {
+      setComputeData({ errors: [error.message] });
+    }
+  }, [hypText, refText]);
 
   return (
     <FlexResponsive>
