@@ -2,8 +2,6 @@ import os
 from pathlib import Path
 from urllib.parse import urljoin
 
-import numpy as np
-
 import bleurt.score
 
 
@@ -20,4 +18,4 @@ class MetricPlugin:
         self.bleurt = bleurt.score.BleurtScorer(str(self.MODEL_PATH / self.MODEL))
 
     def evaluate(self, hypotheses, references):
-        return float(np.average(self.bleurt.score(references, hypotheses)))
+        return self.bleurt.score(references=references, candidates=hypotheses)

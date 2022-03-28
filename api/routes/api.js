@@ -53,6 +53,8 @@ router.get("/metrics", async (req, res, next) => {
  */
 
 router.get("/summarizers", async (req, res, next) => {
+  // TODO: cancle request
+  // req.on("close", () => console.log("---closed---"))
   try {
     return res.json(currentConfig.SUMMARIZERS);
   } catch (err) {
@@ -145,7 +147,8 @@ router.post(
   async (req, res, next) => {
     try {
       const { metrics, references, hypotheses } = req.body;
-      return res.json({ data: { scores: await evaluate(metrics, hypotheses, references) } });
+      const scores = await evaluate(metrics, hypotheses, references);
+      return res.json({ data: { scores } });
     } catch (err) {
       return next(err);
     }

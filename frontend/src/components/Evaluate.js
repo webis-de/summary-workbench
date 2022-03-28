@@ -4,7 +4,7 @@ import { useAsyncFn } from "react-use";
 import { evaluateRequest } from "../api";
 import { MetricsContext } from "../contexts/MetricsContext";
 import { useCalculations } from "../hooks/calculations";
-import { getChosen } from "../utils/common";
+import { average, getChosen, mapObject } from "../utils/common";
 import { collectPluginErrors } from "../utils/data";
 import { flatten } from "../utils/flatScores";
 import { OneHypRef } from "./OneHypRef";
@@ -68,15 +68,14 @@ const zipLines = (lines) => {
 const evaluate = async (modelsWithArguments, references, hypotheses) => {
   const response = await evaluateRequest(modelsWithArguments, references, hypotheses);
   if (response.errors) return response;
-  const { scores } = response.data;
   return collectPluginErrors(
-    scores,
-    (name, { score }) => {
-      if (score) return { name, score };
+    response.data.scores,
+    (name, { scores }) => {
+      if (scores) return { name, scores };
       return undefined;
     },
     (elements) => ({
-      scores: Object.fromEntries(elements.map(({ name, score }) => [name, score])),
+      scores: Object.fromEntries(elements.map(({ name, scores }) => [name, scores])),
     })
   );
 };
@@ -85,6 +84,7 @@ class ScoreBuilder {
   constructor(id, metrics, documents, references, modeltexts) {
     this.id = id;
     this.scores = {};
+    this.avgScores = {};
     this.documents = documents;
     this.references = references;
     this.modeltexts = modeltexts;
@@ -102,6 +102,7 @@ class ScoreBuilder {
     const flattened = Object.fromEntries(flatten(scores, this.metrics));
     Object.keys(flattened).forEach((key) => this.usedScores.add(key));
     this.scores[model] = flattened;
+    this.avgScores[model] = mapObject(flattened, (list) => average(list));
   }
 
   compile() {
@@ -109,9 +110,9 @@ class ScoreBuilder {
     const columns = [...Object.keys(this.scores)];
     rows.sort();
     columns.sort();
-    const table = rows.map((row) => columns.map((column) => this.scores[column][row]));
+    const table = rows.map((row) => columns.map((column) => this.avgScores[column][row]));
     const metrics = [...this.usedMetrics];
-    const { id, documents, references, modeltexts } = this;
+    const { id, documents, references, modeltexts, scores } = this;
     return {
       id,
       documents,
@@ -121,6 +122,7 @@ class ScoreBuilder {
       columns,
       table,
       metrics,
+      scores,
     };
   }
 }
@@ -147,7 +149,7 @@ const SubEvaluate = () => {
       const collectedErrors = [];
       responses.forEach(([key, { data, errors }]) => {
         if (data) scoreBuilder.add(key, data.scores);
-        if (errors) collectedErrors.push(...errors);
+        if (errors) collectedErrors.push({ name: key, errors });
       });
       const data = {};
       if (!scoreBuilder.empty()) data.data = scoreBuilder.compile();

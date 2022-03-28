@@ -1,25 +1,41 @@
 import { Hint } from "./Text";
 
-const Error = ({ error: { message } }) => (
-  <Hint key={message} type="danger" small>
-    {message}
-  </Hint>
-);
+const Errors = ({ errors, nested }) => {
+  if (Array.isArray(errors)) {
+    return errors.map((err, i) => <Errors key={i} errors={err} nested={nested} />);
+  }
 
-const MultipleError = ({ error }) =>
-  error.map(({ name, errors }) => (
-    <Hint key={name} type="danger" small>
-      <div>{name}:</div>
-      <div className="ml-5">
-        {errors.map(({ message }, i) => (
-          <div key={i}>{message}</div>
-        ))}
-      </div>
+  const { name, message } = errors;
+
+  let subErrors;
+  if (typeof errors === "string") subErrors = errors;
+  else {
+    subErrors = errors.errors;
+    if (subErrors === undefined) {
+      if (message === undefined) throw new Error("either 'errors' or 'message' needs to be set");
+      subErrors = message;
+    }
+  }
+
+  let inner;
+  if (typeof subErrors === "string") inner = <div>{subErrors}</div>;
+  else inner = <Errors errors={subErrors} nested />;
+
+  if (name !== undefined) {
+    inner = (
+      <>
+        <div>{name}:</div>
+        <div className="ml-5">{inner}</div>
+      </>
+    );
+  }
+
+  if (nested) return <div>{inner}</div>;
+  return (
+    <Hint type="danger" small>
+      {inner}
     </Hint>
-  ));
-
-const Errors = ({ errors }) =>
-  errors.map((error) =>
-    error.type === "MULTIPLE" ? <MultipleError error={error.errors} /> : <Error error={error} />
   );
+};
+
 export { Errors };

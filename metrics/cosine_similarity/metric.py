@@ -1,5 +1,4 @@
 import os
-from statistics import mean
 
 import spacy
 
@@ -13,4 +12,4 @@ class MetricPlugin:
     def evaluate(self, hypotheses, references):
         nlp = self.nlp
         scores = [nlp(h).similarity(nlp(r)) for h, r in zip(hypotheses, references)]
-        return mean(scores)
+        return scores

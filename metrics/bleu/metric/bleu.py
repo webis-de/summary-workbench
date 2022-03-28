@@ -44,8 +44,7 @@ class Bleu:
             smooth_value=self.sent_smooth_value,
             use_effective_order=self.sent_use_effective_order,
         )
-        score_dict = {"bleu": score.score}
-        return score_dict
+        return score.score
 
     def compute_score(self, summaries, references, aggregate=True):
         if isinstance(summaries, str):
@@ -65,4 +64,4 @@ class Bleu:
                 use_effective_order=self.use_effective_order,
             )
             return score.score
-        return list(map(self.evaluate_example, zip(summaries, references)))
+        return [self.evaluate_example(s, r) for s, r in zip(summaries, references)]

@@ -14,4 +14,5 @@ class MetricPlugin:
         hyps = dict(enumerate(hyp_list_zip))
         refs = dict(enumerate(ref_list_zip))
 
-        return self.meteor.compute_score(refs, hyps)[0]
+        _, scores = self.meteor.compute_score(refs, hyps)
+        return scores

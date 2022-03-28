@@ -6,4 +6,4 @@ class MetricPlugin:
         self.bleu = Bleu()
 
     def evaluate(self, hypotheses, references):
-        return self.bleu.compute_score(hypotheses, references)
+        return self.bleu.compute_score(hypotheses, references, aggregate=False)

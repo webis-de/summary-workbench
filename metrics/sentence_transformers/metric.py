@@ -1,4 +1,3 @@
-from statistics import mean
 import os
 
 from sentence_transformers import SentenceTransformer, util
@@ -6,7 +5,11 @@ from sentence_transformers import SentenceTransformer, util
 
 def _paired_cosin_sim(embeddings1, embeddings2):
     assert len(embeddings1) == len(embeddings2)
-    return [float(util.pytorch_cos_sim(e1, e2)[0][0]) for e1, e2 in zip(embeddings1, embeddings2)]
+    return [
+        float(util.pytorch_cos_sim(e1, e2)[0][0])
+        for e1, e2 in zip(embeddings1, embeddings2)
+    ]
+
 
 class MetricPlugin:
     MODEL = os.environ.get("model") or "roberta-large-nli-stsb-mean-tokens"
@@ -18,4 +21,4 @@ class MetricPlugin:
         embeddings1 = self.model.encode(hypotheses, convert_to_tensor=True)
         embeddings2 = self.model.encode(references, convert_to_tensor=True)
         cosine_scores = _paired_cosin_sim(embeddings1, embeddings2)
-        return mean(cosine_scores)
+        return cosine_scores

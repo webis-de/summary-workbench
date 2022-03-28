@@ -148,6 +148,10 @@ class SummarizerBase(BaseModel):
     )
 
 
+def to_float_list(array):
+    return [float(e) for e in array]
+
+
 def construct_metric():
     from metric import MetricPlugin
 
@@ -158,7 +162,12 @@ def construct_metric():
     @app.post("/")
     def evaluate(body: MetricBody, response: Response):
         try:
-            return {"score": plugin.evaluate(**body.dict())}
+            scores = plugin.evaluate(**body.dict())
+            if isinstance(scores, dict):
+                scores = {k: to_float_list(v) for k, v in scores.items()}
+            else:
+                scores = to_float_list(scores)
+            return {"scores": scores}
         except Exception as error:
             response.status_code = 400
             return {"message": ", ".join(error.args)}

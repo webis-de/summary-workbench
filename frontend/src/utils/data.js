@@ -10,7 +10,7 @@ const collectPluginErrors = (plugins, elementFunc, dataFunc) => {
   collectedErrors.sort((a, b) => a.name > b.name);
   const data = {};
   if (collectedElements.length) data.data = dataFunc(collectedElements);
-  if (collectedErrors.length) data.errors = [{ type: "MULTIPLE", errors: collectedErrors }];
+  if (collectedErrors.length) data.errors = collectedErrors;
   return data;
 };
 

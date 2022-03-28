@@ -12,4 +12,8 @@ const foldObject = (objects, func, values = []) => {
 
 const unpack = (obj, subKey) => mapObject(obj, (value) => value[subKey]);
 
-export { getChosen, unpack, mapObject, foldObject };
+const sum = (arr) => arr.reduce((acc, value) => acc + value, 0);
+
+const average = (arr) => sum(arr) / arr.length;
+
+export { getChosen, unpack, mapObject, foldObject, sum, average };

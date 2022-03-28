@@ -1,13 +1,18 @@
 # pylint: disable=C0103
 import re
+
+import numpy as np
+
 from .cider_scorer import CiderScorer
 
-tokenizer = re.compile(r'\w+')
+tokenizer = re.compile(r"\w+")
+
 
 def tokenize(document):
     return tokenizer.findall(document)
 
-class Cider():
+
+class Cider:
     def __init__(self, n_gram=4, sigma=6.0, tokenize=True):
         """
         CIDEr metric
@@ -31,18 +36,17 @@ class Cider():
             references = [references]
         if self.tokenize:
             if isinstance(references[0], str):
-                references = [" ".join(tokenize(reference)) \
-                              for reference in references]
+                references = [" ".join(tokenize(reference)) for reference in references]
             else:
-                references = [[" ".join(tokenize(ref)) \
-                              for ref in reference] for reference in references]
+                references = [
+                    [" ".join(tokenize(ref)) for ref in reference]
+                    for reference in references
+                ]
             summaries = [" ".join(tokenize(summary)) for summary in summaries]
         cider_scorer = CiderScorer(n=self.n_gram, sigma=self.sigma)
         for summ, ref in zip(summaries, references):
             if not isinstance(ref, list):
                 ref = [ref]
             cider_scorer += (summ, ref)
-        score, scores = cider_scorer.compute_score()
-        if not aggregate:
-            return score
-        return score
+        scores = cider_scorer.compute_score()
+        return np.mean(scores) if aggregate else scores
