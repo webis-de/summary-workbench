@@ -13,7 +13,7 @@ const evaluate = async (metrics, hypotheses, references) => {
   plugins = Object.fromEntries(plugins);
   const validationResults = await validationRequest(plugins);
   if (Object.keys(validationResults).length) return validationResults;
-  return pluginRequest(plugins, ({ score }) => ({ score }));
+  return pluginRequest(plugins, ({ scores }) => ({ scores }));
 };
 
 module.exports = { evaluate };

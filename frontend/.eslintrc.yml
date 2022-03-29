@@ -42,4 +42,5 @@ rules:
   no-constant-condition: 0
   import/no-extraneous-dependencies: 0
   no-restricted-syntax: 0
+  max-classes-per-file: 0
   no-unused-vars: "warn"

@@ -1,11 +1,13 @@
-import { useContext, useMemo, useReducer, useRef, useEffect, useState } from "react";
+import { useContext, useMemo, useReducer, useRef, useState } from "react";
 import { FaCheck, FaRegCopy } from "react-icons/fa";
-import { useToggle, useKey } from "react-use";
+import Plot from "react-plotly.js";
+import { useKey, useToggle } from "react-use";
 
 import { HoverContext } from "../contexts/HoverContext";
 import { useMarkup } from "../hooks/markup";
-import { mapObject } from "../utils/common";
+import { arrayEqual, mapObject } from "../utils/common";
 import formatters from "../utils/export";
+import { range } from "../utils/python";
 import { Button } from "./utils/Button";
 import { Card, CardContent, CardHead } from "./utils/Card";
 import { Input } from "./utils/Form";
@@ -160,7 +162,9 @@ const ModelCard = ({ name, markup, markupState, toggle }) => (
 );
 
 class MarkupMatrix {
-  constructor(documents, models) {
+  constructor(calculation) {
+    const { documents, references, modeltexts } = calculation;
+    const models = { reference: references, ...modeltexts };
     this.length = documents.length;
     this.documents = documents;
     this.models = models;
@@ -182,11 +186,7 @@ class MarkupMatrix {
 }
 
 const Visualize = ({ calculation }) => {
-  const { documents, references, modeltexts } = calculation;
-  const matrix = useMemo(
-    () => new MarkupMatrix(documents, { reference: references, ...modeltexts }),
-    [documents, references, modeltexts]
-  );
+  const matrix = useMemo(() => new MarkupMatrix(calculation), [calculation]);
   const { numPages, page, setPage } = usePagination(matrix.length, 1, 1);
 
   const hovered = useContext(HoverContext);
@@ -241,6 +241,156 @@ const Visualize = ({ calculation }) => {
   );
 };
 
+class PlotMatrix {
+  constructor(calculation) {
+    const { references, modeltexts, scores, columns, rows } = calculation;
+    this.columns = columns;
+    this.rows = rows;
+    this.models = modeltexts;
+    this.references = references;
+    this.scores = scores;
+    this.jitter = {
+      scores: range(references.length).map(() => Math.random()),
+      label: "uniform jitter",
+    };
+    this.defaultScores = {
+      scores: [],
+      label: "nothing selected",
+    };
+  }
+
+  fromCoord([row, col]) {
+    const rowname = this.rows[row];
+    const colname = this.columns[col];
+    return {
+      scores: this.scores[colname][rowname],
+      texts: this.models[colname],
+      label: `${rowname}     (${colname})`,
+    };
+  }
+
+  get(metrics) {
+    const colnames = this.columns;
+    const rownames = this.rows;
+    const table = rownames.map((rowname) =>
+      colnames.map((colname) => {
+        if (!this.scores[colname][rowname]) return undefined;
+        return false;
+      })
+    );
+    metrics.forEach(([row, col]) => {
+      table[row][col] = true;
+    });
+    let plotData = metrics.map((e) => this.fromCoord(e));
+    const [x, y] = plotData;
+    if (!x) plotData = [this.defaultScores, this.defaultScores];
+    else if (!y) plotData = [x, this.jitter];
+
+    return { colnames, rownames, table, plotData };
+  }
+}
+
+const SetButton = ({ isSet, children, ...props }) => {
+  let className = "py-2 px-4 text-sm font-medium";
+  if (isSet === undefined) className += " text-gray-900 bg-white cursor-default opacity-50";
+  else if (isSet) className += " bg-gray-600 text-white ring-[3px] ring-black";
+  else
+    className += " text-gray-900 bg-white hover:text-white hover:bg-gray-400 ring-1 ring-gray-700";
+  return (
+    <button {...props} disabled={isSet === undefined} className={className}>
+      {children}
+    </button>
+  );
+};
+
+const Plotter = ({ calculation }) => {
+  const matrix = useMemo(() => new PlotMatrix(calculation), [calculation]);
+  const [selectedMetrics, toggleMetric] = useReducer((oldState, value) => {
+    const newState = oldState.filter((arr) => !arrayEqual(arr, value));
+    if (oldState.length !== newState.length) return newState;
+    return [...newState.slice(-1), value];
+  }, []);
+  const { colnames, rownames, table, plotData } = useMemo(
+    () => matrix.get(selectedMetrics),
+    [selectedMetrics]
+  );
+  const [x, y] = plotData;
+  return (
+    <div>
+      <TableWrapper>
+        <Table>
+          <Thead>
+            <Th>Metric</Th>
+            {colnames.map((colname) => (
+              <Th key={colname}>{colname}</Th>
+            ))}
+          </Thead>
+          <Tbody>
+            {table.map((row, i) => {
+              const metric = rownames[i];
+              return (
+                <Tr key={metric} hover striped>
+                  <Td loose>{metric}</Td>
+                  {row.map((isSet, j) => (
+                    <Td key={j} loose>
+                      <SetButton isSet={isSet} onClick={() => toggleMetric([i, j])}>
+                        toggle
+                      </SetButton>
+                    </Td>
+                  ))}
+                </Tr>
+              );
+            })}
+          </Tbody>
+        </Table>
+      </TableWrapper>
+      <div className="grid grid-cols-2 py-4 px-2">
+        <div>test</div>
+        <div className="border border-black">
+          <Plot
+            className="w-full min-h-[500px]"
+            data={[
+              {
+                x: x.scores,
+                y: y.scores,
+                // text: [],
+                // hoverinfo: "text",
+                // customdata:
+                type: "scatter",
+                mode: "markers",
+                hoverlabel: { bgcolor: "black" },
+                selected: { marker: { color: "orange", opacity: 1 } },
+                unselected: { marker: { color: "blue", opacity: 1 } },
+                marker: { color: "blue" },
+              },
+            ]}
+            layout={{
+              xaxis: {
+                title: x.label,
+              },
+              yaxis: {
+                title: y.label,
+              },
+              dragmode: "select",
+              autosize: true,
+              margin: {
+                t: 20,
+                r: 20,
+                l: 60,
+                b: 60,
+              },
+            }}
+            config={{
+              responsive: true,
+            }}
+            onSelected={(e) => console.log(e)}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ScoreWorkbench = ({ calculation, RightToken }) => {
   const { rows, columns, table } = calculation;
   return (
@@ -250,6 +400,7 @@ const ScoreWorkbench = ({ calculation, RightToken }) => {
           <TabHead>
             <Pill>Scores</Pill>
             <Pill>Visualize Overlap</Pill>
+            <Pill>Plotter</Pill>
           </TabHead>
           {RightToken}
         </div>
@@ -259,6 +410,9 @@ const ScoreWorkbench = ({ calculation, RightToken }) => {
           </TabPanel>
           <TabPanel>
             <Visualize calculation={calculation} />
+          </TabPanel>
+          <TabPanel>
+            <Plotter calculation={calculation} />
           </TabPanel>
         </TabContent>
       </Tabs>

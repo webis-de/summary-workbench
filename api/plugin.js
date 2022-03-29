@@ -21,8 +21,6 @@ const validationRequest = async (plugins) => {
 };
 
 const pluginRequest = async (plugins, extractor) => {
-  const validationResults = await validationRequest(plugins);
-  if (Object.keys(validationResults).length) return validationResults;
   const results = await Promise.all(
     Object.entries(plugins).map(async ([key, { url, args }]) => {
       try {

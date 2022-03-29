@@ -16,4 +16,6 @@ const sum = (arr) => arr.reduce((acc, value) => acc + value, 0);
 
 const average = (arr) => sum(arr) / arr.length;
 
-export { getChosen, unpack, mapObject, foldObject, sum, average };
+const arrayEqual = (a, b) => a.length === b.length && a.every((val, index) => val === b[index]);
+
+export { getChosen, unpack, mapObject, foldObject, sum, average, arrayEqual };

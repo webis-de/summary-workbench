@@ -1,7 +1,7 @@
 const { validationResult } = require("express-validator");
 const { errorToMessage} = require("../errors")
 
-const validateMiddleware = async (req, res, next) => {
+const validateMiddleware = (req, res, next) => {
   try {
     validationResult(req).throw();
   } catch (err) {
