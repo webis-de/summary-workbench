@@ -22,7 +22,7 @@ const Input = ({ Icon, flatLeft, flatRight, small, right, ...props }) => {
   }
 
   return (
-    <div className="relative">
+    <div className="relative w-full">
       {Icon && (
         <div className="absolute inset-y-0 left-0 flex items-center z-10 pl-3 pointer-events-none">
           <Icon className={`${small ? "w-4 h-4" : "w-5 h-5"} text-gray-600`} />

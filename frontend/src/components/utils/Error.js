@@ -1,8 +1,8 @@
 import { Hint } from "./Text";
 
-const Errors = ({ errors, nested }) => {
+const Errors = ({ errors, nested, type = "danger" }) => {
   if (Array.isArray(errors)) {
-    return errors.map((err, i) => <Errors key={i} errors={err} nested={nested} />);
+    return errors.map((err, i) => <Errors key={i} errors={err} nested={nested} type={type} />);
   }
 
   const { name, message } = errors;
@@ -19,7 +19,7 @@ const Errors = ({ errors, nested }) => {
 
   let inner;
   if (typeof subErrors === "string") inner = <div>{subErrors}</div>;
-  else inner = <Errors errors={subErrors} nested />;
+  else inner = <Errors errors={subErrors} nested type={type} />;
 
   if (name !== undefined) {
     inner = (
@@ -32,7 +32,7 @@ const Errors = ({ errors, nested }) => {
 
   if (nested) return <div>{inner}</div>;
   return (
-    <Hint type="danger" small>
+    <Hint type={type} small>
       {inner}
     </Hint>
   );

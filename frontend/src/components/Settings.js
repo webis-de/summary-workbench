@@ -31,7 +31,7 @@ const ModelBox = ({ info, args, setArgument, close }) => (
       </button>
     </div>
     {Boolean(Object.keys(args).length) && (
-      <div className="px-2 py-1">
+      <div className="px-2 py-1 flex flex-col gap-2">
         {Object.entries(args).map(([argName, argDefault]) => (
           <div key={argName} className="flex items-center gap-2">
             <span className="text-sm">{argName}</span>

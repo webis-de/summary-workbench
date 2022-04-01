@@ -9,23 +9,23 @@ const loadSetting = (key, defaults) => {
   return setting === "true";
 };
 
-const defaultNumberArgument = (min, max) => {
-  if (min !== undefined) return min
-  if (max !== undefined) return max
-  return 0
-}
-
-const argumentToDefault = ({type, default: def, categories, min, max}) => {
-  if (def !== undefined && def !== null) return def
+const argumentToDefault = ({ type, default: def }) => {
+  if (def !== undefined && def !== null) return def;
   switch (type) {
-    case "str": return "";
-    case "int": return defaultNumberArgument(min, max);
-    case "float": return defaultNumberArgument(min, max);
-    case "categorical": return categories[0];
-    case "bool": return false;
-    default: throw new Error(`unknown type ${type}`)
+    case "str":
+      return undefined;
+    case "int":
+      return undefined;
+    case "float":
+      return undefined;
+    case "categorical":
+      return undefined;
+    case "bool":
+      return false;
+    default:
+      throw new Error(`unknown type ${type}`);
   }
-}
+};
 
 const initPlugins = async (fetchFunction, defaults) => {
   const rawPlugins = await fetchFunction();
@@ -36,7 +36,10 @@ const initPlugins = async (fetchFunction, defaults) => {
     let args = value.arguments || {};
     if (value.arguments) {
       args = Object.fromEntries(
-        Object.entries(value.arguments).map(([argName, argDef]) => [argName, argumentToDefault(argDef)])
+        Object.entries(value.arguments).map(([argName, argDef]) => [
+          argName,
+          argumentToDefault(argDef),
+        ])
       );
     }
     const info = { ...value };

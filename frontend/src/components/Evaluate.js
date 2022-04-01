@@ -4,7 +4,7 @@ import { useAsyncFn } from "react-use";
 import { evaluateRequest } from "../api";
 import { MetricsContext } from "../contexts/MetricsContext";
 import { useCalculations } from "../hooks/calculations";
-import { average, getChosen, mapObject } from "../utils/common";
+import { average, filterObject, getChosen, mapObject } from "../utils/common";
 import { collectPluginErrors } from "../utils/data";
 import { flatten } from "../utils/flatScores";
 import { OneHypRef } from "./OneHypRef";
@@ -43,13 +43,9 @@ const FileInput = ({ loading, compute, setComputeData, disableErrors }) => (
               Evaluate
             </Button>
           )}
-          <div className="flex flex-col">
-            {disableErrors.map((error) => (
-              <Hint key={error} type="warning" small>
-                {error}
-              </Hint>
-            ))}
-          </div>
+        </div>
+        <div>
+          <Errors errors={disableErrors} type="info" />
         </div>
       </CardContent>
     </Tabs>
@@ -159,6 +155,25 @@ const SubEvaluate = () => {
     [metrics, chosenMetrics]
   );
   const [{ data, errors }, setComputeData] = useState({});
+  const argErrors = useMemo(
+    () =>
+      chosenMetrics
+        .map((key) => {
+          const {
+            info: { name },
+            arguments: args,
+          } = metrics[key];
+          return {
+            name,
+            errors: Object.keys(filterObject(args, (_, v) => v === undefined)).map(
+              (k) => `${k}: argument is missing`
+            ),
+          };
+        })
+        .filter(({ errors: e }) => e.length)
+        .sort(({ name }) => name),
+    [metrics, chosenMetrics]
+  );
 
   const saveCalculation = async (calculation) => {
     await calc.add(calculation);
@@ -167,6 +182,7 @@ const SubEvaluate = () => {
 
   const disableErrors = [];
   if (errors) disableErrors.push(...errors);
+  if (argErrors) disableErrors.push(...argErrors);
   if (!chosenMetrics.length) {
     disableErrors.push("Select at least one metric.");
   }

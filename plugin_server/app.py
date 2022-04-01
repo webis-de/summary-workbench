@@ -59,7 +59,7 @@ class CategoricalArgument(BaseModel):
 
 TYPE_TO_ARGUMENT = {
     "int": IntArgument,
-    "float": IntArgument,
+    "float": FloatArgument,
     "bool": BoolArgument,
     "categorical": CategoricalArgument,
     "str": StringArgument,
