@@ -10,9 +10,9 @@ const swaggerOptions = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "tldr api",
+      title: "summary-workbench api",
       version: "1.0.0",
-      description: "tldr api",
+      description: "summary-workbench api",
     },
   },
   apis: ["./routes/*.js"],
@@ -29,7 +29,6 @@ const app = express();
 app.use("/api/doc", swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
 const errorMiddleware = (err, req, res) => {
-  console.error(err.message);
   res.status(400).json({ error: err.message });
 };
 

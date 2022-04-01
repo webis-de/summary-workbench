@@ -37,4 +37,16 @@ const Input = ({ Icon, flatLeft, flatRight, small, right, ...props }) => {
   );
 };
 
-export { Textarea, Input };
+const Checkbox = ({ children, checked, onChange }) => (
+  <label className="inline-flex items-center justify-center whitespace-nowrap">
+    <input
+      type="checkbox"
+      className="w-4 h-4 bg-gray-50 rounded border border-gray-300 focus:ring-1 focus:ring-blue-300"
+      checked={checked}
+      onChange={onChange}
+    />
+    <span className="ml-1">{children}</span>
+  </label>
+);
+
+export { Textarea, Input, Checkbox };

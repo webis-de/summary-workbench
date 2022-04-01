@@ -129,8 +129,18 @@ const SubEvaluate = () => {
 
   const chosenMetrics = useMemo(() => Object.keys(getChosen(metrics)), [metrics]);
   const [state, doFetch] = useAsyncFn(
-    async ({ id, lines, reset = false }) => {
+    async ({ id, lines: jsonl, chosenKeys, reset = false }) => {
       if (reset) return null;
+      let lines = jsonl;
+      if (chosenKeys) {
+        lines = jsonl.map(({ document, reference, ...rest }) => {
+          let ret = {};
+          if (document !== undefined) ret = { ...ret, document };
+          if (reference !== undefined) ret = { ...ret, reference };
+          ret = { ...ret, ...Object.fromEntries(chosenKeys.map((key) => [key, rest[key]])) };
+          return ret;
+        });
+      }
       const modelsWithArguments = Object.fromEntries(
         chosenMetrics.map((model) => [model, metrics[model].arguments])
       );
@@ -156,7 +166,8 @@ const SubEvaluate = () => {
   );
   const [{ data, errors }, setComputeData] = useState({});
   const argErrors = useMemo(
-    () => extractArgumentErrors(chosenMetrics, metrics), [(chosenMetrics, metrics)]
+    () => extractArgumentErrors(chosenMetrics, metrics),
+    [(chosenMetrics, metrics)]
   );
 
   const saveCalculation = async (calculation) => {
