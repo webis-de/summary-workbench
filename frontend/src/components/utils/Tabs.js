@@ -41,6 +41,20 @@ const Pill = ({ children }) => (
   </HTab>
 );
 
+const PillLink = ({ children }) => (
+  <HTab as={React.Fragment}>
+    {({ selected }) => (
+      <button
+        className={`${
+          selected ? "text-blue-600" : "text-gray-600 hover:text-gray-800 duration-300 underline "
+        } text-sm font-bold tracking-tight focus:z-10 whitespace-nowrap decoration-transparent hover:decoration-inherit`}
+      >
+        {children}
+      </button>
+    )}
+  </HTab>
+);
+
 const TabPanel = ({ children }) => <HTab.Panel>{children}</HTab.Panel>;
 
 const Tabs = ({ onChange, children }) => (
@@ -49,4 +63,4 @@ const Tabs = ({ onChange, children }) => (
   </HTab.Group>
 );
 
-export { Tabs, Tab, TabHead, TabContent, TabPanel, Pill };
+export { Tabs, Tab, TabHead, TabContent, TabPanel, Pill, PillLink };

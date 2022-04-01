@@ -21,4 +21,31 @@ const average = (arr) => sum(arr) / arr.length;
 
 const arrayEqual = (a, b) => a.length === b.length && a.every((val, index) => val === b[index]);
 
-export { getChosen, unpack, mapObject, filterObject, foldObject, sum, average, arrayEqual };
+const extractArgumentErrors = (chosenModels, models) =>
+  chosenModels
+    .map((key) => {
+      const {
+        info: { name },
+        arguments: args,
+      } = models[key];
+      return {
+        name,
+        errors: Object.keys(filterObject(args, (_, v) => v === undefined)).map(
+          (k) => `${k}: argument is missing`
+        ),
+      };
+    })
+    .filter(({ errors: e }) => e.length)
+    .sort(({ name }) => name);
+
+export {
+  getChosen,
+  unpack,
+  mapObject,
+  filterObject,
+  foldObject,
+  sum,
+  average,
+  arrayEqual,
+  extractArgumentErrors,
+};

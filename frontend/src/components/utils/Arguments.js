@@ -86,7 +86,16 @@ const FloatArgument = ({ value, setValue, min, max }) => (
     }}
   />
 );
-const StringArgument = ({ value, setValue }) => <InputField value={value} onDone={setValue} />;
+const StringArgument = ({ value, setValue }) => (
+  <InputField
+    value={value}
+    onDone={(v) => {
+      const parsed = v === "" ? undefined : v;
+      setValue(parsed);
+      return parsed;
+    }}
+  />
+);
 const CategoricalArgument = Categories;
 
 const Argument = ({ type, ...props }) => {

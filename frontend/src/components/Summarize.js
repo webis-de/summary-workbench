@@ -6,11 +6,11 @@ import { feedbackRequest, pdfExtractRequest, summarizeRequest } from "../api";
 import { SettingsContext } from "../contexts/SettingsContext";
 import { SummarizersContext } from "../contexts/SummarizersContext";
 import { useMarkups, usePairwiseMarkups } from "../hooks/markup";
-import { getChosen } from "../utils/common";
+import { extractArgumentErrors, getChosen } from "../utils/common";
 import { collectPluginErrors } from "../utils/data";
 import { Settings } from "./Settings";
 import { Badge } from "./utils/Badge";
-import { Button, LoadingButton } from "./utils/Button";
+import { Button, CopyToClipboardButton, LoadingButton } from "./utils/Button";
 import { Card, CardContent, CardHead } from "./utils/Card";
 import { FileInput, useFileInput } from "./utils/ChooseFile";
 import { Errors } from "./utils/Error";
@@ -19,7 +19,7 @@ import { Bars, EyeClosed, EyeOpen, ThumbsDown, ThumbsUp } from "./utils/Icons";
 import { SpaceGap } from "./utils/Layout";
 import { CenterLoading, Loading } from "./utils/Loading";
 import { Markup, useMarkupScroll } from "./utils/Markup";
-import { Pill, TabContent, TabHead, TabPanel, Tabs } from "./utils/Tabs";
+import { PillLink, TabContent, TabHead, TabPanel, Tabs } from "./utils/Tabs";
 import { HeadingBig, HeadingSemiBig, Hint } from "./utils/Text";
 import { Tooltip } from "./utils/Tooltip";
 
@@ -32,10 +32,10 @@ const Feedback = ({ summary }) => {
 
   if (state.value) return <HeadingSemiBig>Thanks for the Feedback!</HeadingSemiBig>;
   return (
-    <div className="flex flex-col items-end">
+    <div className="flex flex-col">
       <div className="flex gap-4">
         <HeadingSemiBig>Good Summary?</HeadingSemiBig>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
           <ThumbsUp className="w-5 h-5" onClick={() => submit("good")} />
           <ThumbsDown className="w-5 h-5" onClick={() => submit("bad")} />
         </div>
@@ -109,8 +109,18 @@ const InputDocument = ({ summarize, state }) => {
   const { summarizers, types, toggle, setArgument } = useContext(SummarizersContext);
   const { summaryLength } = useContext(SettingsContext);
 
-  const chosenModels = Object.keys(getChosen(summarizers));
+  const chosenModels = useMemo(() => Object.keys(getChosen(summarizers)), [summarizers]);
   const modelIsChosen = Boolean(chosenModels.length);
+
+  const argErrors = useMemo(
+    () => extractArgumentErrors(chosenModels, summarizers),
+    [(chosenModels, summarizers)]
+  );
+
+  const disableErrors = [];
+  if (argErrors) disableErrors.push(...argErrors);
+  if (!documentText) disableErrors.push("Input text to summarize");
+  if (!modelIsChosen) disableErrors.push("Choose at least one metric");
 
   const insertSampleText = () => setDocumentText(sampleText);
 
@@ -153,43 +163,34 @@ const InputDocument = ({ summarize, state }) => {
                 <LoadingButton text="Summarizing" />
               ) : (
                 <Button
-                  disabled={!documentText || !modelIsChosen}
+                  disabled={disableErrors.length}
                   onClick={() => summarize(documentText, chosenModels, summaryLength)}
                 >
                   Summarize
                 </Button>
               )}
-              <div className="flex flex-col">
-                {!documentText && (
-                  <Hint type="info" small>
-                    Input text to summarize
-                  </Hint>
-                )}
-                {!modelIsChosen && (
-                  <Hint type="warning" small>
-                    Choose at least one metric
-                  </Hint>
-                )}
-                {!state.loading && (
-                  <>
-                    {state.error && (
-                      <Hint type="danger" small>
-                        {state.error.message}
-                      </Hint>
-                    )}
-                    {state.value && (
-                      <>
-                        {state.value.errors && <Errors errors={state.value.errors} />}
-                        {state.value.summaries && !state.value.summaries.length && (
-                          <Hint type="danger" small>
-                            no summaries were generated
-                          </Hint>
-                        )}
-                      </>
-                    )}
-                  </>
-                )}
-              </div>
+            </div>
+            <div className="flex flex-col">
+              <Errors errors={disableErrors} type="warning" />
+              {!state.loading && (
+                <>
+                  {state.error && (
+                    <Hint type="danger" small>
+                      {state.error.message}
+                    </Hint>
+                  )}
+                  {state.value && (
+                    <>
+                      {state.value.errors && <Errors errors={state.value.errors} />}
+                      {state.value.summaries && !state.value.summaries.length && (
+                        <Hint type="danger" small>
+                          no summaries were generated
+                        </Hint>
+                      )}
+                    </>
+                  )}
+                </>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -219,6 +220,8 @@ const Summary = ({ markup, summary, markupState, scrollState, showMarkup }) => {
     [markup, summaryText]
   );
 
+  const cleanedText = useMemo(() => summaryText.replace(/\s+/g, " "), [summaryText]);
+
   return (
     <div>
       <div className="flex gap-2 pb-2 -mt-2">
@@ -233,8 +236,11 @@ const Summary = ({ markup, summary, markupState, scrollState, showMarkup }) => {
           showMarkup={showMarkup}
         />
       </div>
-      <div className="pt-4 flex justify-end">
+      <div className="pt-4 flex justify-between items-center gap-4 w-full">
         <Feedback summary={summary} />
+        <div>
+          <CopyToClipboardButton text={cleanedText} />
+        </div>
       </div>
     </div>
   );
@@ -255,7 +261,7 @@ const SummaryTabView = ({ title, showOverlap, summaries, markups, documentLength
       <div className="basis-[60%]">
         <Card full>
           <CardHead>
-            <HeadingBig>{title || "Document"}</HeadingBig>
+            <HeadingSemiBig>{title || "Document"}</HeadingSemiBig>
             <span className="font-bold">{documentLength} words</span>
           </CardHead>
           <div className="max-h-[70vh] overflow-auto bg-white p-4">
@@ -273,9 +279,11 @@ const SummaryTabView = ({ title, showOverlap, summaries, markups, documentLength
           <Card full>
             <CardHead>
               <TabHead>
-                {summaries.map(({ name }) => (
-                  <Pill key={name}>{summarizers[name].info.name}</Pill>
-                ))}
+                <div className="flex flex-wrap gap-x-7">
+                  {summaries.map(({ name }) => (
+                    <PillLink key={name}>{summarizers[name].info.name}</PillLink>
+                  ))}
+                </div>
               </TabHead>
             </CardHead>
             <CardContent white>
@@ -312,8 +320,8 @@ const SummaryCompareView = ({ summaries, markups, showOverlap }) => {
       {elements.map(([markup, summarizer], markupIndex) => (
         <div key={markupIndex} className="grow w-full lg:w-[45%] xl:w-[30%]">
           <Card full>
-            <CardHead>
-              <HeadingBig>{summarizer}</HeadingBig>
+            <CardHead tight>
+              <HeadingSemiBig>{summarizer}</HeadingSemiBig>
             </CardHead>
             <CardContent white>
               <div className="max-h-72 overflow-auto">
@@ -406,7 +414,6 @@ const computeParagraphs = (text) => {
   }
   return paragraphs.join("\n\n");
 };
-
 
 const Summarize = () => {
   const { summarizers, loading, retry } = useContext(SummarizersContext);

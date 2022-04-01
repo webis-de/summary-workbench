@@ -10,8 +10,14 @@ const Card = ({ children, full }) => (
   </div>
 );
 
-const CardHead = ({ children }) => (
-  <div className="px-6 py-4 min-h-[80px] w-full flex justify-between items-center">{children}</div>
+const CardHead = ({ children, tight }) => (
+  <div
+    className={`${
+      tight ? "min-h-[50px]" : "py-4 min-h-[80px]"
+    } px-6 w-full flex justify-between items-center`}
+  >
+    {children}
+  </div>
 );
 
 const CardContent = ({ children, white }) => (

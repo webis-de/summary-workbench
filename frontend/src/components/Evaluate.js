@@ -4,7 +4,7 @@ import { useAsyncFn } from "react-use";
 import { evaluateRequest } from "../api";
 import { MetricsContext } from "../contexts/MetricsContext";
 import { useCalculations } from "../hooks/calculations";
-import { average, filterObject, getChosen, mapObject } from "../utils/common";
+import { average, extractArgumentErrors, getChosen, mapObject } from "../utils/common";
 import { collectPluginErrors } from "../utils/data";
 import { flatten } from "../utils/flatScores";
 import { OneHypRef } from "./OneHypRef";
@@ -45,7 +45,7 @@ const FileInput = ({ loading, compute, setComputeData, disableErrors }) => (
           )}
         </div>
         <div>
-          <Errors errors={disableErrors} type="info" />
+          <Errors errors={disableErrors} type="warning" />
         </div>
       </CardContent>
     </Tabs>
@@ -156,23 +156,7 @@ const SubEvaluate = () => {
   );
   const [{ data, errors }, setComputeData] = useState({});
   const argErrors = useMemo(
-    () =>
-      chosenMetrics
-        .map((key) => {
-          const {
-            info: { name },
-            arguments: args,
-          } = metrics[key];
-          return {
-            name,
-            errors: Object.keys(filterObject(args, (_, v) => v === undefined)).map(
-              (k) => `${k}: argument is missing`
-            ),
-          };
-        })
-        .filter(({ errors: e }) => e.length)
-        .sort(({ name }) => name),
-    [metrics, chosenMetrics]
+    () => extractArgumentErrors(chosenMetrics, metrics), [(chosenMetrics, metrics)]
   );
 
   const saveCalculation = async (calculation) => {

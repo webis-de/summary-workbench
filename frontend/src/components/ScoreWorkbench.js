@@ -1,5 +1,4 @@
-import { useContext, useMemo, useReducer, useRef, useState } from "react";
-import { FaCheck, FaRegCopy } from "react-icons/fa";
+import { useContext, useMemo, useReducer, useState } from "react";
 import Plot from "react-plotly.js";
 import { useKey, useToggle } from "react-use";
 
@@ -8,7 +7,7 @@ import { useMarkup } from "../hooks/markup";
 import { arrayEqual, mapObject } from "../utils/common";
 import formatters from "../utils/export";
 import { range } from "../utils/python";
-import { Button } from "./utils/Button";
+import { CopyToClipboardButton } from "./utils/Button";
 import { Card, CardContent, CardHead } from "./utils/Card";
 import { Input } from "./utils/Form";
 import { EyeClosed, EyeOpen } from "./utils/Icons";
@@ -21,27 +20,6 @@ import { HeadingSemiBig, HeadingSmall } from "./utils/Text";
 import { Toggle } from "./utils/Toggle";
 import { Tooltip } from "./utils/Tooltip";
 
-const CopyToClipboardButton = ({ text }) => {
-  const [saved, setSaved] = useState(false);
-  const timeout = useRef();
-  const onClick = () => {
-    navigator.clipboard.writeText(text);
-    setSaved(true);
-    clearTimeout(timeout.current);
-    timeout.current = setTimeout(() => setSaved(false), 1000);
-  };
-  if (saved)
-    return (
-      <Button variant="success">
-        <FaCheck />
-      </Button>
-    );
-  return (
-    <Button appearance="fill" variant="primary" onClick={onClick}>
-      <FaRegCopy />
-    </Button>
-  );
-};
 
 const ExportPreview = ({ format, rownames, colnames, table }) => {
   const [transpose, toggleTranspose] = useToggle(true);

@@ -1,5 +1,5 @@
-import React from "react";
-import { FaTrash } from "react-icons/fa";
+import React, { useRef, useState } from "react";
+import { FaCheck, FaRegCopy, FaTrash } from "react-icons/fa";
 
 import { Loading } from "./Loading";
 
@@ -127,8 +127,30 @@ const DeleteButton = (props) => (
 
 const LoadingButton = ({ text, ...props }) => (
   <Button {...props} loading>
-  {typeof(text) === "string" ? text : "Loading"}...
+    {typeof text === "string" ? text : "Loading"}...
   </Button>
 );
 
-export { Button, DeleteButton, LoadingButton };
+const CopyToClipboardButton = ({ text }) => {
+  const [saved, setSaved] = useState(false);
+  const timeout = useRef();
+  const onClick = () => {
+    navigator.clipboard.writeText(text);
+    setSaved(true);
+    clearTimeout(timeout.current);
+    timeout.current = setTimeout(() => setSaved(false), 1000);
+  };
+  if (saved)
+    return (
+      <Button variant="success">
+        <FaCheck />
+      </Button>
+    );
+  return (
+    <Button appearance="fill" variant="primary" onClick={onClick}>
+      <FaRegCopy />
+    </Button>
+  );
+};
+
+export { Button, DeleteButton, LoadingButton, CopyToClipboardButton };
