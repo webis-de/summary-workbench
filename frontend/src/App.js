@@ -16,7 +16,6 @@ import { ButtonGroup, RadioBullet, RadioButton, RadioGroup } from "./components/
 import { Range } from "./components/utils/Range";
 import { HeadingBig, HeadingMedium, HeadingSmall, Hint } from "./components/utils/Text";
 import { Toggle } from "./components/utils/Toggle";
-import { VisualizationView } from "./components/Visualize";
 import { DragProvider } from "./contexts/DragContext";
 import { MetricsProvider } from "./contexts/MetricsContext";
 import { SettingsContext, SettingsProvider } from "./contexts/SettingsContext";
@@ -26,7 +25,6 @@ import { colorschemes } from "./utils/color";
 const routes = [
   { path: "/summarize", name: "Summarize", element: <Summarize /> },
   { path: "/evaluate", name: "Evaluate", element: <Evaluate /> },
-  { path: "/visualize", name: "Visualize", element: <VisualizationView /> },
   { path: "/about", name: "About", element: <About /> },
   { path: "*", element: <Navigate to="/summarize" replace /> },
 ];
