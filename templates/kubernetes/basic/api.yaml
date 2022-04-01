@@ -1,31 +1,31 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: tldr-plugins
+  name: summary-workbench-plugins
 data:
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: tldr-api
+  name: summary-workbench-api
   labels:
-    app: tldr
+    app: summary-workbench
     tier: api
 spec:
   selector:
     matchLabels:
-      app: tldr
+      app: summary-workbench
       tier: api
   template:
     metadata:
       labels:
-        app: tldr
+        app: summary-workbench
         tier: api
     spec:
       volumes:
         - name: plugin-config
           configMap:
-            name: tldr-plugins
+            name: summary-workbench-plugins
       containers:
         - name: api
           image:
@@ -44,7 +44,7 @@ spec:
             - name: NODE_ENV
               value: "production"
             - name: MONGODB_HOST
-              value: "mongodb://tldr-mongodb/app"
+              value: "mongodb://summary-workbench-mongodb/app"
           ports:
             - name: api-port
               containerPort: 5000
@@ -65,10 +65,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: tldr-api
+  name: summary-workbench-api
 spec:
   selector:
-    app: tldr
+    app: summary-workbench
     tier: api
   ports:
     - port: 5000

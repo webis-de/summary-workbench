@@ -3,18 +3,18 @@ kind: Deployment
 metadata:
   name:
   labels:
-    app: tldr
+    app: summary-workbench
     tier:
     version:
 spec:
   selector:
     matchLabels:
-      app: tldr
+      app: summary-workbench
       tier:
   template:
     metadata:
       labels:
-        app: tldr
+        app: summary-workbench
         tier:
         version:
     spec:
@@ -41,7 +41,7 @@ metadata:
   name:
 spec:
   selector:
-    app: tldr
+    app: summary-workbench
     tier:
     version:
   ports:

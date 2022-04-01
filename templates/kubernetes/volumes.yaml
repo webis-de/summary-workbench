@@ -1,9 +1,9 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: tldr-mongodb-data
+  name: summary-workbench-mongodb-data
   labels:
-    app: tldr
+    app: summary-workbench
     tier: mongodb
 spec:
   accessModes:

@@ -8,7 +8,7 @@ from fastapi import FastAPI, Response
 from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, Field, create_model, root_validator, validator
 
-sys.path.insert(0, "/tldr_plugin_files")
+sys.path.insert(0, "/summary_workbench_plugin_files")
 
 PLUGIN_CONFIG = json.loads(environ.get("PLUGIN_CONFIG"))
 PLUGIN_TYPE = PLUGIN_CONFIG["type"]

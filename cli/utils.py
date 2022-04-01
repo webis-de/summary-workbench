@@ -7,14 +7,15 @@ from hashlib import sha256
 from pathlib import Path
 
 from ruamel.yaml import YAML
-from ruamel.yaml.comments import CommentedBase, CommentedMap
+from ruamel.yaml.comments import CommentedBase, CommentedMap, CommentedSeq
 from ruamel.yaml.parser import ParserError
-from ruamel.yaml.scanner import ScannerError
 from ruamel.yaml.scalarstring import PreservedScalarString
+from ruamel.yaml.scanner import ScannerError
 
 from .config import DEFAULTS
 from .exceptions import InvalidPathError, InvalidYamlError
 from .schema import ConfigModel
+
 
 def _yaml_remove_comments(data):
     values = data.values() if hasattr(data, "values") else data
@@ -43,19 +44,20 @@ def _yaml_clean(yaml, space_keys=None):
             _yaml_add_newlines(yaml[key])
 
 
-list_types = {list, dict, CommentedMap}
+collection_types = {list, dict, CommentedMap, CommentedSeq}
+list_types = {list, CommentedSeq}
 
 
 def _yaml_merge(yaml, data):
     for key, value in data.items():
-        if (
-            type(value) not in list_types
-            or type(yaml[key]) not in list_types
-            or key not in yaml
-        ):
+        try:
+            next_yaml = yaml[key]
+            if type(next_yaml) in collection_types:
+                _yaml_merge(next_yaml, value)
+            else:
+                yaml[key] = value
+        except KeyError:
             yaml[key] = value
-        else:
-            _yaml_merge(yaml[key], value)
 
 
 def gen_hash(text):

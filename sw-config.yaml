@@ -3,31 +3,31 @@ deploy:
   host: tldr.demo.webis.de
 
 metrics:
+  - ./metrics/bartscore
   - ./metrics/bert
   - ./metrics/bleu
   - ./metrics/bleurt
   - ./metrics/cider
+  - ./metrics/cosine_similarity
   - ./metrics/greedy_matching
   - ./metrics/meteor
   - ./metrics/moverscore
   - ./metrics/rouge
   - ./metrics/sentence_transformers
-  - ./metrics/cosine_similarity
 
 summarizers:
-  - ./summarizers/bertsum
-  - ./summarizers/gsum
   - ./summarizers/argpagerank
+  - ./summarizers/bertsum
+  - ./summarizers/biasedtextrank
   - ./summarizers/conclugen
+  - ./summarizers/gsum
   - ./summarizers/lobart
-  - ./summarizers/newspaper3k
   - ./summarizers/longformer2roberta
-  - source: ./summarizers/coopsum
-    environment:
-      model: COOP-Amazon
-  - source: ./summarizers/coopsum
-    environment:
-      model: COOP-Yelp
+  - ./summarizers/newspaper3k
+  - ./summarizers/pmisum
+  - ./summarizers/positionrank
+  - ./summarizers/textrank
+  - ./summarizers/topicrank
   - source: ./summarizers/cliffsum
     environment:
       model: MaskEnt
@@ -46,9 +46,12 @@ summarizers:
   - source: ./summarizers/cliffsum
     environment:
       model: SysLowCon
-  - source: ./summarizers/textrank
+  - source: ./summarizers/coopsum
     environment:
-      model: textrank
+      model: COOP-Amazon
+  - source: ./summarizers/coopsum
+    environment:
+      model: COOP-Yelp
   - source: ./summarizers/neuralsum
     environment:
       model: T5

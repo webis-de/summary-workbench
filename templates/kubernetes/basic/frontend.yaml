@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: tldr-frontend
+  name: summary-workbench-frontend
   labels:
-    app: tldr
+    app: summary-workbench
     tier: frontend
 spec:
   selector:
     matchLabels:
-      app: tldr
+      app: summary-workbench
       tier: frontend
   template:
     metadata:
       labels:
-        app: tldr
+        app: summary-workbench
         tier: frontend
     spec:
       containers:
@@ -35,10 +35,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: tldr-frontend
+  name: summary-workbench-frontend
 spec:
   selector:
-    app: tldr
+    app: summary-workbench
     tier: frontend
   ports:
     - port: 80

@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: tldr-ingress
+  name: summary-workbench-ingress
   annotations:
     nginx.ingress.kubernetes.io/client-max-body-size: 512m
     nginx.ingress.kubernetes.io/proxy-connect-timeout: '3000'
@@ -17,6 +17,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: tldr
+                name: summary-workbench
                 port:
                   number: 80

@@ -1,6 +1,6 @@
 import sys
 from model_setup import SAVE_PATH, DATA_PATH
-sys.path.insert(0, "/tldr_plugin_files/guided_summarization/bart")
+sys.path.insert(0, "/summary_workbench_plugin_files/guided_summarization/bart")
 from fairseq.models.bart.guided_model import GuidedBARTModel
 from pathlib import Path
 

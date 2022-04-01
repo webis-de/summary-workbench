@@ -1,25 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: tldr-mongodb
+  name: summary-workbench-mongodb
   labels:
-    app: tldr
+    app: summary-workbench
     tier: mongodb
 spec:
   selector:
     matchLabels:
-      app: tldr
+      app: summary-workbench
       tier: mongodb
   template:
     metadata:
       labels:
-        app: tldr
+        app: summary-workbench
         tier: mongodb
     spec:
       volumes:
         - name: mongodata
           persistentVolumeClaim:
-            claimName: tldr-mongodb-data
+            claimName: summary-workbench-mongodb-data
       containers:
         - name: mongodb
           image: mongo:latest
@@ -40,10 +40,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: tldr-mongodb
+  name: summary-workbench-mongodb
 spec:
   selector:
-    app: tldr
+    app: summary-workbench
     tier: mongodb
   ports:
     - port: 27017

@@ -57,7 +57,7 @@ if __name__ == "__main__":
     @click.option(
         "--host",
         required=True,
-        help="host address where the tldr app is running (e.g. https://www.example.com)",
+        help="host address where the summary-workbench app is running (e.g. https://www.example.com)",
     )
     @click.pass_context
     def main(ctx, host):
