@@ -1,6 +1,6 @@
 import sys
 from model_setup import SAVE_PATH, DATA_PATH
-sys.path.insert(0, "/summary_workbench_plugin_files/guided_summarization/bart")
+sys.path.insert(0, "./guided_summarization/bart")
 from fairseq.models.bart.guided_model import GuidedBARTModel
 from pathlib import Path
 
@@ -12,16 +12,10 @@ class GuidedBART(object):
         if self.bart:
             print("Initialized GuidedBART.")
             self.bart.eval()
-    
-    def summarize(self, text=None, ratio=0.2, guidance=None):
+
+    def summarize(self, text, ratio=0.2, guidance=None):
         texts= [text]
-        print("Input text  {}".format(texts[0]))
-        if guidance:
-            gs = [guidance]
-        else:
-            gs = [text.split(". ")[0]]
-        print("Guidance is {}".format(gs))
-        sents = self.bart.sample(texts, gs, beam=4, lenpen=2.0, max_len_b=140, min_len=55, no_repeat_ngram_size=3, guided=True)
+        sents = self.bart.sample(texts, [guidance], beam=4, lenpen=2.0, max_len_b=140, min_len=55, no_repeat_ngram_size=3, guided=True)
         return " ".join(sents)
 
 
@@ -29,7 +23,6 @@ class GuidedBART(object):
 class SummarizerPlugin:
     def __init__(self):
         self.summarizer = GuidedBART()
-    
+
     def summarize(self, *args, **kwargs):
         return self.summarizer.summarize(*args, **kwargs)
-
