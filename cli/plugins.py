@@ -106,6 +106,9 @@ class Plugin(DockerMixin):
         self.unique_name = (
             f"{self.plugin_type.lower()}-{self.clean_owner}-{self.clean_name}"
         ).strip("-")
+        self.docker_unique_name = (
+            f"{self.plugin_type.lower()}-{self.clean_owner or 'anonymous'}-{self.clean_name}"
+        ).strip("-")
         self.url = f"http://{self.unique_name}:5000"
 
         self.plugin_config = {
@@ -149,7 +152,7 @@ class Plugin(DockerMixin):
             / f"{self.plugin_type.lower()}"
             / f"{self.name}.yaml",
             docker_username=docker_username,
-            name=self.unique_name,
+            name=self.docker_unique_name,
             image_url=image_url,
         )
 
