@@ -3,8 +3,9 @@ import json
 import tarfile
 from pathlib import Path
 
-import docker
 from termcolor import colored
+
+import docker
 
 from .exceptions import (BaseManageError, DockerNotRunningError,
                          DockerUsernameRequiredError)
@@ -49,6 +50,7 @@ class Docker:
             encoding="gzip",
             custom_context=True,
             decode=True,
+            rm=True,
             buildargs=buildargs,
         ):
             error = status.get("error")
