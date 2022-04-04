@@ -1,32 +1,28 @@
 import math
-import os
-import sys
-from transformers import PegasusTokenizerFast, PegasusForConditionalGeneration, pipeline
-from model_setup import SAVE_DIR
 
-MODEL = os.environ["model"]
+from model_setup import MODEL, MODELS
+from transformers import (PegasusForConditionalGeneration,
+                          PegasusTokenizerFast, pipeline)
+
 
 def add_dot(text):
     if text[-1] != ".":
         return text + "."
     return text
 
+
 class CliffSum(object):
-    MODEL_PATHS = {
-        "MaskEnt": SAVE_DIR / "maskent",
-        "MaskRel": SAVE_DIR  /"maskrel",
-        "RegenEnt": SAVE_DIR  /"regenent",
-        "RegenRel": SAVE_DIR  /"regenrel",
-        "SwapEnt": SAVE_DIR  /"swapent",
-        "SysLowCon": SAVE_DIR  /"syslowcon",
-    }
     def __init__(self, model="MaskRel"):
-        self.checkpoints_path = self.MODEL_PATHS[model]
-        self.tokenizer = PegasusTokenizerFast.from_pretrained(self.checkpoints_path, local_files_only=True)
+        self.checkpoints_path = MODELS[model]["path"]
+        self.tokenizer = PegasusTokenizerFast.from_pretrained(
+            self.checkpoints_path, local_files_only=True
+        )
         print("Initializing CliffSum with {} model".format(model))
         if self.tokenizer:
             print("Tokenizer initialized")
-        self.model = PegasusForConditionalGeneration.from_pretrained(self.checkpoints_path, local_files_only=True)
+        self.model = PegasusForConditionalGeneration.from_pretrained(
+            self.checkpoints_path, local_files_only=True
+        )
         if self.model:
             print("Model initialized")
         self.pipeline = pipeline(
