@@ -3,7 +3,7 @@ import React from "react";
 import { getSummarizersRequest } from "../api";
 import { usePlugins } from "../hooks/plugins";
 
-const defaults = ["anonymous-textrank", "anonymous-bart-cnn"];
+const defaults = ["summarizer-null-textrank", "summarizer-null-bartcnn"];
 
 const SummarizersContext = React.createContext();
 

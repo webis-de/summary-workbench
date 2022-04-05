@@ -3,7 +3,7 @@ import React from "react";
 import { getMetricsRequest } from "../api";
 import { usePlugins } from "../hooks/plugins";
 
-const defaults = ["anonymous-rouge"];
+const defaults = ["metric-null-rouge"];
 
 const MetricsContext = React.createContext();
 
