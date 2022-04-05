@@ -45,12 +45,13 @@ PLUGIN_TYPES = {"metric", "summarizer"}
 
 
 def clean_string(s):
-    s = s.lower()
-    s = re.sub(r"\s", "_", s)
-    s = re.sub("[^a-z0-9]", "_", s)
-    s = re.sub("_+", "_", s)
-    s = s.strip("_")
-    return s or "_"
+    clean_s = s
+    clean_s = clean_s.lower()
+    clean_s = re.sub(r"\s", "", clean_s)
+    clean_s = re.sub("[^a-z0-9]", "", clean_s)
+    if not clean_s:
+        raise BaseManageError(f"{s} is empty after cleaning, please choose a name containing 'a-z0-9'")
+    return clean_s
 
 
 def quote(string):
@@ -104,10 +105,7 @@ class Plugin(DockerMixin):
             self.dockerfile_path = PLUGIN_DOCKERFILE_PATH
 
         self.unique_name = (
-            f"{self.plugin_type.lower()}-{self.clean_owner}-{self.clean_name}"
-        ).strip("-")
-        self.docker_unique_name = (
-            f"{self.plugin_type.lower()}-{self.clean_owner or 'anonymous'}-{self.clean_name}"
+            f"{self.plugin_type.lower()}-{self.clean_owner or 'null'}-{self.clean_name}"
         ).strip("-")
         self.url = f"http://{self.unique_name}:5000"
 
@@ -152,7 +150,7 @@ class Plugin(DockerMixin):
             / f"{self.plugin_type.lower()}"
             / f"{self.name}.yaml",
             docker_username=docker_username,
-            name=self.docker_unique_name,
+            name=self.unique_name,
             image_url=image_url,
         )
 
