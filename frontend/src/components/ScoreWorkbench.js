@@ -1,4 +1,4 @@
-import { useContext, useMemo, useReducer, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useReducer, useState } from "react";
 import Plot from "react-plotly.js";
 import { useKey, useToggle } from "react-use";
 
@@ -16,10 +16,9 @@ import { Pagination, usePagination } from "./utils/Pagination";
 import { ButtonGroup, RadioButton, RadioGroup } from "./utils/Radio";
 import { Table, TableWrapper, Tbody, Td, Th, Thead, Tr } from "./utils/Table";
 import { Pill, TabContent, TabHead, TabPanel, Tabs } from "./utils/Tabs";
-import { HeadingSemiBig, HeadingSmall } from "./utils/Text";
+import { HeadingMedium, HeadingSemiBig, HeadingSmall } from "./utils/Text";
 import { Toggle } from "./utils/Toggle";
 import { Tooltip } from "./utils/Tooltip";
-
 
 const ExportPreview = ({ format, rownames, colnames, table }) => {
   const [transpose, toggleTranspose] = useToggle(true);
@@ -165,7 +164,7 @@ class MarkupMatrix {
 
 const Visualize = ({ calculation }) => {
   const matrix = useMemo(() => new MarkupMatrix(calculation), [calculation]);
-  const { numPages, page, setPage } = usePagination(matrix.length, 1, 1);
+  const { numPages, page, setPage } = usePagination(matrix.length, { initialSize: 1 });
 
   const hovered = useContext(HoverContext);
   useKey("ArrowLeft", () => hovered && setPage((old) => old - 1), {}, [hovered]);
@@ -243,6 +242,7 @@ class PlotMatrix {
     return {
       scores: this.scores[colname][rowname],
       texts: this.models[colname],
+      model: colname,
       label: `${rowname}     (${colname})`,
     };
   }
@@ -281,6 +281,90 @@ const SetButton = ({ isSet, children, ...props }) => {
   );
 };
 
+const computePlot = (x, y, page, selectedPoints) => {
+  const color = Array(x.scores.length).fill("#8682FF");
+  const size = Array(x.scores.length).fill(7);
+  let selected = selectedPoints;
+  if (selected === undefined || !x.scores.length) selected = [];
+  const currIndex = selected[page - 1];
+  if (currIndex !== undefined) {
+    color[currIndex] = "yellow";
+    size[currIndex] = 13;
+  }
+  const data = {
+    x: x.scores,
+    y: y.scores,
+    selectedpoints: selected.length ? selected : null,
+    marker: { color, size, line: { width: 1, color: "DarkSlateGrey" } },
+  };
+  return { x, y, data, selected };
+};
+
+const usePlot = ([inX, inY], references) => {
+  const [{ x, y, data, selected }, setData] = useState({ selected: [] });
+  const layout = useMemo(() => {
+    if (x)
+      return {
+        xaxis: {
+          autorange: true,
+          title: x.label,
+          range: undefined,
+          type: "linear",
+        },
+        yaxis: {
+          autorange: true,
+          title: y.label,
+          range: undefined,
+          type: "linear",
+        },
+      };
+    return {};
+  }, [x, y]);
+  const { numPages, page, setPage } = usePagination(selected.length, {
+    initialSize: 1,
+    reset: true,
+  });
+  useEffect(() => {
+    setData(({ selected: oldSelected }) => computePlot(inX, inY, page, oldSelected));
+  }, [inX, inY, page]);
+  const setSelected = useCallback(
+    (pointIndexes) => setData(computePlot(x, y, page, pointIndexes)),
+    [x, y, page, selected]
+  );
+  const onSelected = (e) => e && setSelected(e.points.map(({ pointIndex }) => pointIndex));
+  const onDeselect = () => setSelected([]);
+  const setHighlightedPoint = (pointIndex) => {
+    const index = selected.indexOf(pointIndex);
+    if (index >= 0) setPage(index + 1);
+    else setSelected([pointIndex]);
+  };
+  const [modelScores, reference, model1, model2] = useMemo(() => {
+    const index = selected[page - 1];
+    if (index === undefined) return [];
+    const modelScores_ = {
+      [x.label]: x.scores[index],
+    };
+    const reference_ = references[index];
+    const model1_ = [x.model, x.texts[index]];
+    let model2_;
+    if (y.model) {
+      modelScores_[y.label] = y.scores[index];
+      if (x.model !== y.model) model2_ = [y.model, y.texts[index]];
+    }
+    return [modelScores_, reference_, model1_, model2_];
+  }, [selected, page, x, y]);
+  return {
+    data,
+    layout,
+    selected,
+    text: { modelScores, reference, model1, model2 },
+    pagination: { setPage, page, numPages },
+    onSelected,
+    onDeselect,
+    setHighlightedPoint,
+  };
+};
+
 const Plotter = ({ calculation }) => {
   const matrix = useMemo(() => new PlotMatrix(calculation), [calculation]);
   const [selectedMetrics, toggleMetric] = useReducer((oldState, value) => {
@@ -290,9 +374,52 @@ const Plotter = ({ calculation }) => {
   }, []);
   const { colnames, rownames, table, plotData } = useMemo(
     () => matrix.get(selectedMetrics),
-    [selectedMetrics]
+    [matrix, selectedMetrics]
   );
-  const [x, y] = plotData;
+  const {
+    data: dataPatch,
+    layout: layoutPatch,
+    text: { modelScores, reference, model1, model2 },
+    pagination: { numPages, page, setPage },
+    onSelected,
+    onDeselect,
+    setHighlightedPoint,
+  } = usePlot(plotData, matrix.references);
+  const data = useMemo(
+    () => [
+      {
+        ...dataPatch,
+        // text: [],
+        // hoverinfo: "text",
+        // customdata:
+        type: "scatter",
+        mode: "markers",
+        hoverlabel: { bgcolor: "black" },
+      },
+    ],
+    [dataPatch]
+  );
+  const layout = useMemo(
+    () => ({
+      ...layoutPatch,
+      modebar: {
+        orientation: "v",
+      },
+      dragmode: "select",
+      autosize: true,
+      uirevision: true,
+      margin: {
+        t: 20,
+        r: 25,
+        l: 60,
+        b: 60,
+      },
+    }),
+    [layoutPatch]
+  );
+  console.log(reference)
+  const [trueLayout, setTrueLayout] = useState({});
+  useEffect(() => setTrueLayout(layout), [layout]);
   return (
     <div>
       <TableWrapper>
@@ -322,49 +449,61 @@ const Plotter = ({ calculation }) => {
           </Tbody>
         </Table>
       </TableWrapper>
-      <div className="grid grid-cols-2 py-4 px-2">
-        <div>test</div>
-        <div className="border border-black">
-          <Plot
-            className="w-full min-h-[500px]"
-            data={[
-              {
-                x: x.scores,
-                y: y.scores,
-                // text: [],
-                // hoverinfo: "text",
-                // customdata:
-                type: "scatter",
-                mode: "markers",
-                hoverlabel: { bgcolor: "black" },
-                selected: { marker: { color: "orange", opacity: 1 } },
-                unselected: { marker: { color: "blue", opacity: 1 } },
-                marker: { color: "blue" },
-              },
-            ]}
-            layout={{
-              xaxis: {
-                title: x.label,
-              },
-              yaxis: {
-                title: y.label,
-              },
-              dragmode: "select",
-              autosize: true,
-              margin: {
-                t: 20,
-                r: 20,
-                l: 60,
-                b: 60,
-              },
-            }}
-            config={{
-              responsive: true,
-            }}
-            onSelected={(e) => console.log(e)}
-          />
+      {data && (
+        <div className="grid grid-cols-2 py-4 px-2 gap-5">
+          <div className="border border-black">
+            <Plot
+              className="w-full min-h-[500px]"
+              data={data}
+              layout={trueLayout}
+              config={{
+                displayModeBar: true,
+                responsive: true,
+              }}
+              onInitialized={({ layout: newLayout }) => setTrueLayout(newLayout)}
+              onUpdate={({ layout: newLayout }) => setTrueLayout(newLayout)}
+              onSelected={onSelected}
+              onDeselect={onDeselect}
+              onClick={({ points }) => setHighlightedPoint(points[0].pointIndex)}
+            />
+          </div>
+          <div>
+            {reference !== undefined && (
+              <div>
+                <div className="flex justify-center">
+                  <Pagination page={page} numPages={numPages} setPage={setPage} />
+                </div>
+                <div className="flex flex-col gap-3 mt-4">
+                  <div>
+                    <HeadingMedium>Reference</HeadingMedium>
+                    <div>{reference}</div>
+                  </div>
+                  <div>
+                    <HeadingMedium>{model1[0]}</HeadingMedium>
+                    <div>{model1[1]}</div>
+                  </div>
+                  {model2 && (
+                    <div>
+                      <HeadingMedium>{model2[0]}</HeadingMedium>
+                      <div>{model2[1]}</div>
+                    </div>
+                  )}
+                  <table className="inline-block mt-7">
+                    {Object.entries(modelScores).map(([name, score]) => (
+                      <tr key={name}>
+                        <td>
+                          <HeadingSmall>{name}</HeadingSmall>
+                        </td>
+                        <td className="pl-4">{score.toFixed(2)}</td>
+                      </tr>
+                    ))}
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

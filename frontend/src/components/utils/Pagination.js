@@ -82,7 +82,10 @@ const validRange = (value, maxValue, minValue = 1) => {
   return _value;
 };
 
-const usePagination = (numItems, initialPage = 1, initialSize = 10, maxSize = null) => {
+const usePagination = (
+  numItems,
+  { initialPage = 1, initialSize = 10, maxSize = null, reset = false }
+) => {
   const [page, _setPage] = useState(initialPage);
   const [size, _setSize] = useState(initialSize);
 
@@ -107,6 +110,7 @@ const usePagination = (numItems, initialPage = 1, initialSize = 10, maxSize = nu
   );
 
   useEffect(() => setPage(validRange(page, numPages)), [numPages, page, setPage]);
+  useEffect(() => reset && setPage(initialPage), [numItems, initialPage, reset]);
 
   return { page, numPages, setPage, size, setSize };
 };

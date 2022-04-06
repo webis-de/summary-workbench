@@ -57,7 +57,7 @@ spec:
         - name: proxy
           image: nginx:alpine
           ports:
-            - name: summary-workbench-port
+            - name: sw-port
               containerPort: 80
               protocol: TCP
           volumeMounts:
@@ -68,7 +68,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /
-              port: summary-workbench-port
+              port: sw-port
       restartPolicy: Always
 ---
 apiVersion: v1
@@ -81,4 +81,4 @@ spec:
     tier: proxy
   ports:
     - port: 80
-      targetPort: summary-workbench-port
+      targetPort: sw-port

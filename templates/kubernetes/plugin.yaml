@@ -29,7 +29,7 @@ spec:
               protocol: TCP
           readinessProbe:
             httpGet:
-              path: /health
+              path: /config
               port: defaultport
             periodSeconds: 60
             timeoutSeconds: 60
