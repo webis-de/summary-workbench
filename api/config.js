@@ -1,12 +1,12 @@
 const fs = require("fs");
 const axios = require("axios");
 
-const fetchConfig = async (url, key) => {
+const fetchConfig = async (url, key, timeout) => {
   try {
     const response = await axios({
       method: "get",
       url: `${url}/config`,
-      timeout: 2000,
+      timeout,
     })
     const config = response.data;
     config.url = url;
@@ -19,7 +19,7 @@ const fetchConfig = async (url, key) => {
   }
 };
 
-const gatherConfigs = async () => {
+const gatherConfigs = async (timeout) => {
   let pluginConfig;
   try {
     pluginConfig = fs.readFileSync("/plugin_config/plugin_config.json");
@@ -40,7 +40,7 @@ const gatherConfigs = async () => {
   await Promise.all(
     Object.entries(pluginConfig).map(async ([key, value]) => {
       let c = { ...value, disabled: true };
-      if (typeof value === "string") c = await fetchConfig(value, key);
+      if (typeof value === "string") c = await fetchConfig(value, key, timeout);
       if (key !== c.key) {
         console.error(`plugin is configured as ${key} but container has key ${c.key}`);
       }
@@ -59,7 +59,9 @@ const currentConfig = {};
 
 const initConfig = async (timeout = 30000) => {
   console.log("updating config...");
-  const config = await gatherConfigs();
+  let gatherTimeout = 15000;
+  if (!Object.keys(currentConfig).length) gatherTimeout = 2000
+  const config = await gatherConfigs(gatherTimeout);
   currentConfig.METRICS = config.metric;
   currentConfig.SUMMARIZERS = config.summarizer;
   currentConfig.METRIC_KEYS = Object.entries(currentConfig.METRICS)
