@@ -2,7 +2,7 @@ const getChosen = (models) =>
   Object.fromEntries(Object.entries(models).filter(([, { isSet }]) => isSet));
 
 const mapObject = (obj, func) =>
-  Object.fromEntries(Object.entries(obj).map(([key, value]) => [key, func(value)]));
+  Object.fromEntries(Object.entries(obj).map(([key, value]) => [key, func(value, key)]));
 
 const filterObject = (obj, func) =>
   Object.fromEntries(Object.entries(obj).filter(([key, value]) => func(key, value)));

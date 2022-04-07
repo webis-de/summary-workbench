@@ -34,7 +34,7 @@ const Hint = ({ children, type = "default", noicon, small }) => {
           <Icon className={iconClass} />
         </div>
       )}
-      <p className="tracking-tight block">{children}</p>
+      <div className="tracking-tight block">{children}</div>
     </div>
   );
 };

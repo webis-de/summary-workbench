@@ -145,22 +145,25 @@ const SubEvaluate = () => {
         chosenMetrics.map((model) => [model, metrics[model].arguments])
       );
       const [documents, references, models] = zipLines(lines);
-      const responses = await Promise.all(
-        Object.entries(models).map(async ([key, hypotheses]) => [
-          key,
-          await evaluate(modelsWithArguments, references, hypotheses),
-        ])
-      );
       const scoreBuilder = new ScoreBuilder(id, metrics, documents, references, models);
-      const collectedErrors = [];
-      responses.forEach(([key, { data, errors }]) => {
-        if (data) scoreBuilder.add(key, data.scores);
-        if (errors) collectedErrors.push({ name: key, errors });
-      });
-      const data = {};
-      if (!scoreBuilder.empty()) data.data = scoreBuilder.compile();
-      if (collectedErrors.length) data.errors = collectedErrors;
-      return data;
+      if (Object.keys(models).length) {
+        const collectedErrors = [];
+        const responses = await Promise.all(
+          Object.entries(models).map(async ([key, hypotheses]) => [
+            key,
+            await evaluate(modelsWithArguments, references, hypotheses),
+          ])
+        );
+        responses.forEach(([key, { data, errors }]) => {
+          if (data) scoreBuilder.add(key, data.scores);
+          if (errors) collectedErrors.push({ name: key, errors });
+        });
+        const data = {};
+        if (!scoreBuilder.empty()) data.data = scoreBuilder.compile();
+        if (collectedErrors.length) data.errors = collectedErrors;
+        return data;
+      }
+      return { data: scoreBuilder.compile() };
     },
     [metrics, chosenMetrics]
   );
@@ -178,8 +181,14 @@ const SubEvaluate = () => {
   const disableErrors = [];
   if (errors) disableErrors.push(...errors);
   if (argErrors) disableErrors.push(...argErrors);
-  if (!chosenMetrics.length) {
-    disableErrors.push("Select at least one metric.");
+  if (data) {
+    const numChosenKeys = data.chosenKeys ? data.chosenKeys.length : 0;
+    if (!numChosenKeys && !("document" in Object.keys(data.lines[0]))) {
+      disableErrors.push("provide at least the 'document' key or a model key");
+    }
+    if (numChosenKeys && !chosenMetrics.length) {
+      disableErrors.push("Select at least one metric.");
+    }
   }
 
   return (

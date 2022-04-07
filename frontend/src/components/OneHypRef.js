@@ -28,7 +28,7 @@ const OneHypRef = ({ setComputeData }) => {
       setComputeData({
         data: {
           id: "",
-          lines: [{ document: "", reference: refText, hypothesis: hypText }],
+          lines: [{ reference: refText, hypothesis: hypText }],
         },
       });
     } catch (error) {

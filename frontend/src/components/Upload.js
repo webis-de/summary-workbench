@@ -12,7 +12,6 @@ const checkKey = (list, key) => {
 };
 
 const validate = (list) => {
-  checkKey(list, "document");
   checkKey(list, "reference");
   let keys = list.map((element) => Object.keys(element));
   keys = [].concat(...keys);

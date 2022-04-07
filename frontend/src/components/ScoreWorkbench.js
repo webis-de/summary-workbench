@@ -6,10 +6,10 @@ import { HoverContext } from "../contexts/HoverContext";
 import { useMarkup } from "../hooks/markup";
 import { arrayEqual, mapObject } from "../utils/common";
 import formatters from "../utils/export";
-import { range } from "../utils/python";
+import { range, zip } from "../utils/python";
 import { CopyToClipboardButton } from "./utils/Button";
 import { Card, CardContent, CardHead } from "./utils/Card";
-import { Input } from "./utils/Form";
+import { Checkbox, Input } from "./utils/Form";
 import { EyeClosed, EyeOpen } from "./utils/Icons";
 import { Markup } from "./utils/Markup";
 import { Pagination, usePagination } from "./utils/Pagination";
@@ -18,7 +18,6 @@ import { Table, TableWrapper, Tbody, Td, Th, Thead, Tr } from "./utils/Table";
 import { Pill, TabContent, TabHead, TabPanel, Tabs } from "./utils/Tabs";
 import { HeadingMedium, HeadingSemiBig, HeadingSmall } from "./utils/Text";
 import { Toggle } from "./utils/Toggle";
-import { Tooltip } from "./utils/Tooltip";
 
 const ExportPreview = ({ format, rownames, colnames, table }) => {
   const [transpose, toggleTranspose] = useToggle(true);
@@ -63,7 +62,8 @@ const ExportPreview = ({ format, rownames, colnames, table }) => {
   );
 };
 
-const ScoreTable = ({ rownames, colnames, table }) => {
+const ScoreTable = ({ calculation }) => {
+  const { rows, columns, table } = calculation;
   const [format, setFormat] = useState(null);
   return (
     <div>
@@ -71,13 +71,13 @@ const ScoreTable = ({ rownames, colnames, table }) => {
         <Table>
           <Thead>
             <Th>Metric</Th>
-            {colnames.map((colname) => (
+            {columns.map((colname) => (
               <Th key={colname}>{colname}</Th>
             ))}
           </Thead>
           <Tbody>
             {table.map((row, i) => {
-              const metric = rownames[i];
+              const metric = rows[i];
               return (
                 <Tr key={metric} hover striped>
                   <Td>{metric}</Td>
@@ -102,115 +102,160 @@ const ScoreTable = ({ rownames, colnames, table }) => {
           </ButtonGroup>
         </RadioGroup>
       </div>
-      {format && (
-        <ExportPreview format={format} rownames={rownames} colnames={colnames} table={table} />
-      )}
+      {format && <ExportPreview format={format} rownames={rows} colnames={columns} table={table} />}
     </div>
   );
 };
 
 const isMarkup = (markup) => !(typeof markup === "string");
 
-const ToggleOverlap = ({ show, toggle }) => {
+const ToggleOverlap = ({ markupKeys, wantMarkupKeys, setMarkupKeys }) => {
+  const show = !arrayEqual(markupKeys, wantMarkupKeys);
   const Icon = show ? EyeOpen : EyeClosed;
+  const onClick = show ? () => setMarkupKeys(wantMarkupKeys) : () => setMarkupKeys([]);
 
   return (
-    <Tooltip text={"Show/Hide Agreement"}>
-      <Icon className="w-7 h-7" onClick={toggle} />
-    </Tooltip>
+    <button
+      className="whitespace-nowrap hover:text-blue-600 flex items-center gap-1"
+      onClick={onClick}
+    >
+      <Icon className="w-7 h-7" /> {wantMarkupKeys[0]}
+    </button>
   );
 };
 
-const toMarkup = (markup, markupState) =>
+const MarkupOrText = ({ markup, markupState }) =>
   isMarkup(markup) ? (
     <Markup markups={markup} markupState={markupState} />
   ) : (
     <div className="leading-[23px]">{markup}</div>
   );
 
-const ModelCard = ({ name, markup, markupState, toggle }) => (
+const ModelCard = ({ name, markup, markupKeys, markupState, setMarkupKeys, hasDocument }) => (
   <Card full key={name}>
-    <CardHead>
+    <CardHead tight>
       <HeadingSemiBig>{name}</HeadingSemiBig>
-      <ToggleOverlap show={!isMarkup(markup)} toggle={toggle} />
+      <div className="flex gap-4">
+        {hasDocument && (
+          <ToggleOverlap
+            markupKeys={markupKeys}
+            wantMarkupKeys={["document", name]}
+            setMarkupKeys={setMarkupKeys}
+          />
+        )}
+        {name !== "reference" && (
+          <ToggleOverlap
+            markupKeys={markupKeys}
+            wantMarkupKeys={["reference", name]}
+            setMarkupKeys={setMarkupKeys}
+          />
+        )}
+      </div>
     </CardHead>
-    <CardContent>{toMarkup(markup, markupState)}</CardContent>
+    <CardContent>
+      <MarkupOrText markup={markup} markupState={markupState} />
+    </CardContent>
   </Card>
 );
 
 class MarkupMatrix {
   constructor(calculation) {
     const { documents, references, modeltexts } = calculation;
-    const models = { reference: references, ...modeltexts };
-    this.length = documents.length;
-    this.documents = documents;
-    this.models = models;
+    this.length = references.length;
+    this.modelKeys = Object.keys(modeltexts);
+    this.all = { reference: references, ...modeltexts };
+    if (documents !== undefined) this.all.document = documents;
   }
 
-  getPair(index, model) {
-    return [this.documents[index], this.models[model][index]];
+  getFromKeys(index, keys) {
+    return keys.map((k) => this.all[k][index]);
   }
 
-  get(index, docMarkup, modelMarkup) {
-    const doc = docMarkup || this.documents[index];
-    const models = mapObject(this.models, (e) => e[index]);
-    if (modelMarkup) {
-      const [name, markup] = modelMarkup;
-      models[name] = markup;
-    }
-    return [doc, models];
+  get(index, markups) {
+    return mapObject(this.all, (v, k) => (markups && markups[k] ? markups[k] : v[index]));
   }
 }
 
 const Visualize = ({ calculation }) => {
   const matrix = useMemo(() => new MarkupMatrix(calculation), [calculation]);
+  const [chosenModels, setChosenModels] = useState(() =>
+    Object.fromEntries(matrix.modelKeys.map((k) => [k, true]))
+  );
   const { numPages, page, setPage } = usePagination(matrix.length, { initialSize: 1 });
 
   const hovered = useContext(HoverContext);
   useKey("ArrowLeft", () => hovered && setPage((old) => old - 1), {}, [hovered]);
   useKey("ArrowRight", () => hovered && setPage((old) => old + 1), {}, [hovered]);
 
-  const [slot, toggleSlot] = useReducer(
-    (state, newSlot) => (state !== newSlot ? newSlot : null),
-    null
-  );
+  const [markupKeys, setMarkupKeys] = useState([]);
 
   const index = page - 1;
-  const [doc, model] = slot !== null ? matrix.getPair(index, slot) : [];
+  const markups = useMarkup(...matrix.getFromKeys(index, markupKeys));
 
-  const [docMarkup, _modelMarkup] = useMarkup(doc, model);
-  const modelMarkup = _modelMarkup && [slot, _modelMarkup];
-
+  const {
+    document: doc,
+    reference,
+    ...models
+  } = matrix.get(index, Object.fromEntries(zip(markupKeys, markups)));
   const markupState = useState(null);
-  const [docApplied, { reference, ...models }] = matrix.get(index, docMarkup, modelMarkup);
 
   return (
     <div>
+      <div className="flex flex-wrap gap-x-4 gap-y-1 mt-3">
+        {Object.entries(chosenModels).map(([model, checked]) => (
+          <Checkbox
+            key={model}
+            checked={checked}
+            onChange={() =>
+              setChosenModels((oldState) => ({ ...oldState, [model]: !oldState[model] }))
+            }
+          >
+            {model}
+          </Checkbox>
+        ))}
+      </div>
       <div className="pb-3 flex justify-center">
         <Pagination page={page} numPages={numPages} setPage={setPage} />
       </div>
       <div className="flex items-top gap-3">
-        <div className="basis-[45%]">
-          <div>
-            <Card full>
-              <CardHead>
-                <HeadingSemiBig>Document</HeadingSemiBig>
-              </CardHead>
-              <CardContent>{toMarkup(docApplied, markupState)}</CardContent>
-            </Card>
+        {doc !== undefined && (
+          <div className="basis-[45%]">
+            <div>
+              <Card full>
+                <CardHead tight>
+                  <HeadingSemiBig>Document</HeadingSemiBig>
+                </CardHead>
+                <CardContent>
+                  <MarkupOrText markup={doc} markupState={markupState} />
+                </CardContent>
+              </Card>
+            </div>
           </div>
-        </div>
-        <div className="basis-[55%]">
+        )}
+        <div className="basis-[55%] grow">
           <div className="flex flex-col gap-3">
-            {[["reference", reference], ...Object.entries(models).sort()].map(([name, markup]) => (
-              <ModelCard
-                key={name}
-                name={name}
-                markup={markup}
-                markupState={markupState}
-                toggle={() => toggleSlot(name)}
-              />
-            ))}
+            <ModelCard
+              name="reference"
+              markup={reference}
+              markupKeys={markupKeys}
+              markupState={markupState}
+              setMarkupKeys={setMarkupKeys}
+              hasDocument={doc !== undefined}
+            />
+            {Object.entries(models)
+              .filter(([name]) => chosenModels[name])
+              .sort()
+              .map(([name, markup]) => (
+                <ModelCard
+                  key={name}
+                  name={name}
+                  markup={markup}
+                  markupKeys={markupKeys}
+                  markupState={markupState}
+                  setMarkupKeys={setMarkupKeys}
+                  hasDocument={doc !== undefined}
+                />
+              ))}
           </div>
         </div>
       </div>
@@ -220,10 +265,11 @@ const Visualize = ({ calculation }) => {
 
 class PlotMatrix {
   constructor(calculation) {
-    const { references, modeltexts, scores, columns, rows } = calculation;
+    const { documents, references, modeltexts, scores, columns, rows } = calculation;
     this.columns = columns;
     this.rows = rows;
     this.models = modeltexts;
+    this.documents = documents;
     this.references = references;
     this.scores = scores;
     this.jitter = {
@@ -300,7 +346,7 @@ const computePlot = (x, y, page, selectedPoints) => {
   return { x, y, data, selected };
 };
 
-const usePlot = ([inX, inY], references) => {
+const usePlot = ([inX, inY], references, documents) => {
   const [{ x, y, data, selected }, setData] = useState({ selected: [] });
   const layout = useMemo(() => {
     if (x)
@@ -338,26 +384,28 @@ const usePlot = ([inX, inY], references) => {
     if (index >= 0) setPage(index + 1);
     else setSelected([pointIndex]);
   };
-  const [modelScores, reference, model1, model2] = useMemo(() => {
+  const [modelScores, doc, reference, model1, model2] = useMemo(() => {
     const index = selected[page - 1];
     if (index === undefined) return [];
     const modelScores_ = {
       [x.label]: x.scores[index],
     };
     const reference_ = references[index];
+    let doc_;
+    if (documents) doc_ = documents[index];
     const model1_ = [x.model, x.texts[index]];
     let model2_;
     if (y.model) {
       modelScores_[y.label] = y.scores[index];
       if (x.model !== y.model) model2_ = [y.model, y.texts[index]];
     }
-    return [modelScores_, reference_, model1_, model2_];
-  }, [selected, page, x, y]);
+    return [modelScores_, doc_, reference_, model1_, model2_];
+  }, [selected, references, documents, page, x, y]);
   return {
     data,
     layout,
     selected,
-    text: { modelScores, reference, model1, model2 },
+    text: { modelScores, document: doc, reference, model1, model2 },
     pagination: { setPage, page, numPages },
     onSelected,
     onDeselect,
@@ -379,12 +427,12 @@ const Plotter = ({ calculation }) => {
   const {
     data: dataPatch,
     layout: layoutPatch,
-    text: { modelScores, reference, model1, model2 },
+    text: { modelScores, document: doc, reference, model1, model2 },
     pagination: { numPages, page, setPage },
     onSelected,
     onDeselect,
     setHighlightedPoint,
-  } = usePlot(plotData, matrix.references);
+  } = usePlot(plotData, matrix.references, matrix.documents);
   const data = useMemo(
     () => [
       {
@@ -417,7 +465,6 @@ const Plotter = ({ calculation }) => {
     }),
     [layoutPatch]
   );
-  console.log(reference)
   const [trueLayout, setTrueLayout] = useState({});
   useEffect(() => setTrueLayout(layout), [layout]);
   return (
@@ -434,8 +481,8 @@ const Plotter = ({ calculation }) => {
             {table.map((row, i) => {
               const metric = rownames[i];
               return (
-                <Tr key={metric} hover striped>
-                  <Td loose>{metric}</Td>
+                <Tr key={metric} striped>
+                  <Td>{metric}</Td>
                   {row.map((isSet, j) => (
                     <Td key={j} loose>
                       <SetButton isSet={isSet} onClick={() => toggleMetric([i, j])}>
@@ -474,6 +521,12 @@ const Plotter = ({ calculation }) => {
                   <Pagination page={page} numPages={numPages} setPage={setPage} />
                 </div>
                 <div className="flex flex-col gap-3 mt-4">
+                  {doc !== undefined && (
+                    <div>
+                      <HeadingMedium>Document</HeadingMedium>
+                      <div>{doc}</div>
+                    </div>
+                  )}
                   <div>
                     <HeadingMedium>Reference</HeadingMedium>
                     <div>{reference}</div>
@@ -489,14 +542,16 @@ const Plotter = ({ calculation }) => {
                     </div>
                   )}
                   <table className="inline-block mt-7">
-                    {Object.entries(modelScores).map(([name, score]) => (
-                      <tr key={name}>
-                        <td>
-                          <HeadingSmall>{name}</HeadingSmall>
-                        </td>
-                        <td className="pl-4">{score.toFixed(2)}</td>
-                      </tr>
-                    ))}
+                    <tbody>
+                      {Object.entries(modelScores).map(([name, score]) => (
+                        <tr key={name}>
+                          <td>
+                            <HeadingSmall>{name}</HeadingSmall>
+                          </td>
+                          <td className="pl-4">{score.toFixed(2)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
                   </table>
                 </div>
               </div>
@@ -509,28 +564,32 @@ const Plotter = ({ calculation }) => {
 };
 
 const ScoreWorkbench = ({ calculation, RightToken }) => {
-  const { rows, columns, table } = calculation;
+  const hasScores = Boolean(calculation.table.length);
   return (
     <div>
       <Tabs>
         <div className="mb-5 flex items-center justify-between">
           <TabHead>
-            <Pill>Scores</Pill>
+            {hasScores && <Pill>Scores</Pill>}
             <Pill>Visualize Overlap</Pill>
-            <Pill>Plotter</Pill>
+            {hasScores && <Pill>Plotter</Pill>}
           </TabHead>
           {RightToken}
         </div>
         <TabContent>
-          <TabPanel>
-            <ScoreTable rownames={rows} colnames={columns} table={table} />
-          </TabPanel>
+          {hasScores && (
+            <TabPanel>
+              <ScoreTable calculation={calculation} />
+            </TabPanel>
+          )}
           <TabPanel>
             <Visualize calculation={calculation} />
           </TabPanel>
-          <TabPanel>
-            <Plotter calculation={calculation} />
-          </TabPanel>
+          {hasScores && (
+            <TabPanel>
+              <Plotter calculation={calculation} />
+            </TabPanel>
+          )}
         </TabContent>
       </Tabs>
     </div>
