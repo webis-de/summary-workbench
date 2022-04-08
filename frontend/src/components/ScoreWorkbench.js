@@ -16,7 +16,7 @@ import { Pagination, usePagination } from "./utils/Pagination";
 import { ButtonGroup, RadioButton, RadioGroup } from "./utils/Radio";
 import { Table, TableWrapper, Tbody, Td, Th, Thead, Tr } from "./utils/Table";
 import { Pill, TabContent, TabHead, TabPanel, Tabs } from "./utils/Tabs";
-import { HeadingMedium, HeadingSemiBig, HeadingSmall } from "./utils/Text";
+import { HeadingSemiBig, HeadingSmall } from "./utils/Text";
 import { Toggle } from "./utils/Toggle";
 
 const ExportPreview = ({ format, rownames, colnames, table }) => {
@@ -152,7 +152,7 @@ const ModelCard = ({ name, markup, markupKeys, markupState, setMarkupKeys, hasDo
         )}
       </div>
     </CardHead>
-    <CardContent>
+    <CardContent tight>
       <MarkupOrText markup={markup} markupState={markupState} />
     </CardContent>
   </Card>
@@ -225,7 +225,7 @@ const Visualize = ({ calculation }) => {
                 <CardHead tight>
                   <HeadingSemiBig>Document</HeadingSemiBig>
                 </CardHead>
-                <CardContent>
+                <CardContent tight>
                   <MarkupOrText markup={doc} markupState={markupState} />
                 </CardContent>
               </Card>
@@ -413,6 +413,81 @@ const usePlot = ([inX, inY], references, documents) => {
   };
 };
 
+const ExampleDisplay = ({ modelScores, doc: doc_, reference: reference_, model1, model2 }) => {
+  const markupState = useState(null);
+  const [markupKeys, setMarkupKeys] = useState([]);
+
+  const all = useMemo(() => {
+    const all_ = { document: doc_, reference: reference_ };
+    [model1, model2]
+      .filter((v) => v !== undefined)
+      .forEach(([k, v]) => {
+        all_[k] = v;
+      });
+    return all_;
+  }, [doc_, reference_, model1, model2]);
+
+  const markups = Object.fromEntries(zip(markupKeys, useMarkup(...markupKeys.map((k) => all[k]))));
+
+  const {
+    document: doc,
+    reference,
+    ...models
+  } = mapObject(all, (v, k) => (markups && markups[k] ? markups[k] : v));
+
+  return (
+    <div>
+      <div className="flex flex-col gap-3 mt-4">
+        {doc !== undefined && (
+          <div>
+            <Card full>
+              <CardHead tight>
+                <HeadingSemiBig>Document</HeadingSemiBig>
+              </CardHead>
+              <CardContent tight>
+                <MarkupOrText markup={doc} markupState={markupState} />
+              </CardContent>
+            </Card>
+          </div>
+        )}
+        <ModelCard
+          name="reference"
+          markup={reference}
+          markupKeys={markupKeys}
+          markupState={markupState}
+          setMarkupKeys={setMarkupKeys}
+          hasDocument={doc !== undefined}
+        />
+        {Object.entries(models)
+          .sort()
+          .map(([name, markup]) => (
+            <ModelCard
+              key={name}
+              name={name}
+              markup={markup}
+              markupKeys={markupKeys}
+              markupState={markupState}
+              setMarkupKeys={setMarkupKeys}
+              hasDocument={doc !== undefined}
+            />
+          ))}
+        <table className="inline-block mt-7">
+          <tbody>
+            {Object.entries(modelScores).map(([name, score]) => (
+              <tr key={name}>
+                <td>
+                  <HeadingSmall>{name}</HeadingSmall>
+                </td>
+                <td className="pl-4">{score.toFixed(2)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
 const Plotter = ({ calculation }) => {
   const matrix = useMemo(() => new PlotMatrix(calculation), [calculation]);
   const [selectedMetrics, toggleMetric] = useReducer((oldState, value) => {
@@ -498,21 +573,23 @@ const Plotter = ({ calculation }) => {
       </TableWrapper>
       {data && (
         <div className="grid grid-cols-2 py-4 px-2 gap-5">
-          <div className="border border-black">
-            <Plot
-              className="w-full min-h-[500px]"
-              data={data}
-              layout={trueLayout}
-              config={{
-                displayModeBar: true,
-                responsive: true,
-              }}
-              onInitialized={({ layout: newLayout }) => setTrueLayout(newLayout)}
-              onUpdate={({ layout: newLayout }) => setTrueLayout(newLayout)}
-              onSelected={onSelected}
-              onDeselect={onDeselect}
-              onClick={({ points }) => setHighlightedPoint(points[0].pointIndex)}
-            />
+          <div>
+            <div className="border border-black">
+              <Plot
+                className="w-full min-h-[500px]"
+                data={data}
+                layout={trueLayout}
+                config={{
+                  displayModeBar: true,
+                  responsive: true,
+                }}
+                onInitialized={({ layout: newLayout }) => setTrueLayout(newLayout)}
+                onUpdate={({ layout: newLayout }) => setTrueLayout(newLayout)}
+                onSelected={onSelected}
+                onDeselect={onDeselect}
+                onClick={({ points }) => setHighlightedPoint(points[0].pointIndex)}
+              />
+            </div>
           </div>
           <div>
             {reference !== undefined && (
@@ -520,40 +597,14 @@ const Plotter = ({ calculation }) => {
                 <div className="flex justify-center">
                   <Pagination page={page} numPages={numPages} setPage={setPage} />
                 </div>
-                <div className="flex flex-col gap-3 mt-4">
-                  {doc !== undefined && (
-                    <div>
-                      <HeadingMedium>Document</HeadingMedium>
-                      <div>{doc}</div>
-                    </div>
-                  )}
-                  <div>
-                    <HeadingMedium>Reference</HeadingMedium>
-                    <div>{reference}</div>
-                  </div>
-                  <div>
-                    <HeadingMedium>{model1[0]}</HeadingMedium>
-                    <div>{model1[1]}</div>
-                  </div>
-                  {model2 && (
-                    <div>
-                      <HeadingMedium>{model2[0]}</HeadingMedium>
-                      <div>{model2[1]}</div>
-                    </div>
-                  )}
-                  <table className="inline-block mt-7">
-                    <tbody>
-                      {Object.entries(modelScores).map(([name, score]) => (
-                        <tr key={name}>
-                          <td>
-                            <HeadingSmall>{name}</HeadingSmall>
-                          </td>
-                          <td className="pl-4">{score.toFixed(2)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                <ExampleDisplay
+                  key={Object.keys(modelScores).join(":")}
+                  modelScores={modelScores}
+                  doc={doc}
+                  reference={reference}
+                  model1={model1}
+                  model2={model2}
+                />
               </div>
             )}
           </div>

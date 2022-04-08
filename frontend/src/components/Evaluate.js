@@ -183,10 +183,11 @@ const SubEvaluate = () => {
   if (argErrors) disableErrors.push(...argErrors);
   if (data) {
     const numChosenKeys = data.chosenKeys ? data.chosenKeys.length : 0;
-    if (!numChosenKeys && !("document" in Object.keys(data.lines[0]))) {
+
+    if (data.chosenKeys && !numChosenKeys && !Object.keys(data.lines[0]).includes("document")) {
       disableErrors.push("provide at least the 'document' key or a model key");
     }
-    if (numChosenKeys && !chosenMetrics.length) {
+    if ((!data.chosenKeys || numChosenKeys) && !chosenMetrics.length) {
       disableErrors.push("Select at least one metric.");
     }
   }
