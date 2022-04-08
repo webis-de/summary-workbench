@@ -20,8 +20,12 @@ const Thead = ({ children }) => (
   </thead>
 );
 
-const Th = ({ children }) => (
-  <th className="py-3 px-6 text-xs font-medium tracking-wider text-left text-gray-700 uppercase">
+const Th = ({ children, loose, center }) => (
+  <th
+    className={`${loose ? "p-1" : "py-3 px-6"} ${
+      center ? "text-center" : "text-left"
+    } text-xs font-medium tracking-wider text-gray-700 uppercase`}
+  >
     {children}
   </th>
 );
@@ -50,7 +54,7 @@ const Td = ({ children, nowrap, center, right, strong, loose, colSpan }) => {
   else if (right) className += " text-right";
   else className += " text-left";
 
-  if (loose) className += " p-2";
+  if (loose) className += " p-1";
   else className += " py-4 px-6";
 
   if (nowrap) className += " whitespace-nowrap";
@@ -58,7 +62,11 @@ const Td = ({ children, nowrap, center, right, strong, loose, colSpan }) => {
   if (strong) className += " text-gray-900";
   else className += " text-gray-500";
 
-  return <td colSpan={colSpan} className={className}>{children}</td>;
+  return (
+    <td colSpan={colSpan} className={className}>
+      {children}
+    </td>
+  );
 };
 
 export { TableWrapper, Table, Thead, Tbody, Th, Tr, Td };

@@ -314,19 +314,6 @@ class PlotMatrix {
   }
 }
 
-const SetButton = ({ isSet, children, ...props }) => {
-  let className = "py-2 px-4 text-sm font-medium";
-  if (isSet === undefined) className += " text-gray-900 bg-white cursor-default opacity-50";
-  else if (isSet) className += " bg-gray-600 text-white ring-[3px] ring-black";
-  else
-    className += " text-gray-900 bg-white hover:text-white hover:bg-gray-400 ring-1 ring-gray-700";
-  return (
-    <button {...props} disabled={isSet === undefined} className={className}>
-      {children}
-    </button>
-  );
-};
-
 const computePlot = (x, y, page, selectedPoints) => {
   const color = Array(x.scores.length).fill("#8682FF");
   const size = Array(x.scores.length).fill(7);
@@ -337,12 +324,40 @@ const computePlot = (x, y, page, selectedPoints) => {
     color[currIndex] = "yellow";
     size[currIndex] = 13;
   }
-  const data = {
-    x: x.scores,
-    y: y.scores,
-    selectedpoints: selected.length ? selected : null,
-    marker: { color, size, line: { width: 1, color: "DarkSlateGrey" } },
-  };
+  const data = [
+    {
+      x: x.scores,
+      y: y.scores,
+      // text: [],
+      // hoverinfo: "text",
+      // customdata:
+      type: "scatter",
+      mode: "markers",
+      hoverlabel: { bgcolor: "black" },
+      selectedpoints: selected.length ? selected : null,
+      marker: { color, size, line: { width: 1, color: "DarkSlateGrey" } },
+    },
+    {
+      x: x.scores,
+      // text: [],
+      // hoverinfo: "text",
+      // customdata:
+      xaxis: "x1",
+      yaxis: "y2",
+      type: "histogram",
+      marker: { color, size, line: { width: 1, color: "DarkSlateGrey" } },
+    },
+    {
+      y: y.scores,
+      // text: [],
+      // hoverinfo: "text",
+      // customdata:
+      xaxis: "x2",
+      yaxis: "y1",
+      type: "histogram",
+      marker: { color, size, line: { width: 1, color: "DarkSlateGrey" } },
+    },
+  ];
   return { x, y, data, selected };
 };
 
@@ -356,12 +371,26 @@ const usePlot = ([inX, inY], references, documents) => {
           title: x.label,
           range: undefined,
           type: "linear",
+          domain: [0, 0.7],
         },
         yaxis: {
           autorange: true,
           title: y.label,
           range: undefined,
           type: "linear",
+          domain: [0, 0.7],
+        },
+        xaxis2: {
+          autorange: true,
+          range: undefined,
+          type: "linear",
+          domain: [0.8, 1],
+        },
+        yaxis2: {
+          autorange: true,
+          range: undefined,
+          type: "linear",
+          domain: [0.8, 1],
         },
       };
     return {};
@@ -377,7 +406,11 @@ const usePlot = ([inX, inY], references, documents) => {
     (pointIndexes) => setData(computePlot(x, y, page, pointIndexes)),
     [x, y, page, selected]
   );
-  const onSelected = (e) => e && setSelected(e.points.map(({ pointIndex }) => pointIndex));
+  const onSelected = (e) => {
+    if (e && e.range.x && e.range.y) {
+      setSelected(e.points.map(({ pointIndex }) => pointIndex));
+    }
+  };
   const onDeselect = () => setSelected([]);
   const setHighlightedPoint = (pointIndex) => {
     const index = selected.indexOf(pointIndex);
@@ -500,7 +533,7 @@ const Plotter = ({ calculation }) => {
     [matrix, selectedMetrics]
   );
   const {
-    data: dataPatch,
+    data,
     layout: layoutPatch,
     text: { modelScores, document: doc, reference, model1, model2 },
     pagination: { numPages, page, setPage },
@@ -508,20 +541,6 @@ const Plotter = ({ calculation }) => {
     onDeselect,
     setHighlightedPoint,
   } = usePlot(plotData, matrix.references, matrix.documents);
-  const data = useMemo(
-    () => [
-      {
-        ...dataPatch,
-        // text: [],
-        // hoverinfo: "text",
-        // customdata:
-        type: "scatter",
-        mode: "markers",
-        hoverlabel: { bgcolor: "black" },
-      },
-    ],
-    [dataPatch]
-  );
   const layout = useMemo(
     () => ({
       ...layoutPatch,
@@ -547,9 +566,11 @@ const Plotter = ({ calculation }) => {
       <TableWrapper>
         <Table>
           <Thead>
-            <Th>Metric</Th>
+            <Th loose>Metric</Th>
             {colnames.map((colname) => (
-              <Th key={colname}>{colname}</Th>
+              <Th key={colname} loose center>
+                {colname}
+              </Th>
             ))}
           </Thead>
           <Tbody>
@@ -557,12 +578,10 @@ const Plotter = ({ calculation }) => {
               const metric = rownames[i];
               return (
                 <Tr key={metric} striped>
-                  <Td>{metric}</Td>
+                  <Td loose>{metric}</Td>
                   {row.map((isSet, j) => (
-                    <Td key={j} loose>
-                      <SetButton isSet={isSet} onClick={() => toggleMetric([i, j])}>
-                        toggle
-                      </SetButton>
+                    <Td key={j} loose center>
+                      <Checkbox checked={isSet} onChange={() => toggleMetric([i, j])} />
                     </Td>
                   ))}
                 </Tr>
