@@ -114,7 +114,7 @@ const InputDocument = ({ summarize, state }) => {
 
   const argErrors = useMemo(
     () => extractArgumentErrors(chosenModels, summarizers),
-    [(chosenModels, summarizers)]
+    [chosenModels, summarizers]
   );
 
   const disableErrors = [];
@@ -361,11 +361,6 @@ const SummaryView = ({ title, summaries, documentLength }) => {
   const pairwiseMarkups = usePairwiseMarkups(originals, sums);
   const summaryMarkups = useMarkups(sums);
   const scrollRef = useRef();
-  const tabViewKey = useRef(true);
-
-  useMemo(() => {
-    tabViewKey.current = !tabViewKey.current;
-  }, [summaries]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -381,7 +376,6 @@ const SummaryView = ({ title, summaries, documentLength }) => {
         <div className="flex flex-grow">
           {showTab ? (
             <SummaryTabView
-              key={tabViewKey.current}
               documentLength={documentLength}
               showOverlap={showOverlap}
               summaries={summaries}

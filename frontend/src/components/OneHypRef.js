@@ -34,7 +34,7 @@ const OneHypRef = ({ setComputeData }) => {
     } catch (error) {
       setComputeData({ errors: [error.message] });
     }
-  }, [hypText, refText]);
+  }, [hypText, refText, setComputeData]);
 
   return (
     <FlexResponsive>

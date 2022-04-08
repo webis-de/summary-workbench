@@ -170,7 +170,7 @@ const SubEvaluate = () => {
   const [{ data, errors }, setComputeData] = useState({});
   const argErrors = useMemo(
     () => extractArgumentErrors(chosenMetrics, metrics),
-    [(chosenMetrics, metrics)]
+    [chosenMetrics, metrics]
   );
 
   const saveCalculation = async (calculation) => {

@@ -46,7 +46,7 @@ const Upload = ({ setComputeData }) => {
       setData(null);
       setComputeData({ errors: [error.message] });
     }
-  }, [fileName, lines]);
+  }, [fileName, lines, setComputeData]);
 
   useEffect(() => {
     if (data) {
@@ -54,7 +54,7 @@ const Upload = ({ setComputeData }) => {
       const keys = Object.keys(filterObject(chosenKeys, (_, v) => v));
       setComputeData({ data: { id, lines: jsonl, chosenKeys: keys } });
     }
-  }, [data]);
+  }, [data, setComputeData]);
 
   const toggleModel = (model) => {
     const { chosenKeys } = data;

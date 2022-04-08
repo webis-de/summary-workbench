@@ -12,7 +12,7 @@ const SettingsProvider = ({ children }) => {
   const [summaryLength, setSummaryLength] = useLocalStorage("summary-length", 15);
   const [colorscheme, setColorscheme] = useLocalStorage("colorscheme", "soft");
 
-  const colorMap = useMemo(() => new ColorMap(colorscheme, true), [colorscheme, setColorscheme]);
+  const colorMap = useMemo(() => new ColorMap(colorscheme, true), [colorscheme]);
 
   const value = useMemo(
     () => ({

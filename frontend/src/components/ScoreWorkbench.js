@@ -404,7 +404,7 @@ const usePlot = ([inX, inY], references, documents) => {
   }, [inX, inY, page]);
   const setSelected = useCallback(
     (pointIndexes) => setData(computePlot(x, y, page, pointIndexes)),
-    [x, y, page, selected]
+    [x, y, page]
   );
   const onSelected = (e) => {
     if (e && e.range.x && e.range.y) {

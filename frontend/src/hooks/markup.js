@@ -40,7 +40,7 @@ const useMarkups = (texts) => {
   const { minOverlap, ignoreStopwords, selfSimilarities, colorMap } = useContext(SettingsContext);
   return useMemo(
     () => computeMarkup(texts, colorMap, minOverlap, selfSimilarities, ignoreStopwords),
-    [...texts, minOverlap, selfSimilarities, colorMap, ignoreStopwords]
+    [texts, minOverlap, selfSimilarities, colorMap, ignoreStopwords]
   );
 };
 

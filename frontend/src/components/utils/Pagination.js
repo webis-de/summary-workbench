@@ -98,7 +98,7 @@ const usePagination = (
       else f = () => obj;
       return _setPage((oldPage) => validRange(parseNumber(f(oldPage)) || oldPage, numPages));
     },
-    [numPages, _setPage]
+    [numPages]
   );
   const setSize = useCallback(
     (requestSize) => {
@@ -106,11 +106,11 @@ const usePagination = (
       _setSize(newSize);
       _setPage(Math.ceil((size * (page - 1) + 1) / newSize));
     },
-    [numItems, size, page, maxSize, _setSize]
+    [size, page, maxSize]
   );
 
   useEffect(() => setPage(validRange(page, numPages)), [numPages, page, setPage]);
-  useEffect(() => reset && setPage(initialPage), [numItems, initialPage, reset]);
+  useEffect(() => reset && setPage(initialPage), [initialPage, reset, setPage]);
 
   return { page, numPages, setPage, size, setSize };
 };
