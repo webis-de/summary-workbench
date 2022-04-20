@@ -4,7 +4,7 @@ const { isURL } = require("validator");
 const validateMiddleware = require("../middleware/validate");
 const { currentConfig } = require("../config");
 
-const { sentenceSplitter, articleDownloader, pdfExtractor } = require("../subservices");
+const { sentenceSplitter, articleDownloader, pdfExtractor , semanticSimilarity} = require("../subservices");
 
 const Feedbacks = require("../models/feedbacks");
 
@@ -139,6 +139,7 @@ const validateHypRefMiddleware = (req, res, next) => {
  *       400:
  *         description: Failure
  */
+
 router.post(
   "/evaluate",
   evaluateValidator,
@@ -200,6 +201,7 @@ const summarizeValidator = [
  *         description: Failure
  *
  */
+
 router.post("/summarize", summarizeValidator, validateMiddleware, async (req, res, next) => {
   try {
     const { summarizers, text, ratio } = req.body;
@@ -249,6 +251,45 @@ const extractPdfJson = (json) => {
   if (currSection !== null) sections.push(currSection);
   return { title, abstract, sections };
 };
+
+/**
+ * @swagger
+ * /api/semantic_similarity:
+ *   post:
+ *     description: Compute semantic similarity between sentences and a summary.
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               sentences:
+ *                 description: text or list of sentences
+ *                 schema:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *               summary:
+ *                 description: summary of the document
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Success
+ *       400:
+ *         description: Failure
+ *
+ */
+
+router.post("/semantic_similarity", async (req, res, next) => {
+  try {
+    const { sentences, summary } = req.body;
+    console.log(summary)
+    const json = await semanticSimilarity.similarity(sentences, summary);
+    return res.json(json);
+  } catch (err) {
+    return next(err);
+  }
+});
 
 /**
  * @swagger

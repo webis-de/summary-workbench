@@ -16,10 +16,13 @@ const pdfExtractRequest = async (pdf) => {
   const res = await wrappedFetch("/api/pdf/extract", {
     method: "POST",
     body: fd,
-  })
+  });
   if (res.ok) return res.json();
   throw new Error(`request failed with status ${res.status}`);
 };
+
+const semanticRequest = async (sentences, summary) =>
+  post("/api/summarize", { sentences, summary });
 
 const feedbackRequest = (summarizer, summary, reference, url, feedback) => {
   let json = { summarizer, summary, reference, feedback };
@@ -34,4 +37,5 @@ export {
   summarizeRequest,
   pdfExtractRequest,
   feedbackRequest,
+  semanticRequest,
 };

@@ -105,11 +105,22 @@ class PdfExtractor extends Subservice {
   }
 }
 
+class SemanticSimilarity extends Subservice {
+  constructor(verbose = false) {
+    super("subservices/semantic_similarity.py", verbose);
+  }
+
+  similarity(sentences, summary) {
+    return axios.post(`http://localhost:${this.port}/`, { sentences, summary }).then((response) => response.data);
+  }
+}
+
 const articleDownloader = new ArticleDownloader();
 const sentenceSplitter = new SentenceSplitter();
 const pdfExtractor = new PdfExtractor();
+const semanticSimilarity = new SemanticSimilarity();
 
-const services = [articleDownloader, sentenceSplitter, pdfExtractor];
+const services = [articleDownloader, sentenceSplitter, pdfExtractor, semanticSimilarity];
 
 const initSubservices = async () => {
   const freePorts = await getFreePorts(services.length);
@@ -121,5 +132,6 @@ module.exports = {
   articleDownloader,
   sentenceSplitter,
   pdfExtractor,
+  semanticSimilarity,
   initSubservices,
 };

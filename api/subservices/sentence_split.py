@@ -20,7 +20,7 @@ def split_sentences(text):
 
 
 @app.post("/")
-def download(body: Body):
+def split(body: Body):
     sentences = split_sentences(body.text)
     return {"sentences": sentences}
 

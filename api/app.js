@@ -6,6 +6,9 @@ const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUI = require("swagger-ui-express");
 const fileUpload = require("express-fileupload");
 
+const cookieParser = require("cookie-parser");
+const { errorToMessage } = require("./errors");
+
 const swaggerOptions = {
   definition: {
     openapi: "3.0.0",
@@ -20,7 +23,6 @@ const swaggerOptions = {
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 
-const cookieParser = require("cookie-parser");
 
 const apiRouter = require("./routes/api");
 
@@ -28,8 +30,12 @@ const app = express();
 
 app.use("/api/doc", swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
-const errorMiddleware = (err, req, res) => {
-  res.status(400).json({ error: err.message });
+const errorMiddleware = (err, req, res, next) => {
+  let errors = null;
+  const { code } = err;
+  if (code) errors = errorToMessage(code);
+  else errors = errorToMessage(err.response.data);
+  res.status(400).json({ errors });
 };
 
 app.use(logger("dev"));
