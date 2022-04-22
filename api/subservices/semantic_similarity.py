@@ -42,7 +42,7 @@ class Body(BaseModel):
 @app.post("/")
 def similarity(body: Body):
     scores = evaluator.evaluate(body.sentences, body.summary)
-    return {"socres": scores}
+    return {"scores": scores}
 
 
 if __name__ == "__main__":

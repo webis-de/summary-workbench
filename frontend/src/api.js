@@ -22,7 +22,7 @@ const pdfExtractRequest = async (pdf) => {
 };
 
 const semanticRequest = async (sentences, summary) =>
-  post("/api/summarize", { sentences, summary });
+  post("/api/semantic_similarity", { sentences, summary });
 
 const feedbackRequest = (summarizer, summary, reference, url, feedback) => {
   let json = { summarizer, summary, reference, feedback };

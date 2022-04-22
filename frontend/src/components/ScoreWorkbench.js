@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useMemo, useReducer, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import Plot from "react-plotly.js";
 import { useKey, useToggle } from "react-use";
 
@@ -11,7 +11,8 @@ import { CopyToClipboardButton } from "./utils/Button";
 import { Card, CardContent, CardHead } from "./utils/Card";
 import { Checkbox, Input } from "./utils/Form";
 import { EyeClosed, EyeOpen } from "./utils/Icons";
-import { Markup } from "./utils/Markup";
+import { Loading } from "./utils/Loading";
+import { Markup, useMarkupScroll } from "./utils/Markup";
 import { Pagination, usePagination } from "./utils/Pagination";
 import { ButtonGroup, RadioButton, RadioGroup } from "./utils/Radio";
 import { Table, TableWrapper, Tbody, Td, Th, Thead, Tr } from "./utils/Table";
@@ -107,53 +108,101 @@ const ScoreTable = ({ calculation }) => {
   );
 };
 
-const isMarkup = (markup) => !(typeof markup === "string");
-
 const ToggleOverlap = ({ markupKeys, wantMarkupKeys, setMarkupKeys }) => {
   const show = !arrayEqual(markupKeys, wantMarkupKeys);
   const Icon = show ? EyeOpen : EyeClosed;
   const onClick = show ? () => setMarkupKeys(wantMarkupKeys) : () => setMarkupKeys([]);
+  const text = wantMarkupKeys[2] === "semantic" ? "semantic" : wantMarkupKeys[0];
 
   return (
     <button
       className="whitespace-nowrap hover:text-blue-600 flex items-center gap-1"
       onClick={onClick}
     >
-      <Icon className="w-7 h-7" /> {wantMarkupKeys[0]}
+      <Icon className="w-7 h-7" /> {text}
     </button>
   );
 };
 
-const MarkupOrText = ({ markup, markupState }) =>
-  isMarkup(markup) ? (
-    <Markup markups={markup} markupState={markupState} />
-  ) : (
-    <div className="leading-[23px]">{markup}</div>
-  );
+const colorFromStrength = (value) => {
+  const v = Math.max(Math.min(value * 0.5, 1.0), 0.0);
+  return `rgba(255, 0, 0, ${v})`;
+};
 
-const ModelCard = ({ name, markup, markupKeys, markupState, setMarkupKeys, hasDocument }) => (
+const SemanticMarkup = ({ markup }) => {
+  const { scores } = markup;
+  return (
+    <div className="leading-[23px]">
+      {scores.map(([text, score], i) => (
+        <span
+          key={i}
+          style={{
+            padding: 0,
+            paddingTop: "0.1em",
+            paddingBottom: "0.1em",
+            background: colorFromStrength(score),
+          }}
+        >
+          {text}
+        </span>
+      ))}
+    </div>
+  );
+};
+
+const MarkupOrText = ({ markup, markupState, scrollState }) => {
+  if (typeof markup === "string") return <div className="leading-[23px]">{markup}</div>;
+  const { type } = markup;
+  switch (type) {
+    case "loading":
+      return <Loading />;
+    case "lexical":
+      return <Markup markups={markup.markup} markupState={markupState} scrollState={scrollState} />;
+    case "semantic":
+      return <SemanticMarkup markup={markup.markup} />;
+    default:
+      throw new Error(`unknown markup type: ${type}`);
+  }
+};
+
+const ModelCard = ({
+  name,
+  markup,
+  markupKeys,
+  markupState,
+  setMarkupKeys,
+  hasDocument,
+  scrollState,
+}) => (
   <Card full key={name}>
     <CardHead tight>
       <HeadingSemiBig>{name}</HeadingSemiBig>
       <div className="flex gap-4">
         {hasDocument && (
-          <ToggleOverlap
-            markupKeys={markupKeys}
-            wantMarkupKeys={["document", name]}
-            setMarkupKeys={setMarkupKeys}
-          />
+          <>
+            <ToggleOverlap
+              markupKeys={markupKeys}
+              wantMarkupKeys={["document", name, "semantic"]}
+              setMarkupKeys={setMarkupKeys}
+            />
+            <ToggleOverlap
+              markupKeys={markupKeys}
+              wantMarkupKeys={["document", name, "lexical"]}
+              setMarkupKeys={setMarkupKeys}
+            />
+          </>
         )}
         {name !== "reference" && (
           <ToggleOverlap
             markupKeys={markupKeys}
-            wantMarkupKeys={["reference", name]}
+            wantMarkupKeys={["reference", name, "lexical"]}
             setMarkupKeys={setMarkupKeys}
           />
         )}
       </div>
     </CardHead>
     <CardContent tight>
-      <MarkupOrText markup={markup} markupState={markupState} />
+      <MarkupOrText markup={markup} markupState={markupState} scrollState={scrollState} />
     </CardContent>
   </Card>
 );
@@ -171,8 +220,29 @@ class MarkupMatrix {
     return keys.map((k) => this.all[k][index]);
   }
 
-  get(index, markups) {
-    return mapObject(this.all, (v, k) => (markups && markups[k] ? markups[k] : v[index]));
+  get(index, markupModels, markups) {
+    const markupMapper = {};
+    if (markups) {
+      const { type, loading, markup } = markups;
+      if (loading) {
+        if (type === "semantic") markupMapper[markupModels[0]] = { type: "loading" };
+        else
+          markupModels.forEach((model) => {
+            markupMapper[model] = { type: "loading" };
+          });
+      } else if (markup) {
+        if (type === "semantic") markupMapper[markupModels[0]] = { type, markup: markups.markup };
+        else
+          markupModels.forEach((model, i) => {
+            markupMapper[model] = { type, markup: markups.markup[i] };
+          });
+      }
+    }
+    return mapObject(this.all, (v, k) => {
+      const markup = markupMapper[k];
+      if (markup) return markup;
+      return v[index];
+    });
   }
 }
 
@@ -190,14 +260,13 @@ const Visualize = ({ calculation }) => {
   const [markupKeys, setMarkupKeys] = useState([]);
 
   const index = page - 1;
-  const markups = useMarkup(...matrix.getFromKeys(index, markupKeys));
-
-  const {
-    document: doc,
-    reference,
-    ...models
-  } = matrix.get(index, Object.fromEntries(zip(markupKeys, markups)));
+  const markupModels = markupKeys.slice(0, 2);
+  const markupType = markupKeys[2];
+  const [d, r] = matrix.getFromKeys(index, markupModels);
+  const markups = useMarkup(d, r, markupType);
+  const { document: doc, reference, ...models } = matrix.get(index, markupModels, markups);
   const markupState = useState(null);
+  const scrollState = useMarkupScroll(markupKeys);
 
   return (
     <div>
@@ -226,7 +295,7 @@ const Visualize = ({ calculation }) => {
                   <HeadingSemiBig>Document</HeadingSemiBig>
                 </CardHead>
                 <CardContent tight>
-                  <MarkupOrText markup={doc} markupState={markupState} />
+                  <MarkupOrText markup={doc} markupState={markupState} scrollState={scrollState} />
                 </CardContent>
               </Card>
             </div>
@@ -239,6 +308,7 @@ const Visualize = ({ calculation }) => {
               markup={reference}
               markupKeys={markupKeys}
               markupState={markupState}
+              scrollState={scrollState}
               setMarkupKeys={setMarkupKeys}
               hasDocument={doc !== undefined}
             />
@@ -252,6 +322,7 @@ const Visualize = ({ calculation }) => {
                   markup={markup}
                   markupKeys={markupKeys}
                   markupState={markupState}
+                  scrollState={scrollState}
                   setMarkupKeys={setMarkupKeys}
                   hasDocument={doc !== undefined}
                 />
@@ -447,26 +518,25 @@ const usePlot = ([inX, inY], references, documents) => {
 };
 
 const ExampleDisplay = ({ modelScores, doc: doc_, reference: reference_, model1, model2 }) => {
-  const markupState = useState(null);
   const [markupKeys, setMarkupKeys] = useState([]);
 
-  const all = useMemo(() => {
-    const all_ = { document: doc_, reference: reference_ };
+  const matrix = useMemo(() => {
+    const calculation = { documents: [doc_], references: [reference_], modeltexts: {} };
     [model1, model2]
       .filter((v) => v !== undefined)
       .forEach(([k, v]) => {
-        all_[k] = v;
+        calculation.modeltexts[k] = v;
       });
-    return all_;
+    return new MarkupMatrix(calculation);
   }, [doc_, reference_, model1, model2]);
 
-  const markups = Object.fromEntries(zip(markupKeys, useMarkup(...markupKeys.map((k) => all[k]))));
-
-  const {
-    document: doc,
-    reference,
-    ...models
-  } = mapObject(all, (v, k) => (markups && markups[k] ? markups[k] : v));
+  const markupModels = markupKeys.slice(0, 2);
+  const markupType = markupKeys[2];
+  const [d, r] = matrix.getFromKeys(0, markupModels);
+  const markups = useMarkup(d, r, markupType);
+  const { document: doc, reference, ...models } = matrix.get(0, markupModels, markups);
+  const markupState = useState(null);
+  const scrollState = useMarkupScroll(markupKeys);
 
   return (
     <div>
@@ -478,7 +548,7 @@ const ExampleDisplay = ({ modelScores, doc: doc_, reference: reference_, model1,
                 <HeadingSemiBig>Document</HeadingSemiBig>
               </CardHead>
               <CardContent tight>
-                <MarkupOrText markup={doc} markupState={markupState} />
+                <MarkupOrText markup={doc} markupState={markupState} scrollState={scrollState} />
               </CardContent>
             </Card>
           </div>
@@ -490,6 +560,7 @@ const ExampleDisplay = ({ modelScores, doc: doc_, reference: reference_, model1,
           markupState={markupState}
           setMarkupKeys={setMarkupKeys}
           hasDocument={doc !== undefined}
+          scrollState={scrollState}
         />
         {Object.entries(models)
           .sort()
@@ -502,6 +573,7 @@ const ExampleDisplay = ({ modelScores, doc: doc_, reference: reference_, model1,
               markupState={markupState}
               setMarkupKeys={setMarkupKeys}
               hasDocument={doc !== undefined}
+              scrollState={scrollState}
             />
           ))}
         <table className="inline-block mt-7">

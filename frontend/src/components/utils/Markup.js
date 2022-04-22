@@ -1,4 +1,4 @@
-import React, { Fragment, memo, useCallback, useEffect, useRef, useState } from "react";
+import React, { Fragment, memo, useEffect, useRef, useState } from "react";
 
 const innerHoverStyle = { background: "yellow", color: "black", display: "relative" };
 const baseMarkupStyle = {
@@ -8,11 +8,16 @@ const baseMarkupStyle = {
 };
 const outerHoverStyle = { ...baseMarkupStyle, ...innerHoverStyle };
 
-const initScrollState = [null, null, null];
-const useMarkupScroll = () => {
+const initScrollState = [null, null];
+const useMarkupScroll = (deps = null) => {
   const [scrollState, setScrollState] = useState(initScrollState);
-  const resetScrollState = useCallback(() => setScrollState(initScrollState), [setScrollState]);
-  return [scrollState, setScrollState, resetScrollState];
+  const prevDeps = useRef(deps);
+  useEffect(() => {
+    if (prevDeps.current !== deps) setScrollState(initScrollState);
+    prevDeps.current = deps;
+  }, [deps]);
+
+  return [prevDeps.current !== deps ? initScrollState : scrollState, setScrollState];
 };
 
 const Scroll = ({ docIndex, matchOrder, groupSizes, tag, scrollState, allowScroll, children }) => {

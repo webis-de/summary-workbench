@@ -249,12 +249,8 @@ const Summary = ({ markup, summary, markupState, scrollState, showMarkup }) => {
 const SummaryTabView = ({ title, showOverlap, summaries, markups, documentLength }) => {
   const { summarizers } = useContext(SummarizersContext);
   const markupState = useState(null);
-  const scrollState = useMarkupScroll();
-  const resetScroll = scrollState[2];
-  const [summaryIndex, setSummaryIndex] = useReducer((_, index) => {
-    resetScroll();
-    return index;
-  }, 0);
+  const [summaryIndex, setSummaryIndex] = useState(0)
+  const scrollState = useMarkupScroll(summaryIndex);
 
   return (
     <div className="grow flex items-start gap-3">
