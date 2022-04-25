@@ -77,7 +77,7 @@ const PdfUpload = ({ setPdfExtract }) => {
     if (file) {
       if (file.type !== "application/pdf") throw new TypeError("invalid file type");
       const { title, abstract, sections } = await pdfExtractRequest(file);
-      if (!title) setPdfExtract(null)
+      if (!title) setPdfExtract(null);
       const newSections = sections.map(({ section, secNum, texts }) => ({
         title: `${secNum !== null ? `${secNum} ` : ""}${section}`,
         texts,
@@ -188,7 +188,8 @@ const PdfInput = ({ setCallback, setErrors }) => {
 
   useEffect(() => {
     setCallback(() => (pdfExtract ? pdfJsonToText(pdfExtract) : ""));
-    if (pdfExtract.selected.every((v) => !v)) setErrors(["Select some section to summarize"]);
+    if (!pdfExtract) setErrors(["Upload a PDF file"]);
+    else if (pdfExtract.selected.every((v) => !v)) setErrors(["Select some section to summarize"]);
     else setErrors(null);
   }, [setCallback, setErrors, pdfExtract]);
 
@@ -219,7 +220,7 @@ const PdfInput = ({ setCallback, setErrors }) => {
                     });
                   }}
                 >
-                  {title}
+                  {title || "<unnamed>"}
                 </Checkbox>
               ))}
             </div>
