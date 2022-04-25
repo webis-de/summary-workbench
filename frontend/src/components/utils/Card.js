@@ -21,7 +21,7 @@ const CardHead = ({ children, tight }) => (
 );
 
 const CardContent = ({ children, white, tight }) => (
-  <div className={`${tight ? "p-3" : "p-6"} space-y-5 flex-grow ${white ? "bg-white" : ""}`}>{children}</div>
+  <div className={`${tight ? "p-3" : "p-6"} space-y-3 flex-grow flex-col ${white ? "bg-white" : ""}`}>{children}</div>
 );
 
 const CardFoot = ({ children }) => <div className="p-6">{children}</div>;

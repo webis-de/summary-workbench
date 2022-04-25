@@ -38,20 +38,12 @@ const tol = [
   [136, 34, 85],
 ];
 
-const viridis = [
-  [68, 1, 84],
-  [58, 82, 139],
-  [32, 144, 140],
-  [94, 201, 97],
-  [253, 231, 36],
-];
-
 const grayscale = [
   [0, 0, 0],
   [204, 204, 204],
 ];
 
-const generalColorschemes = { soft, viridis };
+const generalColorschemes = { soft };
 const colorblindColorschemes = { ibm, wong, tol, grayscale };
 
 const colorPoints = { ...generalColorschemes, ...colorblindColorschemes };

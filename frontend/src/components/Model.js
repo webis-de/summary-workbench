@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useMemo } from "react";
+import { IconContext } from "react-icons";
 import { FaCheck } from "react-icons/fa";
 
 import { cyrb53 } from "../utils/color";
@@ -16,7 +17,7 @@ const typeToColor = (type) => {
     case "abstractive":
       return colors[1];
     case "unknown":
-      return "bg-black"
+      return "bg-black";
     default:
       return colors[cyrb53(type || "") % colors.length];
   }
@@ -29,16 +30,17 @@ const Bullet = ({ color }) => (
 );
 
 const ModelText = ({ type, text, healthy = true }) => (
-  <div className="flex items-center gap-2">
+  <div className="flex items-center gap-2 overflow-hidden">
     <Bullet color={typeToColor(type)} />
     <span className="block overflow-hidden whitespace-nowrap text-ellipsis">
       <span title={text} className={healthy ? "" : "line-through"}>
         {text}
-      </span>{" "}
+      </span>
       {!healthy && "(unhealthy)"}
     </span>
   </div>
 );
+
 
 const Model = ({ info, onClick, isSet }) => {
   let className = "ring-1 ring-slate-300 flex items-center gap-2 px-2 py-1 bg-white";
@@ -48,7 +50,9 @@ const Model = ({ info, onClick, isSet }) => {
 
   return (
     <button className={className} onClick={onClick}>
-      <FaCheck className={`text-green-600 ${isSet ? "" : "invisible"}`} />
+        <div>
+          <FaCheck size={15} className={`text-green-600 ${isSet ? "" : "invisible"}`} />
+        </div>
       <ModelText
         type={info.metadata.type}
         text={info.name}

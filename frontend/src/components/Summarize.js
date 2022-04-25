@@ -1,4 +1,12 @@
-import React, { useContext, useEffect, useMemo, useReducer, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 import { CSSTransition } from "react-transition-group";
 import { useAsyncFn } from "react-use";
 
@@ -14,13 +22,13 @@ import { Button, CopyToClipboardButton, LoadingButton } from "./utils/Button";
 import { Card, CardContent, CardHead } from "./utils/Card";
 import { FileInput, useFileInput } from "./utils/ChooseFile";
 import { Errors } from "./utils/Error";
-import { Textarea } from "./utils/Form";
+import { Checkbox, Textarea } from "./utils/Form";
 import { Bars, EyeClosed, EyeOpen, ThumbsDown, ThumbsUp } from "./utils/Icons";
 import { SpaceGap } from "./utils/Layout";
-import { CenterLoading, Loading } from "./utils/Loading";
+import { CenterLoading } from "./utils/Loading";
 import { Markup, useMarkupScroll } from "./utils/Markup";
-import { PillLink, TabContent, TabHead, TabPanel, Tabs } from "./utils/Tabs";
-import { HeadingBig, HeadingSemiBig, Hint } from "./utils/Text";
+import { PillLink, Tab, TabContent, TabHead, TabPanel, Tabs } from "./utils/Tabs";
+import { HeadingBig, HeadingMedium, HeadingSemiBig, Hint } from "./utils/Text";
 import { Tooltip } from "./utils/Tooltip";
 
 const Feedback = ({ summary }) => {
@@ -56,25 +64,25 @@ After the war, Turing worked at the National Physical Laboratory, where he desig
 Turing was prosecuted in 1952 for homosexual acts; the Labouchere Amendment of 1885 had mandated that "gross indecency" was a criminal offence in the UK. He accepted chemical castration treatment, with DES, as an alternative to prison. Turing died in 1954, 16 days before his 42nd birthday, from cyanide poisoning. An inquest determined his death as a suicide, but it has been noted that the known evidence is also consistent with accidental poisoning.
 In 2009, following an Internet campaign, British Prime Minister Gordon Brown made an official public apology on behalf of the British government for "the appalling way he was treated". Queen Elizabeth II granted Turing a posthumous pardon in 2013. The "Alan Turing law" is now an informal term for a 2017 law in the United Kingdom that retroactively pardoned men cautioned or convicted under historical legislation that outlawed homosexual acts.`;
 
-const makeSection = ({ section, secNum, texts }) => {
-  const textList = [...texts];
-  if (section) {
-    let heading = section;
-    if (secNum !== null) heading += ` ${secNum}`;
-    textList.unshift(heading);
-  }
-  return textList.join("\n");
-};
+const pdfJsonToText = ({ title, sections, selected }) =>
+  [
+    title,
+    ...sections
+      .filter((_, i) => selected[i])
+      .map(({ title: heading, texts }) => `${heading}\n${texts.join("\n")}`),
+  ].join("\n\n");
 
-const pdfJsonToText = ({ title, abstract, sections }) =>
-  [title, abstract, ...sections.map(makeSection)].join("\n\n");
-
-const PdfUpload = ({ setText }) => {
+const PdfUpload = ({ setPdfExtract }) => {
   const [{ loading, error }, setFile] = useAsyncFn(async (file) => {
     if (file) {
       if (file.type !== "application/pdf") throw new TypeError("invalid file type");
-      const content = await pdfExtractRequest(file);
-      setText(pdfJsonToText(content));
+      const { title, abstract, sections } = await pdfExtractRequest(file);
+      const newSections = sections.map(({ section, secNum, texts }) => ({
+        title: `${secNum !== null ? `${secNum} ` : ""}${section}`,
+        texts,
+      }));
+      newSections.unshift({ title: "Abstract", texts: [abstract] });
+      setPdfExtract({ title, sections: newSections });
     }
   });
   const { fileInputRef, dragged, onDrop, onClick } = useFileInput(setFile);
@@ -82,7 +90,7 @@ const PdfUpload = ({ setText }) => {
     <div className="flex gap-3">
       <FileInput fileInputRef={fileInputRef} setFile={setFile} />
       {loading ? (
-        <Loading />
+        <LoadingButton appearance="soft" small text="Extracting" />
       ) : (
         <div
           className={
@@ -90,8 +98,8 @@ const PdfUpload = ({ setText }) => {
           }
           onDrop={onDrop}
         >
-          <Button onClick={onClick} appearance="link">
-            from pdf
+          <Button onClick={onClick} small appearance="soft">
+            Upload PDF file
           </Button>
         </div>
       )}
@@ -104,13 +112,137 @@ const PdfUpload = ({ setText }) => {
   );
 };
 
-const InputDocument = ({ summarize, state }) => {
+const TextInput = ({ setCallback, setErrors }) => {
   const [documentText, setDocumentText] = useState("");
+
+  useEffect(() => {
+    setCallback(() => documentText);
+    if (!documentText) setErrors(["Input text to summarize"]);
+    else setErrors(null);
+  }, [setCallback, setErrors, documentText]);
+
+  return (
+    <div className="relative h-full">
+      <div className="absolute -top-3 right-5">
+        <Button
+          variant="primary"
+          appearance="soft"
+          small
+          onClick={() => setDocumentText(sampleText)}
+        >
+          Sample Text
+        </Button>
+      </div>
+      <Textarea
+        value={documentText}
+        onChange={(e) => setDocumentText(e.currentTarget.value)}
+        placeholder="Enter a URL or the text to be summarized."
+      />
+    </div>
+  );
+};
+
+const PdfSection = ({ index, selected, heading, texts, registerRef }) => {
+  const scrollRef = useRef(null);
+  registerRef(index, scrollRef);
+  return (
+    <div className={selected ? "" : "opacity-25"}>
+      <div ref={scrollRef}>
+        <HeadingMedium>{heading}</HeadingMedium>
+      </div>
+      {texts.map((text, i) => (
+        <p key={i}>{text}</p>
+      ))}
+    </div>
+  );
+};
+
+const PdfDisplay = ({ title, sections, selected, registerRef }) => (
+  <div className="flex flex-col gap-4 divide-y-2 divide-gray-700">
+    <HeadingSemiBig>{title}</HeadingSemiBig>
+    {sections.map(({ title: heading, texts }, j) => (
+      <PdfSection
+        key={j}
+        index={j}
+        selected={selected[j]}
+        heading={heading}
+        texts={texts}
+        registerRef={registerRef}
+      />
+    ))}
+  </div>
+);
+
+const PdfInput = ({ setCallback, setErrors }) => {
+  const [pdfExtract, setPdfExtract] = useReducer((_, newState) => {
+    if (!newState) return null;
+    if (newState.selected) return newState;
+    return { ...newState, selected: newState.sections.map(() => true) };
+  }, null);
+  const toggleSelected = (i) =>
+    setPdfExtract({
+      ...pdfExtract,
+      selected: pdfExtract.selected.map((s, j) => (j === i ? !s : s)),
+    });
+
+  useEffect(() => {
+    setCallback(() => (pdfExtract ? pdfJsonToText(pdfExtract) : ""));
+    if (pdfExtract.selected.every((v) => !v)) setErrors(["Select some section to summarize"]);
+    else setErrors(null);
+  }, [setCallback, setErrors, pdfExtract]);
+
+  const scrollRefs = useRef({});
+  const registerRef = (index, ref) => {
+    scrollRefs.current[index] = ref;
+  };
+  const parentRef = useRef(null);
+
+  return (
+    <div className="h-full flex flex-col gap-2">
+      <PdfUpload setPdfExtract={setPdfExtract} />
+      {pdfExtract && (
+        <div className="flex overflow-hidden gap-2">
+          <div className="border border-gray-500 pl-1 basis-[30%] overflow-x-hidden overflow-y-auto">
+            <div className="flex flex-col items-start">
+              {pdfExtract.sections.map(({ title }, i) => (
+                <Checkbox
+                  key={i}
+                  checked={pdfExtract.selected[i]}
+                  onChange={() => toggleSelected(i)}
+                  onClickText={() => {
+                    const target = scrollRefs.current[i].current;
+                    parentRef.current.scroll({
+                      left: 0,
+                      top: target.offsetTop,
+                      behavior: "smooth",
+                    });
+                  }}
+                >
+                  {title}
+                </Checkbox>
+              ))}
+            </div>
+          </div>
+          <div
+            ref={parentRef}
+            className="relative border border-gray-500 basis-[70%] overflow-y-auto"
+          >
+            <PdfDisplay {...pdfExtract} registerRef={registerRef} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const InputDocument = ({ summarize, state }) => {
   const { summarizers, types, toggle, setArgument } = useContext(SummarizersContext);
   const { summaryLength } = useContext(SettingsContext);
+  const getTextRef = useRef(null);
 
   const chosenModels = useMemo(() => Object.keys(getChosen(summarizers)), [summarizers]);
   const modelIsChosen = Boolean(chosenModels.length);
+  const [componentErrors, setComponentErrors] = useState(null);
 
   const argErrors = useMemo(
     () => extractArgumentErrors(chosenModels, summarizers),
@@ -119,33 +251,42 @@ const InputDocument = ({ summarize, state }) => {
 
   const disableErrors = [];
   if (argErrors) disableErrors.push(...argErrors);
-  if (!documentText) disableErrors.push("Input text to summarize");
+  if (componentErrors) disableErrors.push(...componentErrors);
+  // if (!documentText) disableErrors.push("Input text to summarize");
   if (!modelIsChosen) disableErrors.push("Choose at least one metric");
 
-  const insertSampleText = () => setDocumentText(sampleText);
+  const setCallback = useCallback((cb) => {
+    getTextRef.current = cb;
+  }, []);
 
   return (
     <div className="flex flex-col lg:flex-row gap-3">
-      <div className="grow flex flex-col min-w-[400px] min-h-[400px] basis-1">
-        <Card full>
-          <CardHead>
-            <div className="w-full flex justify-between items-center">
-              <HeadingSemiBig>Document</HeadingSemiBig>
-              <PdfUpload setText={setDocumentText} />
-              <Button variant="primary" onClick={insertSampleText}>
-                Sample Text
-              </Button>
-            </div>
-          </CardHead>
-          <Textarea
-            value={documentText}
-            onChange={(e) => setDocumentText(e.currentTarget.value)}
-            placeholder="Enter a URL or the text to be summarized."
-          />
-        </Card>
+      <div className="grow min-w-0">
+        <div>
+          <Card full>
+            <Tabs>
+              <CardContent>
+                <TabHead border>
+                  <Tab>Text</Tab>
+                  <Tab>Pdf</Tab>
+                </TabHead>
+                <div className="h-[50vh]">
+                  <TabContent>
+                    <TabPanel>
+                      <TextInput setCallback={setCallback} setErrors={setComponentErrors} />
+                    </TabPanel>
+                    <TabPanel>
+                      <PdfInput setCallback={setCallback} setErrors={setComponentErrors} />
+                    </TabPanel>
+                  </TabContent>
+                </div>
+              </CardContent>
+            </Tabs>
+          </Card>
+        </div>
       </div>
 
-      <div className="min-w-[600px] basis-1">
+      <div className="min-w-[500px] w-auto">
         <Card full>
           <CardHead>
             <HeadingSemiBig>Models</HeadingSemiBig>
@@ -164,7 +305,7 @@ const InputDocument = ({ summarize, state }) => {
               ) : (
                 <Button
                   disabled={disableErrors.length}
-                  onClick={() => summarize(documentText, chosenModels, summaryLength)}
+                  onClick={() => summarize(getTextRef.current(), chosenModels, summaryLength)}
                 >
                   Summarize
                 </Button>
@@ -249,7 +390,7 @@ const Summary = ({ markup, summary, markupState, scrollState, showMarkup }) => {
 const SummaryTabView = ({ title, showOverlap, summaries, markups, documentLength }) => {
   const { summarizers } = useContext(SummarizersContext);
   const markupState = useState(null);
-  const [summaryIndex, setSummaryIndex] = useState(0)
+  const [summaryIndex, setSummaryIndex] = useState(0);
   const scrollState = useMarkupScroll(summaryIndex);
 
   return (

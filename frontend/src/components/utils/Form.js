@@ -1,3 +1,5 @@
+import { Button } from "./Button";
+
 const Textarea = ({ rounded, ...props }) => (
   <textarea
     {...props}
@@ -37,16 +39,28 @@ const Input = ({ Icon, flatLeft, flatRight, small, right, ...props }) => {
   );
 };
 
-const Checkbox = ({ children, checked, onChange }) => (
-  <label className="inline-flex items-center justify-center whitespace-nowrap">
-    <input
-      type="checkbox"
-      className="w-4 h-4 bg-gray-50 rounded border border-gray-300 focus:ring-1 focus:ring-blue-300"
-      checked={checked}
-      onChange={onChange}
-    />
-    <span className="ml-1">{children}</span>
-  </label>
-);
+const Checkbox = ({ children, checked, onChange, onClickText }) => {
+  const ChildComponent = onClickText ? (
+    <Button appearance="link" onClick={onClickText}>
+      {children}
+    </Button>
+  ) : (
+    <span>{children}</span>
+  );
+  const Inner = (
+    <>
+      <input
+        type="checkbox"
+        className="w-4 h-4 bg-gray-50 rounded border border-gray-300 focus:ring-1 focus:ring-blue-300"
+        checked={checked}
+        onChange={onChange}
+      />
+      {ChildComponent}
+    </>
+  );
+  const className = "inline-flex items-center justify-center whitespace-nowrap gap-2";
+  if (onClickText) return <div className={className}>{Inner}</div>;
+  return <label className={className}>{Inner}</label>;
+};
 
 export { Textarea, Input, Checkbox };

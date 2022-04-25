@@ -10,7 +10,7 @@ const TabHead = ({ children, full, border }) => (
     {children}
   </HTab.List>
 );
-const TabContent = ({ children }) => <HTab.Panels>{children}</HTab.Panels>;
+const TabContent = ({ children }) => <HTab.Panels className="h-full">{children}</HTab.Panels>;
 const Tab = ({ children }) => (
   <HTab as={React.Fragment}>
     {({ selected }) => (
@@ -55,7 +55,7 @@ const PillLink = ({ children }) => (
   </HTab>
 );
 
-const TabPanel = ({ children }) => <HTab.Panel>{children}</HTab.Panel>;
+const TabPanel = ({ children }) => <HTab.Panel className="h-full">{children}</HTab.Panel>;
 
 const Tabs = ({ onChange, children }) => (
   <HTab.Group manual onChange={onChange}>

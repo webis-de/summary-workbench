@@ -91,7 +91,7 @@ const Button = ({
   if (flatLeft) className += " rounded-l-[0]";
 
   if (appearance !== "link") {
-    if (small) className += " px-2 py-1";
+    if (small) className += " px-2 py-[1px]";
     else className += " px-4 py-2";
   }
   if (!loading && appearance !== "link" && appearance !== "disabled") className += " focus:ring-2";
