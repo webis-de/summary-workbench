@@ -77,6 +77,7 @@ const PdfUpload = ({ setPdfExtract }) => {
     if (file) {
       if (file.type !== "application/pdf") throw new TypeError("invalid file type");
       const { title, abstract, sections } = await pdfExtractRequest(file);
+      if (!title) setPdfExtract(null)
       const newSections = sections.map(({ section, secNum, texts }) => ({
         title: `${secNum !== null ? `${secNum} ` : ""}${section}`,
         texts,
