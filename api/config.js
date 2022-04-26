@@ -71,7 +71,7 @@ const initConfig = async (timeout = 30000) => {
     .filter(([, value]) => !value.disabled && value.healthy)
     .map(([key]) => key);
   console.log("config updated");
-  setTimeout(initConfig, timeout);
+  setTimeout(() => initConfig(timeout), timeout);
 };
 
 const PORT = process.env.PORT || 5000;

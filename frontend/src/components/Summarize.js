@@ -254,7 +254,6 @@ const InputDocument = ({ summarize, state }) => {
   const disableErrors = [];
   if (argErrors) disableErrors.push(...argErrors);
   if (componentErrors) disableErrors.push(...componentErrors);
-  // if (!documentText) disableErrors.push("Input text to summarize");
   if (!modelIsChosen) disableErrors.push("Choose at least one metric");
 
   const setCallback = useCallback((cb) => {
@@ -288,7 +287,7 @@ const InputDocument = ({ summarize, state }) => {
         </div>
       </div>
 
-      <div className="min-w-[500px] w-auto">
+      <div className="min-w-[600px] w-auto">
         <Card full>
           <CardHead>
             <HeadingSemiBig>Models</HeadingSemiBig>

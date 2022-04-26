@@ -5,7 +5,7 @@ api:
     dockerfile: Dockerfile.dev
   working_dir: /app
   ports:
-    - "5000:5000"
+    - "127.0.0.1:5000:5000"
   volumes:
     - ./api/:/app
     - ./plugin_config:/plugin_config

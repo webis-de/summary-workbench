@@ -5,10 +5,12 @@ const { initConfig } = require("./config")
 
 const { PORT } = require("./config");
 
+const timeout = (process.env.NODE_ENV === "development") ? 5000 : 30000
+
 const main = async () => {
   await initSubservices();
   await connectDB();
-  await initConfig();
+  await initConfig(timeout);
 
   app.listen(PORT, (err) => {
     if (err) {

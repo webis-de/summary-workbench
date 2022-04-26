@@ -34,8 +34,8 @@ const ModelBox = ({ info, args, setArgument, close }) => (
       <div className="px-2 py-1 flex flex-col gap-2">
         {Object.entries(args).map(([argName, argDefault]) => (
           <div key={argName} className="flex items-center gap-2">
-            <span className="text-sm">{argName}</span>
-            <div className="grow flex items-center">
+            <span title={argName} className="grow whitespace-nowrap text-sm overflow-hidden overflow-ellipsis">{argName}</span>
+            <div className="flex items-center">
               <Argument
                 value={argDefault}
                 setValue={(v) => setArgument(info.key, argName, v)}

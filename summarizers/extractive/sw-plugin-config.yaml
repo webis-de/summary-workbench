@@ -1,0 +1,27 @@
+version: "1.0"
+name: "Extractive Summarizer"
+metadata:
+  type: extractive
+  model: en_core_web_md
+arguments:
+  title:
+    type: str
+    default: ""
+  use_tfidf:
+    type: bool
+    default: true
+  use_position:
+    type: bool
+    default: true
+  use_average_lexical_connectivity:
+    type: bool
+    default: true
+  use_stopword_ratio:
+    type: bool
+    default: true
+  use_length:
+    type: bool
+    default: true
+  use_rank:
+    type: bool
+    default: true

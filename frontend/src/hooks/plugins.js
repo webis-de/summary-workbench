@@ -80,8 +80,11 @@ const usePlugins = (fetchFunction, defaults) => {
   );
 
   const setArgument = useCallback(
-    (pluginKey, argumentKey, v) => {
+    (pluginKey, argumentKey, newValue) => {
+      let v = newValue;
       const updatedPlugins = { ...plugins };
+      const defaultArg = updatedPlugins[pluginKey].info.arguments[argumentKey].default
+      if (v === undefined && defaultArg !== undefined) v = defaultArg
       updatedPlugins[pluginKey].arguments[argumentKey] = v;
       setPlugins(updatedPlugins);
     },
