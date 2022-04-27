@@ -14,7 +14,7 @@ const CardHead = ({ children, tight }) => (
   <div
     className={`${
       tight ? "min-h-[50px]" : "py-4 min-h-[80px]"
-    } px-6 w-full flex justify-between items-center`}
+    } px-6 w-full flex gap-4 justify-between items-center`}
   >
     {children}
   </div>

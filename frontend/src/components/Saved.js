@@ -6,7 +6,7 @@ import { ScoreWorkbench } from "./ScoreWorkbench";
 import { Badge, BadgeGroup } from "./utils/Badge";
 import { Button, DeleteButton } from "./utils/Button";
 import { Disclosure, DisclosureContent, DisclosureToggle } from "./utils/Disclosure";
-import { Modal, ModalTitle, useModal } from "./utils/Modal";
+import { Modal, useModal } from "./utils/Modal";
 import { HeadingBig, HeadingMedium } from "./utils/Text";
 import { Tooltip } from "./utils/Tooltip";
 

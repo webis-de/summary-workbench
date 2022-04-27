@@ -388,6 +388,23 @@ const Summary = ({ markup, summary, markupState, scrollState, showMarkup }) => {
   );
 };
 
+// <div className="grow flex items-start gap-3 max-w-full">
+//   <div className="basis-[60%] min-w-0">
+//     <Card full>
+//       <CardHead>
+//         <div className="overflow-hidden whitespace-nowrap">{title}</div>
+//       </CardHead>
+//       <div className="max-h-[70vh] overflow-auto bg-white p-4">
+//         <Markup
+//           markups={markups[summaryIndex][0]}
+//           markupState={markupState}
+//           scrollState={scrollState}
+//           showMarkup={showOverlap}
+//         />
+//       </div>
+//     </Card>
+//   </div>
+//   <div className="basis-[40%] ">
 const SummaryTabView = ({ title, showOverlap, summaries, markups, documentLength }) => {
   const { summarizers } = useContext(SummarizersContext);
   const markupState = useState(null);
@@ -395,11 +412,13 @@ const SummaryTabView = ({ title, showOverlap, summaries, markups, documentLength
   const scrollState = useMarkupScroll(summaryIndex);
 
   return (
-    <div className="grow flex items-start gap-3">
-      <div className="basis-[60%]">
+    <div className="flex items-start gap-3">
+      <div className="basis-[60%] min-w-0">
         <Card full>
           <CardHead>
-            <HeadingSemiBig>{title || "Document"}</HeadingSemiBig>
+            <h3 className="overflow-hidden overflow-ellipsis whitespace-nowrap text-bold capitalize text-slate-600 font-semibold">
+              {title}
+            </h3>
             <span className="font-bold">{documentLength} words</span>
           </CardHead>
           <div className="max-h-[70vh] overflow-auto bg-white p-4">
@@ -491,7 +510,7 @@ const ToggleOverlap = ({ show, toggle }) => {
   );
 };
 
-const SummaryView = ({ title, summaries, documentLength }) => {
+const SummaryView = ({ summaries, documentLength }) => {
   const [showTab, toggleShowTab] = useReducer((e) => !e, true);
   const [showOverlap, toggleShowOverlap] = useReducer((e) => !e, false);
   const sums = useMemo(() => summaries.map(({ summaryText }) => summaryText), [summaries]);
@@ -499,6 +518,11 @@ const SummaryView = ({ title, summaries, documentLength }) => {
   const pairwiseMarkups = usePairwiseMarkups(originals, sums);
   const summaryMarkups = useMarkups(sums);
   const scrollRef = useRef();
+  const titleText = useMemo(() => {
+    const t = originals[0];
+    if (t) return t.split(/[.!?]+/)[0];
+    return null;
+  }, [originals]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -510,14 +534,14 @@ const SummaryView = ({ title, summaries, documentLength }) => {
 
   return (
     <div className="scroll-mt-20" ref={scrollRef}>
-      <div className="flex gap-2">
-        <div className="flex flex-grow">
+      <div className="flex gap-2 w-full">
+        <div className="overflow-hidden">
           {showTab ? (
             <SummaryTabView
               documentLength={documentLength}
               showOverlap={showOverlap}
               summaries={summaries}
-              title={title}
+              title={titleText}
               markups={pairwiseMarkups}
             />
           ) : (
