@@ -13,7 +13,9 @@ const useModal = () => {
 };
 
 const Modal = ({ children, isOpen, close, fit }) => {
-  const fitClass = fit ? "inset-x-12 inset-y-6" : "top-1/2 left-1/2 transform -translate-x-1/2 -translate-x-1/2";
+  const fitClass = fit
+    ? "top-1/2 left-1/2 transform -translate-x-1/2 -translate-x-1/2"
+    : "inset-x-12 inset-y-6";
   return (
     <Dialog open={isOpen} onClose={close}>
       <Dialog.Overlay className="fixed inset-0 bg-black opacity-30 z-20" />

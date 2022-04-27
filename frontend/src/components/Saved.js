@@ -15,7 +15,7 @@ const SavedEntry = ({ calculation, deleteCalculation }) => {
   const [isOpen, openModal, closeModal] = useModal();
   return (
     <div className="shadow-md rounded-lg">
-      <Modal isOpen={isOpen} close={closeModal}>
+      <Modal isOpen={isOpen} close={closeModal} fit>
         <div className="p-4 max-w-[400px] divide-y">
           <div className="whitespace-nowrap overflow-hidden overflow-ellipsis">
             Delete {'"'}
