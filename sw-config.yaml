@@ -28,6 +28,7 @@ summarizers:
   - ./summarizers/positionrank
   - ./summarizers/textrank
   - ./summarizers/topicrank
+  - ./summarizers/extractive
   - source: ./summarizers/cliffsum
     environment:
       model: MaskEnt
