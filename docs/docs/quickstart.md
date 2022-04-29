@@ -4,7 +4,17 @@ sidebar_position: 1
 title: Quickstart
 ---
 
-Clone the repository to your computer and create a file named `my.sw-config.yaml` in the project root and write the following content to the file:
+## Setup
+
+1. Install python, docker, and docker-compose
+2. Make sure the docker daemon is running
+3. Clone the repository to your computer
+4. Go to the repositories root
+5. Run `pip install -r requirements.txt`
+
+## First application
+
+Create a file named `my.sw-config.yaml` in the project root and write the following content to the file:
 
 ```yaml
 metrics:
@@ -56,8 +66,8 @@ Go to `http://localhost:3000` to use the application.
 
 :::note
 
-The startup may take some time and the fronted usually becomes earlier available than the backend.
-Also with the first startup the containers will be build.
+The startup may take some time and the frontend usually becomes available earlier than the backend.
+Also with the first startup the containers will be build and models will be downloaded.
 Therefore future startups won't take as long as the first.
 
 :::
@@ -66,5 +76,11 @@ Therefore future startups won't take as long as the first.
 
 The `configure.py` file takes the `sw-config.yaml` as default config, when no config is specified via `--config`.
 Inspect this file if you want to get an overview of what a full config looks like.
+
+:::
+
+:::note
+
+For a overview of available plugins checkout the `metrics/` and `summarizers/` folders in the repository
 
 :::
