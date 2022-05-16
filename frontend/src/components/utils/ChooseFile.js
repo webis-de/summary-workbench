@@ -56,7 +56,7 @@ const FileInput = ({ fileInputRef, setFile }) => (
     value=""
     type="file"
     ref={fileInputRef}
-    onChange={({target}) => {
+    onChange={({ target }) => {
       const file = target.files[0];
       if (file) setFile(file);
     }}
@@ -89,13 +89,13 @@ const ChooseFile = ({ kind, fileName, setFile, lines, linesAreSame = true }) => 
         dragged
           ? "outline-dashed outline-2 outline-offset-4 outline-black"
           : "focus:ring focus:ring-blue-600"
-      } w-full flex items-stretch ring-2 ring-slate-600 divide-slate-600 divide-x-2 text-sm rounded-lg`}
+      } w-full flex items-stretch ring-2 ring-slate-600 divide-slate-600 divide-x-2 border-slate-50 text-sm rounded-lg overflow-hidden`}
       onDrop={onDrop}
       onClick={onClick}
     >
-      <button className="px-3 bg-gray-700 text-white flex items-center whitespace-nowrap rounded-l-lg hover:bg-gray-600">
+      <div className="px-3 bg-gray-700 text-white flex items-center whitespace-nowrap hover:bg-gray-600">
         Upload File
-      </button>
+      </div>
       <input
         className={`${
           showLineBox ? "" : "rounded-r-lg"

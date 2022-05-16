@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useReducer, useState } from "react";
 import Plot from "react-plotly.js";
 import { useKey, useToggle } from "react-use";
 
@@ -112,13 +112,13 @@ const ToggleOverlap = ({ markupKeys, wantMarkupKeys, setMarkupKeys }) => {
   const show = !arrayEqual(markupKeys, wantMarkupKeys);
   const Icon = show ? EyeOpen : EyeClosed;
   const onClick = show ? () => setMarkupKeys(wantMarkupKeys) : () => setMarkupKeys([]);
-  let text
-  if (wantMarkupKeys[2] === "semantic") text = "Sem-Doc"
+  let text;
+  if (wantMarkupKeys[2] === "semantic") text = "Sem-Doc";
   else {
     const type = wantMarkupKeys[0];
-    if (type === "document") text = "Lex-Doc"
-    else if (type === "reference") text = "Lex-Ref"
-    else throw new Error(`unknown type ${type}`)
+    if (type === "document") text = "Lex-Doc";
+    else if (type === "reference") text = "Lex-Ref";
+    else throw new Error(`unknown type ${type}`);
   }
 
   return (
@@ -273,12 +273,21 @@ const Visualize = ({ calculation }) => {
   const markups = useMarkup(d, r, markupType);
   const { document: doc, reference, ...models } = matrix.get(index, markupModels, markups);
   const markupState = useState(null);
-  const markupDeps = useMemo(() => [...markupKeys, index] , [markupKeys, index])
+  const markupDeps = useMemo(() => [...markupKeys, index], [markupKeys, index]);
   const scrollState = useMarkupScroll(markupDeps);
+
+  const allIsChecked = useMemo(() => Object.values(chosenModels).every((e) => e), [chosenModels]);
 
   return (
     <div>
-      <div className="flex flex-wrap gap-x-4 gap-y-1 mt-3">
+      <Checkbox
+        checked={allIsChecked}
+        onChange={() => setChosenModels((oldState) => mapObject(oldState, () => !allIsChecked))}
+        bold
+      >
+        toggle all models
+      </Checkbox>
+      <div className="flex flex-wrap gap-x-4 gap-y-1">
         {Object.entries(chosenModels).map(([model, checked]) => (
           <Checkbox
             key={model}

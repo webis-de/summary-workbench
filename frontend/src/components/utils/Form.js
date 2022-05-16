@@ -39,13 +39,13 @@ const Input = ({ Icon, flatLeft, flatRight, small, right, ...props }) => {
   );
 };
 
-const Checkbox = ({ children, checked, onChange, onClickText }) => {
+const Checkbox = ({ children, checked, onChange, onClickText, bold }) => {
   const ChildComponent = onClickText ? (
     <Button appearance="link" onClick={onClickText}>
       {children}
     </Button>
   ) : (
-    <span>{children}</span>
+    <span className={bold ? "font-bold" : null} >{children}</span>
   );
   const Inner = (
     <>

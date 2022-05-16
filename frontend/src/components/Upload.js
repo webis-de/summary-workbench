@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
-import { filterObject } from "../utils/common";
+import { filterObject, mapObject } from "../utils/common";
 import { ChooseFile, useFile } from "./utils/ChooseFile";
 import { Checkbox } from "./utils/Form";
 import { Label } from "./utils/Text";
@@ -62,18 +62,31 @@ const Upload = ({ setComputeData }) => {
     setData({ ...data, chosenKeys: { ...chosenKeys, [model]: nextValue } });
   };
 
+  const allIsChecked = useMemo(() => data && Object.values(data.chosenKeys).every((e) => e), [data]);
+
+  const toggleAll = () => {
+    setData({ ...data, chosenKeys: mapObject(data.chosenKeys, () => !allIsChecked) });
+  };
+
   return (
     <Label text="jsonl">
       <ChooseFile kind="jsonl" fileName={fileName} setFile={setFile} lines={lines} />
 
       {data && (
-        <div className="flex flex-wrap gap-x-4 gap-y-1 mt-3">
-          {Object.entries(data.chosenKeys).map(([model, checked]) => (
-            <Checkbox key={model} checked={checked} onChange={() => toggleModel(model)}>
-              {model}
+        <>
+          <div className="flex flex-wrap gap-x-4 gap-y-1 mt-3">
+            {Object.entries(data.chosenKeys).map(([model, checked]) => (
+              <Checkbox key={model} checked={checked} onChange={() => toggleModel(model)}>
+                {model}
+              </Checkbox>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-x-4 gap-y-1 mt-3">
+            <Checkbox checked={allIsChecked} onChange={toggleAll} bold>
+              toggle all
             </Checkbox>
-          ))}
-        </div>
+          </div>
+        </>
       )}
     </Label>
   );
