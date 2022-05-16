@@ -266,7 +266,8 @@ const Visualize = ({ calculation }) => {
   const markups = useMarkup(d, r, markupType);
   const { document: doc, reference, ...models } = matrix.get(index, markupModels, markups);
   const markupState = useState(null);
-  const scrollState = useMarkupScroll(markupKeys);
+  const markupDeps = useMemo(() => [...markupKeys, index] , [markupKeys, index])
+  const scrollState = useMarkupScroll(markupDeps);
 
   return (
     <div>

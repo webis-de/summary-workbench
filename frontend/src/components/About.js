@@ -80,16 +80,6 @@ const About = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex gap-4">
-        <span className="basis-[80%] border border-black overflow-hidden overflow-ellipsis whitespace-nowrap">
-          asjdfl jasl jflasjd flasjdl fjlasdjf lasjdf aksjdflajsdlfja sldjf alsd jflasdj flasjd
-          lfajsdl jfalsdj flajsd lfajsdlf jasld jf
-        </span>
-        <span className="basis-[20%] border border-black whitespace-nowrap overflow-hidden">
-          asjdfl jasl jflasjd flasjdl fjlasdjf lasjdf aksjdflajsdlfja sldjf alsd jflasdj flasjd
-          lfajsdl jfalsdj flajsd lfajsdlf jasld jf asd fasdf adsf asdf
-        </span>
-      </div>
       <SpaceGap>
         <HeadingBig>Overview</HeadingBig>
         <p>
