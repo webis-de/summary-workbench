@@ -27,6 +27,7 @@ import { Bars, EyeClosed, EyeOpen, ThumbsDown, ThumbsUp } from "./utils/Icons";
 import { SpaceGap } from "./utils/Layout";
 import { CenterLoading } from "./utils/Loading";
 import { Markup, useMarkupScroll } from "./utils/Markup";
+import { Range } from "./utils/Range";
 import { PillLink, Tab, TabContent, TabHead, TabPanel, Tabs } from "./utils/Tabs";
 import { HeadingBig, HeadingMedium, HeadingSemiBig, Hint } from "./utils/Text";
 import { Tooltip } from "./utils/Tooltip";
@@ -239,7 +240,7 @@ const PdfInput = ({ setCallback, setErrors }) => {
 
 const InputDocument = ({ summarize, state }) => {
   const { summarizers, types, toggle, setArgument } = useContext(SummarizersContext);
-  const { summaryLength } = useContext(SettingsContext);
+  const { summaryLength, setSummaryLength } = useContext(SettingsContext);
   const getTextRef = useRef(null);
 
   const chosenModels = useMemo(() => Object.keys(getChosen(summarizers)), [summarizers]);
@@ -300,6 +301,11 @@ const InputDocument = ({ summarize, state }) => {
               toggleSetting={toggle}
               type="Summarizers"
             />
+            <div className="border p-2">
+              <HeadingMedium>Summary length</HeadingMedium>
+              <Hint small>Length of the summary in percent</Hint>
+              <Range defaultValue={summaryLength} setValue={setSummaryLength} min={5} max={50} />
+            </div>
             <div className="flex items-center gap-5">
               {state.loading ? (
                 <LoadingButton text="Summarizing" />

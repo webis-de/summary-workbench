@@ -13,7 +13,6 @@ import { Card, CardContent, CardHead } from "./components/utils/Card";
 import { Container } from "./components/utils/Container";
 import { Modal, ModalTitle, useModal } from "./components/utils/Modal";
 import { ButtonGroup, RadioBullet, RadioButton, RadioGroup } from "./components/utils/Radio";
-import { Range } from "./components/utils/Range";
 import { HeadingBig, HeadingMedium, HeadingSmall, Hint } from "./components/utils/Text";
 import { Toggle } from "./components/utils/Toggle";
 import { DragProvider } from "./contexts/DragContext";
@@ -129,8 +128,6 @@ const NavbarOptions = () => {
     setSelfSimilarities,
     colorMap,
     setColorscheme,
-    summaryLength,
-    setSummaryLength,
   } = useContext(SettingsContext);
 
   return (
@@ -147,21 +144,6 @@ const NavbarOptions = () => {
           </Button>
         </div>
         <div className="p-5 space-y-6">
-          <Card full>
-            <CardHead>
-              <div>
-                <HeadingBig>Summarization</HeadingBig>
-                <Hint small>Customize the Summarization</Hint>
-              </div>
-            </CardHead>
-            <CardContent>
-              <div>
-                <HeadingMedium>Summary length</HeadingMedium>
-                <Hint small>Length of the summary in percent</Hint>
-                <Range defaultValue={summaryLength} setValue={setSummaryLength} min={5} max={50} />
-              </div>
-            </CardContent>
-          </Card>
           <Card>
             <CardHead>
               <div>
