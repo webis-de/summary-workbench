@@ -526,7 +526,7 @@ const ExampleDisplay = ({ modelScores, doc: doc_, reference: reference_, model1,
     [model1, model2]
       .filter((v) => v !== undefined)
       .forEach(([k, v]) => {
-        calculation.modeltexts[k] = v;
+        calculation.modeltexts[k] = [v];
       });
     return new MarkupMatrix(calculation);
   }, [doc_, reference_, model1, model2]);
