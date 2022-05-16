@@ -45,7 +45,7 @@ const Checkbox = ({ children, checked, onChange, onClickText, bold }) => {
       {children}
     </Button>
   ) : (
-    <span className={bold ? "font-bold" : null} >{children}</span>
+    <span className={bold ? "font-bold text-sm" : null} >{children}</span>
   );
   const Inner = (
     <>

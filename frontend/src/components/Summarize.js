@@ -200,6 +200,18 @@ const PdfInput = ({ setCallback, setErrors }) => {
   };
   const parentRef = useRef(null);
 
+  const allIsChecked = useMemo(
+    () => pdfExtract && pdfExtract.selected.every((e) => e),
+    [pdfExtract]
+  );
+
+  const toggleAll = () => {
+    setPdfExtract({
+      ...pdfExtract,
+      selected: pdfExtract.selected.map(() => !allIsChecked),
+    });
+  };
+
   return (
     <div className="h-full flex flex-col gap-2">
       <PdfUpload setPdfExtract={setPdfExtract} />
@@ -207,6 +219,9 @@ const PdfInput = ({ setCallback, setErrors }) => {
         <div className="flex overflow-hidden gap-2">
           <div className="border border-gray-500 pl-1 basis-[30%] overflow-x-hidden overflow-y-auto">
             <div className="flex flex-col items-start">
+              <Checkbox checked={allIsChecked} onChange={toggleAll} bold>
+                toggle all sections
+              </Checkbox>
               {pdfExtract.sections.map(({ title }, i) => (
                 <Checkbox
                   key={i}

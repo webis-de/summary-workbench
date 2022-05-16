@@ -280,13 +280,15 @@ const Visualize = ({ calculation }) => {
 
   return (
     <div>
-      <Checkbox
-        checked={allIsChecked}
-        onChange={() => setChosenModels((oldState) => mapObject(oldState, () => !allIsChecked))}
-        bold
-      >
-        toggle all models
-      </Checkbox>
+      {Boolean(Object.keys(chosenModels).length) && (
+        <Checkbox
+          checked={allIsChecked}
+          onChange={() => setChosenModels((oldState) => mapObject(oldState, () => !allIsChecked))}
+          bold
+        >
+          toggle all models
+        </Checkbox>
+      )}
       <div className="flex flex-wrap gap-x-4 gap-y-1">
         {Object.entries(chosenModels).map(([model, checked]) => (
           <Checkbox
