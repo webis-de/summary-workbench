@@ -14,20 +14,27 @@ class CosineSimilarity:
     def __init__(self):
         self.nlp = spacy.load(MODEL)
 
-    def evaluate(self, sentences, summary):
-        if isinstance(sentences, str):
-            sentences = sentences.replace("\n", " ")
-            sentences = sentences.strip()
-            sentences = list(self.nlp(sentences).sents)
-            sentences = [s for s in sentences if any(t.is_alpha for t in s)]
+    def _get_sentences(self, text):
+        if isinstance(text, str):
+            text = text.replace("\n", " ")
+            text = text.strip()
+            text = list(self.nlp(text).sents)
+            text = [s for s in text if any(t.is_alpha for t in s)]
         else:
-            sentences = [self.nlp(s) for s in sentences]
-        summary_doc = self.nlp(summary)
-        scores = [
-            [sentence.text.strip(), sentence.similarity(summary_doc)]
-            for sentence in sentences
-        ]
-        return scores
+            text = [self.nlp(s) for s in text]
+        return text
+
+    def evaluate(self, document, summary):
+        document_sents = self._get_sentences(document)
+        summary_sents = self._get_sentences(summary)
+        return {
+            "documentSentences": [doc_sent.text.strip() for doc_sent in document_sents],
+            "summarySentences": [sum_sent.text.strip() for sum_sent in summary_sents],
+            "scores": [
+                [doc_sent.similarity(sum_sent) for doc_sent in document_sents]
+                for sum_sent in summary_sents
+            ],
+        }
 
 
 evaluator = CosineSimilarity()
@@ -41,8 +48,7 @@ class Body(BaseModel):
 
 @app.post("/")
 def similarity(body: Body):
-    scores = evaluator.evaluate(body.sentences, body.summary)
-    return {"scores": scores}
+    return evaluator.evaluate(body.sentences, body.summary)
 
 
 if __name__ == "__main__":

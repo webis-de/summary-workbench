@@ -283,7 +283,6 @@ const extractPdfJson = (json) => {
 router.post("/semantic_similarity", async (req, res, next) => {
   try {
     const { sentences, summary } = req.body;
-    console.log(summary)
     const json = await semanticSimilarity.similarity(sentences, summary);
     return res.json(json);
   } catch (err) {

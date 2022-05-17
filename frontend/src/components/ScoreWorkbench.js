@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useMemo, useReducer, useState } from "react";
+import { memo, useCallback, useContext, useEffect, useMemo, useReducer, useState } from "react";
 import Plot from "react-plotly.js";
 import { useKey, useToggle } from "react-use";
 
@@ -136,26 +136,43 @@ const colorFromStrength = (value) => {
   return `rgba(255, 0, 0, ${v})`;
 };
 
-const SemanticMarkup = ({ markup }) => {
-  const { scores } = markup;
+const computeRank = (list) =>
+  list
+    .map((score, i) => [score, i])
+    .sort(([a], [b]) => b - a)
+    .map((e) => e[1]);
+
+const sentenceWeightFromScores = (scores, numDocumentSentences, limit = 3) => {
+  const weights = [...Array(numDocumentSentences)].fill(0);
+  scores.map(computeRank).forEach((ranks) => {
+    ranks.slice(0, limit).forEach((e) => {
+      weights[e] += 1;
+    });
+  });
+  return weights.map((e) => e / scores.length);
+};
+
+const SemanticMarkup = memo(({ markup }) => {
+  const { documentSentences, scores } = markup;
+  const weights = sentenceWeightFromScores(scores, documentSentences.length);
   return (
     <div className="leading-[23px]">
-      {scores.map(([text, score], i) => (
+      {weights.map((weight, i) => (
         <span
           key={i}
           style={{
             padding: 0,
             paddingTop: "0.1em",
             paddingBottom: "0.1em",
-            background: colorFromStrength(score),
+            background: weight ? colorFromStrength(weight) : null,
           }}
         >
-          {text}
+          {documentSentences[i]}
         </span>
       ))}
     </div>
   );
-};
+});
 
 const MarkupOrText = ({ markup, markupState, scrollState }) => {
   if (typeof markup === "string") return <div className="leading-[23px]">{markup}</div>;

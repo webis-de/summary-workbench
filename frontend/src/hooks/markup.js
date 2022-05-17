@@ -1,4 +1,4 @@
-import { useContext, useMemo, useRef } from "react";
+import { useContext, useMemo } from "react";
 import { useAsync } from "react-use";
 
 import { semanticRequest } from "../api";
