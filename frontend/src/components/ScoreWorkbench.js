@@ -6,7 +6,7 @@ import { HoverContext } from "../contexts/HoverContext";
 import { useMarkup } from "../hooks/markup";
 import { arrayEqual, mapObject } from "../utils/common";
 import formatters from "../utils/export";
-import { range, zip } from "../utils/python";
+import { range } from "../utils/python";
 import { CopyToClipboardButton } from "./utils/Button";
 import { Card, CardContent, CardHead } from "./utils/Card";
 import { Checkbox, Input } from "./utils/Form";

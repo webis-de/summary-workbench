@@ -1,5 +1,3 @@
-import React, { useMemo } from "react";
-import { IconContext } from "react-icons";
 import { FaCheck } from "react-icons/fa";
 
 import { cyrb53 } from "../utils/color";
@@ -41,7 +39,6 @@ const ModelText = ({ type, text, healthy = true }) => (
   </div>
 );
 
-
 const Model = ({ info, onClick, isSet }) => {
   let className = "ring-1 ring-slate-300 flex items-center gap-2 px-2 py-1 bg-white";
   if (info.disabled) className += " opacity-30";
@@ -50,9 +47,9 @@ const Model = ({ info, onClick, isSet }) => {
 
   return (
     <button className={className} onClick={onClick}>
-        <div>
-          <FaCheck size={15} className={`text-green-600 ${isSet ? "" : "invisible"}`} />
-        </div>
+      <div>
+        <FaCheck size={15} className={`text-green-600 ${isSet ? "" : "invisible"}`} />
+      </div>
       <ModelText
         type={info.metadata.type}
         text={info.name}

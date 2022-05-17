@@ -278,7 +278,7 @@ const InputDocument = ({ summarize, state }) => {
 
   return (
     <div className="flex flex-col lg:flex-row gap-3">
-      <div className="grow min-w-0">
+      <div className="grow min-w-[400px]">
         <div>
           <Card full>
             <Tabs>
@@ -303,7 +303,7 @@ const InputDocument = ({ summarize, state }) => {
         </div>
       </div>
 
-      <div className="min-w-[600px] w-auto">
+      <div className="lg:w-1/2 max-w-[600px] min-w-[500px]">
         <Card full>
           <CardHead>
             <HeadingSemiBig>Models</HeadingSemiBig>

@@ -11,6 +11,7 @@ import { Summarize } from "./components/Summarize";
 import { Button } from "./components/utils/Button";
 import { Card, CardContent, CardHead } from "./components/utils/Card";
 import { Container } from "./components/utils/Container";
+import { Markup, useMarkupScroll } from "./components/utils/Markup";
 import { Modal, ModalTitle, useModal } from "./components/utils/Modal";
 import { ButtonGroup, RadioBullet, RadioButton, RadioGroup } from "./components/utils/Radio";
 import { HeadingBig, HeadingMedium, HeadingSmall, Hint } from "./components/utils/Text";
@@ -19,6 +20,7 @@ import { DragProvider } from "./contexts/DragContext";
 import { MetricsProvider } from "./contexts/MetricsContext";
 import { SettingsContext, SettingsProvider } from "./contexts/SettingsContext";
 import { SummarizersProvider } from "./contexts/SummarizersContext";
+import { useMarkup } from "./hooks/markup";
 import { colorschemes } from "./utils/color";
 
 const routes = [
@@ -116,9 +118,19 @@ const Navbar = () => (
   </>
 );
 
-const NavbarOptions = () => {
-  const [isOpen, openModal, closeModal] = useModal();
+const previewDoc = `Alan Mathison Turing was an English mathematician, computer scientist, logician, cryptanalyst, philosopher, and theoretical biologist.
+Turing was highly influential in the development of theoretical computer science, providing a formalisation of the concepts of algorithm and computation with the Turing machine, which can be considered a model of a general-purpose computer.
+Turing is widely considered to be the father of theoretical computer science and artificial intelligence.
+Despite these accomplishments, he was never fully recognised in his home country, if only because much of his work was covered by the Official Secrets Act.
+During the Second World War, Turing worked for the Government Code and Cypher School (GC&CS) at Bletchley Park, Britain's codebreaking centre that produced Ultra intelligence.
+For a time he led Hut 8, the section that was responsible for German naval cryptanalysis.
+English Government much of his work was covered`;
 
+const previewRef = `mathematician, computer scientist, logician, cryptanalyst, philosopher, and theoretical biologist.
+Turing is widely considered to be the father of theoretical computer science and artificial intelligence.
+he was never fully recognised in his home country, if only because of the official secrets act.`;
+
+const Settings = ({ close }) => {
   const {
     minOverlap,
     setMinOverlap,
@@ -130,20 +142,21 @@ const NavbarOptions = () => {
     setColorscheme,
   } = useContext(SettingsContext);
 
+  const {markup: [markup1, markup2]}  = useMarkup(previewDoc, previewRef);
+
+  const scrollState = useMarkupScroll();
+  const markupState = useState(null);
+
   return (
     <div>
-      <FaCog
-        onClick={openModal}
-        className="text-gray-400 hover:text-slate-200 cursor-pointer w-5 h-5"
-      />
-      <Modal isOpen={isOpen} close={closeModal}>
-        <div className="bg-slate-100 p-5 sticky z-20 top-0 flex justify-between items-center border-b">
-          <ModalTitle>Settings</ModalTitle>
-          <Button appearance="soft" onClick={closeModal}>
-            Close
-          </Button>
-        </div>
-        <div className="p-5 space-y-6">
+      <div className="bg-slate-100 p-5 sticky z-20 top-0 flex justify-between items-center border-b">
+        <ModalTitle>Settings</ModalTitle>
+        <Button appearance="soft" onClick={close}>
+          Close
+        </Button>
+      </div>
+      <div className="p-5 space-y-6">
+        <div className="flex gap-4">
           <Card>
             <CardHead>
               <div>
@@ -211,7 +224,43 @@ const NavbarOptions = () => {
               </div>
             </CardContent>
           </Card>
+          <Card full>
+            <CardHead>
+              <HeadingBig>Preview</HeadingBig>
+            </CardHead>
+            <CardContent>
+              <div className="flex">
+                <Markup
+                  markups={markup1}
+                  markupState={markupState}
+                  scrollState={scrollState}
+                />
+
+                <Markup
+                  markups={markup2}
+                  markupState={markupState}
+                  scrollState={scrollState}
+                />
+              </div>
+            </CardContent>
+          </Card>
         </div>
+      </div>
+    </div>
+  );
+};
+
+const NavbarOptions = () => {
+  const [isOpen, openModal, closeModal] = useModal();
+
+  return (
+    <div>
+      <FaCog
+        onClick={openModal}
+        className="text-gray-400 hover:text-slate-200 cursor-pointer w-5 h-5"
+      />
+      <Modal isOpen={isOpen} close={closeModal}>
+        <Settings close={closeModal} />
       </Modal>
     </div>
   );
