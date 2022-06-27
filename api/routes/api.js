@@ -4,7 +4,12 @@ const { isURL } = require("validator");
 const validateMiddleware = require("../middleware/validate");
 const { currentConfig } = require("../config");
 
-const { sentenceSplitter, articleDownloader, pdfExtractor , semanticSimilarity} = require("../subservices");
+const {
+  sentenceSplitter,
+  articleDownloader,
+  pdfExtractor,
+  semanticSimilarity,
+} = require("../subservices");
 
 const Feedbacks = require("../models/feedbacks");
 
@@ -53,8 +58,6 @@ router.get("/metrics", async (req, res, next) => {
  */
 
 router.get("/summarizers", async (req, res, next) => {
-  // TODO: cancle request
-  // req.on("close", () => console.log("---closed---"))
   try {
     return res.json(currentConfig.SUMMARIZERS);
   } catch (err) {
@@ -148,7 +151,8 @@ router.post(
   async (req, res, next) => {
     try {
       const { metrics, references, hypotheses } = req.body;
-      const scores = await evaluate(metrics, hypotheses, references);
+      const scores = await evaluate(metrics, hypotheses, references, req.abortController);
+      if (req.abortController.signal.aborted) return
       return res.json({ data: { scores } });
     } catch (err) {
       return next(err);
@@ -207,7 +211,8 @@ router.post("/summarize", summarizeValidator, validateMiddleware, async (req, re
     const { summarizers, text, ratio } = req.body;
     const textIsURL = isURL(text);
     const original = textIsURL ? await articleDownloader.download(text) : { text };
-    let summaries = await summarize(summarizers, original.text, ratio);
+    let summaries = await summarize(summarizers, original.text, ratio, req.abortController);
+    if (req.abortController.signal.aborted) return
     summaries = await Promise.all(
       Object.entries(summaries).map(async ([key, value]) => {
         const { summary } = value;

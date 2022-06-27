@@ -7,8 +7,6 @@ const connectDB = () =>
     mongoose.connect(MONGODB_HOST, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      useCreateIndex: true,
-      useFindAndModify: false,
     });
     const db = mongoose.connection;
     db.once("open", () => {

@@ -1,7 +1,7 @@
 const { pluginRequest, validationRequest } = require("./plugin");
 const { currentConfig } = require("./config");
 
-const evaluate = async (metrics, hypotheses, references) => {
+const evaluate = async (metrics, hypotheses, references, abortController) => {
   const { METRICS } = currentConfig;
   let plugins = Object.entries(metrics).map(([metric, args]) => [
     metric,
@@ -11,9 +11,10 @@ const evaluate = async (metrics, hypotheses, references) => {
     },
   ]);
   plugins = Object.fromEntries(plugins);
-  const validationResults = await validationRequest(plugins);
+  const validationResults = await validationRequest(plugins, abortController);
+  if (abortController.signal.aborted) return
   if (Object.keys(validationResults).length) return validationResults;
-  return pluginRequest(plugins, ({ scores }) => ({ scores }));
+  return pluginRequest(plugins, ({ scores }) => ({ scores }), abortController);
 };
 
 module.exports = { evaluate };

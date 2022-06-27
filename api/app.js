@@ -23,7 +23,6 @@ const swaggerOptions = {
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 
-
 const apiRouter = require("./routes/api");
 
 const app = express();
@@ -38,13 +37,23 @@ const errorMiddleware = (err, req, res, next) => {
   res.status(400).json({ errors });
 };
 
+const abortMiddleware = (req, res, next) => {
+  req.abortController = new AbortController();
+  req.socket.on("close", () => {
+    console.log("--- aborting ---", req.originalUrl, req.method);
+    req.abortController.abort();
+  });
+  next();
+};
+
 app.use(logger("dev"));
 app.use(helmet());
 app.use(cookieParser());
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: "30mb" }));
-app.use(fileUpload())
+app.use(fileUpload());
+app.use(abortMiddleware);
 
 app.use("/api", apiRouter);
 app.get("/health", (req, res) => res.status(200).end());

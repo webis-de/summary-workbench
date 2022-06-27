@@ -8,7 +8,7 @@ const validateMiddleware = (req, res, next) => {
     const errors = errorToMessage(Object.values(err.mapped()))
     return res.status(400).json({errors});
   }
-  return next();
+  next();
 };
 
 module.exports = validateMiddleware
