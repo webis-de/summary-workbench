@@ -68,4 +68,4 @@ To enable completion in VSCode, you need to install the [yaml extension](https:/
 ```
 
 Don't forget to replace `<path to repository>` with the path to the repository on your system.
-If the repository is located under `/home/me/comparefile` than `<path to repository>/schema/sw-config.schema.json` becomes `/home/me/comparefile/schema/sw-config.schema.json`
+If the repository is located under `/home/me/summary-workbench` than `<path to repository>/schema/sw-config.schema.json` becomes `/home/me/summary-workbench/schema/sw-config.schema.json`

@@ -1,5 +1,5 @@
 version: "1.0"
-name: "{model}"
+name: "(CLIFF) {model}"
 metadata:
   type: abstractive
   homepage: "https://aclanthology.org/2021.emnlp-main.532/"

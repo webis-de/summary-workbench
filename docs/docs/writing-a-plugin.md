@@ -4,7 +4,7 @@ sidebar_position: 3
 ---
 
 This section explains how you can write your own metrics or summarizers to integrate with Summary Workbench.
-To get started more easily, checkout the plugins under `metrics/` and `summarizers/`
+To help you get started, take a look at the predefined plugins located in the `metrics/` and `summarizers/` folders.
 
 ## Plugin folder structure
 
@@ -22,12 +22,12 @@ A plugin is a folder or git repository which contains the following files:
 
 Following Options can be specified in the `sw-plugin-config.yaml` file:
 
-| option    | required | description                                                                                                                                                                                                                      |
-| --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| version   | yes      | version string of the plugin (start with `"1.0"` and increment if you make changes) make sure the version is a string and not a float (e.g. `"1.0"` instead of `1.0`)                                                            |
-| name      | yes      | name of the plugin (e.g. `BERTScore`)                                                                                                                                                                                            |
-| metadata  | no       | Dictionary with extra data that is available to the container during build time and when running. This data is also returned when querying for available metrics/summarizers. Metadata we use: type, model, homepage, sourcecode |
-| arguments | no       | see [Arguments](#arguments)                                                                                                                                                                                                      |
+| option    | required | description                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| version   | yes      | version string of the plugin (start with `"1.0"` and increment if you make changes) make sure the version is a string and not a float (e.g. `"1.0"` instead of `1.0`)                                                                                                                                                                                                                                                                                                     |
+| name      | yes      | name of the plugin (e.g. `BERTScore`)                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| metadata  | no       | Dictionary with extra data that is available to the container during build time and when running. This data is also returned when querying for available metrics/summarizers. Metadata we use to display information about the plugin in the frontend are `type` (extractive/abstractive/semantic/lexical), `model` (configured deep learning model), `homepage` (url to homepage, developer of plugin or paper) and `sourcecode` (url to plugin or used implementation). |
+| arguments | no       | see [Arguments](#arguments)                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 
 ### Arguments
 
@@ -40,7 +40,7 @@ You can specify the following argument types:
 - `bool` (boolean)
 - `categorical` (categorical)
 
-All types can take a optional `default` option.  
+All types can take an optional `default` option.  
 The `categorical` argument takes a `categories` options, which is a list of categories.  
 The `int` and `float` can take optional `min` and `max` options.
 
@@ -78,7 +78,7 @@ The `metric.py` file should have a class `MetricPlugin` with the following metho
 from typing import List, Dict, Union
 
 class MetricPlugin:
-    evaluate(self, hypotheses: List[str], references: List[str]) -> Union[List[float], Dict[str, List[float]]]:
+    def evaluate(self, hypotheses: List[str], references: List[str]) -> Union[List[float], Dict[str, List[float]]]:
         pass # your code
 ```
 
@@ -110,7 +110,7 @@ The `summarizer.py` file should have a class `SummarizerPlugin` with the followi
 from typing import List, Union
 
 class SummarizerPlugin:
-    summarize(self, text: str, ratio: float) -> Union[str, List[str]]:
+    def summarize(self, text: str, ratio: float) -> Union[str, List[str]]:
         pass # your code
 ```
 

@@ -1,10 +1,12 @@
+import asyncio
 import json
 import sys
 from os import environ
 from typing import List, Literal, Optional, Union
 
+import kthread
 import uvicorn
-from fastapi import FastAPI, Response
+from fastapi import FastAPI, Request, Response
 from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, Field, create_model, root_validator, validator
 
@@ -12,6 +14,27 @@ sys.path.insert(0, "/summary_workbench_plugin_files")
 
 PLUGIN_CONFIG = json.loads(environ.get("PLUGIN_CONFIG"))
 PLUGIN_TYPE = PLUGIN_CONFIG["type"]
+
+
+class CancelError(Exception):
+    pass
+
+
+class KThreadWithReturnValue(kthread.KThread):
+    def run(self):
+        self.result = self._target(*self._args, **self._kwargs)
+
+
+async def cancable_execute(request: Request, function):
+    thread = KThreadWithReturnValue(target=function)
+    thread.start()
+    while thread.is_alive():
+        await asyncio.get_running_loop().run_in_executor(None, thread.join, 1)
+        if await request.is_disconnected():
+            thread.terminate()
+            raise CancelError()
+    return thread.result
+
 
 app = FastAPI()
 
@@ -160,9 +183,9 @@ def construct_metric():
     plugin = MetricPlugin()
 
     @app.post("/")
-    def evaluate(body: MetricBody, response: Response):
+    async def evaluate(body: MetricBody, request: Request, response: Response):
         try:
-            scores = plugin.evaluate(**body.dict())
+            scores = await cancable_execute(request, lambda: plugin.evaluate(**body.dict()))
             if isinstance(scores, dict):
                 scores = {k: to_float_list(v) for k, v in scores.items()}
             else:
@@ -187,9 +210,12 @@ def construct_summarizer():
     plugin = SummarizerPlugin()
 
     @app.post("/")
-    def summarize(body: SummarizerBody, response: Response):
+    async def summarize(body: SummarizerBody, request: Request, response: Response):
         try:
-            return {"summary": plugin.summarize(**body.dict())}
+            summary = await cancable_execute(request, lambda: plugin.summarize(**body.dict()))
+            return {"summary": summary}
+        except CancelError:
+            return
         except Exception as error:
             response.status_code = 400
             return {"message": ", ".join(error.args)}
