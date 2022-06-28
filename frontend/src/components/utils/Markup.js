@@ -1,6 +1,6 @@
 import React, { Fragment, memo, useEffect, useRef, useState } from "react";
 
-const innerHoverStyle = { background: "yellow", color: "black", display: "relative" };
+const innerHoverStyle = { background: "#eeee00", color: "black", display: "relative" };
 const baseMarkupStyle = {
   padding: 0,
   paddingTop: "0.1em",
