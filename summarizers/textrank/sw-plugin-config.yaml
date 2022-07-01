@@ -1,5 +1,5 @@
 version: "1.0"
-name: "Text Rank"
+name: "TextRank"
 metadata:
   type: extractive
   sourcecode: "https://github.com/DerwenAI/pytextrank"

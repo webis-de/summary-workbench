@@ -19,21 +19,21 @@ def add_dot(text):
 
 class NeuralSummarizer(object):
     MODELS = {
-        "T5": "t5-base",
+        "T5-Base": "t5-base",
         "BART-CNN": "facebook/bart-large-cnn",
         "BART-XSum": "facebook/bart-large-xsum",
         "Pegasus-CNN": "google/pegasus-cnn_dailymail",
         "Pegasus-XSum": "google/pegasus-xsum",
     }
 
-    def __init__(self, model: str = "T5"):
+    def __init__(self, model: str = "T5-Base"):
         """Initiates a summarization pipeline using the Huggingface transformers library (https://github.com/huggingface/transformers).
         This pipeline takes a summarization model as input, and returns the summary. To force the model to generate longer summaries, we set the min_length parameter of the pipeline to our desired summary length ratio. List of supported summarization models can be found herE:
         https://huggingface.co/models?filter=summarization
 
         For our demo, we use the following models denoted as {'model name': 'model code'}
         {
-         'T5': 't5-base',
+         'T5-Base': 't5-base',
          'BART-CNN': 'facebook/bart-large-cnn',
          'BART-XSum': 'facebook/bart-large-xsum',
          'Pegasus-CNN': 'google/pegasus-cnn_dailymail',
