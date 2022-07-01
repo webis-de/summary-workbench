@@ -1,5 +1,5 @@
 version: "1.0"
-name: Sentence Transformers
+name: SBERT
 metadata:
   type: semantic
   model: roberta-large-nli-stsb-mean-tokens
