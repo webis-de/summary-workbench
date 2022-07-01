@@ -1,6 +1,6 @@
 import "./css/App.css";
 
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import { FaChevronCircleUp, FaCog, FaGithub, FaTwitter, FaYoutube } from "react-icons/fa";
 import { useLocation } from "react-router";
 import { BrowserRouter, NavLink as Link, Navigate, useRoutes } from "react-router-dom";
@@ -21,7 +21,7 @@ import { MetricsProvider } from "./contexts/MetricsContext";
 import { SettingsContext, SettingsProvider } from "./contexts/SettingsContext";
 import { SummarizersProvider } from "./contexts/SummarizersContext";
 import { useMarkup } from "./hooks/markup";
-import { colorschemes } from "./utils/color";
+import { ColorMap, colorschemes } from "./utils/color";
 
 const routes = [
   { path: "/summarize", name: "Summarize", element: <Summarize /> },
@@ -130,19 +130,21 @@ const previewRef = `mathematician, computer scientist, logician, cryptanalyst, p
 Turing is widely considered to be the father of theoretical computer science and artificial intelligence.
 he was never fully recognised in his home country, if only because of the official secrets act.`;
 
-const Settings = ({ close }) => {
+const SettingsContent = ({ close, save }) => {
   const {
     minOverlap,
-    setMinOverlap,
     ignoreStopwords,
-    setIgnoreStopwords,
     selfSimilarities,
-    setSelfSimilarities,
     colorMap,
-    setColorscheme,
+    setMinOverlap,
+    setIgnoreStopwords,
+    setSelfSimilarities,
+    setColorMap,
   } = useContext(SettingsContext);
 
-  const {markup: [markup1, markup2]}  = useMarkup(previewDoc, previewRef);
+  const {
+    markup: [markup1, markup2],
+  } = useMarkup(previewDoc, previewRef);
 
   const scrollState = useMarkupScroll();
   const markupState = useState(null);
@@ -151,9 +153,14 @@ const Settings = ({ close }) => {
     <div>
       <div className="bg-slate-100 p-5 sticky z-20 top-0 flex justify-between items-center border-b">
         <ModalTitle>Settings</ModalTitle>
-        <Button appearance="soft" onClick={close}>
-          Close
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button appearance="soft" variant="primary" onClick={close}>
+            Close
+          </Button>
+          <Button appearance="fill" variant="success" onClick={save}>
+            Save and Close
+          </Button>
+        </div>
       </div>
       <div className="p-5 space-y-6">
         <div className="flex gap-4">
@@ -203,7 +210,7 @@ const Settings = ({ close }) => {
               <div>
                 <HeadingMedium>Colorscheme</HeadingMedium>
                 <Hint small>Color palette used to highlight matching</Hint>
-                <RadioGroup value={colorMap.colorscheme} setValue={setColorscheme}>
+                <RadioGroup value={colorMap.colorscheme} setValue={setColorMap}>
                   <div className="pt-2 grid grid-cols-2 justify-items-center gap-4">
                     {Object.keys(colorschemes).map((category) => (
                       <HeadingSmall key={category}>{category}</HeadingSmall>
@@ -230,23 +237,60 @@ const Settings = ({ close }) => {
             </CardHead>
             <CardContent>
               <div className="flex">
-                <Markup
-                  markups={markup1}
-                  markupState={markupState}
-                  scrollState={scrollState}
-                />
-
-                <Markup
-                  markups={markup2}
-                  markupState={markupState}
-                  scrollState={scrollState}
-                />
+                <Markup markups={markup1} markupState={markupState} scrollState={scrollState} />
+                <Markup markups={markup2} markupState={markupState} scrollState={scrollState} />
               </div>
             </CardContent>
           </Card>
         </div>
       </div>
     </div>
+  );
+};
+
+const Settings = ({ close }) => {
+  const [settings, setTmpSettings] = useState(useContext(SettingsContext));
+  const {
+    minOverlap,
+    ignoreStopwords,
+    selfSimilarities,
+    colorMap,
+    setMinOverlap,
+    setIgnoreStopwords,
+    setSelfSimilarities,
+    setColorscheme,
+  } = settings;
+  const setTmpOption =
+    (option, mangle = (v) => v) =>
+    (value) =>
+      setTmpSettings((old) => ({ ...old, [option]: mangle(value) }));
+
+  const currSetttings = useMemo(
+    () => ({
+      minOverlap,
+      ignoreStopwords,
+      selfSimilarities,
+      colorMap,
+      setMinOverlap: setTmpOption("minOverlap"),
+      setIgnoreStopwords: setTmpOption("ignoreStopwords"),
+      setSelfSimilarities: setTmpOption("selfSimilarities"),
+      setColorMap: setTmpOption("colorMap", (v) => new ColorMap(v, true)),
+    }),
+    [minOverlap, ignoreStopwords, selfSimilarities, colorMap]
+  );
+
+  const save = () => {
+    setMinOverlap(minOverlap);
+    setIgnoreStopwords(ignoreStopwords);
+    setSelfSimilarities(selfSimilarities);
+    setColorscheme(colorMap.colorscheme);
+    close();
+  };
+
+  return (
+    <SettingsContext.Provider value={currSetttings}>
+      <SettingsContent close={close} save={save} />
+    </SettingsContext.Provider>
   );
 };
 
