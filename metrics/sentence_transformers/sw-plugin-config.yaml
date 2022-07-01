@@ -3,4 +3,5 @@ name: Sentence Transformers
 metadata:
   type: semantic
   model: roberta-large-nli-stsb-mean-tokens
+  homepage: https://aclanthology.org/D19-1410/
   sourcecode: https://github.com/UKPLab/sentence-transformers
