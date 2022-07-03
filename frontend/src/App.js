@@ -300,8 +300,9 @@ const NavbarOptions = () => {
   return (
     <div>
       <FaCog
+        size={20}
         onClick={openModal}
-        className="text-gray-400 hover:text-slate-200 cursor-pointer w-5 h-5"
+        className="text-gray-400 hover:text-slate-200 cursor-pointer"
       />
       <Modal isOpen={isOpen} close={closeModal}>
         <Settings close={closeModal} />
@@ -324,7 +325,8 @@ const ScrollToTopButton = () => {
 
   return (
     <FaChevronCircleUp
-      className={`fixed cursor-pointer text-blue-700 bg-white rounded-full w-9 h-9 z-10 bottom-5 right-4 ${
+      size={40}
+      className={`fixed cursor-pointer text-blue-700 bg-white rounded-full z-10 bottom-5 right-4 ${
         visible ? "block" : "hidden"
       }`}
       title="scoll to top"

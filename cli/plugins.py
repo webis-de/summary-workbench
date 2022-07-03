@@ -1,5 +1,6 @@
 import json
 import re
+import uuid
 from collections import defaultdict
 from itertools import chain
 
@@ -50,7 +51,9 @@ def clean_string(s):
     clean_s = re.sub(r"\s", "", clean_s)
     clean_s = re.sub("[^a-z0-9]", "", clean_s)
     if not clean_s:
-        raise BaseManageError(f"{s} is empty after cleaning, please choose a name containing 'a-z0-9'")
+        raise BaseManageError(
+            f"{s} is empty after cleaning, please choose a name containing 'a-z0-9'"
+        )
     return clean_s
 
 
@@ -110,6 +113,7 @@ class Plugin(DockerMixin):
         self.url = f"http://{self.unique_name}:5000"
 
         self.plugin_config = {
+            "buildtag": str(uuid.uuid4()),
             "metadata": self.metadata,
             "arguments": self.arguments,
             "name": self.name,

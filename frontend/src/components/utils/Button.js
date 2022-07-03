@@ -121,7 +121,7 @@ const Button = ({
 
 const DeleteButton = (props) => (
   <Button {...props} appearence="box" variant="danger">
-    <FaTrash className="p-[1px] w-[16px] h-[16px]" />
+    <FaTrash size={16} className="p-[1px]" />
   </Button>
 );
 

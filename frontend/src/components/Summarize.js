@@ -303,7 +303,7 @@ const InputDocument = ({ summarize, state }) => {
         </div>
       </div>
 
-      <div className="lg:w-1/2 max-w-[600px] min-w-[500px]">
+      <div className="lg:w-1/2 lg:max-w-[600px] min-w-[500px]">
         <Card full>
           <CardHead>
             <HeadingSemiBig>Models</HeadingSemiBig>
@@ -319,7 +319,15 @@ const InputDocument = ({ summarize, state }) => {
             <div className="border p-2">
               <HeadingMedium>Summary length</HeadingMedium>
               <Hint small>Length of the summary in percent</Hint>
-              <Range defaultValue={summaryLength} setValue={setSummaryLength} min={5} max={50} />
+              <div className="px-7">
+                <Range
+                  defaultValue={summaryLength}
+                  setValue={setSummaryLength}
+                  min={15}
+                  max={50}
+                  step={5}
+                />
+              </div>
             </div>
             <div className="flex items-center gap-5">
               {state.loading ? (

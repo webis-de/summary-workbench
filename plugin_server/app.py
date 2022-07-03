@@ -2,10 +2,13 @@ import asyncio
 import json
 import sys
 from os import environ
-from typing import List, Literal, Optional, Union
+from typing import Literal, Union
+import uuid
 
 import kthread
 import uvicorn
+from argument_models import (BoolArgument, CategoricalArgument, FloatArgument,
+                             IntArgument, StringArgument)
 from fastapi import FastAPI, Request, Response
 from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, Field, create_model, root_validator, validator
@@ -13,6 +16,7 @@ from pydantic import BaseModel, Field, create_model, root_validator, validator
 sys.path.insert(0, "/summary_workbench_plugin_files")
 
 PLUGIN_CONFIG = json.loads(environ.get("PLUGIN_CONFIG"))
+PLUGIN_CONFIG["instancetag"] = str(uuid.uuid4())
 PLUGIN_TYPE = PLUGIN_CONFIG["type"]
 
 
@@ -42,42 +46,6 @@ app = FastAPI()
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(_, exc):
     return Response(exc.json(), status_code=400)
-
-
-class IntArgument(BaseModel):
-    type: Literal["int"] = Field(description="type of the argument")
-    default: Optional[int] = Field(description="default argument for that field")
-    min: Optional[int] = Field(description="minimal value for that argument")
-    max: Optional[int] = Field(description="maximal vlaue for that argument")
-
-
-class FloatArgument(BaseModel):
-    type: Literal["float"] = Field(description="type of the argument")
-    default: Optional[float] = Field(description="default argument for that field")
-    min: Optional[float] = Field(description="minimal value for that argument")
-    max: Optional[float] = Field(description="maximal vlaue for that argument")
-
-
-class BoolArgument(BaseModel):
-    type: Literal["bool"] = Field(description="type of the argument")
-    default: Optional[bool] = Field(description="default argument for that field")
-
-
-class StringArgument(BaseModel):
-    type: Literal["str"] = Field(description="type of the argument")
-    default: Optional[str] = Field(description="default argument for that field")
-
-
-class CategoricalArgument(BaseModel):
-    type: Literal["categorical"] = Field(description="type of the argument")
-    categories: List[str] = Field(description="list of categories")
-    default: Optional[str] = Field(description="default argument for that field")
-
-    @validator("default")
-    def in_categories(cls, value, values):
-        if value is not None and value not in values["categories"]:
-            raise ValueError(f"{value} must be one of {values['categories']}")
-        return value
 
 
 TYPE_TO_ARGUMENT = {
@@ -185,7 +153,9 @@ def construct_metric():
     @app.post("/")
     async def evaluate(body: MetricBody, request: Request, response: Response):
         try:
-            scores = await cancable_execute(request, lambda: plugin.evaluate(**body.dict()))
+            scores = await cancable_execute(
+                request, lambda: plugin.evaluate(**body.dict())
+            )
             if isinstance(scores, dict):
                 scores = {k: to_float_list(v) for k, v in scores.items()}
             else:
@@ -212,7 +182,9 @@ def construct_summarizer():
     @app.post("/")
     async def summarize(body: SummarizerBody, request: Request, response: Response):
         try:
-            summary = await cancable_execute(request, lambda: plugin.summarize(**body.dict()))
+            summary = await cancable_execute(
+                request, lambda: plugin.summarize(**body.dict())
+            )
             return {"summary": summary}
         except CancelError:
             return

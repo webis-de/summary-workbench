@@ -6,6 +6,8 @@ metadata:
 arguments:
   title:
     type: str
+    useTextarea: true
+    display: Title
     default: ""
   use_tfidf:
     type: bool

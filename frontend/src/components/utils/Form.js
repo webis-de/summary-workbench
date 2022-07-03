@@ -1,10 +1,12 @@
 import { Button } from "./Button";
 
-const Textarea = ({ rounded, ...props }) => (
+const Textarea = ({ rounded, tight, ...props }) => (
   <textarea
     {...props}
-    className={`block p-2.5 grow w-full h-full text-sm text-gray-900 bg-white ${
+    className={`block grow w-full h-full text-sm text-gray-900 bg-white ${
       rounded ? "rounded-lg" : ""
+    } ${
+      tight ? "p-1" : "p-2.5"
     } border border-gray-300 focus:ring-blue-500 focus:border-blue-500 resize-none`}
   />
 );
@@ -45,7 +47,7 @@ const Checkbox = ({ children, checked, onChange, onClickText, bold }) => {
       {children}
     </Button>
   ) : (
-    <span className={bold ? "font-bold text-sm" : null} >{children}</span>
+    <span className={bold ? "font-bold text-sm" : null}>{children}</span>
   );
   const Inner = (
     <>

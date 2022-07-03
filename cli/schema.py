@@ -1,8 +1,14 @@
+import sys
 from pathlib import Path
-from typing import Dict, List, Literal, Optional, Union
 
-from pydantic import (BaseModel, Field, HttpUrl, ValidationError, constr,
-                      validator)
+sys.path.insert(0, str(Path(__file__).absolute().parent.parent / "plugin_server"))
+
+from typing import Dict, List, Optional, Union
+
+# from plugin_server
+from argument_models import (BoolArgument, CategoricalArgument, FloatArgument,
+                             IntArgument, StringArgument)
+from pydantic import BaseModel, Field, HttpUrl, ValidationError, constr
 
 from .exceptions import ModelValidationError
 
@@ -18,42 +24,6 @@ class ThrowMixin:
             return cls(*args, **kwargs)
         except ValidationError as error:
             raise ModelValidationError(error.errors(), __origin)
-
-
-class IntArgument(BaseModel):
-    type: Literal["int"] = Field(description="type of the argument")
-    default: Optional[int] = Field(description="default argument for that field")
-    min: Optional[int] = Field(description="minimal value for that argument")
-    max: Optional[int] = Field(description="maximal vlaue for that argument")
-
-
-class FloatArgument(BaseModel):
-    type: Literal["float"] = Field(description="type of the argument")
-    default: Optional[float] = Field(description="default argument for that field")
-    min: Optional[float] = Field(description="minimal value for that argument")
-    max: Optional[float] = Field(description="maximal vlaue for that argument")
-
-
-class BoolArgument(BaseModel):
-    type: Literal["bool"] = Field(description="type of the argument")
-    default: Optional[bool] = Field(description="default argument for that field")
-
-
-class StringArgument(BaseModel):
-    type: Literal["str"] = Field(description="type of the argument")
-    default: Optional[str] = Field(description="default argument for that field")
-
-
-class CategoricalArgument(BaseModel):
-    type: Literal["categorical"] = Field(description="type of the argument")
-    categories: List[str] = Field(description="list of categories")
-    default: Optional[str] = Field(description="default argument for that field")
-
-    @validator("default")
-    def in_categories(cls, value, values):
-        if value is not None and value not in values["categories"]:
-            raise ValueError(f"{value} must be one of {values['categories']}")
-        return value
 
 
 class PluginModel(BaseModel, ThrowMixin):

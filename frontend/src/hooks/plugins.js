@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { MdSwitchLeft } from "react-icons/md";
 import { useAsyncRetry } from "react-use";
 
 const saveSetting = (key, status) => window.localStorage.setItem(key, status ? "true" : "false");
@@ -50,6 +51,32 @@ const initPlugins = async (fetchFunction, defaults) => {
   return { plugins, types };
 };
 
+const parse = (value, parseFunc, min, max) => {
+  if (value === "" || value === undefined) return undefined;
+  let parsed = parseFunc(value);
+  if (Number.isNaN(parsed)) parsed = 0;
+  if (min !== undefined && parsed < min) parsed = min;
+  if (max !== undefined && parsed > max) parsed = max;
+  return parsed;
+};
+const verifyArg = (value, type, definition) => {
+  const { min, max, categories } = definition;
+  switch (type) {
+    case "int":
+      return parse(value, parseInt, min, max);
+    case "float":
+      return parse(value, parseFloat, min, max);
+    case "str":
+      return value || undefined;
+    case "categorical":
+      return categories.includes(value) ? value : undefined;
+    case "bool":
+      return value === true;
+    default:
+      throw new Error(`unknown type ${type}`);
+  }
+};
+
 const usePlugins = (fetchFunction, defaults) => {
   const { value, loading, retry, error } = useAsyncRetry(() =>
     initPlugins(fetchFunction, defaults)
@@ -82,9 +109,16 @@ const usePlugins = (fetchFunction, defaults) => {
   const setArgument = useCallback(
     (pluginKey, argumentKey, newValue) => {
       let v = newValue;
+      const {
+        default: defaultArg,
+        type,
+        ...definition
+      } = plugins[pluginKey].info.arguments[argumentKey];
       const updatedPlugins = { ...plugins };
-      const defaultArg = updatedPlugins[pluginKey].info.arguments[argumentKey].default
-      if (v === undefined && defaultArg !== undefined) v = defaultArg
+      v = verifyArg(v, type, definition);
+      if (v === null) v = undefined;
+      if (v === undefined && defaultArg !== undefined) v = defaultArg;
+      if (v === null) v = undefined;
       updatedPlugins[pluginKey].arguments[argumentKey] = v;
       setPlugins(updatedPlugins);
     },

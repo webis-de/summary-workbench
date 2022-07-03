@@ -65,7 +65,7 @@ const Saved = ({ calculations, deleteCalculation }) => (
     <div className="pb-4 flex items-center gap-2">
       <HeadingBig>Saved Calculations</HeadingBig>
       <Tooltip place="right" text="the data is stored in the browser">
-        <FaQuestionCircle className="w-5 h-5 text-blue-500 hover:text-blue-700" />
+        <FaQuestionCircle size={18} className="text-blue-500 hover:text-blue-700" />
       </Tooltip>
     </div>
     <div className="flex flex-col gap-2">

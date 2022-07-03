@@ -39,11 +39,4 @@ const Hint = ({ children, type = "default", noicon, small }) => {
   );
 };
 
-const Label = ({ text, children }) => (
-  <label className="w-full flex flex-col text-sm font-medium text-gray-900">
-    {text}
-    {children}
-  </label>
-);
-
-export { HeadingSemiBig, HeadingBig, HeadingSmall, HeadingMedium, Hint, Label };
+export { HeadingSemiBig, HeadingBig, HeadingSmall, HeadingMedium, Hint };

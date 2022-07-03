@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { Input } from "./Form";
+import { Input, Textarea } from "./Form";
 import { Toggle } from "./Toggle";
 
 const RightInfo = ({ children }) => (
@@ -9,11 +9,28 @@ const RightInfo = ({ children }) => (
   </span>
 );
 
-const InputField = ({ value: initValue, onDone, min, max }) => {
-  const [value, setValue] = useState(initValue);
-  const accept = () => setValue(onDone(value));
+const TextareaField = ({ value: initValue, setValue: setInitValue }) => {
+  const [value, setValue] = useState(initValue.value);
+  const accept = () => setInitValue(value);
   useEffect(() => {
-    setValue(initValue);
+    setValue(initValue.value);
+  }, [initValue, setValue]);
+  return (
+    <Textarea
+      value={value === undefined ? "" : value}
+      tight
+      rows={4}
+      onChange={(e) => setValue(e.currentTarget.value)}
+      onBlur={accept}
+    />
+  );
+};
+
+const InputField = ({ value: initValue, setValue: setInitValue, min, max }) => {
+  const [value, setValue] = useState(initValue.value);
+  const accept = () => setInitValue(value);
+  useEffect(() => {
+    setValue(initValue.value);
   }, [initValue, setValue]);
 
   return (
@@ -35,16 +52,7 @@ const InputField = ({ value: initValue, onDone, min, max }) => {
   );
 };
 
-const parse = (value, parseFunc, min, max) => {
-  if (value === "" || value === undefined) return undefined;
-  let parsed = parseFunc(value);
-  if (Number.isNaN(parsed)) parsed = 0;
-  if (min !== undefined && parsed < min) parsed = min;
-  if (max !== undefined && parsed > max) parsed = max;
-  return parsed;
-};
-
-const Categories = ({ value, setValue, categories }) => (
+const Categories = ({ value, setValue, definition: { categories } }) => (
   <div className="w-full">
     <select
       value={categories.indexOf(value)}
@@ -61,55 +69,31 @@ const Categories = ({ value, setValue, categories }) => (
   </div>
 );
 
-const IntArgument = ({ value, setValue, min, max }) => (
-  <InputField
-    value={value}
-    min={min}
-    max={max}
-    onDone={(v) => {
-      const parsed = parse(v, parseInt, min, max);
-      setValue(parsed);
-      return parsed;
-    }}
-  />
+const IntArgument = ({ value, setValue, definition: { min, max } }) => (
+  <InputField value={value} min={min} max={max} setValue={setValue} />
 );
 const BoolArgument = ({ value, setValue }) => <Toggle checked={value} onChange={setValue} />;
-const FloatArgument = ({ value, setValue, min, max }) => (
-  <InputField
-    value={value}
-    min={min}
-    max={max}
-    onDone={(v) => {
-      const parsed = parse(v, parseFloat, min, max);
-      setValue(parsed);
-      return parsed;
-    }}
-  />
+const FloatArgument = ({ value, setValue, definition: { min, max } }) => (
+  <InputField value={value} min={min} max={max} setValue={setValue} />
 );
-const StringArgument = ({ value, setValue }) => (
-  <InputField
-    value={value}
-    onDone={(v) => {
-      const parsed = v === "" ? undefined : v;
-      setValue(parsed);
-      return parsed;
-    }}
-  />
-);
+const StringArgument = ({ value, setValue, definition: { useTextarea } }) => {
+  if (useTextarea) return <TextareaField value={value} setValue={setValue} />;
+  return <InputField value={value} setValue={setValue} />;
+};
 const CategoricalArgument = Categories;
 
-const Argument = ({ type, ...props }) => {
-  switch (type) {
+const Argument = ({ type, value, setValue, definition }) => {
+  switch (definition.type) {
     case "int":
-      return <IntArgument {...props} />;
+      return <IntArgument value={value} setValue={setValue} definition={definition} />;
     case "float":
-      return <FloatArgument {...props} />;
+      return <FloatArgument value={value} setValue={setValue} definition={definition} />;
     case "bool":
-      return <BoolArgument {...props} />;
+      return <BoolArgument value={value} setValue={setValue} definition={definition} />;
     case "str":
-      return <StringArgument {...props} />;
+      return <StringArgument value={value} setValue={setValue} definition={definition} />;
     case "categorical":
-      return <CategoricalArgument {...props} />;
+      return <CategoricalArgument value={value} setValue={setValue} definition={definition} />;
     default:
       throw new Error(`unknown type ${type}`);
   }
