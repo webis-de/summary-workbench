@@ -241,7 +241,6 @@ const extractPdfs = (files) =>
 const extractPdfJson = (json) => {
   const { title, abstract } = json;
   const pdfBody = json.pdf_parse.body_text;
-  console.log(pdfBody)
   const sections = [];
   let currSection = null;
   pdfBody.forEach(({ text, section, sec_num: secNum }) => {

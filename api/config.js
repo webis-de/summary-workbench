@@ -1,6 +1,8 @@
 const fs = require("fs");
 const axios = require("axios");
 
+const isProduction = process.env.NODE_ENV !== "development"
+
 const fetchConfig = async (url, key, timeout) => {
   try {
     const response = await axios({
@@ -58,7 +60,7 @@ const gatherConfigs = async (timeout) => {
 const currentConfig = {};
 
 const initConfig = async (timeout = 30000) => {
-  console.log("updating config...");
+  if (!isProduction) console.log("updating config...");
   let gatherTimeout = 15000;
   if (!Object.keys(currentConfig).length) gatherTimeout = 2000
   const config = await gatherConfigs(gatherTimeout);
@@ -70,11 +72,10 @@ const initConfig = async (timeout = 30000) => {
   currentConfig.SUMMARIZER_KEYS = Object.entries(currentConfig.SUMMARIZERS)
     .filter(([, value]) => !value.disabled && value.healthy)
     .map(([key]) => key);
-  console.log("config updated");
+  if (!isProduction) console.log("config updated");
   setTimeout(() => initConfig(timeout), timeout);
 };
 
-const isProduction = process.env.NODE_ENV !== "development"
 const PORT = process.env.PORT || 5000;
 console.log("Modus:", process.env.NODE_ENV);
 

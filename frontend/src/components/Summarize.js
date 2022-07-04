@@ -95,13 +95,22 @@ const PdfUpload = ({ setPdfExtract }) => {
         <LoadingButton appearance="soft" small text="Extracting" />
       ) : (
         <div
-          className={
+          className={`flex justify-between items-center w-full ${
             dragged ? "outline-dashed outline-2 outline-offset-4 outline-black rounded-lg" : ""
-          }
+          }`}
           onDrop={onDrop}
         >
           <Button onClick={onClick} small appearance="soft">
             Upload PDF file
+          </Button>
+          <Button
+            variant="primary"
+            appearance="link"
+            target="_blank"
+            href="https://aclanthology.org/D19-1410.pdf"
+            download
+          >
+            Link to sample PDF
           </Button>
         </div>
       )}
