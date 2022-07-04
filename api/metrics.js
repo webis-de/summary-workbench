@@ -1,5 +1,6 @@
 const { pluginRequest, validationRequest } = require("./plugin");
 const { currentConfig } = require("./config");
+const cache = require("./cache")
 
 const evaluate = async (metrics, hypotheses, references, abortController) => {
   const { METRICS } = currentConfig;
@@ -11,10 +12,13 @@ const evaluate = async (metrics, hypotheses, references, abortController) => {
     },
   ]);
   plugins = Object.fromEntries(plugins);
-  const validationResults = await validationRequest(plugins, abortController);
-  if (abortController.signal.aborted) return
+  const [cached, nonCached] = cache.get(plugins, METRICS)
+  const validationResults = await validationRequest(nonCached, abortController);
+  if (abortController.signal.aborted) return undefined
   if (Object.keys(validationResults).length) return validationResults;
-  return pluginRequest(plugins, ({ scores }) => ({ scores }), abortController);
+  const result = await pluginRequest(nonCached, ({ scores }) => ({ scores }), abortController);
+  cache.add(result, plugins, METRICS)
+  return {...cached, ...result}
 };
 
 module.exports = { evaluate };

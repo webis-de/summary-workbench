@@ -1,5 +1,6 @@
 const { pluginRequest, validationRequest } = require("./plugin");
 const { currentConfig } = require("./config");
+const cache = require("./cache")
 
 const summarize = async (summarizers, text, ratio, abortController) => {
   const { SUMMARIZERS } = currentConfig;
@@ -11,10 +12,13 @@ const summarize = async (summarizers, text, ratio, abortController) => {
     },
   ]);
   plugins = Object.fromEntries(plugins);
-  const validationResults = await validationRequest(plugins, abortController);
-  if (abortController.signal.aborted) return;
+  const [cached, nonCached] = cache.get(plugins, SUMMARIZERS)
+  const validationResults = await validationRequest(nonCached, abortController);
+  if (abortController.signal.aborted) return undefined;
   if (Object.keys(validationResults).length) return validationResults;
-  return pluginRequest(plugins, ({ summary }) => ({ summary }), abortController);
+  const result = await pluginRequest(nonCached, ({ summary }) => ({ summary }), abortController);
+  cache.add(result, plugins, SUMMARIZERS)
+  return {...cached, ...result}
 };
 
 module.exports = { summarize };

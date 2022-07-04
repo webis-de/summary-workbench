@@ -17,7 +17,7 @@ const validationRequest = async (plugins, abortController) => {
       }
     })
   );
-  if (abortController.signal.aborted) return
+  if (abortController.signal.aborted) return undefined
   return Object.fromEntries(results.filter((item) => item !== undefined));
 };
 
@@ -37,7 +37,7 @@ const pluginRequest = async (plugins, extractor, abortController) => {
       }
     })
   );
-  if (abortController.signal.aborted) return
+  if (abortController.signal.aborted) return undefined
   return Object.fromEntries(results);
 };
 
