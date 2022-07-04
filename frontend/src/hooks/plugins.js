@@ -67,7 +67,7 @@ const verifyArg = (value, type, definition) => {
     case "float":
       return parse(value, parseFloat, min, max);
     case "str":
-      return value || undefined;
+      return (value || "").trim() || undefined;
     case "categorical":
       return categories.includes(value) ? value : undefined;
     case "bool":
@@ -119,7 +119,8 @@ const usePlugins = (fetchFunction, defaults) => {
       if (v === null) v = undefined;
       if (v === undefined && defaultArg !== undefined) v = defaultArg;
       if (v === null) v = undefined;
-      updatedPlugins[pluginKey].arguments[argumentKey] = v;
+      const args = updatedPlugins[pluginKey].arguments
+      updatedPlugins[pluginKey].arguments = {...(args),  [argumentKey]: v};
       setPlugins(updatedPlugins);
     },
     [plugins]

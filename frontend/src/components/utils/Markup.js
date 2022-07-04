@@ -68,7 +68,7 @@ const TaggedMarkup = ({ markup, markupState, scrollState, allowScroll, showMarku
   );
   if (scrollState)
     return (
-      <span className="cursor-pointer">
+      <span className={showMarkup ? "cursor-pointer" : ""}>
         <Scroll
           tag={tag}
           docIndex={docIndex}

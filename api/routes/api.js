@@ -153,9 +153,9 @@ router.post(
       const { metrics, references, hypotheses } = req.body;
       const scores = await evaluate(metrics, hypotheses, references, req.abortController);
       if (req.abortController.signal.aborted) return
-      return res.json({ data: { scores } });
+      res.json({ data: { scores } });
     } catch (err) {
-      return next(err);
+      next(err);
     }
   }
 );
@@ -227,9 +227,9 @@ router.post("/summarize", summarizeValidator, validateMiddleware, async (req, re
     original.text = await sentenceSplitter.split(original.text);
     const response = { data: { original, summaries } };
     if (textIsURL) response.url = text;
-    return res.json(response);
+    res.json(response);
   } catch (err) {
-    return next(err);
+    next(err);
   }
 });
 
@@ -241,17 +241,30 @@ const extractPdfs = (files) =>
 const extractPdfJson = (json) => {
   const { title, abstract } = json;
   const pdfBody = json.pdf_parse.body_text;
+  console.log(pdfBody)
   const sections = [];
   let currSection = null;
   pdfBody.forEach(({ text, section, sec_num: secNum }) => {
-    if (currSection !== null) {
-      if (currSection.section !== section || currSection.secNum !== secNum) {
+    let newText = text
+    if (!secNum && !section) return
+    if (currSection) {
+      if (currSection.secNum) {
+        if (secNum || !section) {
+          if (currSection.secNum !== secNum || (section && currSection.section && currSection.section !== section)) {
+            sections.push(currSection);
+            currSection = null;
+          }
+        }
+      } else if (section && (secNum || currSection.section !== section)) {
         sections.push(currSection);
         currSection = null;
       }
     }
-    if (currSection === null) currSection = { section, secNum, texts: [] };
-    currSection.texts.push(text);
+    if (!currSection) currSection = { section, secNum, texts: [] };
+    if (currSection.section) {
+      if (section && currSection.section !== section) newText = `${section}\n${text}`
+    } else if (section) currSection.section = section
+    currSection.texts.push(newText);
   });
   if (currSection !== null) sections.push(currSection);
   return { title, abstract, sections };

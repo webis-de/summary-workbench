@@ -74,13 +74,14 @@ const initConfig = async (timeout = 30000) => {
   setTimeout(() => initConfig(timeout), timeout);
 };
 
+const isProduction = process.env.NODE_ENV !== "development"
 const PORT = process.env.PORT || 5000;
 console.log("Modus:", process.env.NODE_ENV);
 
 let { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } = process.env;
 
 if (!ACCESS_TOKEN_SECRET || !REFRESH_TOKEN_SECRET) {
-  if (process.env.NODE_ENV === "development") {
+  if (!isProduction) {
     ACCESS_TOKEN_SECRET = "no_secret";
     REFRESH_TOKEN_SECRET = "no_secret";
   } else {
@@ -99,6 +100,7 @@ const { MONGODB_HOST } = process.env;
 module.exports = {
   currentConfig,
   initConfig,
+  isProduction,
   MONGODB_HOST,
   PORT,
   ACCESS_TOKEN_SECRET,

@@ -5,8 +5,9 @@ const helmet = require("helmet");
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUI = require("swagger-ui-express");
 const fileUpload = require("express-fileupload");
-
 const cookieParser = require("cookie-parser");
+const config = require("./config")
+
 const { errorToMessage } = require("./errors");
 
 const swaggerOptions = {
@@ -40,13 +41,12 @@ const errorMiddleware = (err, req, res, next) => {
 const abortMiddleware = (req, res, next) => {
   req.abortController = new AbortController();
   req.socket.on("close", () => {
-    console.log("--- aborting ---", req.originalUrl, req.method);
     req.abortController.abort();
   });
   next();
 };
 
-app.use(logger("dev"));
+app.use(logger(config.isProduction ? "common" : "dev"));
 app.use(helmet());
 app.use(cookieParser());
 app.use(cors({ origin: true, credentials: true }));

@@ -91,8 +91,8 @@ const Upload = ({ setComputeData }) => {
   return (
     <div>
       <div>
-        <div className="flex justify-between pb-1">
-          <div className="flex items-center gap-2">
+        <div className="flex justify-between pb-2">
+          <div className="flex items-end gap-2">
             <HeadingSmall>jsonl</HeadingSmall>
             <Tooltip place="right" text="The file has to contain a json object on each line. All objects have to contain the same keys. The 'reference' key is required and the 'document' key is optional. All other keys are interpreted as models.">
               <FaQuestionCircle size={18} className="text-blue-500 hover:text-blue-700" />

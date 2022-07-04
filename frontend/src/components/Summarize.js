@@ -236,7 +236,7 @@ const PdfInput = ({ setCallback, setErrors }) => {
                     });
                   }}
                 >
-                  {title || "<unnamed>"}
+                  <span title={title}>{title || "<unnamed>"}</span>
                 </Checkbox>
               ))}
             </div>
@@ -502,9 +502,9 @@ const SummaryCompareView = ({ summaries, markups, showOverlap }) => {
   ]);
 
   return (
-    <div className="grow flex flex-wrap gap-3">
+    <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
       {elements.map(([markup, summarizer], markupIndex) => (
-        <div key={markupIndex} className="grow w-full lg:w-[45%] xl:w-[30%]">
+        <div key={markupIndex} className="">
           <Card full>
             <CardHead tight>
               <HeadingSemiBig>{summarizer}</HeadingSemiBig>
