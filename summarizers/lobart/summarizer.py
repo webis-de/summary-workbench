@@ -5,7 +5,7 @@ from asyncio.log import logger
 import torch
 import transformers
 from localattn import LoBART
-from model_setup import MODEL_PATH
+from model_setup import MODEL_PATH, URL_PODCAST_MODEL
 from transformers import BartTokenizer
 
 logging.basicConfig(level=logging.ERROR)
@@ -14,6 +14,7 @@ logging.basicConfig(level=logging.ERROR)
 class LoBARTModel(object):
     def __init__(self):
         print("Transformers version : ", transformers.__version__)
+        self.metadata = {"model": URL_PODCAST_MODEL}
         self.tokenizer = BartTokenizer.from_pretrained("facebook/bart-large")
         self.window_width = 512
         self.attention_window = [self.window_width] * 12
@@ -69,3 +70,6 @@ class SummarizerPlugin:
 
     def summarize(self, *args, **kwargs):
         return self.summarizer.summarize(*args, **kwargs)
+
+    def metadata(self):
+        return self.summarizer.metadata

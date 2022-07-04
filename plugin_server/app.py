@@ -1,9 +1,9 @@
 import asyncio
 import json
 import sys
+import uuid
 from os import environ
 from typing import Literal, Union
-import uuid
 
 import kthread
 import uvicorn
@@ -143,12 +143,23 @@ def to_float_list(array):
     return [float(e) for e in array]
 
 
+def create_plugin(Constructor):
+    plugin = Constructor()
+    updated_plugin_config = PLUGIN_CONFIG.copy()
+    try:
+        updated_plugin_config.setdefault("metadata", {})
+        updated_plugin_config["metadata"].update(plugin.metadata())
+    except:
+        pass
+    return plugin, updated_plugin_config
+
+
 def construct_metric():
     from metric import MetricPlugin
 
     MetricBody = create_model("MetricBody", **PARSED_ARGUMENTS, __base__=MetricBase)
 
-    plugin = MetricPlugin()
+    plugin, updated_plugin_config = create_plugin(MetricPlugin)
 
     @app.post("/")
     async def evaluate(body: MetricBody, request: Request, response: Response):
@@ -169,6 +180,8 @@ def construct_metric():
     def validate(_: MetricBody):
         pass
 
+    return updated_plugin_config
+
 
 def construct_summarizer():
     from summarizer import SummarizerPlugin
@@ -177,7 +190,7 @@ def construct_summarizer():
         "SummarizerBody", **PARSED_ARGUMENTS, __base__=SummarizerBase
     )
 
-    plugin = SummarizerPlugin()
+    plugin, updated_plugin_config = create_plugin(SummarizerPlugin)
 
     @app.post("/")
     async def summarize(body: SummarizerBody, request: Request, response: Response):
@@ -196,6 +209,8 @@ def construct_summarizer():
     def validate(_: SummarizerBody):
         pass
 
+    return updated_plugin_config
+
 
 PLUGIN_TYPES = {
     "metric": construct_metric,
@@ -212,12 +227,12 @@ if PLUGIN_TYPE not in PLUGIN_TYPES:
         f"environment variable PLUGIN_TYPE needs to be one of: {list(PLUGIN_TYPES)}"
     )
 
-PLUGIN_TYPES.get(PLUGIN_TYPE)()
+updated_plugin_config = PLUGIN_TYPES.get(PLUGIN_TYPE)()
 
 
 @app.get("/config")
 async def config():
-    return PLUGIN_CONFIG
+    return updated_plugin_config
 
 
 if __name__ == "__main__":

@@ -3,13 +3,13 @@ import math
 from transformers import EncoderDecoderModel, LongformerTokenizerFast
 
 MAX_POSITION_EMBEDDINGS = 512
+MODEL = "patrickvonplaten/longformer2roberta-cnn_dailymail-fp16"
 
 
 class Longformer2RobertaSummarizer:
     def __init__(self):
-        self.encoder_decoder = EncoderDecoderModel.from_pretrained(
-            "patrickvonplaten/longformer2roberta-cnn_dailymail-fp16"
-        )
+        self.metadata = {"model": MODEL}
+        self.encoder_decoder = EncoderDecoderModel.from_pretrained(MODEL)
         self.tokenizer = LongformerTokenizerFast.from_pretrained(
             "allenai/longformer-base-4096"
         )
@@ -52,3 +52,6 @@ class SummarizerPlugin:
 
     def summarize(self, *args, **kwargs):
         return self.summarizer.summarize(*args, **kwargs)
+
+    def metadata(self):
+        return self.summarizer.metadata

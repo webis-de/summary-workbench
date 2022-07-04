@@ -19,11 +19,11 @@ def add_dot(text):
 
 class NeuralSummarizer(object):
     MODELS = {
-        "T5-Base": "t5-base",
-        "BART-CNN": "facebook/bart-large-cnn",
-        "BART-XSum": "facebook/bart-large-xsum",
-        "Pegasus-CNN": "google/pegasus-cnn_dailymail",
-        "Pegasus-XSum": "google/pegasus-xsum",
+        "T5-Base": {"model": "t5-base"},
+        "BART-CNN": {"model": "facebook/bart-large-cnn"},
+        "BART-XSum": {"model": "facebook/bart-large-xsum"},
+        "Pegasus-CNN": {"model": "google/pegasus-cnn_dailymail"},
+        "Pegasus-XSum": {"model": "google/pegasus-xsum"},
     }
 
     def __init__(self, model: str = "T5-Base"):
@@ -43,7 +43,8 @@ class NeuralSummarizer(object):
         Args:
             model (str, optional): [summarization model]. Defaults to 't5-base'.
         """
-        self.model = self.MODELS[model]
+        self.metadata = self.MODELS[model]
+        self.model = self.metadata["model"]
         self.pipeline = pipeline("summarization", model=self.model)
         self.tokenizer = AutoTokenizer.from_pretrained(self.model)
 
@@ -107,3 +108,6 @@ class SummarizerPlugin:
 
     def summarize(self, *args, **kwargs):
         return self.summarizer.summarize(*args, **kwargs)
+
+    def metadata(self):
+        return self.summarizer.metadata

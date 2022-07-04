@@ -14,6 +14,7 @@ def add_dot(text):
 class CliffSum(object):
     def __init__(self, model="MaskRel"):
         self.checkpoints_path = MODELS[model]["path"]
+        self.metadata = {"model": MODELS[model]["url"]}
         self.tokenizer = PegasusTokenizerFast.from_pretrained(
             self.checkpoints_path, local_files_only=True
         )
@@ -95,3 +96,6 @@ class SummarizerPlugin:
 
     def summarize(self, *args, **kwargs):
         return self.summarizer.summarize(*args, **kwargs)
+
+    def metadata(self):
+        return self.summarizer.metadata

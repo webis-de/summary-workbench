@@ -13,6 +13,7 @@ class CoopModel(object):
     }
     def __init__(self, model="COOP-Amazon"):
         self.model = self.MODELS[model]
+        self.metadata = {"model": self.model}
         self.vae = VAE(self.model, device='cpu')
         if self.vae:
             print("Intialized successfully.")
@@ -33,3 +34,6 @@ class SummarizerPlugin():
 
     def summarize(self, *args, **kwargs):
         return self.summarizer.summarize(*args, **kwargs)
+
+    def metadata(self):
+        return self.summarizer.metadata

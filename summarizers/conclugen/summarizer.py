@@ -2,7 +2,7 @@ import math
 import pathlib
 
 import transformers
-from model_setup import SAVE_PATH
+from model_setup import SAVE_PATH, URL
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
 
 MODEL_PATH = SAVE_PATH / "dbart"
@@ -18,6 +18,7 @@ class ConcluGen(object):
     def __init__(self):
         print("Transformers Version:", transformers.__version__)
         print(MODEL_PATH)
+        self.metadata = {"model": URL}
         self.tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH, local_files_only=True)
         if self.tokenizer:
             print("Tokenizer initialized")
@@ -93,3 +94,6 @@ class SummarizerPlugin:
 
     def summarize(self, *args, **kwargs):
         return self.summarizer.summarize(*args, **kwargs)
+
+    def metadata(self):
+        return self.summarizer.metadata
