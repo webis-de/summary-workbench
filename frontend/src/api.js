@@ -3,13 +3,21 @@ import { get, post, wrappedFetch } from "./request";
 const getMetricsRequest = () => get("/api/metrics");
 const getSummarizersRequest = () => get("/api/summarizers");
 
-const evaluateRequest = (metrics, references, hypotheses) =>
-  post("/api/evaluate", { metrics, references, hypotheses });
+const evaluateRequest = (metrics, references, hypotheses, abortController) =>
+  post("/api/evaluate", { metrics, references, hypotheses }, {abortController});
 
-const summarizeRequest = (data, summarizers, ratio) => {
+const summarizeRequest = (data, summarizers, ratio, abortController) => {
   if (Array.isArray(data))
-    return post("/api/summarize/bulk", { documents: data, summarizers, ratio });
-  return post("/api/summarize", { text: data, summarizers, ratio });
+    return post(
+      "/api/summarize/bulk",
+      { documents: data, summarizers, ratio },
+      { abortController }
+    );
+  return post(
+    "/api/summarize",
+    { text: data, summarizers, ratio, abortController },
+    { abortController }
+  );
 };
 
 const pdfExtractRequest = async (pdf) => {

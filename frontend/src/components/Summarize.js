@@ -291,7 +291,7 @@ const BulkInput = ({ setCallback, setErrors }) => {
   );
 };
 
-const InputDocument = ({ summarize, state }) => {
+const InputDocument = ({ summarize, state, abortController }) => {
   const { summarizers, types, toggle, setArgument } = useContext(SummarizersContext);
   const { summaryLength, setSummaryLength } = useContext(SettingsContext);
   const getTextRef = useRef(null);
@@ -371,7 +371,7 @@ const InputDocument = ({ summarize, state }) => {
                 />
               </div>
             </div>
-            <div className="flex items-center gap-5">
+            <div className="flex justify-between items-center gap-5">
               {state.loading ? (
                 <LoadingButton text="Summarizing" />
               ) : (
@@ -380,6 +380,11 @@ const InputDocument = ({ summarize, state }) => {
                   onClick={() => summarize(getTextRef.current(), chosenModels, summaryLength)}
                 >
                   Summarize
+                </Button>
+              )}
+              {abortController && (
+                <Button variant="danger" appearance="box" onClick={() => abortController.abort()}>
+                  Cancel
                 </Button>
               )}
             </div>
@@ -715,13 +720,26 @@ const computeParagraphs = (text) => {
 const Summarize = () => {
   const { summarizers, loading, retry } = useContext(SummarizersContext);
 
+  const [abortController, setAbortController] = useState(null);
+
+  useEffect(
+    () => () => {
+      if (abortController) abortController.abort();
+    },
+    [abortController]
+  );
+
   const [state, doFetch] = useAsyncFn(
     async ({ data, fileName }, models, summaryLength) => {
       const modelsWithArguments = Object.fromEntries(
         models.map((model) => [model, summarizers[model].arguments])
       );
       const ratio = parseInt(summaryLength, 10) / 100;
-      const response = await summarizeRequest(data, modelsWithArguments, ratio);
+      const controller = new AbortController();
+      setAbortController(controller);
+      const response = await summarizeRequest(data, modelsWithArguments, ratio, controller);
+      setAbortController(null);
+      if (controller.signal.aborted) return undefined;
       if (response.errors) return response;
       if (Array.isArray(response.data)) {
         let combinedData = [];
@@ -794,7 +812,7 @@ const Summarize = () => {
           concatenated as the final summary.{" "}
         </Hint>
       </div>
-      <InputDocument summarize={doFetch} state={state} />
+      <InputDocument summarize={doFetch} state={state} abortController={abortController} />
       {result}
     </SpaceGap>
   );

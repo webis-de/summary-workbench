@@ -1,4 +1,4 @@
-import React, { useContext, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useAsyncFn } from "react-use";
 
 import { evaluateRequest } from "../api";
@@ -19,7 +19,7 @@ import { CenterLoading } from "./utils/Loading";
 import { Tab, TabContent, TabHead, TabPanel, Tabs } from "./utils/Tabs";
 import { HeadingBig, HeadingSemiBig, Hint } from "./utils/Text";
 
-const FileInput = ({ loading, compute, setComputeData, disableErrors }) => (
+const FileInput = ({ loading, compute, setComputeData, disableErrors, abortController }) => (
   <Card full>
     <Tabs>
       <CardContent>
@@ -35,12 +35,17 @@ const FileInput = ({ loading, compute, setComputeData, disableErrors }) => (
             <Upload setComputeData={setComputeData} />
           </TabPanel>
         </TabContent>
-        <div className="flex items-center gap-5">
+        <div className="flex justify-between items-center gap-5">
           {loading ? (
             <LoadingButton text="Evaluating" />
           ) : (
             <Button variant="primary" disabled={disableErrors.length} onClick={compute}>
               Evaluate
+            </Button>
+          )}
+          {abortController && (
+            <Button variant="danger" appearance="box" onClick={() => abortController.abort()}>
+              Cancel
             </Button>
           )}
         </div>
@@ -61,8 +66,14 @@ const zipLines = (lines) => {
   return [documents, references, models];
 };
 
-const evaluate = async (modelsWithArguments, references, hypotheses) => {
-  const response = await evaluateRequest(modelsWithArguments, references, hypotheses);
+const evaluate = async (modelsWithArguments, references, hypotheses, abortController) => {
+  const response = await evaluateRequest(
+    modelsWithArguments,
+    references,
+    hypotheses,
+    abortController
+  );
+  if (abortController && abortController.signal.aborted) return undefined;
   if (response.errors) return response;
   return collectPluginErrors(
     response.data.scores,
@@ -127,6 +138,15 @@ const SubEvaluate = () => {
   const { metrics, types, toggle, setArgument } = useContext(MetricsContext);
   const calc = useCalculations();
 
+  const [abortController, setAbortController] = useState(null);
+
+  useEffect(
+    () => () => {
+      if (abortController) abortController.abort();
+    },
+    [abortController]
+  );
+
   const chosenMetrics = useMemo(() => Object.keys(getChosen(metrics)), [metrics]);
   const [state, doFetch] = useAsyncFn(
     async ({ id, lines: jsonl, chosenKeys, reset = false }) => {
@@ -148,12 +168,16 @@ const SubEvaluate = () => {
       const scoreBuilder = new ScoreBuilder(id, metrics, documents, references, models);
       if (Object.keys(models).length) {
         const collectedErrors = [];
+        const controller = new AbortController();
+        setAbortController(controller);
         const responses = await Promise.all(
           Object.entries(models).map(async ([key, hypotheses]) => [
             key,
-            await evaluate(modelsWithArguments, references, hypotheses),
+            await evaluate(modelsWithArguments, references, hypotheses, controller),
           ])
         );
+        setAbortController(null);
+        if (controller.signal.aborted) return undefined;
         responses.forEach(([key, { data, errors }]) => {
           if (data) scoreBuilder.add(key, data.scores);
           if (errors) collectedErrors.push({ name: key, errors });
@@ -212,6 +236,7 @@ const SubEvaluate = () => {
                 compute={() => doFetch(data)}
                 setComputeData={setComputeData}
                 disableErrors={disableErrors}
+                abortController={abortController}
               />
             </div>
           </div>
