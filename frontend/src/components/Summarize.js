@@ -21,7 +21,7 @@ import { Badge } from "./utils/Badge";
 import { Button, CopyToClipboardButton, LoadingButton } from "./utils/Button";
 import { Card, CardContent, CardHead } from "./utils/Card";
 import { ChooseFile, FileInput, useFile, useFileInput } from "./utils/ChooseFile";
-import { Errors, ErrorBox } from "./utils/Error";
+import { ErrorBox, Errors } from "./utils/Error";
 import { Checkbox, Textarea } from "./utils/Form";
 import { Bars, EyeClosed, EyeOpen, ThumbsDown, ThumbsUp } from "./utils/Icons";
 import { SpaceGap } from "./utils/Layout";
@@ -480,7 +480,8 @@ const Summary = ({ markup, summary, markupState, scrollState, showMarkup }) => {
 //     </Card>
 //   </div>
 //   <div className="basis-[40%] ">
-const SummaryTabView = ({ title, showOverlap, summaries, markups, documentLength }) => {
+const SummaryTabView = ({ title, showOverlap, summaries, originals, sums, documentLength }) => {
+  const markups = usePairwiseMarkups(originals, sums);
   const { summarizers } = useContext(SummarizersContext);
   const markupState = useState(null);
   const [summaryIndex, setSummaryIndex] = useState(0);
@@ -540,8 +541,11 @@ const SummaryTabView = ({ title, showOverlap, summaries, markups, documentLength
   );
 };
 
-const SummaryCompareView = ({ summaries, markups, showOverlap }) => {
+const SummaryCompareView = ({ summaries, sums, showOverlap }) => {
   const { summarizers } = useContext(SummarizersContext);
+  const markups = useMarkups(sums);
+  const markupState = useState(null);
+  const scrollState = useMarkupScroll();
   const elements = markups.map((markup, index) => [
     markup,
     summarizers[summaries[index].name].info.name,
@@ -557,7 +561,12 @@ const SummaryCompareView = ({ summaries, markups, showOverlap }) => {
             </CardHead>
             <CardContent white>
               <div className="max-h-72 overflow-auto">
-                <Markup markups={markup} showMarkup={showOverlap} />
+                <Markup
+                  markups={markup}
+                  showMarkup={showOverlap}
+                  markupState={markupState}
+                  scrollState={scrollState}
+                />
               </div>
             </CardContent>
           </Card>
@@ -590,8 +599,6 @@ const SummaryView = ({ summaries, documentLength }) => {
   const [showOverlap, toggleShowOverlap] = useReducer((e) => !e, false);
   const sums = useMemo(() => summaries.map(({ summaryText }) => summaryText), [summaries]);
   const originals = useMemo(() => summaries.map(({ originalText }) => originalText), [summaries]);
-  const pairwiseMarkups = usePairwiseMarkups(originals, sums);
-  const summaryMarkups = useMarkups(sums);
   const scrollRef = useRef();
   const titleText = useMemo(() => {
     const t = originals[0];
@@ -617,14 +624,11 @@ const SummaryView = ({ summaries, documentLength }) => {
               showOverlap={showOverlap}
               summaries={summaries}
               title={titleText}
-              markups={pairwiseMarkups}
+              originals={originals}
+              sums={sums}
             />
           ) : (
-            <SummaryCompareView
-              showOverlap={showOverlap}
-              summaries={summaries}
-              markups={summaryMarkups}
-            />
+            <SummaryCompareView showOverlap={showOverlap} summaries={summaries} sums={sums} />
           )}
         </div>
         <div className="flex flex-col">
@@ -725,7 +729,8 @@ const Summarize = () => {
           documentLength: computeNumWords(originalText),
         })
       );
-      collected.errors = mapErrorsToName(collected.errors, summarizers);
+      if (collected.errors && collected.errors.length)
+        collected.errors = mapErrorsToName(collected.errors, summarizers);
       collected.type = "single";
       collected.hasResults = collected.data.summaries !== undefined;
       return collected;

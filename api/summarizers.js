@@ -17,6 +17,7 @@ const summarize = async (summarizers, text, ratio, abortController) => {
   if (abortController.signal.aborted) return undefined;
   if (Object.keys(validationResults).length) return validationResults;
   const result = await pluginRequest(nonCached, ({ summary }) => ({ summary }), abortController);
+  if (abortController.signal.aborted) return undefined;
   cache.add(result, plugins, SUMMARIZERS)
   return {...cached, ...result}
 };

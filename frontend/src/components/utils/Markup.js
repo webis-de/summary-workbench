@@ -21,18 +21,20 @@ const useMarkupScroll = (deps = null) => {
 };
 
 const Scroll = ({ docIndex, matchOrder, groupSizes, tag, scrollState, allowScroll, children }) => {
-  const [scrollMarkup, setScrollMarkup] = scrollState;
-  const [scrollDoc, scrollTag, scrollOrder] = scrollMarkup;
+  const [scrollMarkup, setScrollState] = scrollState;
   const scrollNext = () => {
     if (allowScroll) {
-      if (scrollTag === tag && scrollDoc === 1 - docIndex)
-        setScrollMarkup([scrollDoc, scrollTag, (scrollOrder + 1) % groupSizes[scrollDoc]]);
-      else setScrollMarkup([1 - docIndex, tag, 0]);
+      let newScrollOrder
+      const [, scrollTag, scrollOrder] = scrollMarkup;
+      if (scrollTag !== tag) newScrollOrder = Array(groupSizes.length).fill(0)
+      else newScrollOrder = scrollOrder.map(c => c === docIndex ? c + 1 : c).map((c,i) => c % (groupSizes[i] > 0 ? groupSizes[i] : 1))
+      setScrollState([docIndex, tag, newScrollOrder]);
     }
   };
   const scrollRef = useRef();
   useEffect(() => {
-    if (docIndex === scrollMarkup[0] && tag === scrollMarkup[1] && matchOrder === scrollMarkup[2]) {
+    const [scrollDoc, scrollTag, scrollOrder] = scrollMarkup;
+    if (scrollOrder && docIndex !== scrollDoc && tag === scrollTag && matchOrder === scrollOrder[docIndex]) {
       scrollRef.current.scrollIntoView({ block: "nearest", behavior: "smooth", inline: "start" });
     }
   }, [tag, scrollMarkup, docIndex, matchOrder]);
@@ -119,7 +121,7 @@ const MarkupRoot = ({ markups, markupState, scrollState, allowScroll, showMarkup
 );
 
 const Markup = ({ markups, markupState, scrollState, showMarkup = true }) => (
-  <div className="leading-[23px]">
+  <div className="leading-[22px]">
     <MarkupRoot
       markups={markups}
       markupState={markupState}
