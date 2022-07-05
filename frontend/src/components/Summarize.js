@@ -23,7 +23,7 @@ import { Card, CardContent, CardHead } from "./utils/Card";
 import { ChooseFile, FileInput, useFile, useFileInput } from "./utils/ChooseFile";
 import { ErrorBox, Errors } from "./utils/Error";
 import { Checkbox, Textarea } from "./utils/Form";
-import { Bars, EyeClosed, EyeOpen, ThumbsDown, ThumbsUp } from "./utils/Icons";
+import { Bars, Eye, ThumbsDown, ThumbsUp } from "./utils/Icons";
 import { SpaceGap } from "./utils/Layout";
 import { CenterLoading } from "./utils/Loading";
 import { Markup, useMarkupScroll } from "./utils/Markup";
@@ -541,15 +541,43 @@ const SummaryTabView = ({ title, showOverlap, summaries, originals, sums, docume
   );
 };
 
-const SummaryCompareView = ({ summaries, sums, showOverlap }) => {
+const SummaryCompareView = ({ summaries, sums, showOverlap, setOverlap }) => {
   const { summarizers } = useContext(SummarizersContext);
-  const markups = useMarkups(sums);
+  const [overlapSummaries, setOverlapSummaries] = useState(null);
+  const showIndexes = useMemo(() => {
+    if (!overlapSummaries) return [];
+    return overlapSummaries
+      .map((v, i) => [i, v])
+      .filter(([, v]) => v)
+      .map(([i]) => i);
+  }, [overlapSummaries]);
+  const showSums = useMemo(() => showIndexes.map((i) => sums[i]), [showIndexes, sums]);
+  const markups = useMarkups(showSums);
   const markupState = useState(null);
   const scrollState = useMarkupScroll();
-  const elements = markups.map((markup, index) => [
-    markup,
-    summarizers[summaries[index].name].info.name,
-  ]);
+  const elements = useMemo(() => {
+    const newSums = sums.map((sum, index) => [[sum], summarizers[summaries[index].name].info.name]);
+    showIndexes.forEach((i, j) => {
+      newSums[i][0] = markups[j];
+    });
+    return newSums;
+  }, [markups, showIndexes, summaries, summarizers, sums]);
+  const lastShowOverlap = useRef(showOverlap);
+
+  useEffect(() => {
+    if (
+      !overlapSummaries ||
+      (lastShowOverlap.current !== showOverlap && overlapSummaries.some((v) => v) !== showOverlap)
+    )
+      setOverlapSummaries(Array(sums.length).fill(showOverlap));
+    lastShowOverlap.current = showOverlap;
+  }, [sums, showOverlap, setOverlapSummaries, overlapSummaries]);
+
+  const toggleOverlap = (i) => {
+    const newOverlap = overlapSummaries.map((v, j) => (i === j ? !v : v));
+    setOverlapSummaries(newOverlap);
+    setOverlap(newOverlap.some((v) => v));
+  };
 
   return (
     <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
@@ -558,12 +586,17 @@ const SummaryCompareView = ({ summaries, sums, showOverlap }) => {
           <Card full>
             <CardHead tight>
               <HeadingSemiBig>{summarizer}</HeadingSemiBig>
+              <Eye
+                show={overlapSummaries && !overlapSummaries[markupIndex]}
+                size={28}
+                onClick={() => toggleOverlap(markupIndex)}
+              />
             </CardHead>
             <CardContent white>
               <div className="max-h-72 overflow-auto">
                 <Markup
                   markups={markup}
-                  showMarkup={showOverlap}
+                  showMarkup
                   markupState={markupState}
                   scrollState={scrollState}
                 />
@@ -584,19 +617,16 @@ const ToggleView = ({ showTab, toggleShowTab }) => (
   </Tooltip>
 );
 
-const ToggleOverlap = ({ show, toggle }) => {
-  const Icon = show ? EyeOpen : EyeClosed;
-
-  return (
-    <Tooltip text={"Show/Hide Agreement"}>
-      <Icon className="w-7 h-7" onClick={toggle} />
-    </Tooltip>
-  );
-};
+const ToggleOverlap = ({ show, toggle }) => (
+  <Tooltip text={"Show/Hide Agreement"}>
+    <Eye show={show} className="w-7 h-7" onClick={toggle} />
+  </Tooltip>
+);
 
 const SummaryView = ({ summaries, documentLength }) => {
   const [showTab, toggleShowTab] = useReducer((e) => !e, true);
-  const [showOverlap, toggleShowOverlap] = useReducer((e) => !e, false);
+  const [showOverlap, setOverlap] = useState(false);
+  const toggleShowOverlap = () => setOverlap((e) => !e);
   const sums = useMemo(() => summaries.map(({ summaryText }) => summaryText), [summaries]);
   const originals = useMemo(() => summaries.map(({ originalText }) => originalText), [summaries]);
   const scrollRef = useRef();
@@ -628,7 +658,12 @@ const SummaryView = ({ summaries, documentLength }) => {
               sums={sums}
             />
           ) : (
-            <SummaryCompareView showOverlap={showOverlap} summaries={summaries} sums={sums} />
+            <SummaryCompareView
+              showOverlap={showOverlap}
+              setOverlap={setOverlap}
+              summaries={summaries}
+              sums={sums}
+            />
           )}
         </div>
         <div className="flex flex-col">

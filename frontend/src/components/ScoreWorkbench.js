@@ -156,7 +156,7 @@ const SemanticMarkup = memo(({ markup }) => {
   const { documentSentences, scores } = markup;
   const weights = sentenceWeightFromScores(scores, documentSentences.length);
   return (
-    <div className="leading-[23px]">
+    <div className="leading-[22px]">
       {weights.map((weight, i) => (
         <span
           key={i}
@@ -175,7 +175,7 @@ const SemanticMarkup = memo(({ markup }) => {
 });
 
 const MarkupOrText = ({ markup, markupState, scrollState }) => {
-  if (typeof markup === "string") return <div className="leading-[23px]">{markup}</div>;
+  if (typeof markup === "string") return <div className="leading-[22px]">{markup}</div>;
   const { type } = markup;
   switch (type) {
     case "loading":
