@@ -14,4 +14,12 @@ const collectPluginErrors = (plugins, elementFunc, dataFunc) => {
   return data;
 };
 
-export { collectPluginErrors };
+const mapErrorsToName = (errors, definitions) =>
+  errors.map(({ name, ...rest }) => {
+    let obj = definitions[name];
+    if (obj) obj = obj.info;
+    if (obj) obj = obj.name;
+    return { name: obj || name, ...rest };
+  });
+
+export { collectPluginErrors, mapErrorsToName };

@@ -6,8 +6,11 @@ const getSummarizersRequest = () => get("/api/summarizers");
 const evaluateRequest = (metrics, references, hypotheses) =>
   post("/api/evaluate", { metrics, references, hypotheses });
 
-const summarizeRequest = (text, summarizers, ratio) =>
-  post("/api/summarize", { text, summarizers, ratio });
+const summarizeRequest = (data, summarizers, ratio) => {
+  if (Array.isArray(data))
+    return post("/api/summarize/bulk", { documents: data, summarizers, ratio });
+  return post("/api/summarize", { text: data, summarizers, ratio });
+};
 
 const pdfExtractRequest = async (pdf) => {
   const fd = new FormData();

@@ -15,13 +15,13 @@ import { SettingsContext } from "../contexts/SettingsContext";
 import { SummarizersContext } from "../contexts/SummarizersContext";
 import { useMarkups, usePairwiseMarkups } from "../hooks/markup";
 import { extractArgumentErrors, getChosen } from "../utils/common";
-import { collectPluginErrors } from "../utils/data";
+import { collectPluginErrors, mapErrorsToName } from "../utils/data";
 import { Settings } from "./Settings";
 import { Badge } from "./utils/Badge";
 import { Button, CopyToClipboardButton, LoadingButton } from "./utils/Button";
 import { Card, CardContent, CardHead } from "./utils/Card";
-import { FileInput, useFileInput } from "./utils/ChooseFile";
-import { Errors } from "./utils/Error";
+import { ChooseFile, FileInput, useFile, useFileInput } from "./utils/ChooseFile";
+import { Errors, ErrorBox } from "./utils/Error";
 import { Checkbox, Textarea } from "./utils/Form";
 import { Bars, EyeClosed, EyeOpen, ThumbsDown, ThumbsUp } from "./utils/Icons";
 import { SpaceGap } from "./utils/Layout";
@@ -89,31 +89,33 @@ const PdfUpload = ({ setPdfExtract }) => {
   });
   const { fileInputRef, dragged, onDrop, onClick } = useFileInput(setFile);
   return (
-    <div className="flex gap-3">
+    <div className="flex flex-col gap-3">
       <FileInput fileInputRef={fileInputRef} setFile={setFile} />
-      {loading ? (
-        <LoadingButton appearance="soft" small text="Extracting" />
-      ) : (
-        <div
-          className={`flex justify-between items-center w-full ${
-            dragged ? "outline-dashed outline-2 outline-offset-4 outline-black rounded-lg" : ""
-          }`}
-          onDrop={onDrop}
-        >
-          <Button onClick={onClick} small appearance="soft">
-            Upload PDF file
-          </Button>
-          <Button
-            variant="primary"
-            appearance="link"
-            target="_blank"
-            href="https://aclanthology.org/D19-1410.pdf"
-            download
+      <div className="flex justify-between items-center w-full">
+        {loading ? (
+          <LoadingButton appearance="soft" small text="Extracting" />
+        ) : (
+          <div
+            className={` ${
+              dragged ? "outline-dashed outline-2 outline-offset-4 outline-black rounded-lg" : ""
+            }`}
+            onDrop={onDrop}
           >
-            Link to sample PDF
-          </Button>
-        </div>
-      )}
+            <Button onClick={onClick} small appearance="soft">
+              Upload PDF file
+            </Button>
+          </div>
+        )}
+        <Button
+          variant="primary"
+          appearance="link"
+          target="_blank"
+          href="https://aclanthology.org/D19-1410.pdf"
+          download
+        >
+          Link to sample PDF
+        </Button>
+      </div>
       {!loading && error && (
         <Hint type="danger" small>
           {error.message}
@@ -127,7 +129,7 @@ const TextInput = ({ setCallback, setErrors }) => {
   const [documentText, setDocumentText] = useState("");
 
   useEffect(() => {
-    setCallback(() => documentText);
+    setCallback(() => ({ data: documentText }));
     if (!documentText) setErrors(["Input text to summarize"]);
     else setErrors(null);
   }, [setCallback, setErrors, documentText]);
@@ -262,6 +264,33 @@ const PdfInput = ({ setCallback, setErrors }) => {
   );
 };
 
+const BulkInput = ({ setCallback, setErrors }) => {
+  const { fileName, lines, setFile } = useFile();
+
+  useEffect(() => {
+    if (!lines) {
+      setErrors(["no file given"]);
+      setCallback(() => null);
+      return;
+    }
+    const filteredLines = lines.filter((line) => line !== "");
+    if (!filteredLines.length) setErrors(["all lines are empty"]);
+    else setErrors(null);
+    setCallback(() => ({ data: filteredLines, fileName }));
+  }, [fileName, lines, setCallback, setErrors]);
+
+  return (
+    <div className="flex flex-col gap-3">
+      <Hint small>
+        Every non-empty line of the file is interpreted as a document that has to be summarized. The
+        result is a jsonl where the {'"document"'} entry holds the document and all other keys are
+        the names of the models and hold the corresponding summary.
+      </Hint>
+      <ChooseFile kind="summaries" fileName={fileName} setFile={setFile} lines={lines} />
+    </div>
+  );
+};
+
 const InputDocument = ({ summarize, state }) => {
   const { summarizers, types, toggle, setArgument } = useContext(SummarizersContext);
   const { summaryLength, setSummaryLength } = useContext(SettingsContext);
@@ -295,6 +324,7 @@ const InputDocument = ({ summarize, state }) => {
                 <TabHead border>
                   <Tab>Text</Tab>
                   <Tab>Pdf</Tab>
+                  <Tab>Bulk</Tab>
                 </TabHead>
                 <div className="h-[50vh]">
                   <TabContent>
@@ -303,6 +333,9 @@ const InputDocument = ({ summarize, state }) => {
                     </TabPanel>
                     <TabPanel>
                       <PdfInput setCallback={setCallback} setErrors={setComponentErrors} />
+                    </TabPanel>
+                    <TabPanel>
+                      <BulkInput setCallback={setCallback} setErrors={setComponentErrors} />
                     </TabPanel>
                   </TabContent>
                 </div>
@@ -361,7 +394,11 @@ const InputDocument = ({ summarize, state }) => {
                   )}
                   {state.value && (
                     <>
-                      {state.value.errors && <Errors errors={state.value.errors} />}
+                      {state.value.errors && (
+                        <ErrorBox>
+                          <Errors errors={state.value.errors} />
+                        </ErrorBox>
+                      )}
                       {state.value.summaries && !state.value.summaries.length && (
                         <Hint type="danger" small>
                           no summaries were generated
@@ -599,6 +636,33 @@ const SummaryView = ({ summaries, documentLength }) => {
   );
 };
 
+const BulkView = ({ summaries, fileName }) => {
+  const sampleFileUrl = useMemo(
+    () =>
+      window.URL.createObjectURL(new Blob([summaries.map(JSON.stringify).join("\n")]), {
+        type: "text/plain",
+      }),
+    [summaries]
+  );
+
+  return (
+    <Card>
+      <CardContent>
+        <div className="flex justify-center items-center w-full">
+          <Button
+            variant="success"
+            appearance="fill"
+            href={sampleFileUrl}
+            download={`${fileName}-summaries.jsonl`}
+          >
+            Download Result as jsonl
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
 const paragraphSize = 1;
 const computeParagraphs = (text) => {
   const paragraphs = [];
@@ -613,17 +677,43 @@ const Summarize = () => {
   const { summarizers, loading, retry } = useContext(SummarizersContext);
 
   const [state, doFetch] = useAsyncFn(
-    async (rawText, models, summaryLength) => {
+    async ({ data, fileName }, models, summaryLength) => {
       const modelsWithArguments = Object.fromEntries(
         models.map((model) => [model, summarizers[model].arguments])
       );
-      const requestText = rawText.trim();
       const ratio = parseInt(summaryLength, 10) / 100;
-      const response = await summarizeRequest(requestText, modelsWithArguments, ratio);
+      const response = await summarizeRequest(data, modelsWithArguments, ratio);
       if (response.errors) return response;
+      if (Array.isArray(response.data)) {
+        let combinedData = [];
+        let combinedErrors = [];
+        response.data.forEach(({ summaries, document }) => {
+          const { data: currData, errors } = collectPluginErrors(
+            summaries,
+            (name, { summary }) => (summary ? { name, summary } : undefined),
+            (elements) => ({
+              document,
+              summaries: Object.fromEntries(
+                elements.map(({ name, summary }) => [summarizers[name].info.name || name, summary])
+              ),
+            })
+          );
+          if (currData) combinedData.push(currData);
+          if (errors) combinedErrors.push(...errors);
+        });
+        if (!combinedData.length) combinedData = undefined;
+        if (!combinedErrors.length) combinedErrors = undefined;
+        else combinedErrors = mapErrorsToName(combinedErrors, summarizers);
+        return {
+          data: { summaries: combinedData, fileName: fileName.split(".")[0] },
+          errors: combinedErrors,
+          hasResults: combinedData !== undefined,
+          type: "bulk",
+        };
+      }
       const { summaries, original, url } = response.data;
       const originalText = computeParagraphs(original.text);
-      return collectPluginErrors(
+      const collected = collectPluginErrors(
         summaries,
         (name, { summary }) =>
           summary
@@ -635,12 +725,24 @@ const Summarize = () => {
           documentLength: computeNumWords(originalText),
         })
       );
+      collected.errors = mapErrorsToName(collected.errors, summarizers);
+      collected.type = "single";
+      collected.hasResults = collected.data.summaries !== undefined;
+      return collected;
     },
     [summarizers]
   );
 
   if (loading) return <CenterLoading />;
   if (!summarizers) return <Button onClick={retry}>Retry</Button>;
+
+  let result = null;
+  const { value } = state;
+  if (!state.loading && value && value.hasResults) {
+    if (value.type === "single") result = <SummaryView {...value.data} />;
+    else if (value.type === "bulk") result = <BulkView {...value.data} />;
+    else result = <Hint type="danger">data has unknown type {`'${value.type}'`}</Hint>;
+  }
 
   return (
     <SpaceGap big>
@@ -653,7 +755,7 @@ const Summarize = () => {
         </Hint>
       </div>
       <InputDocument summarize={doFetch} state={state} />
-      {!state.loading && state.value && state.value.data && <SummaryView {...state.value.data} />}
+      {result}
     </SpaceGap>
   );
 };

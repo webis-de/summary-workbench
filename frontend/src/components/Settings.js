@@ -26,7 +26,7 @@ const ArgumentLayout = ({ name, argDefault, definition, setValue }) => {
   const { display } = definition;
   const title = typeof display === "string" ? display : name;
   let className = "flex";
-  if (definition.type === "str") className += " flex-col";
+  if (definition.type !== "bool") className += " flex-col";
   else className += " items-center flex-row gap-2";
   return (
     <div className={className}>

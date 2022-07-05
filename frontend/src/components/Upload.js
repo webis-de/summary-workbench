@@ -49,7 +49,6 @@ const Upload = ({ setComputeData }) => {
         try {
           jsonl.push(JSON.parse(line));
         } catch (error) {
-          console.log(line.slice(7965, 7980))
           throw new Error(`line ${i} is not a valid json: ${error}`);
         }
       });

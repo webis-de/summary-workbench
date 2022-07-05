@@ -5,7 +5,7 @@ import { evaluateRequest } from "../api";
 import { MetricsContext } from "../contexts/MetricsContext";
 import { useCalculations } from "../hooks/calculations";
 import { average, extractArgumentErrors, getChosen, mapObject } from "../utils/common";
-import { collectPluginErrors } from "../utils/data";
+import { collectPluginErrors, mapErrorsToName } from "../utils/data";
 import { flatten } from "../utils/flatScores";
 import { OneHypRef } from "./OneHypRef";
 import { Result } from "./Result";
@@ -14,7 +14,7 @@ import { Settings } from "./Settings";
 import { Upload } from "./Upload";
 import { Button, LoadingButton } from "./utils/Button";
 import { Card, CardContent, CardHead } from "./utils/Card";
-import { Errors } from "./utils/Error";
+import { ErrorBox, Errors } from "./utils/Error";
 import { CenterLoading } from "./utils/Loading";
 import { Tab, TabContent, TabHead, TabPanel, Tabs } from "./utils/Tabs";
 import { HeadingBig, HeadingSemiBig, Hint } from "./utils/Text";
@@ -160,7 +160,7 @@ const SubEvaluate = () => {
         });
         const data = {};
         if (!scoreBuilder.empty()) data.data = scoreBuilder.compile();
-        if (collectedErrors.length) data.errors = collectedErrors;
+        if (collectedErrors.length) data.errors = mapErrorsToName(collectedErrors, metrics);
         return data;
       }
       return { data: scoreBuilder.compile() };
@@ -245,7 +245,11 @@ const SubEvaluate = () => {
             )}
             {state.value && (
               <>
-                {state.value.errors && <Errors errors={state.value.errors} />}
+                {state.value.errors && (
+                  <ErrorBox>
+                    <Errors errors={state.value.errors} />
+                  </ErrorBox>
+                )}
                 {!state.value.data && (
                   <Hint type="danger" small>
                     no scores were computed

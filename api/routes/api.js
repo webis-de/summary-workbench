@@ -208,9 +208,10 @@ const summarizeValidator = [
 
 router.post("/summarize", summarizeValidator, validateMiddleware, async (req, res, next) => {
   try {
-    const { summarizers, text, ratio } = req.body;
+    const { text, summarizers, ratio } = req.body;
     const textIsURL = isURL(text);
     const original = textIsURL ? await articleDownloader.download(text) : { text };
+    original.text = original.text.trim()
     let summaries = await summarize(summarizers, original.text, ratio, req.abortController);
     if (req.abortController.signal.aborted) return
     summaries = await Promise.all(
@@ -228,6 +229,39 @@ router.post("/summarize", summarizeValidator, validateMiddleware, async (req, re
     const response = { data: { original, summaries } };
     if (textIsURL) response.url = text;
     res.json(response);
+  } catch (err) {
+    next(err);
+  }
+});
+
+const bulkSummarizeValidator = [
+  isListOfStrings(body("documents")),
+  body("ratio")
+    .customSanitizer(setDefault(0.2))
+    .isFloat({ gt: 0.0, lt: 1.0 })
+    .withMessage("has to be between 0.0 and 1.0"),
+  isValidPlugins(body("summarizers"), "SUMMARIZER_KEYS"),
+];
+
+router.post("/summarize/bulk", bulkSummarizeValidator, validateMiddleware, async (req, res, next) => {
+  try {
+    const { documents, summarizers, ratio } = req.body;
+    documents.map((line) => line.trim()).filter((line) => line !== "")
+    const data = []
+    for (const doc of documents) {
+      const text = doc.trim()
+      let summaries = await summarize(summarizers, text, ratio, req.abortController);
+      if (req.abortController.signal.aborted) return
+      summaries = Object.entries(summaries).map(([key, value]) => {
+        const { summary } = value;
+        const newValue = { ...value };
+        if (Array.isArray(summary)) newValue.summary = summary.join(" ")
+        return [key, newValue];
+      })
+      summaries = Object.fromEntries(summaries);
+      data.push({summaries, document: text})
+    }
+    res.json({data});
   } catch (err) {
     next(err);
   }

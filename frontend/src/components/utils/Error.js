@@ -1,4 +1,11 @@
-import { Hint } from "./Text";
+import { HeadingMedium, Hint } from "./Text";
+
+const ErrorBox = ({ children }) => (
+  <div>
+    <HeadingMedium>Errors</HeadingMedium>
+    <div className="border p-2 max-h-[200px] overflow-y-scroll">{children}</div>
+  </div>
+);
 
 const Errors = ({ errors, nested, type = "danger" }) => {
   if (Array.isArray(errors)) {
@@ -30,12 +37,15 @@ const Errors = ({ errors, nested, type = "danger" }) => {
     );
   }
 
-  if (nested) return <div>{inner}</div>;
-  return (
-    <Hint type={type} small>
-      {inner}
-    </Hint>
-  );
+  if (nested) inner = <div>{inner}</div>;
+  else
+    inner = (
+      <Hint type={type} small>
+        {inner}
+      </Hint>
+    );
+
+  return inner;
 };
 
-export { Errors };
+export { Errors, ErrorBox };

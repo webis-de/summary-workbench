@@ -55,7 +55,7 @@ const InputField = ({ value: initValue, setValue: setInitValue, min, max }) => {
 const Categories = ({ value, setValue, definition: { categories } }) => (
   <div className="w-full">
     <select
-      value={categories.indexOf(value)}
+      value={categories.indexOf(value.value)}
       onChange={(e) => setValue(categories[e.target.value])}
       className="form-select appearance-none block w-full px-3 py-1 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded-lg focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
     >
@@ -72,7 +72,7 @@ const Categories = ({ value, setValue, definition: { categories } }) => (
 const IntArgument = ({ value, setValue, definition: { min, max } }) => (
   <InputField value={value} min={min} max={max} setValue={setValue} />
 );
-const BoolArgument = ({ value, setValue }) => <Toggle checked={value} onChange={setValue} />;
+const BoolArgument = ({ value, setValue }) => <Toggle checked={value.value} onChange={setValue} />;
 const FloatArgument = ({ value, setValue, definition: { min, max } }) => (
   <InputField value={value} min={min} max={max} setValue={setValue} />
 );
