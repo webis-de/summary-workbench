@@ -28,7 +28,7 @@ summarizers:
   - ./summarizers/positionrank
   - ./summarizers/textrank
   - ./summarizers/topicrank
-  - ./summarizers/extractive
+  - ./summarizers/featuresum
   - source: ./summarizers/cliffsum
     environment:
       model: MaskEnt
@@ -55,7 +55,7 @@ summarizers:
       model: COOP-Yelp
   - source: ./summarizers/neuralsum
     environment:
-      model: T5
+      model: T5-Base
   - source: ./summarizers/neuralsum
     environment:
       model: BART-CNN
