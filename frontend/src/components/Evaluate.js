@@ -175,8 +175,7 @@ const SubEvaluate = () => {
             key,
             await evaluate(modelsWithArguments, references, hypotheses, controller),
           ])
-        );
-        setAbortController(null);
+        ).finally(() => setAbortController(null));
         if (controller.signal.aborted) return undefined;
         responses.forEach(([key, { data, errors }]) => {
           if (data) scoreBuilder.add(key, data.scores);

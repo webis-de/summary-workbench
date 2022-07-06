@@ -1,8 +1,13 @@
 import React from "react";
 import { Range as ReactRange, getTrackBackground } from "react-range";
 
-const Range = ({ defaultValue, setValue, min = 0, max = 100, step=1 }) => {
-  const [values, setValues] = React.useState([parseInt(defaultValue, 10)]);
+const Range = ({ defaultValue, setValue, min = 0, max = 100, step = 1 }) => {
+  const [values, setValues] = React.useState(() => {
+    let num = parseInt(defaultValue, 10);
+    if (num < min) num = min;
+    if (num > max) num = max;
+    return [num];
+  });
   return (
     <div className="h-10 mt-8 flex items-center flex-wrap pb-12">
       <ReactRange

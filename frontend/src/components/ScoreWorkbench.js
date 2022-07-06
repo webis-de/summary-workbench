@@ -572,7 +572,7 @@ const ExampleDisplay = ({ modelScores, doc: doc_, reference: reference_, model1,
   const markups = useMarkup(d, r, markupType);
   const { document: doc, reference, ...models } = matrix.get(0, markupModels, markups);
   const markupState = useState(null);
-  const scrollState = useMarkupScroll(markupKeys);
+  const scrollState = useMarkupScroll(modelScores);
 
   return (
     <div>

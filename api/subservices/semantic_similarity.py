@@ -16,10 +16,7 @@ class CosineSimilarity:
 
     def _get_sentences(self, text):
         if isinstance(text, str):
-            text = text.replace("\n", " ")
-            text = text.strip()
-            text = list(self.nlp(text).sents)
-            text = [s for s in text if any(t.is_alpha for t in s)]
+            text = [s for s in self.nlp(text).sents if any(t.is_alpha for t in s)]
         else:
             text = [self.nlp(s) for s in text]
         return text
@@ -28,8 +25,8 @@ class CosineSimilarity:
         document_sents = self._get_sentences(document)
         summary_sents = self._get_sentences(summary)
         return {
-            "documentSentences": [doc_sent.text.strip() for doc_sent in document_sents],
-            "summarySentences": [sum_sent.text.strip() for sum_sent in summary_sents],
+            "documentSentences": [doc_sent.text_with_ws for doc_sent in document_sents],
+            "summarySentences": [sum_sent.text_with_ws for sum_sent in summary_sents],
             "scores": [
                 [doc_sent.similarity(sum_sent) for doc_sent in document_sents]
                 for sum_sent in summary_sents

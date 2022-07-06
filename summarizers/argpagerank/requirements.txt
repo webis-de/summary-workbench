@@ -1,9 +1,10 @@
-wheel
-cython
-scikit-learn
-numpy==1.20
-nltk==3.5
-tensorflow_hub==0.8.0
-discreteMarkovChain==0.22
 absl-py
+cython
+discreteMarkovChain==0.22
+nltk==3.5
+numpy==1.20
+protobuf==3.20.*
+scikit-learn
 tensorflow==2.8.0
+tensorflow_hub==0.8.0
+wheel

@@ -199,7 +199,7 @@ const PdfInput = ({ setCallback, setErrors }) => {
     });
 
   useEffect(() => {
-    setCallback(() => (pdfExtract ? pdfJsonToText(pdfExtract) : ""));
+    setCallback(() => ({data: pdfExtract ? pdfJsonToText(pdfExtract) : ""}));
     if (!pdfExtract) setErrors(["Upload a PDF file"]);
     else if (pdfExtract.selected.every((v) => !v)) setErrors(["Select some section to summarize"]);
     else setErrors(null);
@@ -365,7 +365,7 @@ const InputDocument = ({ summarize, state, abortController }) => {
                 <Range
                   defaultValue={summaryLength}
                   setValue={setSummaryLength}
-                  min={15}
+                  min={20}
                   max={50}
                   step={5}
                 />
@@ -559,7 +559,7 @@ const SummaryCompareView = ({ summaries, sums, showOverlap, setOverlap }) => {
   const showSums = useMemo(() => showIndexes.map((i) => sums[i]), [showIndexes, sums]);
   const markups = useMarkups(showSums);
   const markupState = useState(null);
-  const scrollState = useMarkupScroll();
+  const scrollState = useMarkupScroll(overlapSummaries);
   const elements = useMemo(() => {
     const newSums = sums.map((sum, index) => [[sum], summarizers[summaries[index].name].info.name]);
     showIndexes.forEach((i, j) => {
@@ -737,8 +737,7 @@ const Summarize = () => {
       const ratio = parseInt(summaryLength, 10) / 100;
       const controller = new AbortController();
       setAbortController(controller);
-      const response = await summarizeRequest(data, modelsWithArguments, ratio, controller);
-      setAbortController(null);
+      const response = await summarizeRequest(data, modelsWithArguments, ratio, controller).finally(() => setAbortController(null));
       if (controller.signal.aborted) return undefined;
       if (response.errors) return response;
       if (Array.isArray(response.data)) {

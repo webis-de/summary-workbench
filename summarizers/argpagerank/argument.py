@@ -2,7 +2,6 @@ from nltk.tokenize import sent_tokenize
 from nltk.tokenize import word_tokenize
 import numpy as np
 import re
-import nltk
 
 class Argument:
 

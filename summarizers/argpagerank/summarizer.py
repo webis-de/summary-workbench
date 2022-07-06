@@ -1,11 +1,8 @@
-import json
 import re
-import os
 import tensorflow_hub as hub
 import numpy as np
 import nltk
 nltk.download('punkt')
-from nltk import sent_tokenize
 from argument import Argument
 from sklearn.preprocessing import MinMaxScaler
 from discreteMarkovChain import markovChain
@@ -53,7 +50,7 @@ class ArgsRank(object):
                 return np.array(self.sentences)[ind]
             else:
                 return np.array(self.sentences)
-    
+
     def power_method(self, M, epsilon):
         """
         Apply power methode to calculate stationary distribution for Matrix M
@@ -69,7 +66,7 @@ class ArgsRank(object):
             t = t + 1
             p_prev = p_t
             p_t = np.dot(M.T, p_t)
-            
+
             if np.isnan(p_t).any():
                 break
 
@@ -173,7 +170,7 @@ class ArgsRank(object):
         except Exception as e:
             return None
 
-    
+
     def generate_snippet(self, args, ratio):
         output = []
         self.sem_similarity_scoring([args])
@@ -191,13 +188,12 @@ class ArgsRank(object):
         arg.set_sentences(text)
         cluster.append(arg)
         return self.generate_snippet(cluster, ratio)
-        
+
 
 class SummarizerPlugin:
     def __init__(self):
         print("Initializing ArgPageRank")
         self.summarizer = ArgsRank()
-    
+
     def summarize(self, *args, **kwargs):
         return self.summarizer.summarize(*args, **kwargs)
- 
