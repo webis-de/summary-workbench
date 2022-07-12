@@ -39,7 +39,7 @@ const messageError = ({ message }) => {
   return undefined;
 };
 
-const singleErrorToMessage = (rawError) => {
+const singleErrorToMessage = (rawError, returnNullOnFail=false) => {
   for (const errorFunc of [
     checkPydanticValidation,
     checkJavascriptValidation,
@@ -49,15 +49,19 @@ const singleErrorToMessage = (rawError) => {
     const error = errorFunc(rawError);
     if (error) return error;
   }
+  if (returnNullOnFail) return null
   return {
     type: "UNKNOWN",
     message: JSON.stringify(rawError),
   };
 };
 
-const errorToMessage = (error) => {
-  if (Array.isArray(error)) return error.map(singleErrorToMessage);
-  return [singleErrorToMessage(error)];
+const errorToMessage = (error, returnNullOnFail=false) => {
+  let errors
+  if (Array.isArray(error)) errors = error.map((e) => singleErrorToMessage(e, returnNullOnFail));
+  errors = [singleErrorToMessage(error, returnNullOnFail)];
+  if (returnNullOnFail && errors.some(e => !e)) return null
+  return errors
 };
 
 module.exports = { errorToMessage };

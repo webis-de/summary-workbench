@@ -31,8 +31,8 @@ const pluginRequest = async (plugins, extractor, abortController) => {
         if (error instanceof axios.CanceledError) return null
         let errors = null;
         const { code } = error;
-        if (code) errors = errorToMessage(code);
-        else errors = errorToMessage(error.response.data);
+        if (code) errors = errorToMessage(code, true);
+        if (!errors) errors = errorToMessage(error.response.data);
         return [key, { errors }];
       }
     })

@@ -32,3 +32,10 @@ arguments:
   high_load:
     type: bool
     default: true
+  return_data:
+    type: categorical
+    default: real
+    categories:
+      - real
+      - none
+      - error

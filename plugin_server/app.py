@@ -26,7 +26,15 @@ class CancelError(Exception):
 
 class KThreadWithReturnValue(kthread.KThread):
     def run(self):
-        self.result = self._target(*self._args, **self._kwargs)
+        self.result = None
+        self.exc = None
+        try:
+            self.result = self._target(*self._args, **self._kwargs)
+        except Exception as e:
+            self.exc = e
+
+    def join(self, *args, **kwargs):
+        super().join(*args, **kwargs)
 
 
 async def cancable_execute(request: Request, function):
@@ -37,6 +45,8 @@ async def cancable_execute(request: Request, function):
         if await request.is_disconnected():
             thread.terminate()
             raise CancelError()
+    if thread.exc:
+        raise thread.exc
     return thread.result
 
 

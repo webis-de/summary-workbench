@@ -17,6 +17,7 @@ const evaluate = async (metrics, hypotheses, references, abortController) => {
   if (abortController.signal.aborted) return undefined
   if (Object.keys(validationResults).length) return validationResults;
   const result = await pluginRequest(nonCached, ({ scores }) => ({ scores }), abortController);
+  console.log(result)
   if (abortController.signal.aborted) return undefined
   cache.add(result, plugins, METRICS)
   return {...cached, ...result}

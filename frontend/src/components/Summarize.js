@@ -365,7 +365,7 @@ const InputDocument = ({ summarize, state, abortController }) => {
                 <Range
                   defaultValue={summaryLength}
                   setValue={setSummaryLength}
-                  min={20}
+                  min={15}
                   max={50}
                   step={5}
                 />

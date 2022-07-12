@@ -17,6 +17,7 @@ class MetricPlugin:
         extra_message,
         summary,
         high_load,
+        return_data,
     ):
         if time > 0:
             if high_load:
@@ -33,4 +34,10 @@ class MetricPlugin:
             if error == "AttributeError":
                 raise AttributeError(error_message)
             raise ValueError(f"unknown error type {error}")
-        return [extra_message] * len(hypotheses)
+        if return_data == "real":
+            return [extra_message] * len(hypotheses)
+        if return_data == "none":
+            return None
+        if return_data == "error":
+            return [1, None, "test", 0.2, -10, {"1": "test"}, [1, 2, 3]]
+        raise ValueError(f"unknown return_data {return_data}")
