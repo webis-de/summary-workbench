@@ -199,7 +199,7 @@ const PdfInput = ({ setCallback, setErrors }) => {
     });
 
   useEffect(() => {
-    setCallback(() => ({data: pdfExtract ? pdfJsonToText(pdfExtract) : ""}));
+    setCallback(() => ({ data: pdfExtract ? pdfJsonToText(pdfExtract) : "" }));
     if (!pdfExtract) setErrors(["Upload a PDF file"]);
     else if (pdfExtract.selected.every((v) => !v)) setErrors(["Select some section to summarize"]);
     else setErrors(null);
@@ -737,7 +737,9 @@ const Summarize = () => {
       const ratio = parseInt(summaryLength, 10) / 100;
       const controller = new AbortController();
       setAbortController(controller);
-      const response = await summarizeRequest(data, modelsWithArguments, ratio, controller).finally(() => setAbortController(null));
+      const response = await summarizeRequest(data, modelsWithArguments, ratio, controller).finally(
+        () => setAbortController(null)
+      );
       if (controller.signal.aborted) return undefined;
       if (response.errors) return response;
       if (Array.isArray(response.data)) {
@@ -784,7 +786,7 @@ const Summarize = () => {
       if (collected.errors && collected.errors.length)
         collected.errors = mapErrorsToName(collected.errors, summarizers);
       collected.type = "single";
-      collected.hasResults = collected.data.summaries !== undefined;
+      collected.hasResults = collected.data && collected.data.summaries !== undefined;
       return collected;
     },
     [summarizers]

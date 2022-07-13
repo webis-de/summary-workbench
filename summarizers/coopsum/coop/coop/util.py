@@ -16,7 +16,7 @@ BAD_WORDS = ["I", "i", "My", "my", "Me", "me", "We", "we", "Our", "our", "us"]
 
 def powerset(size):
     # https://docs.python.org/3/library/itertools.html#itertools-recipes
-    return list(map(list, chain.from_iterable(combinations(range(size), r + 1) for r in range(size))))
+    return map(list, chain.from_iterable(combinations(range(size), r + 1) for r in range(size)))
 
 
 def get_logger(log_dir: Path):

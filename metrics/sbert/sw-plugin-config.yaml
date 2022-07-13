@@ -2,6 +2,5 @@ version: "1.0"
 name: SBERT
 metadata:
   type: semantic
-  model: roberta-large-nli-stsb-mean-tokens
   homepage: https://aclanthology.org/D19-1410/
   sourcecode: https://github.com/UKPLab/sentence-transformers

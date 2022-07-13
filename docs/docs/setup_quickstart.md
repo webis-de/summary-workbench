@@ -20,7 +20,7 @@ Create a file named `my.sw-config.yaml` in the project root and write the follow
 metrics:
   - ./metrics/rouge
   - ./metrics/bleu
-  - source: ./metrics/sentence_transformers
+  - source: ./metrics/sbert
     disabled: true
 
 summarizers:

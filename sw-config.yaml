@@ -3,6 +3,7 @@ deploy:
   host: tldr.demo.webis.de
 
 metrics:
+  - ./debug_plugin
   - ./metrics/bartscore
   - ./metrics/bert
   - ./metrics/bleu
@@ -13,9 +14,10 @@ metrics:
   - ./metrics/meteor
   - ./metrics/moverscore
   - ./metrics/rouge
-  - ./metrics/sentence_transformers
+  - ./metrics/sbert
 
 summarizers:
+  - ./debug_plugin
   - ./summarizers/argpagerank
   - ./summarizers/bertsum
   - ./summarizers/biasedtextrank

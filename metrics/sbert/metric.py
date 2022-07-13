@@ -22,3 +22,6 @@ class MetricPlugin:
         embeddings2 = self.model.encode(references, convert_to_tensor=True)
         cosine_scores = _paired_cosin_sim(embeddings1, embeddings2)
         return cosine_scores
+
+    def metadata(self):
+        return {"model": self.MODEL}

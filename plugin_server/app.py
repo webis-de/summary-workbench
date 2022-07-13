@@ -1,4 +1,5 @@
 import asyncio
+import copy
 import json
 import sys
 import uuid
@@ -155,11 +156,11 @@ def to_float_list(array):
 
 def create_plugin(Constructor):
     plugin = Constructor()
-    updated_plugin_config = PLUGIN_CONFIG.copy()
+    updated_plugin_config = copy.deepcopy(PLUGIN_CONFIG)
     try:
         updated_plugin_config.setdefault("metadata", {})
         updated_plugin_config["metadata"].update(plugin.metadata())
-    except:
+    except AttributeError:
         pass
     return plugin, updated_plugin_config
 

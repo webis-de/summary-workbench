@@ -1,10 +1,16 @@
-const connectionError = {
-  type: "PLUGIN_UNHEALTHY",
-  message: "the service is down",
-};
-
 const errorMap = {
-  EAI_AGAIN: connectionError,
+  EAI_AGAIN: {
+    type: "PLUGIN_UNHEALTHY",
+    message: "the service is down",
+  },
+  ECONNABORTED: {
+    type: "TIMEOUT",
+    message: "connection to plugin timeout",
+  },
+  ECONNRESET: {
+    type: "CONTAINER_CLOSED_CONNECTION",
+    message: "the container closed the connection",
+  }
 };
 
 const checkPydanticValidation = ({ loc, msg }) => {
@@ -39,6 +45,11 @@ const messageError = ({ message }) => {
   return undefined;
 };
 
+const toUnknownError = (rawError) => ({
+    type: "UNKNOWN",
+    message: JSON.stringify(rawError),
+})
+
 const singleErrorToMessage = (rawError, returnNullOnFail=false) => {
   for (const errorFunc of [
     checkPydanticValidation,
@@ -50,10 +61,7 @@ const singleErrorToMessage = (rawError, returnNullOnFail=false) => {
     if (error) return error;
   }
   if (returnNullOnFail) return null
-  return {
-    type: "UNKNOWN",
-    message: JSON.stringify(rawError),
-  };
+  return toUnknownError(rawError);
 };
 
 const errorToMessage = (error, returnNullOnFail=false) => {
@@ -64,4 +72,4 @@ const errorToMessage = (error, returnNullOnFail=false) => {
   return errors
 };
 
-module.exports = { errorToMessage };
+module.exports = { errorToMessage, toUnknownError };
