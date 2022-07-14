@@ -10,7 +10,7 @@ requests = "*"
 nltk = "*"
 sklearn = "*"
 numpy = "*"
-gensim = "*"
+gensim = "<4.0.0"
 
 [requires]
-python_version = "3.8"
+python_version = "3.9"

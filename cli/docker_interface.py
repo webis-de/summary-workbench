@@ -61,7 +61,7 @@ class Docker:
                 print(stream, end="")
         context.seek(0)
         image = self.client.images.build(
-            fileobj=context, encoding="gzip", custom_context=True
+            fileobj=context, encoding="gzip", custom_context=True, buildargs=buildargs
         )[0]
         return image.id.split(":")[1]
 

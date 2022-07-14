@@ -9,7 +9,7 @@ metrics:
   - ./metrics/bleu
   - ./metrics/bleurt
   - ./metrics/cider
-  - ./metrics/cosine_similarity
+  - ./metrics/spacy_similarity
   - ./metrics/greedy_matching
   - ./metrics/meteor
   - ./metrics/moverscore

@@ -308,7 +308,7 @@ const InputDocument = ({ summarize, state, abortController }) => {
   const disableErrors = [];
   if (argErrors) disableErrors.push(...argErrors);
   if (componentErrors) disableErrors.push(...componentErrors);
-  if (!modelIsChosen) disableErrors.push("Choose at least one metric");
+  if (!modelIsChosen) disableErrors.push("Choose at least one summarizer");
 
   const setCallback = useCallback((cb) => {
     getTextRef.current = cb;

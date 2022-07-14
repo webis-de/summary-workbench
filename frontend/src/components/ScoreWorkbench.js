@@ -668,7 +668,9 @@ const Plotter = ({ calculation }) => {
     [layoutPatch]
   );
   const [trueLayout, setTrueLayout] = useState({});
-  useEffect(() => setTrueLayout(layout), [layout]);
+  useEffect(() => {
+    setTrueLayout(layout);
+  }, [layout]);
   return (
     <div>
       <TableWrapper>

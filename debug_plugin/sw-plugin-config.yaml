@@ -1,7 +1,6 @@
 version: "1.0"
 name: Debug
-metadata:
-  type: extractive
+metadata: {}
 arguments:
   fail:
     type: bool

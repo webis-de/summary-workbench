@@ -1,0 +1,20 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+torch = "~=1.7.0"
+transformers = "~=3.4.0"
+py-rouge = "*"
+tqdm = "*"
+pandas = "*"
+allennlp = "==1.2.0"
+requests = "*"
+nltk = "*"
+huggingface-hub = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.8"

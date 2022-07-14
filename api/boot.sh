@@ -30,10 +30,10 @@ function init_grobid() {
   echo "init done"
 }
 
-npm install
 init_grobid
 if [[ $NODE_ENV == "production" ]]; then
   node /app/index.js
 else
+  npm install
   /app/node_modules/.bin/nodemon /app/index.js
 fi

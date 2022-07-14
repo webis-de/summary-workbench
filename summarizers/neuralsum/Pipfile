@@ -8,11 +8,10 @@ ipython = "*"
 ipdb = "*"
 
 [packages]
-flask = "*"
-gunicorn = "*"
-transformers = {extras = ["torch"],version = "*"}
+transformers = "*"
+torch = "*"
 sentencepiece = "*"
-protobuf = "*"
+protobuf = "~=3.20.0"
 
 [requires]
-python_version = "3.8"
+python_version = "3.9"

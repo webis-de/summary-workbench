@@ -109,8 +109,12 @@ const usePagination = (
     [size, page, maxSize]
   );
 
-  useEffect(() => setPage(validRange(page, numPages)), [numPages, page, setPage]);
-  useEffect(() => reset && setPage(initialPage), [initialPage, reset, setPage]);
+  useEffect(() => {
+    setPage(validRange(page, numPages));
+  }, [numPages, page, setPage]);
+  useEffect(() => {
+    if (reset) setPage(initialPage);
+  }, [initialPage, reset, setPage]);
 
   return { page, numPages, setPage, size, setSize };
 };

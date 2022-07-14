@@ -1,4 +1,4 @@
-FROM nikolaik/python-nodejs:python3.9-nodejs16-slim
+FROM nikolaik/python-nodejs:python3.9-nodejs18-slim
 
 ENV PDF_EXTRACTOR_HOME=/pdf_extractor
 

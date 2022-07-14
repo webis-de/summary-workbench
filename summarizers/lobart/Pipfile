@@ -1,15 +1,15 @@
 [[source]]
-name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
-
-[dev-packages]
-ipython = "*"
-ipdb = "*"
+name = "pypi"
 
 [packages]
-transformers = "*"
+tqdm = "*"
+requests = "*"
 torch = "*"
+transformers = "==2.11.0"
+
+[dev-packages]
 
 [requires]
 python_version = "3.8"

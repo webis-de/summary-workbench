@@ -79,22 +79,22 @@ const initConfig = async (timeout = 30000) => {
 const PORT = process.env.PORT || 5000;
 console.log("Modus:", process.env.NODE_ENV);
 
-let { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } = process.env;
+// let { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } = process.env;
 
-if (!ACCESS_TOKEN_SECRET || !REFRESH_TOKEN_SECRET) {
-  if (!isProduction) {
-    ACCESS_TOKEN_SECRET = "no_secret";
-    REFRESH_TOKEN_SECRET = "no_secret";
-  } else {
-    console.error(
-      'the "ACCESS_TOKEN_SECRET" and "REFRESH_TOKEN_SECRET" environment variables have to be set when not running in DEBUG mode'
-    );
-    process.exit(1);
-  }
-} else {
-  ACCESS_TOKEN_SECRET = Buffer.from(ACCESS_TOKEN_SECRET, "base64");
-  REFRESH_TOKEN_SECRET = Buffer.from(ACCESS_TOKEN_SECRET, "base64");
-}
+// if (!ACCESS_TOKEN_SECRET || !REFRESH_TOKEN_SECRET) {
+//   if (!isProduction) {
+//     ACCESS_TOKEN_SECRET = "no_secret";
+//     REFRESH_TOKEN_SECRET = "no_secret";
+//   } else {
+//     console.error(
+//       'the "ACCESS_TOKEN_SECRET" and "REFRESH_TOKEN_SECRET" environment variables have to be set when not running in DEBUG mode'
+//     );
+//     process.exit(1);
+//   }
+// } else {
+//   ACCESS_TOKEN_SECRET = Buffer.from(ACCESS_TOKEN_SECRET, "base64");
+//   REFRESH_TOKEN_SECRET = Buffer.from(ACCESS_TOKEN_SECRET, "base64");
+// }
 
 const { MONGODB_HOST } = process.env;
 
@@ -104,6 +104,6 @@ module.exports = {
   isProduction,
   MONGODB_HOST,
   PORT,
-  ACCESS_TOKEN_SECRET,
-  REFRESH_TOKEN_SECRET,
+  // ACCESS_TOKEN_SECRET,
+  // REFRESH_TOKEN_SECRET,
 };

@@ -7,7 +7,9 @@ const DragProvider = ({ children }) => {
   const [dragged, setDragged] = useState(false);
   const increment = () => setNumDragged((v) => v + 1);
   const decrement = () => setNumDragged((v) => v - 1);
-  useEffect(() => setDragged(numDragged > 0), [numDragged, setDragged]);
+  useEffect(() => {
+    setDragged(numDragged > 0);
+  }, [numDragged, setDragged]);
 
   return (
     <DragContext.Provider value={dragged}>

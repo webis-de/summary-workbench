@@ -7,7 +7,7 @@ const { PORT } = require("./config");
 
 const portUsed = (port) =>
   new Promise((resolve) => {
-    const client = net.connect({ port, host: "localhost" });
+    const client = net.connect({ port, host: "127.0.0.1" });
     client.on("connect", () => {
       client.destroy();
       resolve(true);
@@ -59,6 +59,7 @@ class Subservice {
   async wait() {
     console.log(`${this.constructor.name}: waiting`);
     while (!(await portUsed(this.port)) && this.running) await sleep(1000);
+
     if (!this.running) {
       console.log(this.running);
       throw new Error(`${this.constructor.name}: process exited`);
@@ -73,7 +74,7 @@ class ArticleDownloader extends Subservice {
   }
 
   download(url) {
-    return axios.post(`http://localhost:${this.port}/`, { url }).then((response) => response.data);
+    return axios.post(`http://127.0.0.1:${this.port}/`, { url }).then((response) => response.data);
   }
 }
 
@@ -84,7 +85,7 @@ class SentenceSplitter extends Subservice {
 
   split(text) {
     return axios
-      .post(`http://localhost:${this.port}/`, { text })
+      .post(`http://127.0.0.1:${this.port}/`, { text })
       .then((response) => response.data.sentences);
   }
 }
@@ -98,7 +99,7 @@ class PdfExtractor extends Subservice {
     const formData = new FormData();
     formData.append("file", pdf, "file.pdf");
     return axios
-      .post(`http://localhost:${this.port}/`, formData, {
+      .post(`http://127.0.0.1:${this.port}/`, formData, {
         headers: formData.getHeaders(),
       })
       .then((response) => response.data);
@@ -111,7 +112,7 @@ class SemanticSimilarity extends Subservice {
   }
 
   similarity(sentences, summary) {
-    return axios.post(`http://localhost:${this.port}/`, { sentences, summary }).then((response) => response.data);
+    return axios.post(`http://127.0.0.1:${this.port}/`, { sentences, summary }).then((response) => response.data);
   }
 }
 
