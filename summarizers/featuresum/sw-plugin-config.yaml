@@ -13,6 +13,10 @@ arguments:
     type: bool
     display: TF-IDF
     default: true
+  use_special_tokens:
+    type: bool
+    display: Special Tokens
+    default: true
   use_position:
     type: bool
     display: Position

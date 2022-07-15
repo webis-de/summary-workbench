@@ -16,11 +16,10 @@ def has_special_feature(token):
 
 
 def special_token_score(sentences):
+    """number of special tokens (currency, digit, noun, adjective, proper noun, 'a'/'an', has an entity type) devided by length of sentence"""
     features = []
     for sentence in sentences:
-        score = 0
-        for token in sentence:
-            if has_special_feature(token):
-                score += 1
+        special_tokens = [token for token in sentence if has_special_feature(token)]
+        score = len(special_tokens) / len(sentence)
         features.append(score)
     return np.array(features)

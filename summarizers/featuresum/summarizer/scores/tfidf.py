@@ -22,8 +22,7 @@ def mul_feature(matrix):
 
 def tfidf_score(sentences, smooth_idf=False, use_lemma=False):
     """compute the score as the sum of the tfidf vector
-    divided by sentence length
-    """
+    entries divided by sentence length"""
     analyzer = partial(filter_tokens, use_lemma=use_lemma)
     vectorizer = TfidfVectorizer(analyzer=analyzer, smooth_idf=smooth_idf)
     try:

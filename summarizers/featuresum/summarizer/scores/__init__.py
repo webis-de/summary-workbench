@@ -9,6 +9,7 @@ from .rank import rank_score
 from .stopword_ratio import stopword_ratio
 from .tfidf import tfidf_score
 from .word_overlap import WordOverlap
+from .special_tokens import special_token_score
 
 
 def take_ratio(df, ratio):
@@ -41,6 +42,7 @@ class Scorer:
         *,
         title,
         use_tfidf,
+        use_special_tokens,
         use_position,
         use_average_lexical_connectivity,
         use_stopword_ratio,
@@ -54,6 +56,8 @@ class Scorer:
         scores["default"] = 1
         if use_tfidf:
             scores["tfidf"] = tfidf_score(sentences, use_lemma=True)
+        if use_special_tokens:
+            scores["special_tokens"] = special_token_score(sentences)
         if use_position:
             scores["position"] = position_score(sentences, linear=False, use_exp=True)
         if use_average_lexical_connectivity:
@@ -86,6 +90,7 @@ class Scorer:
         ratio,
         title=None,
         use_tfidf=True,
+        use_special_tokens=True,
         use_position=True,
         use_average_lexical_connectivity=True,
         use_stopword_ratio=True,
@@ -96,6 +101,7 @@ class Scorer:
             document,
             title=title,
             use_tfidf=use_tfidf,
+            use_special_tokens=use_special_tokens,
             use_position=use_position,
             use_average_lexical_connectivity=use_average_lexical_connectivity,
             use_stopword_ratio=use_stopword_ratio,
