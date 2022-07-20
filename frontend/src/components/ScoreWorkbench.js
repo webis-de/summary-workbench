@@ -81,7 +81,7 @@ const ScoreTable = ({ calculation }) => {
               const metric = rows[i];
               return (
                 <Tr key={metric} hover striped>
-                  <Td>{metric}</Td>
+                  <Td sticky>{metric}</Td>
                   {row.map((score, j) => (
                     <Td key={j}>{score.toFixed(3)}</Td>
                   ))}
@@ -688,7 +688,7 @@ const Plotter = ({ calculation }) => {
               const metric = rownames[i];
               return (
                 <Tr key={metric} striped>
-                  <Td loose>{metric}</Td>
+                  <Td loose sticky>{metric}</Td>
                   {row.map((isSet, j) => (
                     <Td key={j} loose center>
                       <Checkbox checked={isSet} onChange={() => toggleMetric([i, j])} />

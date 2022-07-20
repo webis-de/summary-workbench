@@ -47,7 +47,7 @@ const Tr = ({ children, hover, striped, red }) => {
   return <tr className={className}>{children}</tr>;
 };
 
-const Td = ({ children, nowrap, center, right, strong, loose, colSpan }) => {
+const Td = ({ children, nowrap, center, right, strong, sticky, loose, colSpan }) => {
   let className = "text-sm font-medium";
 
   if (center) className += " text-center";
@@ -61,6 +61,8 @@ const Td = ({ children, nowrap, center, right, strong, loose, colSpan }) => {
 
   if (strong) className += " text-gray-900";
   else className += " text-gray-500";
+
+  if (sticky) className += " left-0 bg-gray-100 sticky"
 
   return (
     <td colSpan={colSpan} className={className}>
