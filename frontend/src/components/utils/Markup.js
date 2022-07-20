@@ -110,23 +110,26 @@ const StringContent = memo(({ content }) => {
   );
 });
 
-const MarkupRoot = ({ markups, markupState, scrollState, allowScroll, showMarkup }) => (
-  <>
-    {markups.map((child, i) => {
-      if (typeof child === "string") return <StringContent key={i} content={child} />;
-      return (
-        <TaggedMarkup
-          key={i}
-          markup={child}
-          markupState={markupState}
-          scrollState={scrollState}
-          allowScroll={allowScroll}
-          showMarkup={showMarkup}
-        />
-      );
-    })}
-  </>
-);
+const MarkupRoot = ({ markups, markupState, scrollState, allowScroll, showMarkup }) => {
+  if (typeof markups === "string") return <StringContent content={markups} />;
+  return (
+    <>
+      {markups.map((child, i) => {
+        if (typeof child === "string") return <StringContent key={i} content={child} />;
+        return (
+          <TaggedMarkup
+            key={i}
+            markup={child}
+            markupState={markupState}
+            scrollState={scrollState}
+            allowScroll={allowScroll}
+            showMarkup={showMarkup}
+          />
+        );
+      })}
+    </>
+  );
+};
 
 const Markup = ({ markups, markupState, scrollState, showMarkup = true }) => (
   <div className="leading-[22px]">

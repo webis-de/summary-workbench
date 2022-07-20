@@ -75,7 +75,7 @@ const evaluate = async (modelsWithArguments, references, hypotheses, abortContro
   );
   if (abortController && abortController.signal.aborted) return undefined;
   if (response.errors) return response;
-  return collectPluginErrors(
+  const result = collectPluginErrors(
     response.data.scores,
     (name, { scores }) => {
       if (scores) return { name, scores };
@@ -85,6 +85,7 @@ const evaluate = async (modelsWithArguments, references, hypotheses, abortContro
       scores: Object.fromEntries(elements.map(({ name, scores }) => [name, scores])),
     })
   );
+  return result
 };
 
 class ScoreBuilder {

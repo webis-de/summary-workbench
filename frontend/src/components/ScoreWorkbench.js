@@ -4,7 +4,7 @@ import { useKey, useToggle } from "react-use";
 
 import { HoverContext } from "../contexts/HoverContext";
 import { useMarkup } from "../hooks/markup";
-import { arrayEqual, mapObject } from "../utils/common";
+import { arrayEqual, mapObject, computeParagraphs, splitSentences  } from "../utils/common";
 import formatters from "../utils/export";
 import { range } from "../utils/python";
 import { CopyToClipboardButton } from "./utils/Button";
@@ -175,7 +175,7 @@ const SemanticMarkup = memo(({ markup }) => {
 });
 
 const MarkupOrText = ({ markup, markupState, scrollState }) => {
-  if (typeof markup === "string") return <div className="leading-[22px]">{markup}</div>;
+  if (typeof markup === "string") return <Markup markups={markup} />
   const { type } = markup;
   switch (type) {
     case "loading":
@@ -743,7 +743,12 @@ const Plotter = ({ calculation }) => {
   );
 };
 
-const ScoreWorkbench = ({ calculation, RightToken }) => {
+const ScoreWorkbench = ({ calculation: calc, RightToken }) => {
+  const calculation = useMemo(() => {
+    const c = {...calc}
+    if (Array.isArray(c.documents)) c.documents = c.documents.map(splitSentences).map(computeParagraphs)
+    return c
+  }, [calc])
   const hasScores = Boolean(calculation.table.length);
   return (
     <div>

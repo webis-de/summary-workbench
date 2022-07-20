@@ -38,6 +38,18 @@ const extractArgumentErrors = (chosenModels, models) =>
     .filter(({ errors: e }) => e.length)
     .sort(({ name }) => name);
 
+const splitSentences = (text) => text.match(/[^.?!]+[.!?]+[\])'"`’”]*|.+/g).map(t => t.trim());
+
+const paragraphSize = 1;
+const computeParagraphs = (text) => {
+  const paragraphs = [];
+  for (let index = 0; index < text.length; index += paragraphSize) {
+    const paragraph = text.slice(index, index + paragraphSize);
+    paragraphs.push(paragraph.join(" "));
+  }
+  return paragraphs.join("\n\n");
+};
+
 export {
   getChosen,
   unpack,
@@ -48,4 +60,6 @@ export {
   average,
   arrayEqual,
   extractArgumentErrors,
+  splitSentences,
+  computeParagraphs,
 };

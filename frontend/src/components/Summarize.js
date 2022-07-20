@@ -14,7 +14,7 @@ import { feedbackRequest, pdfExtractRequest, summarizeRequest } from "../api";
 import { SettingsContext } from "../contexts/SettingsContext";
 import { SummarizersContext } from "../contexts/SummarizersContext";
 import { useMarkups, usePairwiseMarkups } from "../hooks/markup";
-import { extractArgumentErrors, getChosen } from "../utils/common";
+import { extractArgumentErrors, getChosen, computeParagraphs } from "../utils/common";
 import { collectPluginErrors, mapErrorsToName } from "../utils/data";
 import { Settings } from "./Settings";
 import { Badge } from "./utils/Badge";
@@ -705,16 +705,6 @@ const BulkView = ({ summaries, fileName }) => {
       </CardContent>
     </Card>
   );
-};
-
-const paragraphSize = 1;
-const computeParagraphs = (text) => {
-  const paragraphs = [];
-  for (let index = 0; index < text.length; index += paragraphSize) {
-    const paragraph = text.slice(index, index + paragraphSize);
-    paragraphs.push(paragraph.join(" "));
-  }
-  return paragraphs.join("\n\n");
 };
 
 const Summarize = () => {
