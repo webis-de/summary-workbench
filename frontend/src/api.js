@@ -15,7 +15,7 @@ const summarizeRequest = (data, summarizers, ratio, abortController) => {
     );
   return post(
     "/api/summarize",
-    { text: data, summarizers, ratio, abortController },
+    { text: data, summarizers, ratio },
     { abortController }
   );
 };

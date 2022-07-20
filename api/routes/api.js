@@ -116,12 +116,11 @@ const validateHypRefMiddleware = (req, res, next) => {
  *             type: object
  *             properties:
  *               metrics:
- *                 description: list of metrics for the evaluation
- *                 example: ["anonymous-rouge", "anonymous-bleu"]
- *                 schema:
- *                   type: array
- *                   items:
- *                     type: string
+ *                 description: object with metric identifier as key and arguments as value (if metric needs arguments) (see /api/metrics)
+ *                 example: { "metric-null-rouge": {}, "metric-null-bleu": {} }
+ *                 type: object
+ *                 additionalProperties:
+ *                   type: object
  *               references:
  *                 description: list of texts
  *                 example: ["I like to swim. Water is nice", "I like forests, because trees are nice. I wish i could climb."]
@@ -181,23 +180,21 @@ const summarizeValidator = [
  *             type: object
  *             properties:
  *               summarizers:
- *                 description: list of summarizers to use (see /api/summarizers)
- *                 example: ["anonymous-textrank", "anonymous-newspaper3k"]
- *                 schema:
- *                   type: array
- *                   items:
- *                     type: string
+ *                 description: object with summary identifier as key and arguments as value (if summarizer needs arguments) (see /api/summarizers)
+ *                 example: { "summarizer-null-textrank": {}, "summarizer-null-newspaper3k": {} }
+ *                 type: object
+ *                 additionalProperties:
+ *                   type: object
  *               text:
- *                 description: text to summarizer or url of a website which is used to crawl the text
- *                 example: New World was inhabited by an alien species called the Spackle . The last few hundred survivors are stuck in one small village that 's slowly dying since no one can have any kids.
+ *                 description: text to summarize a text or an url of a website which is used to crawl the text
+ *                 example: Alan Mathison Turing was an English mathematician, computer scientist, logician, cryptanalyst, philosopher, and theoretical biologist. Turing was highly influential in the development of theoretical computer science, providing a formalisation of the concepts of algorithm and computation with the Turing machine, which can be considered a model of a general-purpose computer. Turing is widely considered to be the father of theoretical computer science and artificial intelligence. Despite these accomplishments, he was never fully recognised in his home country, if only because much of his work was covered by the Official Secrets Act.
  *                 type: string
  *               ratio:
  *                 description: length of the summarie
  *                 example: 0.1
- *                 schema:
- *                   type: number
- *                   minimum: 0
- *                   maximum: 1
+ *                 type: number
+ *                 minimum: 0
+ *                 maximum: 1
  *     responses:
  *       200:
  *         description: Success
@@ -242,6 +239,46 @@ const bulkSummarizeValidator = [
     .withMessage("has to be between 0.0 and 1.0"),
   isValidPlugins(body("summarizers"), "SUMMARIZER_KEYS"),
 ];
+
+/**
+ * @swagger
+ * /api/summarize/bulk:
+ *   post:
+ *     description: Summarize A text or url
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               summarizers:
+ *                 description: object with summary identifier as key and arguments as value (if summarizer needs arguments) (see /api/summarizers)
+ *                 example: { "summarizer-null-textrank": {}, "summarizer-null-newspaper3k": {} }
+ *                 type: object
+ *                 additionalProperties:
+ *                   type: object
+ *               documents:
+ *                 description: list of texts to summarize
+ *                 example: [
+ *                   "Alan Mathison Turing was an English mathematician, computer scientist, logician, cryptanalyst, philosopher, and theoretical biologist. Turing was highly influential in the development of theoretical computer science, providing a formalisation of the concepts of algorithm and computation with the Turing machine, which can be considered a model of a general-purpose computer. Turing is widely considered to be the father of theoretical computer science and artificial intelligence. Despite these accomplishments, he was never fully recognised in his home country, if only because much of his work was covered by the Official Secrets Act.",
+ *                   "Turing played a crucial role in cracking intercepted coded messages that enabled the Allies to defeat the Nazis in many crucial engagements, including the Battle of the Atlantic. Due to the problems of counterfactual history, it is hard to estimate the precise effect Ultra intelligence had on the war, but Professor Jack Copeland has estimated that this work shortened the war in Europe by more than two years and saved over 14 million lives. After the war, Turing worked at the National Physical Laboratory, where he designed the Automatic Computing Engine. The Automatic Computing Engine was one of the first designs for a stored-program computer. In 1948, Turing joined Max Newman's Computing Machine Laboratory, at the Victoria University of Manchester, where he helped develop the Manchester computers and became interested in mathematical biology. He wrote a paper on the chemical basis of morphogenesis and predicted oscillating chemical reactions such as the Belousov–Zhabotinsky reaction, first observed in the 1960s."
+ *                 ]
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               ratio:
+ *                 description: length of the summarie
+ *                 example: 0.1
+ *                 type: number
+ *                 minimum: 0
+ *                 maximum: 1
+ *     responses:
+ *       200:
+ *         description: Success
+ *       400:
+ *         description: Failure
+ *
+ */
 
 router.post("/summarize/bulk", bulkSummarizeValidator, validateMiddleware, async (req, res, next) => {
   try {
@@ -316,12 +353,13 @@ const extractPdfJson = (json) => {
  *             properties:
  *               sentences:
  *                 description: text or list of sentences
- *                 schema:
- *                   type: array
- *                   items:
- *                     type: string
+ *                 example: ["I like to swim. Water is nice", "I like forests, because trees are nice. I wish i could climb."]
+ *                 type: array
+ *                 items:
+ *                   type: string
  *               summary:
  *                 description: summary of the document
+ *                 example: Trees are green.
  *                 type: string
  *     responses:
  *       200:
