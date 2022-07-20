@@ -25,9 +25,9 @@ arguments:
     type: bool
     display: Mean Lexical Connectivity
     default: true
-  use_stopword_ratio:
+  use_content_words_ratio:
     type: bool
-    display: Stopword Ratio
+    display: Content Words Ratio
     default: true
   use_length:
     type: bool

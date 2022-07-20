@@ -6,7 +6,7 @@ from .average_lexical_connectivity import average_lexical_connectivity
 from .length import length_score
 from .position import position_score
 from .rank import rank_score
-from .stopword_ratio import stopword_ratio
+from .content_words_ratio import content_words_ratio
 from .tfidf import tfidf_score
 from .word_overlap import WordOverlap
 from .special_tokens import special_token_score
@@ -45,7 +45,7 @@ class Scorer:
         use_special_tokens,
         use_position,
         use_average_lexical_connectivity,
-        use_stopword_ratio,
+        use_content_words_ratio,
         use_length,
         use_rank,
     ):
@@ -62,8 +62,8 @@ class Scorer:
             scores["position"] = position_score(sentences, linear=False, use_exp=True)
         if use_average_lexical_connectivity:
             scores["average_lexical_connectivity"] = average_lexical_connectivity(sentences)
-        if use_stopword_ratio:
-            scores["stopword_ratio"] = stopword_ratio(sentences)
+        if use_content_words_ratio:
+            scores["content_words_ratio"] = content_words_ratio(sentences)
         if use_length:
             scores["length"] = length_score(sentences)
         if title is not None and title != "":
@@ -93,7 +93,7 @@ class Scorer:
         use_special_tokens=True,
         use_position=True,
         use_average_lexical_connectivity=True,
-        use_stopword_ratio=True,
+        use_content_words_ratio=True,
         use_length=True,
         use_rank=True,
     ):
@@ -104,7 +104,7 @@ class Scorer:
             use_special_tokens=use_special_tokens,
             use_position=use_position,
             use_average_lexical_connectivity=use_average_lexical_connectivity,
-            use_stopword_ratio=use_stopword_ratio,
+            use_content_words_ratio=use_content_words_ratio,
             use_length=use_length,
             use_rank=use_rank,
         )
