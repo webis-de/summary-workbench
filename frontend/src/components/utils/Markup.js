@@ -24,17 +24,25 @@ const Scroll = ({ docIndex, matchOrder, groupSizes, tag, scrollState, allowScrol
   const [scrollMarkup, setScrollState] = scrollState;
   const scrollNext = () => {
     if (allowScroll) {
-      let newScrollOrder
+      let newScrollOrder;
       const [, scrollTag, scrollOrder] = scrollMarkup;
-      if (scrollTag !== tag) newScrollOrder = Array(groupSizes.length).fill(0)
-      else newScrollOrder = scrollOrder.map(c => c === docIndex ? c + 1 : c).map((c,i) => c % (groupSizes[i] > 0 ? groupSizes[i] : 1))
+      if (scrollTag !== tag) newScrollOrder = Array(groupSizes.length).fill(0);
+      else
+        newScrollOrder = scrollOrder.map(
+          (c, i) => (i === docIndex ? c : c + 1) % groupSizes[i] || 0
+        );
       setScrollState([docIndex, tag, newScrollOrder]);
     }
   };
   const scrollRef = useRef();
   useEffect(() => {
     const [scrollDoc, scrollTag, scrollOrder] = scrollMarkup;
-    if (scrollOrder && docIndex !== scrollDoc && tag === scrollTag && matchOrder === scrollOrder[docIndex]) {
+    if (
+      scrollOrder &&
+      docIndex !== scrollDoc &&
+      tag === scrollTag &&
+      matchOrder === scrollOrder[docIndex]
+    ) {
       scrollRef.current.scrollIntoView({ block: "nearest", behavior: "smooth", inline: "start" });
     }
   }, [tag, scrollMarkup, docIndex, matchOrder]);

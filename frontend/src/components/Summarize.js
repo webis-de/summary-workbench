@@ -652,7 +652,7 @@ const SummaryView = ({ summaries, documentLength }) => {
   return (
     <div className="scroll-mt-20" ref={scrollRef}>
       <div className="flex gap-2 w-full">
-        <div className="overflow-hidden">
+        <div className="overflow-hidden w-full">
           {showTab ? (
             <SummaryTabView
               documentLength={documentLength}
