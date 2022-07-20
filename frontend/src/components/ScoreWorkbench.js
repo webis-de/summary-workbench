@@ -577,18 +577,6 @@ const ExampleDisplay = ({ modelScores, doc: doc_, reference: reference_, model1,
   return (
     <div>
       <div className="flex flex-col gap-3 mt-4">
-        {doc !== undefined && (
-          <div>
-            <Card full>
-              <CardHead tight>
-                <HeadingSemiBig>Document</HeadingSemiBig>
-              </CardHead>
-              <CardContent tight>
-                <MarkupOrText markup={doc} markupState={markupState} scrollState={scrollState} />
-              </CardContent>
-            </Card>
-          </div>
-        )}
         <ModelCard
           name="reference"
           markup={reference}
@@ -612,6 +600,18 @@ const ExampleDisplay = ({ modelScores, doc: doc_, reference: reference_, model1,
               scrollState={scrollState}
             />
           ))}
+        {doc !== undefined && (
+          <div>
+            <Card full>
+              <CardHead tight>
+                <HeadingSemiBig>Document</HeadingSemiBig>
+              </CardHead>
+              <CardContent tight>
+                <MarkupOrText markup={doc} markupState={markupState} scrollState={scrollState} />
+              </CardContent>
+            </Card>
+          </div>
+        )}
         <table className="inline-block mt-7">
           <tbody>
             {Object.entries(modelScores).map(([name, score]) => (
