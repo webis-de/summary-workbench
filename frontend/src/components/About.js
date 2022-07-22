@@ -1,4 +1,5 @@
 import React, { useContext } from "react";
+import { FaCode, FaExternalLinkAlt } from "react-icons/fa";
 
 import { MetricsContext } from "../contexts/MetricsContext";
 import { SummarizersContext } from "../contexts/SummarizersContext";
@@ -14,8 +15,8 @@ const AboutTable = ({ section, content }) => (
       <Thead>
         <Th>{section}</Th>
         <Th>Type</Th>
-        <Th>Code</Th>
-        <Th>Homepage</Th>
+        <Th center>Code</Th>
+        <Th center>Homepage</Th>
         <Th>Embedding Model</Th>
       </Thead>
       <Tbody>
@@ -40,16 +41,20 @@ const AboutTable = ({ section, content }) => (
               <Td>{type}</Td>
               <Td>
                 {sourcecode && (
-                  <Button appearance="link" variant="primary" href={sourcecode}>
-                    Code
-                  </Button>
+                  <div className="flex justify-center">
+                    <Button appearance="link" variant="primary" href={sourcecode}>
+                      <FaCode size={20} />
+                    </Button>
+                  </div>
                 )}
               </Td>
-              <Td>
+              <Td center>
                 {homepage && (
-                  <Button appearance="link" variant="success" href={homepage}>
-                    Homepage
-                  </Button>
+                  <div className="flex justify-center">
+                    <Button appearance="link" variant="success" href={homepage}>
+                      <FaExternalLinkAlt size={20} />
+                    </Button>
+                  </div>
                 )}
               </Td>
               <Td>{model}</Td>
@@ -130,7 +135,7 @@ const About = () => {
       <SpaceGap>
         <HeadingSemiBig>Code</HeadingSemiBig>
         <Button appearance="link" href="https://git.informatik.uni-leipzig.de/ds40bamo/comparefile">
-          https://git.informatik.uni-leipzig.de/ds40bamo/comparefile
+          https://github.com/webis-de/summary-workbench
         </Button>
       </SpaceGap>
     </div>

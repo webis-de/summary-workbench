@@ -46,7 +46,7 @@ const config = {
         },
         items: [
           {
-            href: 'https://github.com/facebook/docusaurus',
+            href: 'https://github.com/webis-de/summary-workbench',
             label: 'GitHub',
             position: 'right',
           },
