@@ -5,6 +5,6 @@ nltk==3.5
 numpy==1.20
 protobuf==3.20.*
 scikit-learn
-tensorflow==2.8.0
+tensorflow==2.8.1
 tensorflow_hub==0.8.0
 wheel
