@@ -1,5 +1,5 @@
 # Description
 
-Web project build with FastAPI, Express.js and React.js to assess and investigate the quality of summarization tasks.
-You can evaluate the quality of your own summarizations or generate summarizations from texts or urls based on many metrics and summarizers.
+Web project build with FastAPI, Express.js and React.js that can be used to evaluate the quality of your own summarizations or generate summarizations from texts or URLs based on many metrics and summarizers.
+The documentation for the application can be found here: <https://webis-de.github.io/summary-workbench/>
 A running demo can be found here: <https://tldr.demo.webis.de>.

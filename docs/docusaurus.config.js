@@ -8,13 +8,14 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 const config = {
   title: 'Summary Workbench - documentation',
   tagline: '',
-  url: 'https://tldr.demo.webis.de',
-  baseUrl: '/',
+  url: 'https://webis-de.github.io',
+  baseUrl: '/summary-workbench/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.png',
-  organizationName: 'webis', // Usually your GitHub org/user name.
-  projectName: 'Summary Workbench', // Usually your repo name.
+  organizationName: 'webis-de', // Usually your GitHub org/user name.
+  projectName: 'summary-workbench', // Usually your repo name.
+  trailingSlash: false,
 
   presets: [
     [
