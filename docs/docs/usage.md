@@ -1,4 +1,5 @@
 ---
+slug: /
 title: Usage
 sidebar_position: 0
 ---
