@@ -133,97 +133,96 @@ All arguments to the evaluate method will be passed as keyword arguments. You ca
 
 :::
 
-## Example summarizer plugin
+<!-- ## Example summarizer plugin -->
 
-Let us add the ConcluGen model (for generating informative conclusions of arguments) as a plugin.
+<!-- Let us add the ConcluGen model (for generating informative conclusions of arguments) as a plugin. -->
 
-### Method 1. From a local folder.
+<!-- ### Method 1. From a local folder. -->
 
-1. Create a folder anywhere and name it `conclugen`.
-2. This folder must contain the four files mentioned above: `requirements.txt`, `model_setup.py`, `summarizer.py`, and `config.yaml`.
+<!-- 1. Create a folder anywhere and name it `conclugen`. -->
+<!-- 2. This folder must contain the four files mentioned above: `requirements.txt`, `model_setup.py`, `summarizer.py`, and `config.yaml`. -->
 
-```requirements.txt title="requirements.txt"
-requests
-transformers[torch]
-```
+<!-- ```requirements.txt title="requirements.txt" -->
+<!-- requests -->
+<!-- transformers[torch] -->
+<!-- ``` -->
 
-```python title=model_setup.py
-import requests
-import tarfile
-import pathlib
+<!-- ```python title=model_setup.py -->
+<!-- import requests -->
+<!-- import tarfile -->
+<!-- import pathlib -->
 
-SAVE_PATH = pathlib.Path("~/checkpoints").expanduser()
-URL = "https://files.webis.de/webis-conclugen21-models/dbart.tar.gz"
-MODEL_NAME = "Webis-Conclugen21"
+<!-- SAVE_PATH = pathlib.Path("~/checkpoints").expanduser() -->
+<!-- URL = "https://files.webis.de/webis-conclugen21-models/dbart.tar.gz" -->
+<!-- MODEL_NAME = "Webis-Conclugen21" -->
 
-def setup():
-    # create checkpoints directory if non-existent
-    print("Creating and downloading checkpoints")
-    pathlib.Path(SAVE_PATH).mkdir(parents=True, exist_ok=True)
-    response = requests.get(URL, stream=True)
-    file = tarfile.open(fileobj=response.raw, mode="r|gz")
-    file.extractall(path=SAVE_PATH)
-    print("Done")
+<!-- def setup(): -->
+<!--     # create checkpoints directory if non-existent -->
+<!--     print("Creating and downloading checkpoints") -->
+<!--     pathlib.Path(SAVE_PATH).mkdir(parents=True, exist_ok=True) -->
+<!--     response = requests.get(URL, stream=True) -->
+<!--     file = tarfile.open(fileobj=response.raw, mode="r|gz") -->
+<!--     file.extractall(path=SAVE_PATH) -->
+<!--     print("Done") -->
 
-if __name__ =="__main__":
-    setup()
-```
+<!-- if __name__ =="__main__": -->
+<!--     setup() -->
+<!-- ``` -->
 
-```python title=summarizer.py
-import pathlib
+<!-- ```python title=summarizer.py -->
+<!-- import pathlib -->
 
-import transformers
-from model_setup import SAVE_PATH
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
+<!-- import transformers -->
+<!-- from model_setup import SAVE_PATH -->
+<!-- from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, pipeline -->
 
-MODEL_PATH = SAVE_PATH / "dbart"
+<!-- MODEL_PATH = SAVE_PATH / "dbart" -->
 
+<!-- class ConcluGen(): -->
+<!--   def __init__(self): -->
+<!--         self.tokenizer = AutoTokenizer.from_pretrained(pathlib.Path(MODEL_NAME), local_files_only=True) -->
+<!--         self.model = AutoModelForSeq2SeqLM.from_pretrained(pathlib.Path(MODEL_NAME), local_files_only=True) -->
+<!--         self.pipeline = pipeline( -->
+<!--             "summarization", model=self.model, tokenizer=self.tokenizer -->
+<!--         ) -->
 
-class ConcluGen():
-  def __init__(self):
-        self.tokenizer = AutoTokenizer.from_pretrained(pathlib.Path(MODEL_NAME), local_files_only=True)
-        self.model = AutoModelForSeq2SeqLM.from_pretrained(pathlib.Path(MODEL_NAME), local_files_only=True)
-        self.pipeline = pipeline(
-            "summarization", model=self.model, tokenizer=self.tokenizer
-        )
+<!--   def generate_conclusion(self, text, ratio): -->
+<!--     return "Conclusion" -->
 
-  def generate_conclusion(self, text, ratio):
-    return "Conclusion"
+<!-- class SummarizerPlugin(): -->
+<!--   def __init__(self): -->
+<!--     self.summarizer = ConcluGen() -->
 
-class SummarizerPlugin():
-  def __init__(self):
-    self.summarizer = ConcluGen()
+<!--   def summarize(self, **kwargs): -->
+<!--     return self.summarizer.generate_conclusion(**kwargs) -->
+<!-- ``` -->
 
-  def summarize(self, **kwargs):
-    return self.summarizer.generate_conclusion(**kwargs)
-```
+<!-- ```yaml title=sw-plugin-config.yaml -->
+<!-- version: "1.0" -->
+<!-- name: "ConcluGen" -->
+<!-- metadata: -->
+<!--   type: abstractive -->
+<!--   homepage: https://aclanthology.org/2021.findings-acl.306/ -->
+<!--   sourcecode: https://github.com/webis-de/acl21-informative-conclusion-generation -->
+<!-- ``` -->
 
-```yaml title=sw-plugin-config.yaml
-version: "1.0"
-name: "ConcluGen"
-metadata:
-  type: abstractive
-  homepage: https://aclanthology.org/2021.findings-acl.306/
-  sourcecode: https://github.com/webis-de/acl21-informative-conclusion-generation
-```
+<!-- To configure the plugin add the following to your `sw-config.yaml`: -->
 
-To configure the plugin add the following to your `sw-config.yaml`:
+<!-- ```yaml title=sw-config.yaml -->
+<!-- summarizers: -->
+<!--   - <path to your conclugen folder> -->
+<!-- ``` -->
 
-```yaml title=sw-config.yaml
-summarizers:
-  - <path to your conclugen folder>
-```
+<!-- ### Method 2. From a git repository. -->
 
-### Method 2. From a git repository.
+<!-- Do the same as in [Method 1. From a local folder.](#method-1-from-a-local-folder) and push the folder to GitHub (name the repository `conclugen`). -->
 
-Do the same as in [Method 1. From a local folder.](#method-1-from-a-local-folder) and push the folder to GitHub (name the repository `conclugen`).
+<!-- To configure the plugin add the following to your `sw-config.yaml`: -->
 
-To configure the plugin add the following to your `sw-config.yaml`:
-
-```yaml title=sw-config.yaml
-summarizers:
-  - https://github.com/<your-username>/conclugen
-```
+<!-- ```yaml title=sw-config.yaml -->
+<!-- summarizers: -->
+<!--   - https://github.com/<your-username>/conclugen -->
+<!-- ``` -->
 
 ## Generic plugins
 
@@ -247,6 +246,39 @@ This will configure the plugin as `CoolSummarizer (cool model)` and inside the c
 
 For examples checkout `summarizer/neuralsum`, `summarizer/cliffsum`, and `summarizer/coopsum`
 
+## Dynamic Metadata
+
+Metadata can be specified using the `metadata` field in the `sw-plugin-config.yaml`.
+This approach is static and sometimes it is required to set the metadata based on some parameter.
+For example with the following config it could be useful to expose the model as a metadata field.
+
+```yaml title="example sw-config.yaml"
+summarizers:
+  - source: <path-to-cool-summarizer>
+    environment:
+      model: cool model
+```
+
+This is possible by adding a metadata method to the corresponding Plugin class, which returns a dictionary containing the metadata.
+
+```python title="example summarizer plugin (works the same for metric plugin)"
+class SummarizerPlugin:
+    def __init__(self):
+        self.m = {"model": os.environ.get("model")}
+
+    def summarize(self, *args, **kwargs):
+        return "example summary"
+
+    def metadata(self):
+        return self.m
+```
+
+:::note
+
+The dynamic metadata returned from the metadata method will overwrite the static metadata specified in the `sw-plugin-config.yaml` file.
+
+:::
+
 ## Tips
 
 - Writing a simple plugin is very easy and you probably need only very few information from this page.  
@@ -260,4 +292,4 @@ For examples checkout `summarizer/neuralsum`, `summarizer/cliffsum`, and `summar
   The base image for the container will be the official docker image for the specified python version.  
   The only alternative to specify a custom python version is to provide your own Dockerfile.
 
-- If your plugin is generic, only download the specified model.
+- If your plugin is generic and can have multiple models, only download the specified model.
