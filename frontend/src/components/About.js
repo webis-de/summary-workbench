@@ -9,6 +9,8 @@ import { CenterLoading } from "./utils/Loading";
 import { Table, TableWrapper, Tbody, Td, Th, Thead, Tr } from "./utils/Table";
 import { HeadingBig, HeadingSemiBig } from "./utils/Text";
 
+const sourceCodeLink = "https://github.com/webis-de/summary-workbench";
+
 const AboutTable = ({ section, content }) => (
   <TableWrapper>
     <Table>
@@ -134,8 +136,8 @@ const About = () => {
       </SpaceGap>
       <SpaceGap>
         <HeadingSemiBig>Code</HeadingSemiBig>
-        <Button appearance="link" href="https://git.informatik.uni-leipzig.de/ds40bamo/comparefile">
-          https://github.com/webis-de/summary-workbench
+        <Button appearance="link" href={sourceCodeLink}>
+          {sourceCodeLink}
         </Button>
       </SpaceGap>
     </div>
