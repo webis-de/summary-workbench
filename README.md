@@ -10,28 +10,28 @@ A running demo can be found here: <https://tldr.demo.webis.de>.
 
 ### Create a Request
 
-![test](docs/static/summarize_input.gif)
+![Create a Request](docs/static/summarize_input.gif)
 
 ### Inspect the Results
 
-![test](docs/static/summarize_usage.gif)
+![Inspect the Results](docs/static/summarize_usage.gif)
 
 # Evaluate
 
 ### Create a Request
 
-![test](docs/static/evaluation_input.gif)
+![Create a Request](docs/static/evaluation_input.gif)
 
 ### Inspect the Results
 
 #### Scores
 
-![test](docs/static/evaluation_scores.gif)
+![Scores](docs/static/evaluation_scores.gif)
 
 #### Visualize Text Examples
 
-![test](docs/static/evaluation_visualization.gif)
+![Visualize Text Examples](docs/static/evaluation_visualization.gif)
 
 #### Plot Scores against each other
 
-![test](docs/static/evaluation_plotter.gif)
+![Plot Scores against each other](docs/static/evaluation_plotter.gif)
