@@ -18,10 +18,8 @@ const pair_comp = (a, b) => {
 };
 
 const get_rank = (pairs) => {
-  const tmp = pairs.map(() => 0);
   const sort_pairs = pairs.map((pair, i) => [pair, i]);
   sort_pairs.sort((a, b) => pair_comp(a[0], b[0]));
-  for (let i = 0; i < pairs.length; i++) tmp[sort_pairs[i][1]] = i;
   const ranks = pairs.map(() => 0);
   let rank = 0;
   for (let i = 1; i < pairs.length; i++) {
@@ -68,7 +66,7 @@ const build_lcp_array = (doc, suffix_array, inverse_suffix_array) => {
   for (let i = 0; i < n; i++) {
     if (inverse_suffix_array[i] === 0) continue;
     const k = suffix_array[inverse_suffix_array[i] - 1];
-    while (doc[i + h] === doc[k + h]) h++;
+    while (i + h < n && k + h < n && doc[i + h] === doc[k + h]) h++;
     lcp[inverse_suffix_array[i]] = h;
     if (h > 0) h--;
   }
@@ -324,9 +322,14 @@ class Textblock {
   };
 }
 
-
-const computeMarkup = (docs, colorMap, min_length = 3, allow_self_similarities = false, ignore_stopwords = true) => {
-  if (!docs.length) return []
+const computeMarkup = (
+  docs,
+  colorMap,
+  min_length = 3,
+  allow_self_similarities = false,
+  ignore_stopwords = true
+) => {
+  if (!docs.length) return [];
   const textblocks = docs.map((doc) => new Textblock(doc));
   const clean_docs_idx = textblocks.map((textblock) => textblock.clean_word_list(ignore_stopwords));
 
