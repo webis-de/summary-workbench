@@ -21,14 +21,15 @@ const summarizeRequest = (data, summarizers, ratio, abortController) => {
 };
 
 const pdfExtractRequest = async (pdf) => {
-  const fd = new FormData();
-  fd.append("file", pdf);
-
   const res = await wrappedFetch("/api/pdf/extract", {
     method: "POST",
-    body: fd,
+    body: pdf,
   });
-  if (res.ok) return res.json();
+  if (res.ok) {
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    return data
+  }
   throw new Error(`request failed with status ${res.status}`);
 };
 

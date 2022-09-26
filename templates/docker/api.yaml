@@ -1,19 +1,18 @@
 api:
   image: api:latest
   build:
-    context: ./api/
+    context: ./api2/
     dockerfile: Dockerfile.dev
   working_dir: /app
   ports:
     - "127.0.0.1:5000:5000"
   volumes:
-    - ./api/:/app
+    - ./api2/:/app
     - ./plugin_config:/plugin_config
-    - api_node_modules:/app/node_modules
+    - api_root:/root
   environment:
-    - NODE_ENV=development
     - MONGODB_HOST=mongodb://mongo/app
   command: ./boot.sh
 
 volumes:
-  api_node_modules:
+  api_root:

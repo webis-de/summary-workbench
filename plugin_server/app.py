@@ -1,4 +1,3 @@
-import asyncio
 import copy
 import json
 import sys
@@ -6,13 +5,13 @@ import uuid
 from os import environ
 from typing import Literal, Union
 
-import kthread
 import uvicorn
 from argument_models import (BoolArgument, CategoricalArgument, FloatArgument,
                              IntArgument, StringArgument)
 from fastapi import FastAPI, Request, Response
 from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, Field, create_model, root_validator, validator
+from cancel import CancelError, CancableThread
 
 sys.path.insert(0, "/summary_workbench_plugin_files")
 
@@ -20,35 +19,10 @@ PLUGIN_CONFIG = json.loads(environ.get("PLUGIN_CONFIG"))
 PLUGIN_CONFIG["instancetag"] = str(uuid.uuid4())
 PLUGIN_TYPE = PLUGIN_CONFIG["type"]
 
-
-class CancelError(Exception):
-    pass
-
-
-class KThreadWithReturnValue(kthread.KThread):
-    def run(self):
-        self.result = None
-        self.exc = None
-        try:
-            self.result = self._target(*self._args, **self._kwargs)
-        except Exception as e:
-            self.exc = e
-
-    def join(self, *args, **kwargs):
-        super().join(*args, **kwargs)
-
-
-async def cancable_execute(request: Request, function):
-    thread = KThreadWithReturnValue(target=function)
-    thread.start()
-    while thread.is_alive():
-        await asyncio.get_running_loop().run_in_executor(None, thread.join, 1)
-        if await request.is_disconnected():
-            thread.terminate()
-            raise CancelError()
-    if thread.exc:
-        raise thread.exc
-    return thread.result
+async def run_until_finish_or_disconnect(request: Request, function):
+    thread = CancableThread(target=function)
+    result = await thread.run_until_finish_or_disconnect(request)
+    return result
 
 
 app = FastAPI()
@@ -66,24 +40,6 @@ TYPE_TO_ARGUMENT = {
     "categorical": CategoricalArgument,
     "str": StringArgument,
 }
-
-
-def build_min_validator(min_value):
-    def min_validator(_, v):
-        if v < min_value:
-            raise ValueError(f"{v} is smaller than {min_value}")
-        return v
-
-    return min_validator
-
-
-def build_max_validator(max_value):
-    def max_validator(_, v):
-        if v > max_value:
-            raise ValueError(f"{v} is bigger than {max_value}")
-        return v
-
-    return max_validator
 
 
 def parse_arguments(arguments):
@@ -175,7 +131,7 @@ def construct_metric():
     @app.post("/")
     async def evaluate(body: MetricBody, request: Request, response: Response):
         try:
-            scores = await cancable_execute(
+            scores = await run_until_finish_or_disconnect(
                 request, lambda: plugin.evaluate(**body.dict())
             )
             if isinstance(scores, dict):
@@ -206,7 +162,7 @@ def construct_summarizer():
     @app.post("/")
     async def summarize(body: SummarizerBody, request: Request, response: Response):
         try:
-            summary = await cancable_execute(
+            summary = await run_until_finish_or_disconnect(
                 request, lambda: plugin.summarize(**body.dict())
             )
             return {"summary": summary}
