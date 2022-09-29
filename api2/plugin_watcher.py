@@ -4,8 +4,8 @@ import warnings
 from pathlib import Path
 
 from utils.abort import aborter
-from utils.request import request
 from utils.aio import to_future
+from utils.request import request
 
 
 def filter_available(plugins):
@@ -75,8 +75,8 @@ class PluginWatcher:
             while True:
                 await asyncio.sleep(self.update_every)
                 await self.update()
-        except asyncio.CancelledError as e:
-            raise e
+        except asyncio.CancelledError:
+            raise
         except Exception as e:
             aborter(
                 f"the watcher loop finished with exception {e}, which should never happen"

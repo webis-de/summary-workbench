@@ -1,5 +1,8 @@
 from datetime import datetime
 from time import sleep
+from typing import Literal
+
+from pydantic import Field
 
 
 class SummarizerPlugin:
@@ -8,16 +11,16 @@ class SummarizerPlugin:
 
     def summarize(
         self,
-        text,
+        batch,
         ratio,
-        fail,
-        error,
-        error_message,
-        time,
-        extra_message,
-        summary,
-        high_load,
-        return_data,
+        return_data: Literal["real", "none", "error"] = "real",
+        high_load: bool = True,
+        summary: str = "test summary",
+        extra_message: float = Field(0, le=-500, ge=500),
+        time: int = Field(0, ge=-1, le=1000),
+        error_message: str = "test error",
+        fail: bool = True,
+        error: Literal["ValueError", "Exception", "AttributeError"] = "ValueError",
     ):
         if time > 0:
             if high_load:
@@ -35,9 +38,9 @@ class SummarizerPlugin:
                 raise AttributeError(error_message)
             raise ValueError(f"unknown error type {error}")
         if return_data == "real":
-            return f"{text[:20]}... {summary} {extra_message} {ratio}"
+            return [f"{text[:20]}... {summary} {extra_message} {ratio}" for text in batch]
         if return_data == "none":
-            return None
+            return [None for text in batch]
         if return_data == "error":
-            return {"somedata": [1, 2, None]}
+            return [{"somedata": [1, 2, None]} for text in batch]
         raise ValueError(f"unknown return_data {return_data}")

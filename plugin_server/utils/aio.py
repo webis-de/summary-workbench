@@ -1,5 +1,16 @@
 import asyncio
+from contextlib import asynccontextmanager
 from functools import wraps
+
+
+class EventWithResult(asyncio.Event):
+    def __init__(self):
+        super().__init__()
+        self.result = None
+
+    def set(self, result):
+        self.result = result
+        super().set()
 
 
 async def wait_first(coros):
@@ -15,21 +26,6 @@ async def wait_first(coros):
         await asyncio.wait(futures)
 
 
-
-async def until_true(func, interval=1):
-    while not await func():
-        await asyncio.sleep(interval)
-
-
-async def finish_or_condition(wrapped_coro, condition_func, interval=1):
-    result, coro = await wait_first(
-        [wrapped_coro, until_true(condition_func, interval=interval)]
-    )
-    if coro is wrapped_coro:
-        return result
-    return None
-
-
 def to_future(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -38,9 +34,15 @@ def to_future(func):
     return wrapper
 
 
-def to_threaded(func):
-    @wraps(func)
-    async def wrapper(*args, **kwargs):
-        return await asyncio.to_thread(func, *args, **kwargs)
+async def to_thread(func, *args, **kwargs):
+    return await asyncio.get_running_loop().run_in_executor(None, func, *args, **kwargs)
 
-    return wrapper
+
+@asynccontextmanager
+async def parallel(coro):
+    future = asyncio.ensure_future(coro)
+    try:
+        yield
+    finally:
+        future.cancel()
+        await asyncio.wait([future])
