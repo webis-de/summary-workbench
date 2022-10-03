@@ -1,5 +1,8 @@
 from datetime import datetime
 from time import sleep
+from typing import Literal
+
+from pydantic import Field
 
 
 class MetricPlugin:
@@ -8,16 +11,15 @@ class MetricPlugin:
 
     def evaluate(
         self,
-        hypotheses,
-        references,
-        fail,
-        error,
-        error_message,
-        time,
-        extra_message,
-        summary,
-        high_load,
-        return_data,
+        batch,
+        return_data: Literal["real", "none", "error"] = "real",
+        high_load: bool = True,
+        summary: str = "test summary",
+        extra_message: float = Field(0, ge=-500, le=500),
+        time: int = Field(0, ge=-1, le=1000),
+        error_message: str = Field("test error", textarea=True),
+        fail: bool = True,
+        error: Literal["ValueError", "Exception", "AttributeError"] = "ValueError",
     ):
         if time > 0:
             if high_load:
@@ -35,9 +37,9 @@ class MetricPlugin:
                 raise AttributeError(error_message)
             raise ValueError(f"unknown error type {error}")
         if return_data == "real":
-            return [extra_message] * len(hypotheses)
+            return [[extra_message] * len(hyp) for hyp, _ in batch]
         if return_data == "none":
-            return None
+            return [None] * len(batch)
         if return_data == "error":
-            return [1, None, "test", 0.2, -10, {"1": "test"}, [1, 2, 3]]
+            return [[1, None, "test", 0.2, -10, {"1": "test"}, [1, 2, 3]]] * len(batch)
         raise ValueError(f"unknown return_data {return_data}")

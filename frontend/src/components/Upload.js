@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { FaQuestionCircle } from "react-icons/fa";
 
-import { filterObject, mapObject } from "../utils/common";
+import { ofilter, omap } from "../utils/common";
 import { Button } from "./utils/Button";
 import { ChooseFile, useFile } from "./utils/ChooseFile";
 import { Checkbox } from "./utils/Form";
@@ -54,7 +54,7 @@ const Upload = ({ setComputeData }) => {
   useEffect(() => {
     if (data) {
       const { id, jsonl, chosenKeys } = data;
-      const keys = Object.keys(filterObject(chosenKeys, (_, v) => v));
+      const keys = Object.keys(ofilter(chosenKeys, (_, v) => v));
       setComputeData({ data: { id, lines: jsonl, chosenKeys: keys } });
     }
   }, [data, setComputeData]);
@@ -71,7 +71,7 @@ const Upload = ({ setComputeData }) => {
   );
 
   const toggleAll = () => {
-    setData({ ...data, chosenKeys: mapObject(data.chosenKeys, () => !allIsChecked) });
+    setData({ ...data, chosenKeys: omap(data.chosenKeys, () => !allIsChecked) });
   };
 
   return (

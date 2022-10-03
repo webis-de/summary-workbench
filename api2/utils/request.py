@@ -6,7 +6,6 @@ from utils.aio import wait_first
 
 async def _fetch(session, parse_as_json=True, **kwargs):
     async with session.request(**kwargs) as response:
-        response.raise_for_status()
         if parse_as_json:
             return await response.json()
         return await response.text()

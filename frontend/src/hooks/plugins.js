@@ -1,6 +1,34 @@
-import { useCallback, useEffect, useState } from "react";
-import { MdSwitchLeft } from "react-icons/md";
+import Ajv from "ajv";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAsyncRetry } from "react-use";
+
+import { getChosen } from "../utils/common";
+
+const ajv = new Ajv({
+  strict: false,
+  coerceTypes: true,
+  allErrors: true,
+  validateSchema: true,
+});
+
+const parseErrorSchema = (ajvErrors) =>
+  ajvErrors
+    .map((error) =>
+      error.keyword === "required"
+        ? { ...error, instancePath: `/${error.params.missingProperty}` }
+        : error
+    )
+    .reduce((previous, error) => {
+      const path = error.instancePath.substring(1).replace(/\//g, ".");
+      const prev = {...previous}
+      if (!prev[path]) {
+        prev[path] = {
+          message: error.message,
+          type: error.keyword,
+        };
+      }
+      return prev;
+    }, {});
 
 const saveSetting = (key, status) => window.localStorage.setItem(key, status ? "true" : "false");
 
@@ -10,123 +38,108 @@ const loadSetting = (key, defaults) => {
   return setting === "true";
 };
 
-const argumentToDefault = ({ type, default: def }) => {
-  if (def !== undefined && def !== null) return def;
-  switch (type) {
-    case "str":
-      return undefined;
-    case "int":
-      return undefined;
-    case "float":
-      return undefined;
-    case "categorical":
-      return undefined;
-    case "bool":
-      return false;
-    default:
-      throw new Error(`unknown type ${type}`);
-  }
+const convertErrors = (errors) => {
+  if (!errors || !Object.keys(errors).length) return null;
+  return Object.entries(errors).map(([name, message]) => ({ name, message }));
 };
+
+const defaultArguments = (schema) =>
+  Object.fromEntries(
+    Object.entries(schema.properties).map(([key, value]) => [key, value.default !== undefined ? value.default : ""])
+  );
 
 const initPlugins = async (fetchFunction, defaults) => {
   const rawPlugins = await fetchFunction();
   if (!rawPlugins) return null;
   const plugins = {};
   Object.entries(rawPlugins).forEach(([key, value]) => {
-    const isSet = loadSetting(key, defaults) && !value.disabled && value.healthy;
-    let args = value.arguments || {};
-    if (value.arguments) {
-      args = Object.fromEntries(
-        Object.entries(value.arguments).map(([argName, argDef]) => [
-          argName,
-          argumentToDefault(argDef),
-        ])
-      );
-    }
-    const info = { ...value };
+    const loaded = !value.disabled && value.healthy;
+    const isSet = loadSetting(key, defaults) && loaded;
+    const info = value;
     if (!info.metadata.type) info.metadata.type = "unknown";
-    plugins[key] = { info, isSet, arguments: args };
+    const data = { info, isSet };
+    if (loaded) {
+      const schema = info.validators.argument;
+      const val = ajv.compile(schema);
+      const validate = (values) => {
+        val(values)
+        return parseErrorSchema(val.errors || [])
+      }
+      data.arguments = defaultArguments(schema);
+      data.validate = validate;
+      data.errors = validate(data.arguments)
+    }
+    plugins[key] = data;
   });
-  const types = [...new Set(Object.values(plugins).map(({ info }) => info.metadata.type))];
-  return { plugins, types };
+  return plugins;
 };
 
-const parse = (value, parseFunc, min, max) => {
-  if (value === "" || value === undefined) return undefined;
-  let parsed = parseFunc(value);
-  if (Number.isNaN(parsed)) parsed = 0;
-  if (min !== undefined && parsed < min) parsed = min;
-  if (max !== undefined && parsed > max) parsed = max;
-  return parsed;
-};
-const verifyArg = (value, type, definition) => {
-  const { min, max, categories } = definition;
-  switch (type) {
-    case "int":
-      return parse(value, parseInt, min, max);
-    case "float":
-      return parse(value, parseFloat, min, max);
-    case "str":
-      return (value || "").trim() || undefined;
-    case "categorical":
-      return categories.includes(value) ? value : undefined;
-    case "bool":
-      return value === true;
-    default:
-      throw new Error(`unknown type ${type}`);
-  }
-};
+const extractArgumentErrors = (chosenModels) =>
+  Object.values(chosenModels)
+    .map(({info: {name}, errors}) => ({
+        name,
+        message: convertErrors(errors),
+    }))
+    .filter(({ message }) => message)
+    .sort(({ name }) => name);
 
 const usePlugins = (fetchFunction, defaults) => {
   const { value, loading, retry, error } = useAsyncRetry(() =>
     initPlugins(fetchFunction, defaults)
   );
-  const [plugins, setPlugins] = useState(null);
-  const [types, setTypes] = useState(null);
+  const [plugins, setPlugins] = useState({});
+
   useEffect(() => {
-    if (value) {
-      setPlugins(value.plugins);
-      setTypes(value.types);
-    } else {
-      setPlugins(null);
-      setTypes(null);
-    }
+    setPlugins(value);
   }, [value, setPlugins]);
 
   const toggle = useCallback(
     (key) => {
-      if (plugins[key].info.disabled || !plugins[key].info.healthy) return;
-      const updatedPlugins = { ...plugins };
-      const plugin = { ...updatedPlugins[key] };
+      const { disabled, healthy } = plugins[key].info;
+      if (disabled || !healthy) return;
+      const plugin = { ...plugins[key] };
       plugin.isSet = !plugin.isSet;
-      updatedPlugins[key] = plugin;
       saveSetting(key, plugin.isSet);
-      setPlugins(updatedPlugins);
+      setPlugins({ ...plugins, [key]: plugin });
     },
-    [plugins]
+    [plugins, setPlugins]
   );
 
   const setArgument = useCallback(
-    (pluginKey, argumentKey, newValue) => {
-      let v = newValue;
-      const {
-        default: defaultArg,
-        type,
-        ...definition
-      } = plugins[pluginKey].info.arguments[argumentKey];
+    (key, argKey, v) => {
+      const plugin = plugins[key];
+      const { arguments: args, validate } = plugin;
       const updatedPlugins = { ...plugins };
-      v = verifyArg(v, type, definition);
-      if (v === null) v = undefined;
-      if (v === undefined && defaultArg !== undefined) v = defaultArg;
-      if (v === null) v = undefined;
-      const args = updatedPlugins[pluginKey].arguments
-      updatedPlugins[pluginKey].arguments = {...(args),  [argumentKey]: v};
+      const data = { ...args, [argKey]: v };
+      const errors = validate(data);
+      updatedPlugins[key].arguments = data;
+      updatedPlugins[key].errors = errors;
       setPlugins(updatedPlugins);
     },
-    [plugins]
+    [plugins, setPlugins]
   );
 
-  return { retry, error, plugins, types, loading, toggle, setArgument };
+  const types = useMemo(
+    () => plugins && [...new Set(Object.values(plugins).map(({ info }) => info.metadata.type))],
+    [plugins]
+  );
+  const chosenModels = useMemo(() => (plugins ? getChosen(plugins) : {}), [plugins]);
+  const argumentErrors = useMemo(
+    () => extractArgumentErrors(chosenModels),
+    [chosenModels]
+  );
+
+  return {
+    retry,
+    error,
+    loading,
+    plugins,
+    types,
+    chosenModels,
+    argumentErrors,
+    toggle,
+    setArgument,
+  };
 };
 
 export { usePlugins };

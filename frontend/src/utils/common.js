@@ -1,19 +1,31 @@
 const getChosen = (models) =>
   Object.fromEntries(Object.entries(models).filter(([, { isSet }]) => isSet));
 
-const mapObject = (obj, func) =>
-  Object.fromEntries(Object.entries(obj).map(([key, value]) => [key, func(value, key)]));
+const omap = (obj, func, kind = "value") => {
+  switch (kind) {
+    case "value":
+      return Object.fromEntries(Object.entries(obj).map(([key, value]) => [key, func(value, key)]));
+    case "full":
+      return Object.fromEntries(Object.entries(obj).map(([key, value]) => func(key, value)));
+    case "key":
+      return Object.fromEntries(
+        Object.entries(obj).map(([key, value]) => [func(key, value), value])
+      );
+    default:
+      throw new Error(`unknown kind ${kind}`);
+  }
+};
 
-const filterObject = (obj, func) =>
+const ofilter = (obj, func) =>
   Object.fromEntries(Object.entries(obj).filter(([key, value]) => func(key, value)));
 
 const foldObject = (objects, func, values = []) => {
   if (!objects.length) return func(values);
   const [obj, ...rest] = objects;
-  return mapObject(obj, (value) => foldObject(rest, func, [...values, value]));
+  return omap(obj, (value) => foldObject(rest, func, [...values, value]));
 };
 
-const unpack = (obj, subKey) => mapObject(obj, (value) => value[subKey]);
+const unpack = (obj, subKey) => omap(obj, (value) => value[subKey]);
 
 const sum = (arr) => arr.reduce((acc, value) => acc + value, 0);
 
@@ -21,24 +33,7 @@ const average = (arr) => sum(arr) / arr.length;
 
 const arrayEqual = (a, b) => a.length === b.length && a.every((val, index) => val === b[index]);
 
-const extractArgumentErrors = (chosenModels, models) =>
-  chosenModels
-    .map((key) => {
-      const {
-        info: { name },
-        arguments: args,
-      } = models[key];
-      return {
-        name,
-        errors: Object.keys(filterObject(args, (_, v) => v === undefined)).map(
-          (k) => `${k}: argument is missing`
-        ),
-      };
-    })
-    .filter(({ errors: e }) => e.length)
-    .sort(({ name }) => name);
-
-const splitSentences = (text) => text.match(/[^.?!]+[.!?]+[\])'"`’”]*|.+/g).map(t => t.trim());
+const splitSentences = (text) => text.match(/[^.?!]+[.!?]+[\])'"`’”]*|.+/g).map((t) => t.trim());
 
 const paragraphSize = 1;
 const computeParagraphs = (text) => {
@@ -53,13 +48,12 @@ const computeParagraphs = (text) => {
 export {
   getChosen,
   unpack,
-  mapObject,
-  filterObject,
+  omap,
+  ofilter,
   foldObject,
   sum,
   average,
   arrayEqual,
-  extractArgumentErrors,
   splitSentences,
   computeParagraphs,
 };

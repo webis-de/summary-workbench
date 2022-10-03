@@ -13,9 +13,9 @@ import { useAsyncFn } from "react-use";
 import { feedbackRequest, pdfExtractRequest, summarizeRequest } from "../api";
 import { SettingsContext } from "../contexts/SettingsContext";
 import { SummarizersContext } from "../contexts/SummarizersContext";
+import { useAbortController } from "../hooks/abortController";
 import { useMarkups, usePairwiseMarkups } from "../hooks/markup";
-import { extractArgumentErrors, getChosen, computeParagraphs } from "../utils/common";
-import { collectPluginErrors, mapErrorsToName } from "../utils/data";
+import { computeParagraphs, omap } from "../utils/common";
 import { Settings } from "./Settings";
 import { Badge } from "./utils/Badge";
 import { Button, CopyToClipboardButton, LoadingButton } from "./utils/Button";
@@ -129,7 +129,7 @@ const TextInput = ({ setCallback, setErrors }) => {
   const [documentText, setDocumentText] = useState("");
 
   useEffect(() => {
-    setCallback(() => ({ data: documentText }));
+    setCallback(() => ({ data: [documentText] }));
     if (!documentText) setErrors(["Input text to summarize"]);
     else setErrors(null);
   }, [setCallback, setErrors, documentText]);
@@ -199,7 +199,7 @@ const PdfInput = ({ setCallback, setErrors }) => {
     });
 
   useEffect(() => {
-    setCallback(() => ({ data: pdfExtract ? pdfJsonToText(pdfExtract) : "" }));
+    setCallback(() => ({ data: [pdfExtract ? pdfJsonToText(pdfExtract) : ""] }));
     if (!pdfExtract) setErrors(["Upload a PDF file"]);
     else if (pdfExtract.selected.every((v) => !v)) setErrors(["Select some section to summarize"]);
     else setErrors(null);
@@ -291,24 +291,17 @@ const BulkInput = ({ setCallback, setErrors }) => {
   );
 };
 
-const InputDocument = ({ summarize, state, abortController }) => {
-  const { summarizers, types, toggle, setArgument } = useContext(SummarizersContext);
+const InputDocument = ({ summarize, state, abort }) => {
+  const { chosenModels, argumentErrors } = useContext(SummarizersContext);
   const { summaryLength, setSummaryLength } = useContext(SettingsContext);
   const getTextRef = useRef(null);
 
-  const chosenModels = useMemo(() => Object.keys(getChosen(summarizers)), [summarizers]);
-  const modelIsChosen = Boolean(chosenModels.length);
   const [componentErrors, setComponentErrors] = useState(null);
 
-  const argErrors = useMemo(
-    () => extractArgumentErrors(chosenModels, summarizers),
-    [chosenModels, summarizers]
-  );
-
   const disableErrors = [];
-  if (argErrors) disableErrors.push(...argErrors);
+  if (argumentErrors) disableErrors.push(...argumentErrors);
   if (componentErrors) disableErrors.push(...componentErrors);
-  if (!modelIsChosen) disableErrors.push("Choose at least one summarizer");
+  if (!Object.keys(chosenModels).length) disableErrors.push("Choose at least one summarizer");
 
   const setCallback = useCallback((cb) => {
     getTextRef.current = cb;
@@ -351,13 +344,7 @@ const InputDocument = ({ summarize, state, abortController }) => {
             <HeadingSemiBig>Models</HeadingSemiBig>
           </CardHead>
           <CardContent>
-            <Settings
-              models={summarizers}
-              types={types}
-              setArgument={setArgument}
-              toggleSetting={toggle}
-              type="Summarizers"
-            />
+            <Settings Context={SummarizersContext} type="Summarizers" />
             <div className="border p-2">
               <HeadingMedium>Summary length</HeadingMedium>
               <Hint small>Length of the summary in percent</Hint>
@@ -373,18 +360,18 @@ const InputDocument = ({ summarize, state, abortController }) => {
             </div>
             <div className="flex justify-between items-center gap-5">
               {state.loading ? (
-                <LoadingButton text="Summarizing" />
+                <>
+                  <LoadingButton text="Summarizing" />
+                  <Button variant="danger" appearance="box" onClick={abort}>
+                    Cancel
+                  </Button>
+                </>
               ) : (
                 <Button
                   disabled={disableErrors.length}
-                  onClick={() => summarize(getTextRef.current(), chosenModels, summaryLength)}
+                  onClick={() => summarize(getTextRef.current(), summaryLength)}
                 >
                   Summarize
-                </Button>
-              )}
-              {abortController && (
-                <Button variant="danger" appearance="box" onClick={() => abortController.abort()}>
-                  Cancel
                 </Button>
               )}
             </div>
@@ -468,26 +455,8 @@ const Summary = ({ markup, summary, markupState, scrollState, showMarkup }) => {
   );
 };
 
-// <div className="grow flex items-start gap-3 max-w-full">
-//   <div className="basis-[60%] min-w-0">
-//     <Card full>
-//       <CardHead>
-//         <div className="overflow-hidden whitespace-nowrap">{title}</div>
-//       </CardHead>
-//       <div className="max-h-[70vh] overflow-auto bg-white p-4">
-//         <Markup
-//           markups={markups[summaryIndex][0]}
-//           markupState={markupState}
-//           scrollState={scrollState}
-//           showMarkup={showOverlap}
-//         />
-//       </div>
-//     </Card>
-//   </div>
-//   <div className="basis-[40%] ">
 const SummaryTabView = ({ title, showOverlap, summaries, originals, sums, documentLength }) => {
   const markups = usePairwiseMarkups(originals, sums);
-  const { summarizers } = useContext(SummarizersContext);
   const markupState = useState(null);
   const [summaryIndex, setSummaryIndex] = useState(0);
   const scrollState = useMarkupScroll(summaryIndex);
@@ -519,7 +488,7 @@ const SummaryTabView = ({ title, showOverlap, summaries, originals, sums, docume
               <TabHead>
                 <div className="flex flex-wrap gap-x-7">
                   {summaries.map(({ name }) => (
-                    <PillLink key={name}>{summarizers[name].info.name}</PillLink>
+                    <PillLink key={name}>{name}</PillLink>
                   ))}
                 </div>
               </TabHead>
@@ -547,7 +516,6 @@ const SummaryTabView = ({ title, showOverlap, summaries, originals, sums, docume
 };
 
 const SummaryCompareView = ({ summaries, sums, showOverlap, setOverlap }) => {
-  const { summarizers } = useContext(SummarizersContext);
   const [overlapSummaries, setOverlapSummaries] = useState(null);
   const showIndexes = useMemo(() => {
     if (!overlapSummaries) return [];
@@ -561,12 +529,12 @@ const SummaryCompareView = ({ summaries, sums, showOverlap, setOverlap }) => {
   const markupState = useState(null);
   const scrollState = useMarkupScroll(overlapSummaries);
   const elements = useMemo(() => {
-    const newSums = sums.map((sum, index) => [[sum], summarizers[summaries[index].name].info.name]);
+    const newSums = sums.map((sum, index) => [[sum], summaries[index].name]);
     showIndexes.forEach((i, j) => {
       newSums[i][0] = markups[j];
     });
     return newSums;
-  }, [markups, showIndexes, summaries, summarizers, sums]);
+  }, [markups, showIndexes, summaries, sums]);
   const lastShowOverlap = useRef(showOverlap);
 
   useEffect(() => {
@@ -707,83 +675,66 @@ const BulkView = ({ summaries, fileName }) => {
   );
 };
 
+const extractErrors = (errors) =>
+  Object.entries(errors)
+    .map(([name, value]) => ({ name, message: value.map(({ message }) => message) }))
+    .sort(({ name }) => name);
+
 const Summarize = () => {
-  const { summarizers, loading, retry } = useContext(SummarizersContext);
-
-  const [abortController, setAbortController] = useState(null);
-
-  useEffect(
-    () => () => {
-      if (abortController) abortController.abort();
-    },
-    [abortController]
-  );
+  const { plugins, loading, chosenModels, retry } = useContext(SummarizersContext);
+  const { reset, abort } = useAbortController();
 
   const [state, doFetch] = useAsyncFn(
-    async ({ data, fileName }, models, summaryLength) => {
-      const modelsWithArguments = Object.fromEntries(
-        models.map((model) => [model, summarizers[model].arguments])
-      );
+    async ({ data, fileName }, summaryLength) => {
+      const summarizers = omap(chosenModels, (v) => v.arguments);
       const ratio = parseInt(summaryLength, 10) / 100;
-      const controller = new AbortController();
-      setAbortController(controller);
-      const response = await summarizeRequest(data, modelsWithArguments, ratio, controller).finally(
-        () => setAbortController(null)
-      );
-      if (controller.signal.aborted) return undefined;
+      const controller = reset();
+      const bulk = data.length > 1;
+      const response = await summarizeRequest(data, summarizers, ratio, bulk, controller);
+      if (!response) return undefined;
       if (response.errors) return response;
-      if (Array.isArray(response.data)) {
-        let combinedData = [];
-        let combinedErrors = [];
-        response.data.forEach(({ summaries, document }) => {
-          const { data: currData, errors } = collectPluginErrors(
-            summaries,
-            (name, { summary }) => (summary ? { name, summary } : undefined),
-            (elements) => ({
-              document,
-              summaries: Object.fromEntries(
-                elements.map(({ name, summary }) => [summarizers[name].info.name || name, summary])
-              ),
-            })
-          );
-          if (currData) combinedData.push(currData);
-          if (errors) combinedErrors.push(...errors);
-        });
-        if (!combinedData.length) combinedData = undefined;
-        if (!combinedErrors.length) combinedErrors = undefined;
-        else combinedErrors = mapErrorsToName(combinedErrors, summarizers);
+      let { errors } = response.data;
+      const { summaries: sums } = response.data;
+      if (errors) {
+        errors = omap(errors, (key) => plugins[key].info.name || key, "key");
+        errors = extractErrors(errors);
+      }
+      const hasResults = Boolean(sums.length);
+      if (bulk) {
         return {
-          data: { summaries: combinedData, fileName: fileName.split(".")[0] },
-          errors: combinedErrors,
-          hasResults: combinedData !== undefined,
+          data: { summaries: sums, fileName: fileName.split(".")[0] },
+          errors,
+          hasResults,
           type: "bulk",
         };
       }
-      const { summaries, original, url } = response.data;
-      const originalText = computeParagraphs(original.text);
-      const collected = collectPluginErrors(
-        summaries,
-        (name, { summary }) =>
-          summary
-            ? { name, originalText, summaryText: computeParagraphs(summary), url }
-            : undefined,
-        (elements) => ({
-          summaries: elements,
-          title: original.title,
+      if (!hasResults) return { errors, hasResults };
+      const { metadata } = sums[0] || {};
+      let { summaries } = sums[0] || {};
+      const originalText = computeParagraphs(metadata.document);
+      summaries = Object.entries(summaries)
+        .map(([key, value]) => ({
+          name: plugins[key].info.name,
+          originalText,
+          summaryText: computeParagraphs(value),
+        }))
+        .sort(({ name }) => name);
+      return {
+        data: {
+          summaries,
+          title: metadata.title,
           documentLength: computeNumWords(originalText),
-        })
-      );
-      if (collected.errors && collected.errors.length)
-        collected.errors = mapErrorsToName(collected.errors, summarizers);
-      collected.type = "single";
-      collected.hasResults = collected.data && collected.data.summaries !== undefined;
-      return collected;
+        },
+        errors,
+        hasResults,
+        type: "single",
+      };
     },
-    [summarizers]
+    [plugins]
   );
 
   if (loading) return <CenterLoading />;
-  if (!summarizers) return <Button onClick={retry}>Retry</Button>;
+  if (!plugins) return <Button onClick={retry}>Retry</Button>;
 
   let result = null;
   const { value } = state;
@@ -803,7 +754,7 @@ const Summarize = () => {
           concatenated as the final summary.{" "}
         </Hint>
       </div>
-      <InputDocument summarize={doFetch} state={state} abortController={abortController} />
+      <InputDocument summarize={doFetch} state={state} abort={abort} />
       {result}
     </SpaceGap>
   );

@@ -23,7 +23,11 @@ async def wait_first(coros):
     finally:
         for future in futures:
             future.cancel()
-        await asyncio.wait(futures)
+        for future in futures:
+            try:
+                await future
+            except:
+                pass
 
 
 def to_future(func):

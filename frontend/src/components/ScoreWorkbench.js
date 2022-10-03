@@ -4,7 +4,7 @@ import { useKey, useToggle } from "react-use";
 
 import { HoverContext } from "../contexts/HoverContext";
 import { useMarkup } from "../hooks/markup";
-import { arrayEqual, mapObject, computeParagraphs, splitSentences  } from "../utils/common";
+import { arrayEqual, omap, computeParagraphs, splitSentences  } from "../utils/common";
 import formatters from "../utils/export";
 import { range } from "../utils/python";
 import { CopyToClipboardButton } from "./utils/Button";
@@ -262,7 +262,7 @@ class MarkupMatrix {
           });
       }
     }
-    return mapObject(this.all, (v, k) => {
+    return omap(this.all, (v, k) => {
       const markup = markupMapper[k];
       if (markup) return markup;
       return v[index];
@@ -300,7 +300,7 @@ const Visualize = ({ calculation }) => {
       {Boolean(Object.keys(chosenModels).length) && (
         <Checkbox
           checked={allIsChecked}
-          onChange={() => setChosenModels((oldState) => mapObject(oldState, () => !allIsChecked))}
+          onChange={() => setChosenModels((oldState) => omap(oldState, () => !allIsChecked))}
           bold
         >
           toggle all models

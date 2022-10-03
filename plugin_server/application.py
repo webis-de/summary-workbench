@@ -1,9 +1,9 @@
 import asyncio
 
+from errors import general_exception, validation_exception
 from fastapi import FastAPI, Request, Response, WebSocket
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from errors import general_exception, validation_exception
 from manager.request import RequestManager
 from manager.websocket import WebsocketManager
 from workers import Workers
@@ -59,5 +59,9 @@ def build_application(func, validator, num_threads=1, batch_size=32):
                 asyncio.all_tasks(asyncio.get_running_loop())
             ),
         }
+
+    @app.get("/health")
+    async def health():
+        return Response()
 
     return app

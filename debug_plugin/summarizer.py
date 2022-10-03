@@ -16,10 +16,10 @@ class SummarizerPlugin:
         return_data: Literal["real", "none", "error"] = "real",
         high_load: bool = True,
         summary: str = "test summary",
-        extra_message: float = Field(0, le=-500, ge=500),
+        extra_message: float = Field(0, ge=-500, le=500),
         time: int = Field(0, ge=-1, le=1000),
-        error_message: str = "test error",
-        fail: bool = True,
+        error_message: str = Field("test error", textarea=True),
+        fail: bool = False,
         error: Literal["ValueError", "Exception", "AttributeError"] = "ValueError",
     ):
         if time > 0:

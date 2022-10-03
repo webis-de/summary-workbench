@@ -4,20 +4,14 @@ const getMetricsRequest = () => get("/api/metrics");
 const getSummarizersRequest = () => get("/api/summarizers");
 
 const evaluateRequest = (metrics, references, hypotheses, abortController) =>
-  post("/api/evaluate", { metrics, references, hypotheses }, {abortController});
+  post("/api/evaluate", { metrics, references, hypotheses }, { abortController });
 
-const summarizeRequest = (data, summarizers, ratio, abortController) => {
-  if (Array.isArray(data))
-    return post(
-      "/api/summarize/bulk",
-      { documents: data, summarizers, ratio },
-      { abortController }
-    );
-  return post(
-    "/api/summarize",
-    { text: data, summarizers, ratio },
-    { abortController }
-  );
+const summarizeRequest = (documents, summarizers, ratio, bulk, abortController) => {
+  const data = { documents, summarizers, ratio, add_metadata: true };
+  if (!bulk) {
+    data.split_sentences = true;
+  }
+  return post("/api/summarize", data, { abortController });
 };
 
 const pdfExtractRequest = async (pdf) => {
@@ -28,7 +22,7 @@ const pdfExtractRequest = async (pdf) => {
   if (res.ok) {
     const data = await res.json();
     if (data.error) throw new Error(data.error);
-    return data
+    return data;
   }
   throw new Error(`request failed with status ${res.status}`);
 };

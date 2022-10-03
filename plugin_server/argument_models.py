@@ -115,7 +115,6 @@ class Config:
     allow_mutation = False
     extra = "forbid"
 
-
 def create_function_validator(
     function, positional_arguments=None, required_arguments=None, validators=None
 ):
@@ -162,6 +161,10 @@ def create_function_validator(
                 raise ValueError(f"'{name}' is not present")
     else:
         required_arguments = {}
+
+    for name, (annotation, _) in extra_arguments.items():
+        if annotation is Any:
+            raise ValueError(f"type annotation for argument '{name}' is missing")
 
     batch_validator = create_model("BatchValidator", **pos_arguments)
     required_validator = create_model("RequiredValidator", **required_arguments)

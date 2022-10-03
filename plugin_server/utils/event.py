@@ -35,7 +35,7 @@ class EventBox:
 
     def make_response(self, response=None):
         if self.result_type == "done":
-            return {"success": True, "results": self.result}
+            return {"success": True, "data": self.result}
         elif self.result_type == "error":
             if response is not None:
                 response.status_code = 400

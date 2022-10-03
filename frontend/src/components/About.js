@@ -83,7 +83,7 @@ const About = () => {
     loading: summarizersLoading,
     retry: summarizersReload,
   } = useContext(SummarizersContext);
-  const { metrics, loading: metricsLoading, retry: metricsReload } = useContext(MetricsContext);
+  const { plugins, loading: metricsLoading, retry: metricsReload } = useContext(MetricsContext);
 
   return (
     <div className="flex flex-col gap-4">
@@ -128,10 +128,10 @@ const About = () => {
       </SpaceGap>
       <SpaceGap>
         <HeadingSemiBig>Evaluation Metrics</HeadingSemiBig>
-        {!metrics ? (
+        {!plugins ? (
           <WaitResource loading={metricsLoading} reloader={metricsReload} />
         ) : (
-          <AboutTable section="Metric" content={metrics} />
+          <AboutTable section="Metric" content={plugins} />
         )}
       </SpaceGap>
       <SpaceGap>

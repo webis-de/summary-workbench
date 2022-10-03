@@ -1,10 +1,11 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useContext, useState } from "react";
 import { useAsyncFn } from "react-use";
 
 import { evaluateRequest } from "../api";
 import { MetricsContext } from "../contexts/MetricsContext";
+import { useAbortController } from "../hooks/abortController";
 import { useCalculations } from "../hooks/calculations";
-import { average, extractArgumentErrors, getChosen, mapObject } from "../utils/common";
+import { average, omap } from "../utils/common";
 import { collectPluginErrors, mapErrorsToName } from "../utils/data";
 import { flatten } from "../utils/flatScores";
 import { OneHypRef } from "./OneHypRef";
@@ -19,7 +20,7 @@ import { CenterLoading } from "./utils/Loading";
 import { Tab, TabContent, TabHead, TabPanel, Tabs } from "./utils/Tabs";
 import { HeadingBig, HeadingSemiBig, Hint } from "./utils/Text";
 
-const FileInput = ({ loading, compute, setComputeData, disableErrors, abortController }) => (
+const FileInput = ({ loading, compute, setComputeData, disableErrors, abort }) => (
   <Card full>
     <Tabs>
       <CardContent>
@@ -37,15 +38,15 @@ const FileInput = ({ loading, compute, setComputeData, disableErrors, abortContr
         </TabContent>
         <div className="flex justify-between items-center gap-5">
           {loading ? (
-            <LoadingButton text="Evaluating" />
+            <>
+              <LoadingButton text="Evaluating" />
+              <Button variant="danger" appearance="box" onClick={() => abort()}>
+                Cancel
+              </Button>
+            </>
           ) : (
             <Button variant="primary" disabled={disableErrors.length} onClick={compute}>
               Evaluate
-            </Button>
-          )}
-          {abortController && (
-            <Button variant="danger" appearance="box" onClick={() => abortController.abort()}>
-              Cancel
             </Button>
           )}
         </div>
@@ -85,7 +86,7 @@ const evaluate = async (modelsWithArguments, references, hypotheses, abortContro
       scores: Object.fromEntries(elements.map(({ name, scores }) => [name, scores])),
     })
   );
-  return result
+  return result;
 };
 
 class ScoreBuilder {
@@ -110,7 +111,7 @@ class ScoreBuilder {
     const flattened = Object.fromEntries(flatten(scores, this.metrics));
     Object.keys(flattened).forEach((key) => this.usedScores.add(key));
     this.scores[model] = flattened;
-    this.avgScores[model] = mapObject(flattened, (list) => average(list));
+    this.avgScores[model] = omap(flattened, (list) => average(list));
   }
 
   compile() {
@@ -136,19 +137,11 @@ class ScoreBuilder {
 }
 
 const SubEvaluate = () => {
-  const { metrics, types, toggle, setArgument } = useContext(MetricsContext);
+  const { plugins, chosenModels, argumentErrors } = useContext(MetricsContext);
   const calc = useCalculations();
 
-  const [abortController, setAbortController] = useState(null);
+  const { reset: abortReset, abort } = useAbortController();
 
-  useEffect(
-    () => () => {
-      if (abortController) abortController.abort();
-    },
-    [abortController]
-  );
-
-  const chosenMetrics = useMemo(() => Object.keys(getChosen(metrics)), [metrics]);
   const [state, doFetch] = useAsyncFn(
     async ({ id, lines: jsonl, chosenKeys, reset = false }) => {
       if (reset) return null;
@@ -162,41 +155,34 @@ const SubEvaluate = () => {
           return ret;
         });
       }
-      const modelsWithArguments = Object.fromEntries(
-        chosenMetrics.map((model) => [model, metrics[model].arguments])
-      );
+      const modelsWithArguments = omap(chosenModels, (v) => v.arguments);
       const [documents, references, models] = zipLines(lines);
-      const scoreBuilder = new ScoreBuilder(id, metrics, documents, references, models);
+      const scoreBuilder = new ScoreBuilder(id, plugins, documents, references, models);
       if (Object.keys(models).length) {
         const collectedErrors = [];
-        const controller = new AbortController();
-        setAbortController(controller);
+        const controller = abortReset();
         const responses = await Promise.all(
           Object.entries(models).map(async ([key, hypotheses]) => [
             key,
             await evaluate(modelsWithArguments, references, hypotheses, controller),
           ])
-        ).finally(() => setAbortController(null));
-        console.log(responses)
-        if (controller.signal.aborted) return undefined;
+        )
+        console.log(responses);
+        if (!responses) return undefined;
         responses.forEach(([key, { data, errors }]) => {
           if (data) scoreBuilder.add(key, data.scores);
           if (errors) collectedErrors.push({ name: key, errors });
         });
         const data = {};
         if (!scoreBuilder.empty()) data.data = scoreBuilder.compile();
-        if (collectedErrors.length) data.errors = mapErrorsToName(collectedErrors, metrics);
+        if (collectedErrors.length) data.errors = mapErrorsToName(collectedErrors, plugins);
         return data;
       }
       return { data: scoreBuilder.compile() };
     },
-    [metrics, chosenMetrics]
+    [plugins, chosenModels]
   );
   const [{ data, errors }, setComputeData] = useState({});
-  const argErrors = useMemo(
-    () => extractArgumentErrors(chosenMetrics, metrics),
-    [chosenMetrics, metrics]
-  );
 
   const saveCalculation = async (calculation) => {
     await calc.add(calculation);
@@ -205,14 +191,14 @@ const SubEvaluate = () => {
 
   const disableErrors = [];
   if (errors) disableErrors.push(...errors);
-  if (argErrors) disableErrors.push(...argErrors);
+  if (argumentErrors) disableErrors.push(...argumentErrors);
   if (data) {
     const numChosenKeys = data.chosenKeys ? data.chosenKeys.length : 0;
 
     if (data.chosenKeys && !numChosenKeys && !Object.keys(data.lines[0]).includes("document")) {
       disableErrors.push("provide at least the 'document' key or a model key");
     }
-    if ((!data.chosenKeys || numChosenKeys) && !chosenMetrics.length) {
+    if ((!data.chosenKeys || numChosenKeys) && !chosenModels.length) {
       disableErrors.push("Select at least one metric.");
     }
   }
@@ -237,7 +223,7 @@ const SubEvaluate = () => {
                 compute={() => doFetch(data)}
                 setComputeData={setComputeData}
                 disableErrors={disableErrors}
-                abortController={abortController}
+                abort={abort}
               />
             </div>
           </div>
@@ -248,13 +234,7 @@ const SubEvaluate = () => {
                   <HeadingSemiBig>Metrics</HeadingSemiBig>
                 </CardHead>
                 <CardContent>
-                  <Settings
-                    models={metrics}
-                    types={types}
-                    setArgument={setArgument}
-                    toggleSetting={toggle}
-                    type="Metrics"
-                  />
+                  <Settings Context={MetricsContext} type="Metrics" />
                 </CardContent>
               </Card>
             </div>
@@ -295,9 +275,9 @@ const SubEvaluate = () => {
 };
 
 const Evaluate = () => {
-  const { loading, metrics, retry } = useContext(MetricsContext);
+  const { loading, plugins, retry } = useContext(MetricsContext);
   if (loading) return <CenterLoading />;
-  if (!metrics) return <Button onClick={retry}>Retry</Button>;
+  if (!plugins) return <Button onClick={retry}>Retry</Button>;
   return <SubEvaluate />;
 };
 

@@ -24,8 +24,28 @@ def is_url(url):
 METRICS = {}
 
 
-def error_to_message(error):
-    pass
+def _error_to_message(error):
+    errors = []
+    if isinstance(error, str):
+        error = {"message": error}
+    error_type = error.get("error", "UNKNOWN")
+    if error_type == "VALIDATION":
+        for e in error["errors"]:
+            loc = e["loc"]
+            msg = e["msg"]
+            message = f"{loc}: {msg}"
+            errors.append({"type": error_type, "message": message})
+    else:
+        message = error["message"]
+        errors.append({"type": error_type, "message": message})
+    return errors
+
+
+def error_to_message(errors):
+    if not isinstance(errors, list):
+        errors = [errors]
+    errors = [err for e in errors for err in _error_to_message(e)]
+    return errors
 
 
 async def plugin_request(plugins):
@@ -34,12 +54,11 @@ async def plugin_request(plugins):
     results = {}
     errors = {}
     for key, response in zip(keys, responses):
-        if isinstance(response, Exception):
+        if response["success"]:
+            results[key] = response["data"]
+        else:
             err_messages = error_to_message(response)
             errors[key] = err_messages
-            # TODO: add more error handling
-        else:
-            results[key] = response
     # TODO: implement cache
     return results, errors
 
@@ -62,17 +81,16 @@ async def evaluate(metrics, hypotheses, references):
     return results | errors
 
 
-async def summarize(summarizers, text, ratio):
+async def summarize(summarizers, documents, ratio):
     request_args = {
         key: {
             "url": watcher.summarizers[key]["url"],
-            "json": {"text": text, "ratio": ratio, **args},
+            "json": {"batch": documents, "ratio": ratio, **args},
         }
         for key, args in summarizers.items()
     }
     results, errors = await plugin_request(request_args)
-    results = {key: {"summary": value["summary"]} for key, value in results.items()}
-    return results | errors
+    return results, errors
 
 
 @app.on_event("startup")
@@ -121,8 +139,10 @@ async def evaluate_route(request: Request, body: EvaluationBody):
 
 
 class SummarizeBody(BaseModel):
-    text: str
+    documents: list[str] = Field(..., min_length=1)
     ratio: float = Field(0.2, gt=0.0, lt=1.0)
+    split_sentences: bool = False
+    add_metadata: bool = False
     summarizers: dict[str, dict]
 
     @validator("summarizers")
@@ -140,57 +160,58 @@ app.add_middleware(
 )
 
 
+async def sentence_split_multiple(texts):
+    return [await sentence_split(text) for text in texts]
+
+
 @api.post("/summarize")
 @cancel_on_disconnect
 async def summarize_route(request: Request, body: SummarizeBody):
-    text = body.text
-    if is_url(text):
-        url = text
-        text = await download_article(text)
+    documents = []
+    metadata = []
+    for text in body.documents:
+        text = text.strip()
+        if is_url(text):
+            meta = await download_article(text)
+            meta["url"] = text
+            text = meta["text"]
+            del meta["text"]
+        else:
+            meta = {}
+        documents.append(text)
+        if body.add_metadata:
+            if body.split_sentences:
+                text = await sentence_split(text)
+            meta["document"] = text
+        metadata.append(meta)
+    results, errors = await summarize(body.summarizers, documents, body.ratio)
+    if body.split_sentences:
+        new_results = {}
+        for key, value in results.items():
+            if isinstance(value, list):
+                value = await sentence_split_multiple(value)
+            new_results[key] = value
+        results = new_results
+    if results:
+        keys, values = list(zip(*results.items()))
     else:
-        url = None
-    text = text.strip()
-    summaries = await summarize(body.summarizers, text, body.ratio)
-    for value in summaries.values():
-        if isinstance(value["summary"], str):
-            value["summary"] = await sentence_split(value["summary"])
-    original = {"text": await sentence_split(text)}
-    if url is not None:
-        original["url"] = url
-    result = {"data": {"original": original, "summaries": summaries}}
-    return result
-
-
-class BulkSummarizeBody(BaseModel):
-    documents: list[str]
-    ratio: float = Field(0.2, gt=0.0, lt=1.0)
-    summarizers: dict[str, dict]
-
-    @validator("summarizers")
-    def valid_summarizers(cls, v):
-        assert all(e in watcher.summarizer_keys for e in v.keys())
-        return v
+        keys, values = [], []
+    summaries = []
+    for e, meta in zip(zip(*values), metadata):
+        content = {"summaries": dict(zip(keys, e))}
+        if body.add_metadata:
+            content["metadata"] = meta
+        summaries.append(content)
+    data = {"summaries": summaries}
+    if errors:
+        data["errors"] = errors
+    return {"data": data}
 
 
 def join(l):
     if isinstance(l, list):
         return " ".join(l)
     return l
-
-
-@api.post("/summarize/bulk")
-@cancel_on_disconnect
-async def bulk_summarize_route(request: Request, body: BulkSummarizeBody):
-    data = []
-    for doc in body.documents:
-        doc = doc.strip()
-        summaries = await summarize(body.summarizers, doc, body.ratio)
-        summaries = {
-            key: {**value, "summary": join(value["summary"])}
-            for key, value in summaries.items()
-        }
-        data.append({"document": doc, "summaries": summaries})
-    return {"data": data}
 
 
 @api.post("/pdf/extract")
