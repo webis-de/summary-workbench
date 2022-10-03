@@ -45,6 +45,11 @@ const computeParagraphs = (text) => {
   return paragraphs.join("\n\n");
 };
 
+const extractErrors = (errors) =>
+  Object.entries(errors)
+    .map(([name, value]) => ({ name, message: value.map(({ message }) => message) }))
+    .sort(({ name }) => name);
+
 export {
   getChosen,
   unpack,
@@ -54,6 +59,7 @@ export {
   sum,
   average,
   arrayEqual,
+  extractErrors,
   splitSentences,
   computeParagraphs,
 };

@@ -12,9 +12,9 @@ class MetricPlugin:
     def evaluate(
         self,
         batch,
+        references,
         return_data: Literal["real", "none", "error"] = "real",
         high_load: bool = True,
-        summary: str = "test summary",
         extra_message: float = Field(0, ge=-500, le=500),
         time: int = Field(0, ge=-1, le=1000),
         error_message: str = Field("test error", textarea=True),
@@ -37,7 +37,7 @@ class MetricPlugin:
                 raise AttributeError(error_message)
             raise ValueError(f"unknown error type {error}")
         if return_data == "real":
-            return [[extra_message] * len(hyp) for hyp, _ in batch]
+            return [[extra_message] * len(hyp) for hyp in batch]
         if return_data == "none":
             return [None] * len(batch)
         if return_data == "error":

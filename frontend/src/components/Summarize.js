@@ -15,7 +15,7 @@ import { SettingsContext } from "../contexts/SettingsContext";
 import { SummarizersContext } from "../contexts/SummarizersContext";
 import { useAbortController } from "../hooks/abortController";
 import { useMarkups, usePairwiseMarkups } from "../hooks/markup";
-import { computeParagraphs, omap } from "../utils/common";
+import { computeParagraphs, omap, extractErrors } from "../utils/common";
 import { Settings } from "./Settings";
 import { Badge } from "./utils/Badge";
 import { Button, CopyToClipboardButton, LoadingButton } from "./utils/Button";
@@ -674,11 +674,6 @@ const BulkView = ({ summaries, fileName }) => {
     </Card>
   );
 };
-
-const extractErrors = (errors) =>
-  Object.entries(errors)
-    .map(([name, value]) => ({ name, message: value.map(({ message }) => message) }))
-    .sort(({ name }) => name);
 
 const Summarize = () => {
   const { plugins, loading, chosenModels, retry } = useContext(SummarizersContext);

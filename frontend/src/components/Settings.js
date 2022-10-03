@@ -71,7 +71,7 @@ const ModelBox = ({ type, name, schema, errors, args, setArgument, close }) => (
   </div>
 );
 const Settings = ({ type, Context }) => {
-  const { plugins, chosenModels, types, toggleSetting, setArgument } = useContext(Context);
+  const { plugins, chosenModels, types, toggle, setArgument } = useContext(Context);
   const modelKeys = useMemo(() => Object.keys(plugins).sort(), [plugins]);
   const { query, setQuery, filteredKeys } = useFilter(modelKeys);
 
@@ -82,18 +82,18 @@ const Settings = ({ type, Context }) => {
         <div className="flex items-center">
           <HeadingMedium>Selected {type}</HeadingMedium>
         </div>
-        <SelectModels keys={filteredKeys} models={plugins} selectModel={toggleSetting} />
+        <SelectModels keys={filteredKeys} models={plugins} selectModel={toggle} />
         <div className="flex flex-col gap-1 p-1 border border-slate-400 overflow-y-auto overflow-x-hidden h-[300px] shadow-md bg-white">
           {Object.entries(chosenModels).map(([key, { info, arguments: args, errors }]) => (
             <ModelBox
               key={key}
-              name={key}
+              name={plugins[key].info.name}
               args={args}
               setArgument={setArgument}
               errors={errors}
               type={info.validators.type}
               schema={info.validators.argument}
-              close={() => toggleSetting(key)}
+              close={() => toggle(key)}
             />
           ))}
         </div>

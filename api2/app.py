@@ -69,16 +69,19 @@ api = APIRouter()
 
 
 async def evaluate(metrics, hypotheses, references):
+    keys, batch = zip(*hypotheses.items())
     request_args = {
         key: {
             "url": watcher.metrics[key]["url"],
-            "json": {"hypotheses": hypotheses, "references": references, **args},
+            "json": {"batch": batch, "references": references, **args},
         }
         for key, args in metrics.items()
     }
     results, errors = await plugin_request(request_args)
-    results = {key: {"scores": value["scores"]} for key, value in results.items()}
-    return results | errors
+    results = {
+        key: {k: v for k, v in zip(keys, value)} for key, value in results.items()
+    }
+    return results, errors
 
 
 async def summarize(summarizers, documents, ratio):
@@ -109,17 +112,22 @@ async def metrics():
 
 
 class EvaluationBody(BaseModel):
-    hypotheses: list[str]
+    hypotheses: dict[str, list[str]]
     references: list[str]
     metrics: dict[str, dict]
 
     @root_validator
     def same_length(cls, values):
-        len_hyps = len(values["hypotheses"])
-        len_refs = len(values["references"])
-        assert (
-            len_hyps == len_refs
-        ), f"hypotheses and references are not the same size ({len_hyps} != {len_refs})"
+        references = values.get("references")
+        hypotheses = values.get("hypotheses")
+        if references is None or hypotheses is None:
+            return values
+        len_refs = len(references)
+        for name, hyps in hypotheses.items():
+            len_hyps = len(hyps)
+            assert (
+                len_hyps == len_refs
+            ), f"hypotheses {name} and references are not the same size ({len_hyps} != {len_refs})"
         return values
 
     @validator("metrics")
@@ -131,11 +139,11 @@ class EvaluationBody(BaseModel):
 @api.post("/evaluate")
 @cancel_on_disconnect
 async def evaluate_route(request: Request, body: EvaluationBody):
-    return {
-        "data": {
-            "scores": await evaluate(body.metrics, body.hypotheses, body.references)
-        }
-    }
+    results, errors = await evaluate(body.metrics, body.hypotheses, body.references)
+    data = {"scores": results}
+    if errors:
+        data["errors"] = errors
+    return {"data": data}
 
 
 class SummarizeBody(BaseModel):
@@ -206,12 +214,6 @@ async def summarize_route(request: Request, body: SummarizeBody):
     if errors:
         data["errors"] = errors
     return {"data": data}
-
-
-def join(l):
-    if isinstance(l, list):
-        return " ".join(l)
-    return l
 
 
 @api.post("/pdf/extract")

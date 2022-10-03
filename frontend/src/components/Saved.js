@@ -18,9 +18,7 @@ const SavedEntry = ({ calculation, deleteCalculation }) => {
       <Modal isOpen={isOpen} close={closeModal} fit>
         <div className="p-4 max-w-[400px] divide-y">
           <div className="whitespace-nowrap overflow-hidden overflow-ellipsis">
-            Delete {'"'}
-            {calculation.id}
-            {'"'}?
+            Delete {calculation.id}?
           </div>
           <div className="pt-2 flex justify-end gap-4">
             <Button variant="success" appearance="soft" onClick={deleteCalculation}>

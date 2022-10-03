@@ -44,7 +44,7 @@ const AboutTable = ({ section, content }) => (
               <Td>
                 {sourcecode && (
                   <div className="flex justify-center">
-                    <Button appearance="link" variant="primary" href={sourcecode}>
+                    <Button appearance="link" variant="primary" target="_blank" href={sourcecode}>
                       <FaCode size={20} />
                     </Button>
                   </div>
@@ -53,8 +53,8 @@ const AboutTable = ({ section, content }) => (
               <Td center>
                 {homepage && (
                   <div className="flex justify-center">
-                    <Button appearance="link" variant="success" href={homepage}>
-                      <FaExternalLinkAlt size={20} />
+                    <Button appearance="link" variant="success" target="_blank" href={homepage}>
+                      <FaExternalLinkAlt size={16} />
                     </Button>
                   </div>
                 )}
@@ -79,11 +79,11 @@ const WaitResource = ({ loading, reloader }) => {
 
 const About = () => {
   const {
-    summarizers,
+    plugins: summarizers,
     loading: summarizersLoading,
     retry: summarizersReload,
   } = useContext(SummarizersContext);
-  const { plugins, loading: metricsLoading, retry: metricsReload } = useContext(MetricsContext);
+  const { plugins: metrics, loading: metricsLoading, retry: metricsReload } = useContext(MetricsContext);
 
   return (
     <div className="flex flex-col gap-4">
@@ -128,10 +128,10 @@ const About = () => {
       </SpaceGap>
       <SpaceGap>
         <HeadingSemiBig>Evaluation Metrics</HeadingSemiBig>
-        {!plugins ? (
+        {!metrics ? (
           <WaitResource loading={metricsLoading} reloader={metricsReload} />
         ) : (
-          <AboutTable section="Metric" content={plugins} />
+          <AboutTable section="Metric" content={metrics} />
         )}
       </SpaceGap>
       <SpaceGap>

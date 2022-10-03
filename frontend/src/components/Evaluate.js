@@ -5,8 +5,7 @@ import { evaluateRequest } from "../api";
 import { MetricsContext } from "../contexts/MetricsContext";
 import { useAbortController } from "../hooks/abortController";
 import { useCalculations } from "../hooks/calculations";
-import { average, omap } from "../utils/common";
-import { collectPluginErrors, mapErrorsToName } from "../utils/data";
+import { average, extractErrors, omap } from "../utils/common";
 import { flatten } from "../utils/flatScores";
 import { OneHypRef } from "./OneHypRef";
 import { Result } from "./Result";
@@ -67,26 +66,10 @@ const zipLines = (lines) => {
   return [documents, references, models];
 };
 
-const evaluate = async (modelsWithArguments, references, hypotheses, abortController) => {
-  const response = await evaluateRequest(
-    modelsWithArguments,
-    references,
-    hypotheses,
-    abortController
-  );
-  if (abortController && abortController.signal.aborted) return undefined;
-  if (response.errors) return response;
-  const result = collectPluginErrors(
-    response.data.scores,
-    (name, { scores }) => {
-      if (scores) return { name, scores };
-      return undefined;
-    },
-    (elements) => ({
-      scores: Object.fromEntries(elements.map(({ name, scores }) => [name, scores])),
-    })
-  );
-  return result;
+const evaluate = async (modelsWithArguments, references, hypotheses, controller) => {
+  const response = await evaluateRequest(modelsWithArguments, references, hypotheses, controller);
+  if (controller && controller.signal.aborted) return undefined;
+  return response;
 };
 
 class ScoreBuilder {
@@ -120,7 +103,7 @@ class ScoreBuilder {
     rows.sort();
     columns.sort();
     const table = rows.map((row) => columns.map((column) => this.avgScores[column][row]));
-    const metrics = [...this.usedMetrics];
+    const metrics = [...this.usedMetrics].sort();
     const { id, documents, references, modeltexts, scores } = this;
     return {
       id,
@@ -135,6 +118,18 @@ class ScoreBuilder {
     };
   }
 }
+
+const transpose = (obj) => {
+  const outerKeys = Object.keys(obj);
+  if (!outerKeys.length) return obj;
+  const innerKeys = Object.keys(obj[outerKeys[0]]);
+  return Object.fromEntries(
+    innerKeys.map((ikey) => [
+      ikey,
+      Object.fromEntries(outerKeys.map((okey) => [okey, obj[okey][ikey]])),
+    ])
+  );
+};
 
 const SubEvaluate = () => {
   const { plugins, chosenModels, argumentErrors } = useContext(MetricsContext);
@@ -159,23 +154,21 @@ const SubEvaluate = () => {
       const [documents, references, models] = zipLines(lines);
       const scoreBuilder = new ScoreBuilder(id, plugins, documents, references, models);
       if (Object.keys(models).length) {
-        const collectedErrors = [];
         const controller = abortReset();
-        const responses = await Promise.all(
-          Object.entries(models).map(async ([key, hypotheses]) => [
-            key,
-            await evaluate(modelsWithArguments, references, hypotheses, controller),
-          ])
-        )
-        console.log(responses);
-        if (!responses) return undefined;
-        responses.forEach(([key, { data, errors }]) => {
-          if (data) scoreBuilder.add(key, data.scores);
-          if (errors) collectedErrors.push({ name: key, errors });
-        });
+        const response = await evaluate(modelsWithArguments, references, models, controller);
+        if (!response) return undefined;
+        if (response.errors) return response;
+        let { errors } = response.data;
+        let { scores } = response.data;
+        scores = transpose(scores);
+        if (errors) {
+          errors = omap(errors, (key) => plugins[key].info.name || key, "key");
+          errors = extractErrors(errors);
+        }
+        Object.entries(scores).forEach(([key, s]) => scoreBuilder.add(key, s));
         const data = {};
         if (!scoreBuilder.empty()) data.data = scoreBuilder.compile();
-        if (collectedErrors.length) data.errors = mapErrorsToName(collectedErrors, plugins);
+        if (errors) data.errors = errors
         return data;
       }
       return { data: scoreBuilder.compile() };
@@ -198,7 +191,7 @@ const SubEvaluate = () => {
     if (data.chosenKeys && !numChosenKeys && !Object.keys(data.lines[0]).includes("document")) {
       disableErrors.push("provide at least the 'document' key or a model key");
     }
-    if ((!data.chosenKeys || numChosenKeys) && !chosenModels.length) {
+    if ((!data.chosenKeys || numChosenKeys) && !Object.keys(chosenModels).length) {
       disableErrors.push("Select at least one metric.");
     }
   }
