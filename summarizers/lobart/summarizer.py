@@ -68,8 +68,8 @@ class SummarizerPlugin:
         print("Initializing LoBART")
         self.summarizer = LoBARTModel()
 
-    def summarize(self, *args, **kwargs):
-        return self.summarizer.summarize(*args, **kwargs)
+    def summarize(self, batch, ratio):
+        return [self.summarizer.summarize(text, ratio) for text in batch]
 
     def metadata(self):
         return self.summarizer.metadata

@@ -9,7 +9,7 @@ from gpt2 import CHECKPOINT_PATH
 class PMISumm(object):
     def __init__(self):
         self.model = GPT2(location=CHECKPOINT_PATH)
-    
+
     def get_probabilities(self, sentences):
         """
         Run a forward pass of GPT2 on the article and obtain word probabilities.
@@ -42,13 +42,13 @@ class PMISumm(object):
                 if gt_count == len(sent_words):
                     break
         return res
-        
+
     def get_npmi_matrix(self, sentences, method=1, batch_size=1):
         """
         Accepts a list of sentences of length n and returns 3 objects:
         - Normalised PMI nxn matrix - temp
         - PMI nxn matrix - temp2
-        - List of length n indicating sentence-wise surprisal i.e. p(sentence) - p 
+        - List of length n indicating sentence-wise surprisal i.e. p(sentence) - p
 
         To optimize performance, we do the forward pass batchwise by assembling the batch and maintaining batch indices
         For each batch we call get_probabilities
@@ -105,7 +105,7 @@ class PMISumm(object):
 
     def remove_unicode(self,text):
         return ''.join([i if ord(i) < 128 else ' ' for i in text])
-    
+
     def summarize(self, text=None, ratio=0.2):
         sentences = [self.remove_unicode(sent) for sent in sent_tokenize(text)]
         npmi, pmi, surprise = self.get_npmi_matrix(sentences, batch_size=10)
@@ -132,10 +132,11 @@ class PMISumm(object):
         for i in sorted(selected):
             summary_sentences.append(sentences[i])
         return " ".join(summary_sentences)
-   
+
 
 class SummarizerPlugin:
     def __init__(self):
         self.summarizer = PMISumm()
-    def summarize(self, *args, **kwargs):
-        return self.summarizer.summarize(*args, **kwargs)
+
+    def summarize(self, batch, ratio):
+        return [self.summarizer.summarize(text, ratio) for text in batch]

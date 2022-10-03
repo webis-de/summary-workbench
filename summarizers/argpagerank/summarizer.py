@@ -195,5 +195,5 @@ class SummarizerPlugin:
         print("Initializing ArgPageRank")
         self.summarizer = ArgsRank()
 
-    def summarize(self, *args, **kwargs):
-        return self.summarizer.summarize(*args, **kwargs)
+    def summarize(self, batch, ratio):
+        return [self.summarizer.summarize(t, ratio) for t in batch]

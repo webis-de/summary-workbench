@@ -1,11 +1,11 @@
+import os
 from pathlib import Path
+from urllib.parse import urljoin
 
 import numpy as np
 from gensim.models import KeyedVectors
 from nltk.tokenize import word_tokenize
 from sklearn.metrics.pairwise import cosine_similarity
-from urllib.parse import urljoin
-import os
 
 
 class Embedding:
@@ -37,7 +37,7 @@ class MetricPlugin:
     def __init__(self):
         self.emb = Embedding(self.MODEL_PATH())
 
-    def evaluate(self, hypotheses, references):
+    def _evaluate(self, hypotheses, references):
         references = [references]
 
         def embedd(lines):
@@ -64,3 +64,6 @@ class MetricPlugin:
             scores.append(score_source)
 
         return np.max(scores, axis=0)
+
+    def evaluate(self, batch, references):
+        return [self._evaluate(hypotheses, references) for hypotheses in batch]

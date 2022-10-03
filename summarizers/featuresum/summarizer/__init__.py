@@ -1,10 +1,37 @@
+from model_setup import MODEL
+
 from .scores import Scorer
 
-from model_setup import MODEL
 
 class SummarizerPlugin:
     def __init__(self):
         self.model = Scorer(MODEL)
 
-    def summarize(self, text, ratio, **kwargs):
-        return self.model.summarize(document=text, ratio=ratio, **kwargs)
+    def summarize(
+        self,
+        batch,
+        ratio,
+        title: str = "",
+        use_tfidf: bool = True,
+        use_special_tokens: bool = True,
+        use_position: bool = True,
+        use_average_lexical_connectivity: bool = True,
+        use_content_words_ratio: bool = True,
+        use_length: bool = True,
+        use_rank: bool = True,
+    ):
+        return [
+            self.model.summarize(
+                text,
+                ratio,
+                title=title,
+                use_tfidf=use_tfidf,
+                use_special_tokens=use_special_tokens,
+                use_position=use_position,
+                use_average_lexical_connectivity=use_average_lexical_connectivity,
+                use_content_words_ratio=use_content_words_ratio,
+                use_length=use_length,
+                use_rank=use_rank,
+            )
+            for text in batch
+        ]

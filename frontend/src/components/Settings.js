@@ -3,7 +3,7 @@ import { FaTimes } from "react-icons/fa";
 
 import { Legend, Model, ModelText } from "./Model";
 import { LiveSearch, useFilter } from "./utils/FuzzySearch";
-import { Argument } from "./utils/NewArguments";
+import { Argument } from "./utils/Arguments";
 import { HeadingMedium, Hint } from "./utils/Text";
 
 const SelectModels = ({ keys, models, selectModel }) => (
@@ -47,7 +47,7 @@ const ArgumentLayout = ({ value, schema, setValue, error }) => {
   );
 };
 
-const ModelBox = ({ type, name, schema, errors, args, setArgument, close }) => (
+const ModelBox = ({ type, identifier, name, schema, errors, args, setArgument, close }) => (
   <div className="border border-gray-400 bg-gray-100 flex flex-col divide-y divide-gray-300">
     <div className="px-2 py-[1px] flex justify-between">
       <ModelText type={type} text={name} />
@@ -63,7 +63,7 @@ const ModelBox = ({ type, name, schema, errors, args, setArgument, close }) => (
             value={args[argumentName]}
             schema={argumentSchema}
             error={errors[argumentName]}
-            setValue={(v) => setArgument(name, argumentName, v)}
+            setValue={(v) => setArgument(identifier, argumentName, v)}
           />
         ))}
       </div>
@@ -87,6 +87,7 @@ const Settings = ({ type, Context }) => {
           {Object.entries(chosenModels).map(([key, { info, arguments: args, errors }]) => (
             <ModelBox
               key={key}
+              identifier={key}
               name={plugins[key].info.name}
               args={args}
               setArgument={setArgument}

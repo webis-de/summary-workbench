@@ -7,7 +7,7 @@ class MetricPlugin:
     def __init__(self):
         self.meteor = Meteor()
 
-    def evaluate(self, hypotheses, references):
+    def _evaluate(self, hypotheses, references):
         hyp_list_zip = [[hyp] for hyp in hypotheses]
         ref_list_zip = [[ref] for ref in references]
 
@@ -16,3 +16,6 @@ class MetricPlugin:
 
         _, scores = self.meteor.compute_score(refs, hyps)
         return scores
+
+    def evaluate(self, batch, references):
+        return [self._evaluate(hypotheses, references) for hypotheses in batch]

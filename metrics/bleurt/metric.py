@@ -17,5 +17,5 @@ class MetricPlugin:
     def __init__(self):
         self.bleurt = bleurt.score.BleurtScorer(str(self.MODEL_PATH / self.MODEL))
 
-    def evaluate(self, hypotheses, references):
-        return self.bleurt.score(references=references, candidates=hypotheses)
+    def evaluate(self, batch, references):
+        return [self.bleurt.score(references=references, candidates=hypotheses) for hypotheses in batch]

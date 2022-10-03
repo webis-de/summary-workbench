@@ -13,5 +13,5 @@ class MetricPlugin:
     def __init__(self):
         self.mover_score = MODEL_CLASS()
 
-    def evaluate(self, hypotheses, references):
-        return self.mover_score.score(references, hypotheses)
+    def evaluate(self, batch, references):
+        return [self.mover_score.score(references, hypotheses) for hypotheses in batch]

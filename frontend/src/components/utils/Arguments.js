@@ -10,10 +10,10 @@ const RightInfo = ({ children }) => (
 );
 
 const TextareaField = ({ value: initValue, setValue: setInitValue }) => {
-  const [value, setValue] = useState(initValue.value);
+  const [value, setValue] = useState(initValue);
   const accept = () => setInitValue(value);
   useEffect(() => {
-    setValue(initValue.value);
+    setValue(initValue);
   }, [initValue, setValue]);
   return (
     <Textarea
@@ -27,10 +27,10 @@ const TextareaField = ({ value: initValue, setValue: setInitValue }) => {
 };
 
 const InputField = ({ value: initValue, setValue: setInitValue, min, max }) => {
-  const [value, setValue] = useState(initValue.value);
+  const [value, setValue] = useState(initValue);
   const accept = () => setInitValue(value);
   useEffect(() => {
-    setValue(initValue.value);
+    setValue(initValue);
   }, [initValue, setValue]);
 
   return (
@@ -52,11 +52,16 @@ const InputField = ({ value: initValue, setValue: setInitValue, min, max }) => {
   );
 };
 
-const Categories = ({ value, setValue, definition: { categories } }) => (
+const Categories = ({ onChange, value, categories }) => (
   <div className="w-full">
     <select
-      value={categories.indexOf(value.value)}
-      onChange={(e) => setValue(categories[e.target.value])}
+      value={categories.indexOf(value)}
+      onChange={(e) => {
+        const index = e.target.value;
+        let result = null;
+        if (index >= 0) result = categories[index];
+        onChange(result);
+      }}
       className="form-select appearance-none block w-full px-3 py-1 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded-lg focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
     >
       <option value={-1}>-- select a value --</option>
@@ -69,33 +74,26 @@ const Categories = ({ value, setValue, definition: { categories } }) => (
   </div>
 );
 
-const IntArgument = ({ value, setValue, definition: { min, max } }) => (
-  <InputField value={value} min={min} max={max} setValue={setValue} />
-);
-const BoolArgument = ({ value, setValue }) => <Toggle checked={value.value} onChange={setValue} />;
-const FloatArgument = ({ value, setValue, definition: { min, max } }) => (
-  <InputField value={value} min={min} max={max} setValue={setValue} />
-);
-const StringArgument = ({ value, setValue, definition: { useTextarea } }) => {
-  if (useTextarea) return <TextareaField value={value} setValue={setValue} />;
+const StringArgument = ({ value, setValue, textarea }) => {
+  if (textarea) return <TextareaField value={value} setValue={setValue} />;
   return <InputField value={value} setValue={setValue} />;
 };
-const CategoricalArgument = Categories;
 
-const Argument = ({ type, value, setValue, definition }) => {
-  switch (definition.type) {
-    case "int":
-      return <IntArgument value={value} setValue={setValue} definition={definition} />;
-    case "float":
-      return <FloatArgument value={value} setValue={setValue} definition={definition} />;
-    case "bool":
-      return <BoolArgument value={value} setValue={setValue} definition={definition} />;
-    case "str":
-      return <StringArgument value={value} setValue={setValue} definition={definition} />;
-    case "categorical":
-      return <CategoricalArgument value={value} setValue={setValue} definition={definition} />;
+const Argument = ({ value, schema, setValue }) => {
+  if (schema.enum) return <Categories value={value} categories={schema.enum} onChange={setValue} />;
+  const { textarea } = schema;
+  const { minimum, maximum } = schema;
+  switch (schema.type) {
+    case "integer":
+      return <InputField value={value} setValue={setValue} min={minimum} max={maximum} />;
+    case "number":
+      return <InputField value={value} setValue={setValue} min={minimum} max={maximum} />;
+    case "boolean":
+      return <Toggle checked={value} onChange={setValue} />;
+    case "string":
+      return <StringArgument value={value} setValue={setValue} textarea={textarea} />;
     default:
-      throw new Error(`unknown type ${type}`);
+      return <StringArgument value={value} setValue={setValue} textarea={textarea} />;
   }
 };
 

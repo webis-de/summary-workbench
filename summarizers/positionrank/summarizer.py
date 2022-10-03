@@ -49,5 +49,5 @@ class SummarizerPlugin:
         self.model = PositionRankModel()
         print("Intialized  PositionRank")
 
-    def summarize(self, *args, **kwargs):
-        return self.model.summarize(*args, **kwargs)
+    def summarize(self, batch, ratio):
+        return [self.summarizer.summarize(text, ratio) for text in batch]

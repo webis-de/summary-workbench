@@ -23,7 +23,7 @@ class SummarizerPlugin:
     def __init__(self):
         pass
 
-    def summarize(self, text, ratio):
+    def _summarize(self, text, ratio):
         sentences = nlp.split_sentences(text)
         keys = nlp.keywords(text)
 
@@ -32,3 +32,6 @@ class SummarizerPlugin:
         ranks = [s[0] for s in ranks]
         summary = " ".join(take_ratio(ranks, ratio))
         return summary
+
+    def summarize(self, batch, ratio):
+        return [self._summarize(text, ratio) for text in batch]
