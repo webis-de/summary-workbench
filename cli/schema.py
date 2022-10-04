@@ -1,4 +1,3 @@
-import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
@@ -81,6 +80,10 @@ class ConfigModel(BaseModel, ThrowMixin):
     )
     deploy: Optional[DeployModel] = Field(
         description="configuration for the kubernetes deployment"
+    )
+    environment: Dict[constr(regex=key_pattern), Union[str, int, float, bool]] = Field(
+        {},
+        description="key value pairs that will be environment variables inside of all the images",
     )
     metrics: plugin_type = Field([], description="configuration for metrics")
     summarizers: plugin_type = Field([], description="configuration for summarizers")

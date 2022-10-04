@@ -8,6 +8,12 @@ from application import build_application
 
 sys.path.insert(0, "/summary_workbench_plugin_files")
 
+PLUGIN_CONFIG = json.loads(environ["PLUGIN_CONFIG"])
+NUM_THREADS = int(environ.get("THREADS", 1))
+BATCH_SIZE = int(environ.get("BATCH_SIZE", 32))
+CACHE_SIZE = int(environ.get("CACHE_SIZE", 0))
+
+
 
 def construct_metric():
     from metric_factory import MetricFactory
@@ -26,7 +32,7 @@ PLUGIN_TYPES = {
     "summarizer": construct_summarizer,
 }
 
-plugin_config = json.loads(environ.get("PLUGIN_CONFIG"))
+plugin_config = PLUGIN_CONFIG
 plugin_config["instancetag"] = str(uuid.uuid4())
 
 factory = PLUGIN_TYPES[plugin_config["type"]]()
@@ -42,13 +48,13 @@ plugin_config["validators"] = {
 
 
 app = build_application(
-    factory.func, factory.full_validator, num_threads=1, batch_size=32
+    factory.func, factory.full_validator, num_threads=NUM_THREADS, batch_size=BATCH_SIZE, cache_size=CACHE_SIZE
 )
 
 
 @app.get("/config")
 async def config():
-    return plugin_config
+    return {**plugin_config, "statistics": await app.statistics()}
 
 
 if __name__ == "__main__":

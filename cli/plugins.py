@@ -76,11 +76,13 @@ def check_if_required_files_present(path):
 class Plugin(DockerMixin):
     def __init__(
         self,
+        *,
         plugin_type,
         source,
         disabled,
         image_url,
         environment,
+        global_environment,
         docker_username,
     ):
         if plugin_type not in PLUGIN_TYPES:
@@ -89,6 +91,7 @@ class Plugin(DockerMixin):
         self.plugin_path, self.owner = resolve_source(source)
         self.clean_owner = clean_string(self.owner) if self.owner else ""
         self.disabled = disabled
+        environment = {**global_environment, **environment}
 
         check_if_required_files_present(self.plugin_path)
 
@@ -274,6 +277,7 @@ class Plugins:
                     Plugin(
                         plugin_type=plugin_type,
                         **init_args,
+                        global_environment=config.environment,
                         docker_username=config.docker_username,
                     )
                 )

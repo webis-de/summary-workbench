@@ -1,4 +1,5 @@
 import asyncio
+import logging
 
 from errors import general_exception, validation_exception
 from fastapi import FastAPI, Request, Response, WebSocket
@@ -8,10 +9,19 @@ from manager.request import RequestManager
 from manager.websocket import WebsocketManager
 from workers import Workers
 
+uvicorn_logger = logging.getLogger("uvicorn")
 
-def build_application(func, validator, num_threads=1, batch_size=32):
+
+def build_application(func, validator, num_threads=1, batch_size=32, cache_size=0):
     app = FastAPI()
-    workers = Workers(func, num_threads, batch_size)
+    workers = Workers(func, num_threads=num_threads, batch_size=batch_size, cache_size=cache_size)
+
+    @app.on_event("startup")
+    def startup():
+        uvicorn_logger.info(f"THREADS: {num_threads}")
+        uvicorn_logger.info(f"BATCH_SIZE: {batch_size}")
+        uvicorn_logger.info(f"CACHE_SIZE: {cache_size}")
+
 
     @app.on_event("startup")
     def startup():
@@ -46,19 +56,23 @@ def build_application(func, validator, num_threads=1, batch_size=32):
         websocket_manager = WebsocketManager(websocket, validator)
         await websocket_manager.loop_until_disconnect(workers)
 
-    @app.get("/statistics")
     async def statistics():
         return {
             "batch size": workers.batcher.batch_size,
+            "items in cache": workers.cache.cache.currsize,
+            "cache size": workers.cache.cache.maxsize,
             "maximal threads": workers.num_threads,
             "running threads": workers.num_running_threads(),
             "running elements": workers.num_running_elements(),
             "waiting requests": workers.num_waiting_requests(),
             "waiting elements": workers.num_waiting_elements(),
-            "number of futures in event loop": len(
+            "futures in event loop": len(
                 asyncio.all_tasks(asyncio.get_running_loop())
             ),
         }
+
+    app.add_api_route("/statistics", statistics, methods=["GET"])
+    app.statistics = statistics
 
     @app.get("/health")
     async def health():

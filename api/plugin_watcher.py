@@ -43,7 +43,7 @@ class PluginWatcher:
             if config is None:
                 config = value
                 config["disabled"] = True
-            elif isinstance(config, Exception):
+            elif isinstance(config, Exception) or not config.get("success", True):
                 config = {"disabled": False, "healthy": False, "key": key}
             else:
                 config["url"] = value

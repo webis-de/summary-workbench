@@ -1,12 +1,14 @@
 import asyncio
 
 from utils.aio import to_future
+from utils.cache import Cache
 from utils.pipe import Pipe
 from utils.thread import CancableThread
 
 
 class Batcher:
     def __init__(self, batch_size):
+        assert batch_size > 0, "the batch size has to be at least 1"
         self.batch_size = batch_size
         self.num_elements = 0
         self.num_staging = 0
@@ -25,16 +27,15 @@ class Batcher:
 
     def add(self, work):
         self.pipe.add(work)
-        self.num_elements += len(work)
+        self.num_elements += work.remaining
 
     async def consume(self):
         async for work in self.pipe.drain():
-            self.num_elements -= len(work)
-            self.num_staging = len(work)
-            arguments = work.data.copy()
-            batch_argument = arguments["batch"]
-            del arguments["batch"]
-            for batch in self.make_batches(enumerate(batch_argument)):
+            self.num_elements -= work.remaining
+            self.num_staging = work.remaining
+            arguments = work.arguments
+            remaining = work.get_remaining()
+            for batch in self.make_batches(remaining):
                 indices, batch = zip(*batch)
                 if work.is_done():
                     break
@@ -45,12 +46,17 @@ class Batcher:
 
 
 class Work:
-    def __init__(self, event_box, data):
+    def __init__(self, event_box, data, cache):
         self.event_box = event_box
-        self.data = data
+        self.arguments = data.copy()
+        self.batch = self.arguments["batch"]
+        del self.arguments["batch"]
         self.remaining = len(self)
         self.results = [None] * len(self)
         self.is_set = [False] * len(self)
+        self.cache = cache
+        self.arguments_hash = self.cache.hash(self.arguments)
+        self.add_cached()
         self.check_done()
 
     def __del__(self):
@@ -60,7 +66,19 @@ class Work:
             )
 
     def __len__(self):
-        return len(self.data["batch"])
+        return len(self.batch)
+
+    def add_cached(self):
+        for i, e in self.get_remaining():
+            try:
+                self.add_processed(i, self.cache.get([e, self.arguments_hash]))
+            except KeyError:
+                pass
+
+    def get_remaining(self):
+        return [
+            e for e, is_set in zip(enumerate(self.batch), self.is_set) if not is_set
+        ]
 
     def set_done(self, results):
         self.event_box.set_done(results)
@@ -82,6 +100,7 @@ class Work:
         if self.is_set[i]:
             self.set_error(f"element {i} was already set")
         else:
+            self.cache.set([self.batch[i], self.arguments_hash], instance)
             self.results[i] = instance
             self.is_set[i] = True
             self.remaining -= 1
@@ -89,11 +108,13 @@ class Work:
 
 
 class Workers:
-    def __init__(self, func, num_threads=1, batch_size=32):
+    def __init__(self, func, num_threads=1, batch_size=32, cache_size=0):
         assert num_threads > 0, "the number of threads has to be at least 1"
         self.batcher = Batcher(batch_size)
+        self.cache = Cache(cache_size)
         self.num_threads = num_threads
         self.func = func
+        self.cache_size = cache_size
         self.curr_processing_size = 0
         self.worker_process = None
         self.threads = set()
@@ -124,7 +145,7 @@ class Workers:
         return self.batcher.num_waiting_elements()
 
     def submit(self, event_box, data):
-        work = Work(event_box, data)
+        work = Work(event_box, data, cache=self.cache)
         if not work.is_done():
             self.batcher.add(work)
 

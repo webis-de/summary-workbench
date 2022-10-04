@@ -2,3 +2,4 @@ pydantic
 fastapi
 uvicorn[standard]
 kthread
+cachetools

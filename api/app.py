@@ -154,9 +154,9 @@ class EvaluationBody(BaseModel):
 
     @validator("metrics")
     def valid_metric(cls, v):
-        unknown_metrics = [e for e in v.keys() if e not in watcher.metric_keys]
-        if unknown_metrics:
-            raise ValueError(f"unknown metrics: {unknown_metrics}")
+        unknown = [e for e in v.keys() if e not in watcher.metric_keys]
+        if unknown:
+            raise ValueError(f"unknown metrics: {unknown}")
         return v
 
 
