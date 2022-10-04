@@ -44,7 +44,7 @@ const AboutTable = ({ section, content }) => (
               <Td>
                 {sourcecode && (
                   <div className="flex justify-center">
-                    <Button appearance="link" variant="primary" target="_blank" href={sourcecode}>
+                    <Button appearance="link" variant="primary" rel="noreferrer" target="_blank" href={sourcecode}>
                       <FaCode size={20} />
                     </Button>
                   </div>
@@ -53,7 +53,7 @@ const AboutTable = ({ section, content }) => (
               <Td center>
                 {homepage && (
                   <div className="flex justify-center">
-                    <Button appearance="link" variant="success" target="_blank" href={homepage}>
+                    <Button appearance="link" variant="success" rel="noreferrer" target="_blank" href={homepage}>
                       <FaExternalLinkAlt size={16} />
                     </Button>
                   </div>

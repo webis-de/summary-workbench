@@ -1,7 +1,14 @@
 import "./css/App.css";
 
 import React, { useContext, useEffect, useMemo, useState } from "react";
-import { FaChevronCircleUp, FaCog, FaGithub, FaTwitter, FaYoutube } from "react-icons/fa";
+import {
+  FaChevronCircleUp,
+  FaCog,
+  FaExternalLinkAlt,
+  FaGithub,
+  FaTwitter,
+  FaYoutube,
+} from "react-icons/fa";
 import { useLocation } from "react-router";
 import { BrowserRouter, NavLink as Link, Navigate, useRoutes } from "react-router-dom";
 
@@ -69,8 +76,13 @@ const NavLink = ({ href, to, children }) => {
   const activeClassName = `text-gray-100 font-medium hover:text-gray-100 underline underline-offset-4 ${classNameBase}`;
   if (href)
     return (
-      <a href={href} className={className}>
-        {children}
+      <a
+        href={href}
+        className={`flex items-center gap-2 justify-center ${className}`}
+        target="_blank"
+        rel="noreferrer"
+      >
+        <span>{children}</span><FaExternalLinkAlt style={{ marginTop: -2 }} size={12} /> 
       </a>
     );
   return (
@@ -89,6 +101,7 @@ const NavRoutes = () => (
           {name}
         </NavLink>
       ))}
+    <NavLink href="https://webis-de.github.io/summary-workbench/">Documentation</NavLink>
   </div>
 );
 
@@ -98,15 +111,12 @@ const Navbar = () => (
     <nav className="fixed bg-[#1B3451] top-0 right-0 z-30 left-0">
       <Container>
         <div className="h-16 flex justify-between items-center">
-          <NavLink href="https://webis.de/">
-            {/* <div className="flex items-center">
-              <img src="https://assets.webis.de/img/webis-logo.png" alt="Webis Logo" />
-              <span className="ml-4">Webis.de</span>
-            </div> */}
-            <span className="text-2xl no-underline text-slate-50 normal-case hover:text-blue-dark font-sans font-bold">
-              Summary Workbench
-            </span>
-          </NavLink>
+          <a
+            href="/"
+            className="text-2xl no-underline text-slate-50 normal-case hover:text-blue-dark font-sans font-bold"
+          >
+            Summary Workbench
+          </a>
 
           <div className="flex gap-10">
             <NavRoutes />

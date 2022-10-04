@@ -1,0 +1,3 @@
+grobid:
+  image: grobid:latest
+  build: ./grobid

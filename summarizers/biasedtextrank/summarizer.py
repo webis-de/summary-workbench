@@ -1,6 +1,7 @@
-import spacy
 import os
+
 import pytextrank
+import spacy
 
 
 class BiasedTextRankModel(object):
@@ -27,7 +28,7 @@ class BiasedTextRankModel(object):
     def get_sentences_from_phrases(self, doc, phrases):
         sentences = []
         limit_phrases = round(len(phrases) * 0.3)
-        for phrase  in phrases[:limit_phrases]:
+        for phrase in phrases[:limit_phrases]:
             for sent in doc.sents:
                 if phrase.text in sent.text and sent.text not in sentences:
                     sentences.append(sent.text)
@@ -46,10 +47,12 @@ class BiasedTextRankModel(object):
             return " ".join(summary_sents)
         else:
             return {"error": "A focus text must be provided."}
+
+
 class SummarizerPlugin:
     def __init__(self):
         self.model = BiasedTextRankModel()
         print("Intialized Biased TextRank")
 
-    def summarize(self, batch, ratio):
-        return [self.model.summarize(text, ratio) for text in batch]
+    def summarize(self, batch, ratio, focus: str):
+        return [self.model.summarize(text, ratio, focus) for text in batch]

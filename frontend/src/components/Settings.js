@@ -2,8 +2,8 @@ import React, { useContext, useMemo } from "react";
 import { FaTimes } from "react-icons/fa";
 
 import { Legend, Model, ModelText } from "./Model";
-import { LiveSearch, useFilter } from "./utils/FuzzySearch";
 import { Argument } from "./utils/Arguments";
+import { LiveSearch, useFilter } from "./utils/FuzzySearch";
 import { HeadingMedium, Hint } from "./utils/Text";
 
 const SelectModels = ({ keys, models, selectModel }) => (
@@ -28,10 +28,7 @@ const ArgumentLayout = ({ value, schema, setValue, error }) => {
   return (
     <div className={className}>
       <div className="flex justify-left gap-5">
-        <span
-          title={schema.title}
-          className="text-sm"
-        >
+        <span title={schema.title} className="text-sm">
           {schema.title}
         </span>
         {error && (

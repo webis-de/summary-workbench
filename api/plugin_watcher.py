@@ -84,4 +84,9 @@ class PluginWatcher:
 
     async def start(self):
         await self.update()
+        self.loop = self.update_loop()
+
+    def shutdown(self):
         self.update_loop()
+        self.loop.cancel()
+        del self.loop

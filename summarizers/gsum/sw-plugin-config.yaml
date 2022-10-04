@@ -4,6 +4,3 @@ metadata:
   type: abstractive
   homepage: https://aclanthology.org/2021.naacl-main.384/
   sourcecode: https://github.com/neulab/guided_summarization
-arguments:
-  guidance:
-    type: str

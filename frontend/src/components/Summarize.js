@@ -15,7 +15,7 @@ import { SettingsContext } from "../contexts/SettingsContext";
 import { SummarizersContext } from "../contexts/SummarizersContext";
 import { useAbortController } from "../hooks/abortController";
 import { useMarkups, usePairwiseMarkups } from "../hooks/markup";
-import { computeParagraphs, omap, extractErrors } from "../utils/common";
+import { computeParagraphs, extractErrors, omap } from "../utils/common";
 import { Settings } from "./Settings";
 import { Badge } from "./utils/Badge";
 import { Button, CopyToClipboardButton, LoadingButton } from "./utils/Button";
@@ -109,6 +109,7 @@ const PdfUpload = ({ setPdfExtract }) => {
         <Button
           variant="primary"
           appearance="link"
+          rel="noreferrer"
           target="_blank"
           href="https://aclanthology.org/D19-1410.pdf"
           download

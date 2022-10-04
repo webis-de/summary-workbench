@@ -1,0 +1,23 @@
+grobid:
+  grobidHome: "/opt/grobid/grobid-home"
+  modelPreload: true
+
+server:
+    type: custom
+    applicationConnectors:
+    - type: http
+      port: 8070
+    adminConnectors:
+    - type: http
+      port: 8071
+    registerDefaultExceptionMappers: false
+
+
+logging:
+  level: WARN
+  loggers:
+    org.apache.pdfbox.pdmodel.font.PDSimpleFont: "OFF"
+  appenders:
+    - type: console
+      threshold: ALL
+      timeZone: UTC

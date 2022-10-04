@@ -17,6 +17,7 @@ latex2mathml = "*"
 fastapi = "*"
 uvicorn = "*"
 spacy = "*"
+pymongo = {extras = ["srv"], version = "*"}
 
 [dev-packages]
 

@@ -40,7 +40,7 @@ class SummarizerPlugin:
         if return_data == "real":
             return [f"{text[:20]}... {summary} {extra_message} {ratio}" for text in batch]
         if return_data == "none":
-            return [None for text in batch]
+            return [None] * len(batch)
         if return_data == "error":
-            return [{"somedata": [1, 2, None]} for text in batch]
+            return [{"somedata": [1, 2, None]}] * len(batch)
         raise ValueError(f"unknown return_data {return_data}")

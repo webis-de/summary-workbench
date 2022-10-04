@@ -6,19 +6,20 @@ os.chdir(Path(__file__).absolute().parent.parent)
 import json
 import shutil
 
+import __main__
 import click
 from termcolor import colored
 
-from .config import (DEFAULT_CONFIG, DEFAULTS, DEPLOY_PATH, SCHEMA_FOLDER,
+from .config import (DEFAULT_CONFIG, DEFAULTS, DEPLOY_PATH,
                      DOCKER_COMPOSE_YAML_PATH, DOCKER_TEMPLATES_PATH,
-                     KUBERNETES_TEMPLATES_PATH, PLUGIN_CONFIG_PATH)
+                     KUBERNETES_TEMPLATES_PATH, PLUGIN_CONFIG_PATH,
+                     SCHEMA_FOLDER)
 from .docker_interface import Docker, DockerMixin
 from .exceptions import BaseManageError, DoubleServicesError
 from .plugins import Plugins
-from .utils import Yaml, dict_path, gen_secret, get_config
 from .schema import ConfigModel, PluginModel
+from .utils import Yaml, dict_path, gen_secret, get_config
 
-import __main__
 
 def remove_old_deploy_files():
     for path in DEPLOY_PATH.glob("*"):
@@ -152,6 +153,11 @@ class Proxy(Service):
 class Mongodb(Service):
     def __init__(self):
         super().__init__("mongodb")
+
+
+class Grobid(Service):
+    def __init__(self):
+        super().__init__("grobid")
 
 
 class Volumes(Service):
@@ -321,6 +327,7 @@ class ServiceManager:
             Frontend(),
             Ingress(),
             Mongodb(),
+            Grobid(),
             Proxy(),
             Volumes(),
             Plugins.load(),
@@ -387,10 +394,15 @@ def pull():
 def gen_docker_compose():
     ServiceManager().gen_docker_compose()
 
+
 @click.command(help="generate json/yaml-schema of configuration files")
 def gen_schema():
-    Path(SCHEMA_FOLDER / "sw-config.schema.json").write_text(ConfigModel.schema_json(indent=2))
-    Path(SCHEMA_FOLDER / "sw-plugin-config.schema.json").write_text(PluginModel.schema_json(indent=2))
+    Path(SCHEMA_FOLDER / "sw-config.schema.json").write_text(
+        ConfigModel.schema_json(indent=2)
+    )
+    Path(SCHEMA_FOLDER / "sw-plugin-config.schema.json").write_text(
+        PluginModel.schema_json(indent=2)
+    )
 
 
 @click.command(help="generate the deployment files for the kubernetes")

@@ -94,7 +94,6 @@ class Plugin(DockerMixin):
 
         config_path = self.plugin_path / DEFAULT_PLUGIN_CONFIG
         config = PluginModel.load(config_path, **Yaml.load(config_path, json=True))
-        self.arguments = {k: v.dict() for k, v in config.arguments.items()}
         self.version = config.version
         self.metadata = config.metadata
         self.metadata.update(environment)
@@ -115,7 +114,6 @@ class Plugin(DockerMixin):
         self.plugin_config = {
             "buildtag": str(uuid.uuid4()),
             "metadata": self.metadata,
-            "arguments": self.arguments,
             "name": self.name,
             "owner": self.owner,
             "key": self.unique_name,

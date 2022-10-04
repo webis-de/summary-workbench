@@ -3,37 +3,3 @@ name: "FeatureSum"
 metadata:
   type: extractive
   model: en_core_web_md
-arguments:
-  title:
-    type: str
-    useTextarea: true
-    display: Title
-    default: ""
-  use_tfidf:
-    type: bool
-    display: TF-IDF
-    default: true
-  use_special_tokens:
-    type: bool
-    display: Special Tokens
-    default: true
-  use_position:
-    type: bool
-    display: Position
-    default: true
-  use_average_lexical_connectivity:
-    type: bool
-    display: Mean Lexical Connectivity
-    default: true
-  use_content_words_ratio:
-    type: bool
-    display: Content Words Ratio
-    default: true
-  use_length:
-    type: bool
-    display: Length
-    default: true
-  use_rank:
-    type: bool
-    display: Rank
-    default: true

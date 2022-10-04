@@ -3,6 +3,3 @@ name: "Biased TextRank"
 metadata:
   type: extractive
   sourcecode: "https://github.com/DerwenAI/pytextrank"
-arguments:
-  focus:
-    type: str

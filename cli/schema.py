@@ -1,13 +1,8 @@
 import sys
 from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).absolute().parent.parent / "plugin_server"))
-
 from typing import Dict, List, Optional, Union
 
 # from plugin_server
-from argument_models import (BoolArgument, CategoricalArgument, FloatArgument,
-                             IntArgument, StringArgument)
 from pydantic import BaseModel, Field, HttpUrl, ValidationError, constr
 
 from .exceptions import ModelValidationError
@@ -32,19 +27,6 @@ class PluginModel(BaseModel, ThrowMixin):
     )
     name: str = Field(
         regex=name_pattern, description="name of the plugin (e.g. BERT-model)"
-    )
-    arguments: Dict[
-        constr(regex=variable_pattern),
-        Union[
-            IntArgument,
-            FloatArgument,
-            BoolArgument,
-            StringArgument,
-            CategoricalArgument,
-        ],
-    ] = Field(
-        {},
-        description="Defines extra arguments for your plugin, which will be passed to your summarizer/metric as keyword arguments. For number types min and max value can be provided. If the type of the plugin is 'categorical' the default argument is required and has to be a list of strings.",
     )
     metadata: Dict[constr(regex=key_pattern), str] = Field(
         {},

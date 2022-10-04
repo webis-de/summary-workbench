@@ -1,13 +1,17 @@
+import os
 from urllib.parse import urlparse
 
 import uvicorn
 from fastapi import APIRouter, FastAPI, Request, Response
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from plugin_watcher import PluginWatcher
 from pydantic import AnyHttpUrl, BaseModel, Field, root_validator, validator
+from pymongo import MongoClient
 from utils.article_download import download_article
 from utils.cancel import cancel_on_disconnect
-from utils.pdf import GrobidError, extract_pdf
+from utils.pdf import Grobid, GrobidError
 from utils.request import request
 from utils.semantic import semantic_similarity
 from utils.sentence import sentence_split
@@ -64,6 +68,7 @@ async def plugin_request(plugins):
 
 
 watcher = PluginWatcher()
+grobid = Grobid(host=os.environ["GROBID_HOST"])
 app = FastAPI()
 api = APIRouter()
 
@@ -97,8 +102,24 @@ async def summarize(summarizers, documents, ratio):
 
 
 @app.on_event("startup")
+def startup_db_client():
+    app.mongodb_client = MongoClient(os.environ["MONGODB_HOST"])
+    app.database = app.mongodb_client["Feedbacks"]
+
+
+@app.on_event("shutdown")
+def shutdown_db_client():
+    app.mongodb_client.close()
+
+
+@app.on_event("startup")
 async def startup_event():
     await watcher.start()
+
+
+@app.on_event("shutdown")
+def shutdown_db_client():
+    watcher.shutdown()
 
 
 @api.get("/metrics")
@@ -125,14 +146,17 @@ class EvaluationBody(BaseModel):
         len_refs = len(references)
         for name, hyps in hypotheses.items():
             len_hyps = len(hyps)
-            assert (
-                len_hyps == len_refs
-            ), f"hypotheses {name} and references are not the same size ({len_hyps} != {len_refs})"
+            if len_hyps != len_refs:
+                raise ValueError(
+                    f"hypotheses {name} and references are not the same size ({len_hyps} != {len_refs})"
+                )
         return values
 
     @validator("metrics")
     def valid_metric(cls, v):
-        assert all(e in watcher.metric_keys for e in v.keys())
+        unknown_metrics = [e for e in v.keys() if e not in watcher.metric_keys]
+        if unknown_metrics:
+            raise ValueError(f"unknown metrics: {unknown_metrics}")
         return v
 
 
@@ -155,7 +179,9 @@ class SummarizeBody(BaseModel):
 
     @validator("summarizers")
     def valid_summarizers(cls, v):
-        assert all(e in watcher.summarizer_keys for e in v.keys())
+        unknown = [e for e in v.keys() if e not in watcher.summarizer_keys]
+        if unknown:
+            raise ValueError(f"unknown summarizers: {unknown}")
         return v
 
 
@@ -223,13 +249,13 @@ async def pdf_extract(request: Request):
         request.headers.get("content-type") == "application/pdf"
     ), f"{request.content_type} is invalid, it should be application/pdf"
     try:
-        return await extract_pdf(await request.body())
+        return await grobid.extract_pdf(await request.body())
     except GrobidError as e:
         return {"error": str(e)}
 
 
 class SemanticSimilarityBody(BaseModel):
-    sentences: list[str]
+    sentences: str
     summary: str
 
 
@@ -247,8 +273,8 @@ class FeedbackBody(BaseModel):
 
 
 @api.post("/feedback")
-async def feedback(body: FeedbackBody):
-    pass
+async def feedback(request: Request, body: FeedbackBody):
+    request.app.database["feedback"].insert_one(body.dict())
 
 
 @app.get("/health")
@@ -257,6 +283,22 @@ async def health():
 
 
 app.include_router(api, prefix="/api")
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(_, exc):
+    errors = exc.errors()
+    for entry in errors:
+        entry["loc"] = list(entry["loc"][1:])
+    return JSONResponse(
+        {"errors": error_to_message({"error": "VALIDATION", "errors": errors})},
+        status_code=422,
+    )
+
+
+@app.exception_handler(Exception)
+async def general_exception_handler(_, exc):
+    return JSONResponse({"errors": [str(exc)]}, status_code=500)
 
 
 if __name__ == "__main__":

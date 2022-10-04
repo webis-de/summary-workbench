@@ -1,25 +1,11 @@
-FROM nikolaik/python-nodejs:python3.9-nodejs18-slim
+FROM python:3.10
 
-ENV PDF_EXTRACTOR_HOME=/pdf_extractor
-
-RUN apt update && apt -y install openjdk-11-jdk git unzip curl
-
-# pdf extractor setup
-RUN mkdir $PDF_EXTRACTOR_HOME
-RUN cd $PDF_EXTRACTOR_HOME && git clone https://github.com/allenai/s2orc-doc2json.git
-RUN cd $PDF_EXTRACTOR_HOME && wget https://github.com/kermitt2/grobid/archive/0.6.1.zip && unzip 0.6.1.zip && rm 0.6.1.zip
-RUN cd $PDF_EXTRACTOR_HOME/grobid-0.6.1 && ./gradlew clean install
-RUN cp $PDF_EXTRACTOR_HOME/s2orc-doc2json/doc2json/grobid2json/grobid/config.yaml $PDF_EXTRACTOR_HOME/grobid-0.6.1/grobid-service/config/config.yaml && cp $PDF_EXTRACTOR_HOME/s2orc-doc2json/doc2json/grobid2json/grobid/grobid.properties $PDF_EXTRACTOR_HOME/grobid-0.6.1/grobid-home/config/grobid.properties
-
-RUN pip3 install --no-cache-dir $PDF_EXTRACTOR_HOME/s2orc-doc2json newspaper3k nltk flask beautifulsoup4 boto3 aiohttp lxml python-multipart python-magic latex2mathml fastapi uvicorn spacy
-
-RUN python3 -m spacy download en_core_web_md
-
+COPY . /app
 WORKDIR /app
-COPY . /app/
-RUN npm ci
+RUN pip install pipenv
+RUN pipenv install --system && python model_setup.py
 
-CMD ./boot.sh
+CMD uvicorn app:app --host 0.0.0.0 --port 5000
 
 
 # vi: ft=dockerfile

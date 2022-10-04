@@ -7,25 +7,6 @@ class GrobidError(Exception):
     pass
 
 
-async def grobid(pdf_stream):
-    url = f"http://localhost:8070/api/processFulltextDocument"
-
-    data = aiohttp.FormData()
-    data.add_field("input", pdf_stream, filename="", content_type="application/pdf")
-    data.add_field("generateIDs", "0")
-    data.add_field("consolidateHeader", "0")
-    data.add_field("consolidateCitations", "0")
-    data.add_field("includeRawAffiliations", "0")
-    data.add_field("includeRawCitations", "1")
-
-    headers = {"Accept": "application/xml"}
-
-    async with aiohttp.ClientSession() as session:
-        async with session.post(url=url, data=data, headers=headers) as response:
-            response.raise_for_status()
-            return await response.text()
-
-
 def group_sections(pdf_json):
     title, abstract = pdf_json["title"], pdf_json["abstract"]
     sections = []
@@ -62,13 +43,35 @@ def group_sections(pdf_json):
     return {"title": title, "abstract": abstract, "sections": sections}
 
 
-async def extract_pdf(pdf_stream):
-    try:
-        xml = await grobid(pdf_stream)
-    except aiohttp.ClientResponseError as e:
-        raise GrobidError(f"Grobid failed with status code {e.status}")
+class Grobid:
+    def __init__(self, host):
+        self.host = host
 
-    soup = BeautifulSoup(xml, "xml")
-    pdf_json = convert_tei_xml_soup_to_s2orc_json(soup, "", "").release_json("pdf")
-    sections = group_sections(pdf_json)
-    return sections
+    async def _grobid(self, pdf_stream):
+        url = f"{self.host}/api/processFulltextDocument"
+
+        data = aiohttp.FormData()
+        data.add_field("input", pdf_stream, filename="", content_type="application/pdf")
+        data.add_field("generateIDs", "0")
+        data.add_field("consolidateHeader", "0")
+        data.add_field("consolidateCitations", "0")
+        data.add_field("includeRawAffiliations", "0")
+        data.add_field("includeRawCitations", "1")
+
+        headers = {"Accept": "application/xml"}
+
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url=url, data=data, headers=headers) as response:
+                response.raise_for_status()
+                return await response.text()
+
+    async def extract_pdf(self, pdf_stream):
+        try:
+            xml = await self._grobid(pdf_stream)
+        except aiohttp.ClientResponseError as e:
+            raise GrobidError(f"Grobid failed with status code {e.status}")
+
+        soup = BeautifulSoup(xml, "xml")
+        pdf_json = convert_tei_xml_soup_to_s2orc_json(soup, "", "").release_json("pdf")
+        sections = group_sections(pdf_json)
+        return sections

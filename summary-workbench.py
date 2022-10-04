@@ -5,10 +5,7 @@ import requests
 
 def get(url, json=None):
     r = requests.post(url, json=json) if json else requests.get(url)
-    if r.ok:
-        return r.json()
-    else:
-        r.raise_for_status()
+    return r.json()
 
 
 class Api:
@@ -31,15 +28,27 @@ class Api:
             },
         )
 
-    def summarize(self, text, summarizers, ratio):
+    def summarize(
+        self, documents, summarizers, ratio, add_metadata=False, split_sentences=False
+    ):
         return get(
             f"{self.host}/api/summarize",
-            json={"text": text, "summarizers": summarizers, "ratio": ratio},
+            json={
+                "documents": documents,
+                "summarizers": summarizers,
+                "ratio": ratio,
+                "add_metadata": add_metadata,
+                "split_sentences": split_sentences,
+            },
         )
 
 
 if __name__ == "__main__":
-    from pprint import pprint
+    import json
+
+    def json_print(data):
+        print(json.dumps(data))
+
     from sys import stdin
 
     import click
@@ -77,15 +86,15 @@ if __name__ == "__main__":
         api = ctx.obj["api"]
         available_metrics = api.get_metrics()
         if verbose:
-            pprint(available_metrics)
+            json_print(available_metrics)
         elif not metrics:
-            pprint(list(available_metrics.keys()))
+            json_print(list(available_metrics.keys()))
         else:
             unknown_metrics = set(metrics).difference(set(available_metrics.keys()))
             if unknown_metrics:
                 print(f"unknown metrics: {list(unknown_metrics)}")
             else:
-                pprint(
+                json_print(
                     dict(
                         pair for pair in available_metrics.items() if pair[0] in metrics
                     )
@@ -110,7 +119,11 @@ if __name__ == "__main__":
         else:
             hypotheses = read_file(hypfile)
             references = read_file(reffile)
-            pprint(api.evaluate(metrics, hypotheses, references))
+            json_print(
+                api.evaluate(
+                    {key: {} for key in metrics}, {"hypotheses": hypotheses}, references
+                )
+            )
 
     @main.command(help="list available metrics or show more information about a metric")
     @click.option(
@@ -125,15 +138,15 @@ if __name__ == "__main__":
         api = ctx.obj["api"]
         available_summarizers = api.get_summarizers()
         if verbose:
-            pprint(available_summarizers)
+            json_print(available_summarizers)
         elif not metrics:
-            pprint(list(available_summarizers.keys()))
+            json_print(list(available_summarizers.keys()))
         else:
             unknown_metrics = set(metrics).difference(set(available_summarizers.keys()))
             if unknown_metrics:
                 print(f"unknown metrics: {list(unknown_metrics)}")
             else:
-                pprint(
+                json_print(
                     dict(
                         pair
                         for pair in available_summarizers.items()
@@ -160,15 +173,17 @@ if __name__ == "__main__":
             click.echo("no summarizers given")
         else:
             text = stdin.read().strip() if not file else read_file(file)
-            response = api.summarize(text, summarizers, ratio)
-            if raw or not "summaries" in response:
-                pprint(response)
+            response = api.summarize([text], {key: {} for key in summarizers}, ratio, add_metadata=True, split_sentences=True)
+            if raw:
+                json_print(response)
             else:
-                original = response["original"]
-                title = original.get("title")
+                data = response["data"]
+                summary = data["summaries"][0]
+                metadata = summary["metadata"]
+                title = metadata.get("title")
                 print(colored("original: " + (title if title else ""), "green"))
-                print(clean_lines(original["text"]))
-                for summarizer, summary in response["summaries"].items():
+                print(clean_lines(metadata["document"]))
+                for summarizer, summary in summary["summaries"].items():
                     print()
                     print(colored(f"{summarizer}:", "green"))
                     print(clean_lines(summary))

@@ -37,5 +37,5 @@ class SummarizerPlugin:
     def __init__(self):
         self.summarizer = GuidedBART()
 
-    def summarize(self, batch, ratio):
-        return [self.summarizer.summarize(text, ratio) for text in batch]
+    def summarize(self, batch, ratio, guidance: str):
+        return [self.summarizer.summarize(text, ratio, guidance) for text in batch]

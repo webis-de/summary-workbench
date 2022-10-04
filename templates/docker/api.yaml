@@ -1,17 +1,15 @@
 api:
-  image: api:latest
-  build:
-    context: ./api2/
-    dockerfile: Dockerfile.dev
+  image: python:latest
   working_dir: /app
   ports:
     - "127.0.0.1:5000:5000"
   volumes:
-    - ./api2/:/app
+    - ./api/:/app
     - ./plugin_config:/plugin_config
     - api_root:/root
   environment:
     - MONGODB_HOST=mongodb://mongo/app
+    - GROBID_HOST=http://grobid:8070
   command: ./boot.sh
 
 volumes:
