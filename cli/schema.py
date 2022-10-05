@@ -55,6 +55,12 @@ class ConfigurePluginModel(BaseModel):
         {},
         description="key value pairs that will be environment variables inside of the image, can also be used to generate names of the plugin dynamically",
     )
+    extern_environment: Dict[
+        constr(regex=key_pattern), Union[str, int, float, bool]
+    ] = Field(
+        {},
+        description="key value pairs that will be environment variables inside of all the plugins (not during build time, but also in kubernetes files)",
+    )
 
     class Config:
         allow_mutation = False
@@ -65,6 +71,7 @@ class DeployModel(BaseModel):
     host: str = Field(
         description="host name where the application is exposed on the kubernetes cluster",
     )
+    resources: Dict = Field({}, description="requests and limits for all pods")
 
     class Config:
         allow_mutation = False
@@ -81,9 +88,11 @@ class ConfigModel(BaseModel, ThrowMixin):
     deploy: Optional[DeployModel] = Field(
         description="configuration for the kubernetes deployment"
     )
-    environment: Dict[constr(regex=key_pattern), Union[str, int, float, bool]] = Field(
+    extern_environment: Dict[
+        constr(regex=key_pattern), Union[str, int, float, bool]
+    ] = Field(
         {},
-        description="key value pairs that will be environment variables inside of all the images",
+        description="key value pairs that will be environment variables inside of all the plugins (not during build time, but also in kubernetes files)",
     )
     metrics: plugin_type = Field([], description="configuration for metrics")
     summarizers: plugin_type = Field([], description="configuration for summarizers")

@@ -45,6 +45,8 @@ spec:
               value: "production"
             - name: MONGODB_HOST
               value: "mongodb://summary-workbench-mongodb/app"
+            - name: GROBID_HOST
+              value: "http://summary-workbench-grobid:8070"
           ports:
             - name: api-port
               containerPort: 5000

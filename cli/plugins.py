@@ -82,8 +82,9 @@ class Plugin(DockerMixin):
         disabled,
         image_url,
         environment,
-        global_environment,
+        extern_environment,
         docker_username,
+        resources,
     ):
         if plugin_type not in PLUGIN_TYPES:
             raise InvalidPluginTypeError(f"invalid type {plugin_type}")
@@ -91,7 +92,8 @@ class Plugin(DockerMixin):
         self.plugin_path, self.owner = resolve_source(source)
         self.clean_owner = clean_string(self.owner) if self.owner else ""
         self.disabled = disabled
-        environment = {**global_environment, **environment}
+        self.extern_environment = extern_environment
+        self.resources = resources
 
         check_if_required_files_present(self.plugin_path)
 
@@ -124,9 +126,14 @@ class Plugin(DockerMixin):
             "version": self.version,
         }
         self.environment["PLUGIN_CONFIG"] = json.dumps(self.plugin_config)
+        self.all_environment = {**self.environment, **self.extern_environment}
 
         self.dev_environment = [
-            f"{key}={value}" for key, value in self.environment.items()
+            f"{key}={value}" for key, value in self.all_environment.items()
+        ]
+        self.kubernetes_environment = [
+            {"name": key, "value": value}
+            for key, value in self.extern_environment.items()
         ]
 
         self.build_environment = "\n".join(
@@ -191,17 +198,20 @@ class Plugin(DockerMixin):
 
     def patch(self):
         labels = {"tier": self.unique_name, "version": self.version}
+        container = {
+            "name": self.unique_name,
+            "image": self.image_url,
+            "env": self.kubernetes_environment,
+        }
+        if self.resources:
+            container["resources"] = self.resources
         deployment = {
             "metadata": {"name": self.unique_name, "labels": labels},
             "spec": {
                 "selector": {"matchLabels": labels},
                 "template": {
                     "metadata": {"labels": labels},
-                    "spec": {
-                        "containers": {
-                            0: {"name": self.unique_name, "image": self.image_url}
-                        }
-                    },
+                    "spec": {"containers": {0: container}},
                 },
             },
         }
@@ -265,6 +275,8 @@ class Plugins:
     @classmethod
     def load(cls):
         config = get_config()
+        deploy = config.deploy
+        resources = deploy.resources if deploy else None
         plugins = defaultdict(list)
         for plugin_type in PLUGIN_TYPES:
             config_key = f"{plugin_type}s"
@@ -273,12 +285,16 @@ class Plugins:
                 if not isinstance(init_args, ConfigurePluginModel):
                     init_args = ConfigurePluginModel(source=init_args)
                 init_args = init_args.dict()
+                init_args["extern_environment"] = {
+                    **init_args["extern_environment"],
+                    **config.extern_environment,
+                }
                 plugins[config_key].append(
                     Plugin(
                         plugin_type=plugin_type,
                         **init_args,
-                        global_environment=config.environment,
                         docker_username=config.docker_username,
+                        resources=resources,
                     )
                 )
         return cls(dict(plugins))

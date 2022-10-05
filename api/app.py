@@ -63,13 +63,12 @@ async def plugin_request(plugins):
         else:
             err_messages = error_to_message(response)
             errors[key] = err_messages
-    # TODO: implement cache
     return results, errors
 
 
 watcher = PluginWatcher()
 grobid = Grobid(host=os.environ["GROBID_HOST"])
-app = FastAPI()
+app = FastAPI(docs_url="/api/docs", redoc_url="/api/redoc")
 api = APIRouter()
 
 
@@ -133,9 +132,24 @@ async def metrics():
 
 
 class EvaluationBody(BaseModel):
-    hypotheses: dict[str, list[str]]
-    references: list[str]
-    metrics: dict[str, dict]
+    hypotheses: dict[str, list[str]] = Field(
+        ...,
+        description="A dictionary where each key is a model and each value is a list of hypotheses. Each model has to have the same number of hypothese. Each hypotheses will be compared with the corresponding entry in the reference argument.",
+        example={
+            "model1": ["this is a test hypotheses", "this is another test hypotheses"],
+            "model2": ["this is another test hypotheses", "this is a test hypotheses"],
+        },
+    )
+    references: list[str] = Field(
+        ...,
+        description="A list of reference texts. The number of references has to be the same as the number of hypotheses for each model.",
+        example=["this is a test reference", "this is another test reference"],
+    )
+    metrics: dict[str, dict] = Field(
+        ...,
+        description="The selection of metrics where each key is the name of the model and each value is a dictionary that contains the arguments for the model",
+        example={"metric-null-rouge": {}},
+    )
 
     @root_validator
     def same_length(cls, values):
@@ -171,11 +185,30 @@ async def evaluate_route(request: Request, body: EvaluationBody):
 
 
 class SummarizeBody(BaseModel):
-    documents: list[str] = Field(..., min_length=1)
-    ratio: float = Field(0.2, gt=0.0, lt=1.0)
-    split_sentences: bool = False
-    add_metadata: bool = False
-    summarizers: dict[str, dict]
+    documents: list[str] = Field(
+        ...,
+        min_length=1,
+        description="List of documents to be summarized.",
+        example=["This is the first sentence.", "This is the second sentence."],
+    )
+    ratio: float = Field(
+        0.2,
+        gt=0.0,
+        lt=1.0,
+        description="The number of words in the summary will be approximately 'ratio * <number of words in document>'",
+    )
+    split_sentences: bool = Field(
+        False, description="If set, the summaries will be split into sentences."
+    )
+    add_metadata: bool = Field(
+        False,
+        description="Add additional data like the original document, the url (if given) and the title of the document (if given).",
+    )
+    summarizers: dict[str, dict] = Field(
+        ...,
+        description="The selection of summarizers where each key is the name of the model and each value is a dictionary that contains the arguments for the model",
+        example={"summarizer-null-textrank": {}},
+    )
 
     @validator("summarizers")
     def valid_summarizers(cls, v):

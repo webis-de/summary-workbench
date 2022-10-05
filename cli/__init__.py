@@ -75,11 +75,11 @@ class PluginConfig:
 
 
 class NodeMixin:
+    def __init__(self, service_name):
+        self.service_name = service_name
+
     def get_version(self):
-        package_json_path = self.path / "package.json"
-        if package_json_path.exists():
-            with open(package_json_path) as file:
-                return json.load(file)["version"]
+        return json.loads(Path("./version.json").read_text())[self.service_name]
 
     def build_chain_args(self):
         return [
@@ -109,6 +109,7 @@ class Service(DockerMixin):
 
 class Api(NodeMixin, Service):
     def __init__(self):
+        NodeMixin.__init__(self, "api")
         Service.__init__(self, "api")
 
     def patch(self):
@@ -129,12 +130,19 @@ class Api(NodeMixin, Service):
 
 class Frontend(NodeMixin, Service):
     def __init__(self):
+        NodeMixin.__init__(self, "api")
         Service.__init__(self, "frontend")
 
     def patch(self):
         return dict_path(
             [0, "spec", "template", "spec", "containers", 0, "image"], self.image_url
         )
+
+
+class Grobid(NodeMixin, Service):
+    def __init__(self):
+        Service.__init__(self, "grobid")
+        NodeMixin.__init__(self, "grobid")
 
 
 class Ingress(Service):
@@ -155,17 +163,12 @@ class Mongodb(Service):
         super().__init__("mongodb")
 
 
-class Grobid(Service):
-    def __init__(self):
-        super().__init__("grobid")
-
-
 class Volumes(Service):
     def __init__(self):
         super().__init__("volumes", "")
 
 
-SERVICES_THAT_NEED_BUILD = [Api, Frontend]
+SERVICES_THAT_NEED_BUILD = [Api, Frontend, Grobid]
 
 
 def extract_qualified_name(qualified_name):

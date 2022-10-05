@@ -1,48 +1,43 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name:
+  name: summary-workbench-grobid
   labels:
     app: summary-workbench
-    tier:
-    version:
+    tier: grobid
 spec:
   selector:
     matchLabels:
       app: summary-workbench
-      tier:
+      tier: grobid
   template:
     metadata:
       labels:
         app: summary-workbench
-        tier:
-        version:
+        tier: grobid
     spec:
       containers:
-        - name:
-          image:
-          imagePullPolicy: Always
+        - name: grobid
+          image: mongo:latest
           ports:
-            - name: defaultport
-              containerPort: 5000
+            - name: grobid-port
+              containerPort: 8070
               protocol: TCP
           readinessProbe:
             httpGet:
-              path: /config
-              port: defaultport
-            periodSeconds: 60
-            timeoutSeconds: 60
+              path: /
+              port: 8070
+            periodSeconds: 15
       restartPolicy: Always
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name:
+  name: summary-workbench-grobid
 spec:
   selector:
     app: summary-workbench
-    tier:
-    version:
+    tier: grobid
   ports:
-    - port: 5000
-      targetPort: defaultport
+    - port: 8070
+      targetPort: grobid-port

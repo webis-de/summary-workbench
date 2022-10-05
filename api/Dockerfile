@@ -2,8 +2,8 @@ FROM python:3.10
 
 COPY . /app
 WORKDIR /app
-RUN pip install pipenv
-RUN pipenv install --system && python model_setup.py
+RUN pip install pipenv && pipenv install --system
+RUN python model_setup.py
 
 CMD uvicorn app:app --host 0.0.0.0 --port 5000
 

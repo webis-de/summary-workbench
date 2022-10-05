@@ -82,7 +82,8 @@ const NavLink = ({ href, to, children }) => {
         target="_blank"
         rel="noreferrer"
       >
-        <span>{children}</span><FaExternalLinkAlt style={{ marginTop: -2 }} size={12} /> 
+        <span>{children}</span>
+        <FaExternalLinkAlt style={{ marginTop: -2 }} size={12} />
       </a>
     );
   return (
