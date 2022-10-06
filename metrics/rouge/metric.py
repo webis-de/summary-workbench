@@ -1,16 +1,20 @@
+from os import environ
+
 from rouge import Rouge
+
+model = environ["model"]
+
+AVAILABLE_MODELS = {"1", "2", "l"}
+if model not in AVAILABLE_MODELS:
+    raise ValueError(f"invalid model {model}, needs to be one of {AVAILABLE_MODELS}")
 
 
 class MetricPlugin:
     def __init__(self):
         self.rouge = Rouge()
+        self.key = f"rouge-{model}"
 
-    def _evaluate(self, hypotheses, references):
+    def evaluate(self, batch):
+        hypotheses, references = zip(*batch)
         scores = self.rouge.get_scores(hypotheses, references, avg=False)
-        if not scores:
-            return []
-        keys = scores[0].keys()
-        return {key[-1]: [score[key]["f"] for score in scores] for key in keys}
-
-    def evaluate(self, batch, references):
-        return [self._evaluate(references, hypotheses) for hypotheses in batch]
+        return [score[self.key]["f"] for score in scores]

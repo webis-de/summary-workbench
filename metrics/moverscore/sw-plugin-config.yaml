@@ -2,6 +2,6 @@ version: "1.0"
 name: MoverScore
 metadata:
   type: semantic
-  model: MoverScoreV1
+  model: distilbert-base-uncased
   homepage: https://arxiv.org/pdf/1909.02622.pdf
   sourcecode: https://github.com/AIPHES/emnlp19-moverscore

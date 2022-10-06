@@ -14,7 +14,6 @@ BATCH_SIZE = int(environ.get("BATCH_SIZE", 32))
 CACHE_SIZE = int(environ.get("CACHE_SIZE", 0))
 
 
-
 def construct_metric():
     from metric_factory import MetricFactory
 
@@ -48,7 +47,11 @@ plugin_config["validators"] = {
 
 
 app = build_application(
-    factory.func, factory.full_validator, num_threads=NUM_THREADS, batch_size=BATCH_SIZE, cache_size=CACHE_SIZE
+    factory.func,
+    factory.full_validator,
+    num_threads=NUM_THREADS,
+    batch_size=BATCH_SIZE,
+    cache_size=CACHE_SIZE,
 )
 
 

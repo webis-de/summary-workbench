@@ -23,7 +23,15 @@ metrics:
   - ./metrics/greedy_matching
   - ./metrics/meteor
   - ./metrics/moverscore
-  - ./metrics/rouge
+  - source: ./metrics/rouge
+    environment:
+      model: "1"
+  - source: ./metrics/rouge
+    environment:
+      model: "2"
+  - source: ./metrics/rouge
+    environment:
+      model: "l"
   - ./metrics/sbert
 
 summarizers:

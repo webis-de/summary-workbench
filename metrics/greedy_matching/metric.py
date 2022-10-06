@@ -65,5 +65,6 @@ class MetricPlugin:
 
         return np.max(scores, axis=0)
 
-    def evaluate(self, batch, references):
-        return [self._evaluate(hypotheses, references) for hypotheses in batch]
+    def evaluate(self, batch):
+        hypotheses, references = zip(*batch)
+        return self._evaluate(hypotheses, references)

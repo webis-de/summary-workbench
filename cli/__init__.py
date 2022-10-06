@@ -144,6 +144,11 @@ class Grobid(NodeMixin, Service):
         Service.__init__(self, "grobid")
         NodeMixin.__init__(self, "grobid")
 
+    def patch(self):
+        return dict_path(
+            [0, "spec", "template", "spec", "containers", 0, "image"], self.image_url
+        )
+
 
 class Ingress(Service):
     def __init__(self):

@@ -17,5 +17,6 @@ class MetricPlugin:
         _, scores = self.meteor.compute_score(refs, hyps)
         return scores
 
-    def evaluate(self, batch, references):
-        return [self._evaluate(hypotheses, references) for hypotheses in batch]
+    def evaluate(self, batch):
+        hypotheses, references = zip(*batch)
+        return self._evaluate(hypotheses, references)

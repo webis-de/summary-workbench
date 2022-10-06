@@ -50,4 +50,4 @@ class SummarizerPlugin:
         print("Intialized  TextRank")
 
     def summarize(self, batch, ratio):
-        return [self.summarizer.summarize(text, ratio) for text in batch]
+        return [self.model.summarize(text, ratio) for text in batch]

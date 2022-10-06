@@ -28,10 +28,10 @@ spec:
               protocol: TCP
           readinessProbe:
             httpGet:
-              path: /config
+              path: /health
               port: defaultport
-            periodSeconds: 60
-            timeoutSeconds: 60
+            periodSeconds: 15
+            timeoutSeconds: 1
       restartPolicy: Always
 ---
 apiVersion: v1

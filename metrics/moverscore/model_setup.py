@@ -1,10 +1,10 @@
 import logging
 
-from metric import MODEL_CLASS
+from metric import MetricPlugin
 
 
 def setup():
-    MODEL_CLASS.model_setup()
+    MetricPlugin()
 
 
 if __name__ == "__main__":

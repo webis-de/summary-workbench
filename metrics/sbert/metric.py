@@ -3,7 +3,7 @@ import os
 from sentence_transformers import SentenceTransformer, util
 
 
-def _paired_cosin_sim(embeddings1, embeddings2):
+def _paired_cosine_sim(embeddings1, embeddings2):
     assert len(embeddings1) == len(embeddings2)
     return [
         float(util.pytorch_cos_sim(e1, e2)[0][0])
@@ -17,14 +17,12 @@ class MetricPlugin:
     def __init__(self):
         self.model = SentenceTransformer(self.MODEL)
 
-    def _evaluate(self, hypotheses, references):
+    def evaluate(self, batch):
+        hypotheses, references = zip(*batch)
         embeddings1 = self.model.encode(hypotheses, convert_to_tensor=True)
         embeddings2 = self.model.encode(references, convert_to_tensor=True)
-        cosine_scores = _paired_cosin_sim(embeddings1, embeddings2)
+        cosine_scores = _paired_cosine_sim(embeddings1, embeddings2)
         return cosine_scores
-
-    def evaluate(self, batch, references):
-        return [self._evaluate(references, hypotheses) for hypotheses in batch]
 
     def metadata(self):
         return {"model": self.MODEL}

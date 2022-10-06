@@ -30,5 +30,5 @@ WORKDIR {CONTAINER_PLUGIN_SERVER_PATH}
 COPY . .
 RUN pip install -r requirements.txt
 WORKDIR {CONTAINER_PLUGIN_FILES_PATH}
-CMD ["python", "{CONTAINER_PLUGIN_SERVER_PATH}/app.py"]
+CMD ["uvicorn", "--app-dir", "/summary_workbench_plugin_server", "app:app", "--host", "0.0.0.0", "--port", "5000"]
 """

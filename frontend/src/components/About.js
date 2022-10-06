@@ -11,10 +11,34 @@ import { HeadingBig, HeadingSemiBig } from "./utils/Text";
 
 const sourceCodeLink = "https://github.com/webis-de/summary-workbench";
 
+const statusToValues = (status) => {
+  switch (status) {
+    case "unhealthy":
+      return ["bg-red-400", "text-red-600"];
+    case "healthy":
+      return ["bg-green-400", "text-green-600"];
+    case "disabled":
+      return ["bg-white", "text-gray-600"];
+    default:
+      throw new Error(`unknown status ${status}`);
+  }
+};
+
+const Status = ({ status }) => {
+  const [bgColor, fgColor] = statusToValues(status);
+  return (
+    <div className="flex gap-2 items-center">
+      <div className={`ring-1 ring-gray-500 rounded-full ${bgColor} h-2 w-2`} />
+      <span className={`${fgColor} text-xs uppercase`}>{status}</span>
+    </div>
+  );
+};
+
 const AboutTable = ({ section, content }) => (
   <TableWrapper>
     <Table>
       <Thead>
+        <Th>Status</Th>
         <Th>{section}</Th>
         <Th>Type</Th>
         <Th center>Code</Th>
@@ -29,7 +53,10 @@ const AboutTable = ({ section, content }) => (
           } = info;
           if (!info.healthy && !info.disabled) {
             return (
-              <Tr key={key} red>
+              <Tr key={key}>
+                <Td>
+                  <Status status="unhealthy" />
+                </Td>
                 <Td>{name}</Td>
                 <Td colSpan={100} center>
                   unhealthy
@@ -39,12 +66,21 @@ const AboutTable = ({ section, content }) => (
           }
           return (
             <Tr key={key} hover striped>
+              <Td>
+                <Status status={info.disabled ? "disabled" : "healthy"} />
+              </Td>
               <Td>{name}</Td>
               <Td>{type}</Td>
               <Td>
                 {sourcecode && (
                   <div className="flex justify-center">
-                    <Button appearance="link" variant="primary" rel="noreferrer" target="_blank" href={sourcecode}>
+                    <Button
+                      appearance="link"
+                      variant="primary"
+                      rel="noreferrer"
+                      target="_blank"
+                      href={sourcecode}
+                    >
                       <FaCode size={20} />
                     </Button>
                   </div>
@@ -53,7 +89,13 @@ const AboutTable = ({ section, content }) => (
               <Td center>
                 {homepage && (
                   <div className="flex justify-center">
-                    <Button appearance="link" variant="success" rel="noreferrer" target="_blank" href={homepage}>
+                    <Button
+                      appearance="link"
+                      variant="success"
+                      rel="noreferrer"
+                      target="_blank"
+                      href={homepage}
+                    >
                       <FaExternalLinkAlt size={16} />
                     </Button>
                   </div>
@@ -83,7 +125,11 @@ const About = () => {
     loading: summarizersLoading,
     retry: summarizersReload,
   } = useContext(SummarizersContext);
-  const { plugins: metrics, loading: metricsLoading, retry: metricsReload } = useContext(MetricsContext);
+  const {
+    plugins: metrics,
+    loading: metricsLoading,
+    retry: metricsReload,
+  } = useContext(MetricsContext);
 
   return (
     <div className="flex flex-col gap-4">
@@ -119,7 +165,7 @@ const About = () => {
         </p>
       </SpaceGap>
       <SpaceGap>
-        <HeadingSemiBig>Summarization Models</HeadingSemiBig>
+        <HeadingSemiBig>Summarization Plugin Dashboard</HeadingSemiBig>
         {!summarizers ? (
           <WaitResource loading={summarizersLoading} reloader={summarizersReload} />
         ) : (
@@ -127,7 +173,7 @@ const About = () => {
         )}
       </SpaceGap>
       <SpaceGap>
-        <HeadingSemiBig>Evaluation Metrics</HeadingSemiBig>
+        <HeadingSemiBig>Evaluation Plugin Dashboard</HeadingSemiBig>
         {!metrics ? (
           <WaitResource loading={metricsLoading} reloader={metricsReload} />
         ) : (
@@ -136,7 +182,7 @@ const About = () => {
       </SpaceGap>
       <SpaceGap>
         <HeadingSemiBig>Code</HeadingSemiBig>
-        <Button appearance="link" href={sourceCodeLink}>
+        <Button appearance="link" href={sourceCodeLink} target="_blank">
           {sourceCodeLink}
         </Button>
       </SpaceGap>

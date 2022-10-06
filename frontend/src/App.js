@@ -40,31 +40,40 @@ const routes = [
 const Footer = () => (
   <footer className="h-32 w-full bg-gray-100 text-xs text-gray-600">
     <Container>
-      <div className="h-full flex gap-2 items-center justify-end">
-        <span>
-          &copy; 2022{" "}
-          <a className="hover:text-gray-600" href="https://webis.de/">
-            Webis Group
+      <div className="flex h-full justify-between">
+        <div className="flex gap-2 items-center">
+          <Button appearance="link" target="_blank" href="https://github.com/webis-de/summary-workbench/issues">
+            <div className="flex gap-1 items-center">
+              <FaGithub size={20} /> report issues or ask questions
+            </div>
+          </Button>
+        </div>
+        <div className="h-full flex gap-2 items-center justify-end">
+          <span>
+            &copy; 2022
+            <a className="hover:text-gray-600" href="https://webis.de/">
+              Webis Group
+            </a>
+          </span>
+          <span>&bull;</span>
+          <a href="https://github.com/webis-de">
+            <FaGithub className="text-base text-gray-400 hover:text-gray-400" />
           </a>
-        </span>
-        <span>&bull;</span>
-        <a href="https://github.com/webis-de">
-          <FaGithub className="text-base text-gray-400 hover:text-gray-400" />
-        </a>
-        <a href="https://twitter.com/webis_de">
-          <FaTwitter className="text-base text-gray-400 hover:text-gray-400" />
-        </a>
-        <a href="https://www.youtube.com/webis">
-          <FaYoutube className="text-base text-gray-400 hover:text-gray-400" />
-        </a>
-        <span>&bull;</span>
-        <a className="hover:text-gray-600" href="https://webis.de/people.html">
-          Contact
-        </a>
-        <span>&bull;</span>
-        <a className="hover:text-gray-600" href="https://webis.de/legal.html">
-          Impressum / Terms / Privacy
-        </a>
+          <a href="https://twitter.com/webis_de">
+            <FaTwitter className="text-base text-gray-400 hover:text-gray-400" />
+          </a>
+          <a href="https://www.youtube.com/webis">
+            <FaYoutube className="text-base text-gray-400 hover:text-gray-400" />
+          </a>
+          <span>&bull;</span>
+          <a className="hover:text-gray-600" href="https://webis.de/people.html">
+            Contact
+          </a>
+          <span>&bull;</span>
+          <a className="hover:text-gray-600" href="https://webis.de/legal.html">
+            Impressum / Terms / Privacy
+          </a>
+        </div>
       </div>
     </Container>
   </footer>

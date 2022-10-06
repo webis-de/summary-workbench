@@ -1,9 +1,8 @@
 import sys
 
-from model_setup import DATA_PATH, SAVE_PATH
-
 sys.path.insert(0, "./guided_summarization/bart")
 from fairseq.models.bart.guided_model import GuidedBARTModel
+from model_setup import DATA_PATH, SAVE_PATH
 
 MODEL_PATH = SAVE_PATH
 DATA_PATH = DATA_PATH / "data"

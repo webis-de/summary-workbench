@@ -58,6 +58,8 @@ async def plugin_request(plugins):
     results = {}
     errors = {}
     for key, response in zip(keys, responses):
+        if isinstance(response, TimeoutError):
+            raise Exception("timeout error occurred")
         if response["success"]:
             results[key] = response["data"]
         else:
@@ -72,18 +74,26 @@ app = FastAPI(docs_url="/api/docs", redoc_url="/api/redoc")
 api = APIRouter()
 
 
+def split(values, num_parts):
+    size = len(values) // num_parts
+    return [values[i : i + size] for i in range(0, len(values), size)]
+
+
 async def evaluate(metrics, hypotheses, references):
     keys, batch = zip(*hypotheses.items())
+    batch = [e for hyps in batch for e in zip(hyps, references)]
     request_args = {
         key: {
             "url": watcher.metrics[key]["url"],
-            "json": {"batch": batch, "references": references, **args},
+            "json": {"batch": batch, **args},
+            "timeout": 0,
         }
         for key, args in metrics.items()
     }
     results, errors = await plugin_request(request_args)
     results = {
-        key: {k: v for k, v in zip(keys, value)} for key, value in results.items()
+        key: {k: v for k, v in zip(keys, split(value, len(keys)))}
+        for key, value in results.items()
     }
     return results, errors
 

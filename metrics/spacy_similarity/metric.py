@@ -14,5 +14,6 @@ class MetricPlugin:
         scores = [nlp(h).similarity(nlp(r)) for h, r in zip(hypotheses, references)]
         return scores
 
-    def evaluate(self, batch, references):
-        return [self._evaluate(references, hypotheses) for hypotheses in batch]
+    def evaluate(self, batch):
+        hypotheses, references = zip(*batch)
+        return self._evaluate(references, hypotheses)

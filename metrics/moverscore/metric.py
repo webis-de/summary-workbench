@@ -1,17 +1,17 @@
 import os
 
-from moverscore import MoverScore, MoverScoreV2
+from moverscore import MoverScore
 
-MODELS = {"MoverScoreV1": MoverScore, "MoverScoreV2": MoverScoreV2}
-
-MODEL = os.environ.get("model") or "MoverScoreV2"
-
-MODEL_CLASS = MODELS[MODEL]
+MODEL = os.environ.get("model")
 
 
 class MetricPlugin:
     def __init__(self):
-        self.mover_score = MODEL_CLASS()
+        self.mover_score = MoverScore(model_name=MODEL)
 
-    def evaluate(self, batch, references):
-        return [self.mover_score.score(references, hypotheses) for hypotheses in batch]
+    def evaluate(self, batch):
+        hypotheses, references = zip(*batch)
+        return self.mover_score.score(references, hypotheses)
+
+    def metadata(self):
+        return {"model": self.mover_score.model_name}

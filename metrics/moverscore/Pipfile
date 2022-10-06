@@ -9,4 +9,4 @@ verify_ssl = true
 moverscore = {git = "https://github.com/dominik-schwabe/emnlp19-moverscore.git"}
 
 [requires]
-python_version = "3.8"
+python_version = "3.9"

@@ -14,14 +14,15 @@ uvicorn_logger = logging.getLogger("uvicorn")
 
 def build_application(func, validator, num_threads=1, batch_size=32, cache_size=0):
     app = FastAPI()
-    workers = Workers(func, num_threads=num_threads, batch_size=batch_size, cache_size=cache_size)
+    workers = Workers(
+        func, num_threads=num_threads, batch_size=batch_size, cache_size=cache_size
+    )
 
     @app.on_event("startup")
     def startup():
         uvicorn_logger.info(f"THREADS: {num_threads}")
         uvicorn_logger.info(f"BATCH_SIZE: {batch_size}")
         uvicorn_logger.info(f"CACHE_SIZE: {cache_size}")
-
 
     @app.on_event("startup")
     def startup():
@@ -66,9 +67,7 @@ def build_application(func, validator, num_threads=1, batch_size=32, cache_size=
             "running elements": workers.num_running_elements(),
             "waiting requests": workers.num_waiting_requests(),
             "waiting elements": workers.num_waiting_elements(),
-            "futures in event loop": len(
-                asyncio.all_tasks(asyncio.get_running_loop())
-            ),
+            "futures in event loop": len(asyncio.all_tasks(asyncio.get_running_loop())),
         }
 
     app.add_api_route("/statistics", statistics, methods=["GET"])
