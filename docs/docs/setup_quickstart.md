@@ -23,7 +23,7 @@ metrics:
     disabled: true
 
 summarizers:
-  - ./summarizers/extractive
+  - ./summarizers/featuresum
   - ./summarizers/textrank
   - source: ./summarizers/neuralsum
     disabled: true
@@ -31,7 +31,7 @@ summarizers:
       model: T5
 ```
 
-This will configure `BLEU`, `ROUGE`, and `sentence transformers` as evaluation metrics, and `neuralsum` with the `T5` model, our custom `extractive` summarizer, and `textrank` as summarizers.
+This will configure `BLEU`, `ROUGE`, and `sentence transformers` as evaluation metrics, and `neuralsum` with the `T5` model, our custom `featuresum` summarizer, and `textrank` as summarizers.
 
 :::note
 

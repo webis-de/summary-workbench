@@ -1,3 +1,4 @@
+import asyncio
 import os
 from urllib.parse import urlparse
 
@@ -45,7 +46,17 @@ def _error_to_message(error):
     return errors
 
 
+def exception_to_error(exc):
+    if isinstance(exc, asyncio.exceptions.TimeoutError):
+        message = "timeout exception occurred"
+    else:
+        message = f"exception {exc.__class__} occurred with message: {exc}"
+    return {"error": "APPLICATION", "message": message}
+
+
 def error_to_message(errors):
+    if isinstance(errors, Exception):
+        errors = exception_to_error(errors)
     if not isinstance(errors, list):
         errors = [errors]
     errors = [err for e in errors for err in _error_to_message(e)]
@@ -58,9 +69,7 @@ async def plugin_request(plugins):
     results = {}
     errors = {}
     for key, response in zip(keys, responses):
-        if isinstance(response, TimeoutError):
-            raise Exception("timeout error occurred")
-        if response["success"]:
+        if isinstance(response, dict) and response["success"]:
             results[key] = response["data"]
         else:
             err_messages = error_to_message(response)
@@ -86,7 +95,6 @@ async def evaluate(metrics, hypotheses, references):
         key: {
             "url": watcher.metrics[key]["url"],
             "json": {"batch": batch, **args},
-            "timeout": 0,
         }
         for key, args in metrics.items()
     }

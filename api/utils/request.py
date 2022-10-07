@@ -11,8 +11,11 @@ async def _fetch(session, parse_as_json=True, **kwargs):
         return await response.text()
 
 
+timeout = aiohttp.ClientTimeout(total=None, connect=10, sock_connect=10, sock_read=None)
+
+
 async def request(request_data, cancel_event=None, return_exceptions=True):
-    async with aiohttp.ClientSession() as session:
+    async with aiohttp.ClientSession(timeout=timeout) as session:
         requests = []
         for data in request_data:
             data = data.copy()

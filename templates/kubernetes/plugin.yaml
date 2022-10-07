@@ -31,7 +31,7 @@ spec:
               path: /health
               port: defaultport
             periodSeconds: 15
-            timeoutSeconds: 1
+            timeoutSeconds: 5
       restartPolicy: Always
 ---
 apiVersion: v1

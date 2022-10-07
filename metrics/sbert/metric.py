@@ -12,7 +12,7 @@ def _paired_cosine_sim(embeddings1, embeddings2):
 
 
 class MetricPlugin:
-    MODEL = os.environ.get("model") or "roberta-large-nli-stsb-mean-tokens"
+    MODEL = os.environ.get("model") or "all-mpnet-base-v2"
 
     def __init__(self):
         self.model = SentenceTransformer(self.MODEL)
