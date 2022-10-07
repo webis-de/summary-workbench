@@ -13,6 +13,7 @@ class SummarizerPlugin:
         self,
         batch,
         ratio,
+        return_list: bool = False,
         return_data: Literal["real", "none", "error"] = "real",
         high_load: bool = True,
         summary: str = "test summary",
@@ -38,6 +39,8 @@ class SummarizerPlugin:
                 raise AttributeError(error_message)
             raise ValueError(f"unknown error type {error}")
         if return_data == "real":
+            if return_list:
+                return [[f"{text[:20]}... {summary}", f"{extra_message}", f"{ratio}"] for text in batch]
             return [f"{text[:20]}... {summary} {extra_message} {ratio}" for text in batch]
         if return_data == "none":
             return [None] * len(batch)

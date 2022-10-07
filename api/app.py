@@ -245,8 +245,14 @@ app.add_middleware(
 )
 
 
-async def sentence_split_multiple(texts):
-    return [await sentence_split(text) for text in texts]
+async def transform_text(text, split):
+    if split:
+        if isinstance(text, str):
+            return await sentence_split(text)
+    else:
+        if not isinstance(text, str):
+            return " ".join(text)
+    return text
 
 
 @api.post("/summarize")
@@ -265,16 +271,16 @@ async def summarize_route(request: Request, body: SummarizeBody):
             meta = {}
         documents.append(text)
         if body.add_metadata:
-            if body.split_sentences:
-                text = await sentence_split(text)
-            meta["document"] = text
+            meta["document"] = await transform_text(text, body.split_sentences)
         metadata.append(meta)
     results, errors = await summarize(body.summarizers, documents, body.ratio)
     if body.split_sentences:
         new_results = {}
         for key, value in results.items():
             if isinstance(value, list):
-                value = await sentence_split_multiple(value)
+                value = [
+                    await transform_text(text, body.split_sentences) for text in value
+                ]
             new_results[key] = value
         results = new_results
     if results:

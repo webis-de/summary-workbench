@@ -2,6 +2,7 @@ import os
 
 import pytextrank
 import spacy
+from pydantic import Field
 
 
 class BiasedTextRankModel(object):
@@ -54,5 +55,5 @@ class SummarizerPlugin:
         self.model = BiasedTextRankModel()
         print("Intialized Biased TextRank")
 
-    def summarize(self, batch, ratio, focus: str):
+    def summarize(self, batch, ratio, focus: str = Field(..., min_length=1)):
         return [self.model.summarize(text, ratio, focus) for text in batch]
