@@ -11,7 +11,7 @@ The following GIF shows how to enter text, select summarizers, set the summary l
 
 ![Making a Summarization Request](/summarize_input.gif)
 
-### Inspect the Resulting Summaries
+### Inspect the Summaries
 After executing the request the document with its summaries is shown.
 By clicking the eye-icon, the lexical overlap is shown to see what part of the document got reused in the summary.
 By clicking the bar-icon, the lexical overlap of the summaries with each other is shown.
@@ -20,7 +20,7 @@ By hovering an overlap section, all corresponding sections are highlighted in ye
 ![Inspecting the Resulting Summaries](/summarize_usage.gif)
 
 ### Using a PDF Document as Input for the Summarization
-As an alternative a PDF-document can be used as an input.
+Alternatively, a PDF-document can be used as an input.
 The text is extracted with [Grobid](https://github.com/kermitt2/grobid) and extracted sections are shown on the left.
 By clicking the entry, a section can be selected.
 The selected sections are concatenated when submitted for summarization.
@@ -43,7 +43,7 @@ Scores can be exported as latex table or CSV.
 ![Show Average Scores after Evaluating](/evaluation_scores.gif)
 
 ### Visualize the Overlap for the Examples
-The second tab shows the examples for textual inspection.
+The second tab presents the evaluated texts for textual inspection.
 By clicking the eye-icon labeled with `Lex-Doc` and `Lex-Ref`, the lexical overlap is shown with the document and the reference respectively.
 By clicking the eye-icon labeled with `Sem-Doc`, the semantic overlap with the document is shown, which is computed by finding the top 3 most similar sentences using spaCy similarity for each summary sentence and highlighting them by the fraction of sentences that found this sentence.
 
@@ -51,7 +51,7 @@ By clicking the eye-icon labeled with `Sem-Doc`, the semantic overlap with the d
 
 ### Plotter Feature of the Evaluation View
 The third tab shows a graph where a scatter plot of 2 selected metrics is shown.
-When only one metric is selected, the other values for the other axis will be drawn from a random uniform distribution.
+When only one metric is selected, the other values for the other axis will be drawn from a uniform distribution.
 Points can be selected to show a view similar to [Visualize the Overlap for the Examples](#visualize-the-overlap-for-the-examples).
 
 ![Plotter Feature of the Evaluation View](/evaluation_plotter.gif)

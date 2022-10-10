@@ -16,34 +16,36 @@ Before you can use the `configure.py` script you need to run `pip install -r req
 
 Following commands are available:
 
-| command            | description                                                                                                                        |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
-| gen-docker-compose | generate a docker-compose.yaml to run the application locally                                                                      |
-| build              | build images for the plugins (metrics, summarizers)                                                                                |
-| push               | push an image to dockerhub for later deployment                                                                                    |
-| gen-kubernetes     | generates kubernetes files for the deployment                                                                                      |
-| gen-schema         | generate json schema files for sw-config.yaml and sw-plugin-config.yaml which can be used to provide completion in your editor/IDE |
+| command            | description                                                                                                                                                                                        |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| gen-docker-compose | generate a docker-compose.yaml to run the application locally                                                                                                                                      |
+| build              | build images for the plugins (metrics, summarizers)                                                                                                                                                |
+| push               | push an image to dockerhub for later deployment                                                                                                                                                    |
+| gen-kubernetes     | generates kubernetes files for the deployment                                                                                                                                                      |
+| gen-schema         | generate json schema files for `sw-config.yaml` and `sw-plugin-config.yaml` which can be used to provide completion in your editor/IDE (see [configuration#completion](/configuration#completion)) |
 
 ## sw-config.yaml
 
 The application is configured with the `sw-config.yaml` file.
 It has the following top level options:
 
-| option          | required for         | description                                                                  |
-| --------------- | -------------------- | ---------------------------------------------------------------------------- |
-| docker_username | push, gen-kubernetes | username of your dockerhub                                                   |
-| deploy          | gen-kubernetes       | generate deployment files                                                    |
-| metrics         | all                  | list of metrics (path or git url to the metric folder or repository)         |
-| summarizers     | all                  | list of summarizers (path or git url to the summarizer folder or repository) |
+| option             | required for         | description                                                                                                                        |
+| ------------------ | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| docker_username    | push, gen-kubernetes | username of your dockerhub                                                                                                         |
+| extern_environment | optional             | key value pairs that will be environment variables inside of all the plugins (not during build time, but also in kubernetes files) |
+| deploy             | gen-kubernetes       | configure the deployment                                                                                                           |
+| metrics            | all                  | list of metrics (path or git url to the metric folder or repository)                                                               |
+| summarizers        | all                  | list of summarizers (path or git url to the summarizer folder or repository)                                                       |
 
 To configure a metric or a summarizer specify the path or git url to the metric or to the summarizer as an list entry under the `metrics` or `summarizers` option.
 Alternatively you can specify the following options as dictionary:
 
-| option      | description                                                                                                                                                                                                                           |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| source      | path or git url to the plugin folder or repository                                                                                                                                                                                    |
-| disabled    | if true, the plugin will not be loaded but information about the plugin will still be shown in the application                                                                                                                        |
-| environment | key-value pairs that will be add to the plugin as environment variables during build time and are present in the running plugin container. It is useful e.g. when a plugin provides different models and one wants to choose a model. |
+| option             | description                                                                                                                                                                                                                           |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| source             | path or git url to the plugin folder or repository                                                                                                                                                                                    |
+| disabled           | if true, the plugin will not be loaded but information about the plugin will still be shown in the application                                                                                                                        |
+| environment        | key-value pairs that will be add to the plugin as environment variables during build time and are present in the running plugin container. It is useful e.g. when a plugin provides different models and one wants to choose a model. |
+| extern_environment | key value pairs that will be environment variables inside the plugin (not during build time, but also in kubernetes files)                                                                                                            |
 
 :::info
 

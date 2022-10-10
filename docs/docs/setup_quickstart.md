@@ -5,17 +5,20 @@ title: Setup Quickstart
 
 ## Setup
 
-1. Install python, docker, and docker-compose
-2. Make sure the docker daemon is running
-3. Clone the repository to your computer
-4. Go to the repositories root
-5. Run `pip install -r requirements.txt`
+1. Install python, docker, and docker-compose and start the docker service
+2. Open a terminal, clone the repository and go to the repository root
+3. Run `pip install -r requirements.txt`, which will install all neccessary packages for the ./configure.py script
 
 ## First application
 
 Create a file named `my.sw-config.yaml` in the project root and write the following content to the file:
 
 ```yaml
+extern_environment:
+  THREADS: 4
+  BATCH_SIZE: 32
+  CACHE_SIZE: 1000
+
 metrics:
   - ./metrics/rouge
   - ./metrics/bleu
@@ -31,12 +34,12 @@ summarizers:
       model: T5
 ```
 
-This will configure `BLEU`, `ROUGE`, and `sentence transformers` as evaluation metrics, and `neuralsum` with the `T5` model, our custom `featuresum` summarizer, and `textrank` as summarizers.
+This will configure `BLEU`, `ROUGE`, and `Sentence-BERT` as evaluation metrics, and `neuralsum` with the `T5` model, our custom `featuresum` summarizer, and `TextRank` as summarizers.
 
 :::note
 
 If the `disabled` option is set to `true`, the plugin will not be loaded but information about the plugin will still be displayed in the demo.
-The disabled plugins in the example load large neural models. You can set `disabled` to `false` if you have enough space to load the plugins.
+The disabled plugins in the example load large neural models. You can set `disabled` to `false` if you have enough space on your system.
 
 :::
 
@@ -47,7 +50,7 @@ For the `neuralsum` plugin the `model` variable is required.
 
 :::
 
-You can find a `configure.py` file in the project root.  
+You can find the `configure.py` file in the project root.  
 Run the following command to generate a docker-compose file in the project root:
 
 ```bash
@@ -73,7 +76,7 @@ Therefore future startups won't take as long as the first.
 
 :::note
 
-The `configure.py` file takes the `sw-config.yaml` as default config, when no config is specified via `--config`.
+The `sw-config.yaml` file in the project root will be used as the default config by `configure.py` when `--config` is omitted.
 Inspect this file if you want to get an overview of what a full config looks like.
 
 :::
@@ -83,3 +86,14 @@ Inspect this file if you want to get an overview of what a full config looks lik
 For a overview of available plugins checkout the `metrics/` and `summarizers/` folders in the repository
 
 :::
+
+## Extern Environment
+
+The `extern_environment` option sets environment variables in all plugin containers.
+The following environment variables are used to configure the plugin server.
+
+| Name       | Default | Description                                                                                                                                       |
+| ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| THREADS    | 1       | The number of parallel calls to the summarize function.                                                                                           |
+| BATCH_SIZE | 32      | This is the maximal length that the `batch` argument will have (see [writing-a-plugin#required-arguments](writing-a-plugin#required-arguments)) |
+| CACHE_SIZE | 0       | The size of the LRU cache. A unique sha256 key will be generated based on the input and the arguments. 0 disables the cache.                          |

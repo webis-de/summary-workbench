@@ -79,7 +79,12 @@ async def plugin_request(plugins):
 
 watcher = PluginWatcher()
 grobid = Grobid(host=os.environ["GROBID_HOST"])
-app = FastAPI(docs_url="/api/docs", redoc_url="/api/redoc")
+app = FastAPI(
+    openapi_url="/api/openapi.json",
+    swagger_ui_oauth2_redirect_url="/api/docs/oauth2-redirect",
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
+)
 api = APIRouter()
 
 
@@ -145,7 +150,7 @@ async def metrics():
 
 
 @api.get("/summarizers")
-async def metrics():
+async def summarizers():
     return watcher.summarizers
 
 
