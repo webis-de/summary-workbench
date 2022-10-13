@@ -136,32 +136,44 @@ const About = () => {
       <SpaceGap>
         <HeadingBig>Overview</HeadingBig>
         <p>
-          Summary Workbench is a web application to support research in text summarization. It
-          provides three core functionalities: text summarization via multiple models (
-          <strong>Summarize</strong>), automatic evaluation of model predictions (
-          <strong>Evaluate</strong>), and visual comparison of the predictions against reference
-          summaries (<strong>Visualize</strong>).
+          Summary Workbench is a web application that unifies application and evaluation of text
+          summarization models. It provides two core functionalities: text summarization via
+          multiple models (Summarize) and automatic evaluation of model predictions (Evaluate).
         </p>
       </SpaceGap>
       <SpaceGap>
         <HeadingSemiBig>Summarize</HeadingSemiBig>
         <p>
-          Users can select multiple models available in the tool as well as plugin their own models
-          to summarize text. It is also possible to simply enter a URL whose contents are parsed and
-          summarized. When multiple models are applied, a visual comparison of their summaries is
-          also provided that indicates the amount of text copied from the source document in the
-          summaries. Clicking on a summary sentence lexically aligns it to the corresponding
-          document sentences.
+          <ol className="list-decimal list-inside">
+            <li>
+              Summarize any web page (paste a URL), plain text, or scholarly documents (upload a
+              PDF) via multiple state-of-the-art models.
+            </li>
+            <li>
+              Scholarly documents are neatly parsed to allow for summarizing only sections of
+              choice.
+            </li>
+            <li>
+              Instantly visualize lexical overlap among the generated summaries and the source
+              document. Comparison among summaries is also possible.
+            </li>
+          </ol>
         </p>
       </SpaceGap>
       <SpaceGap>
         <HeadingSemiBig>Evaluate</HeadingSemiBig>
         <p>
-          Select multiple evaluation metrics or add your evaluation metric as a plugin to evaluate
-          model predictions against references. You can either evaluate two texts or two files (one
-          text per line). You can save your evaluations as <strong>runs</strong> (in your local
-          browser storage) and visually compare among the examples to inspect overlapping tokens.
-          Finally, you can export the scores as Latex tables or as csv files.
+          <ol className="list-decimal list-inside">
+            <li>
+              Upload all model predictions on a test set as JSONL file to evaluate using multiple
+              measures.
+            </li>
+            <li>
+              Visualize semantic and lexical overlap among summaries and source documents on demand.
+            </li>
+            <li>Neatly export the computed scores as CSV or LaTeX tables.</li>
+            <li>Computed results are cached in local storage for future inspections.</li>
+          </ol>
         </p>
       </SpaceGap>
       <SpaceGap>
