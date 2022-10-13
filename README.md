@@ -1,9 +1,7 @@
-# Description
+# Summary Workbench
 
-Web project build with FastAPI, Express.js and React.js that can be used to evaluate the quality of your own summarizations or generate summarizations from texts or URLs based on many metrics and summarizers.  
-The documentation for the application can be found here: <https://webis-de.github.io/summary-workbench/>  
-A running demo can be found here: <https://tldr.demo.webis.de>.
-
+Unifying the application and evaluation of text summarization models. [[Documentation](https://webis-de.github.io/summary-workbench/)] [[Live Demo](https://tldr.demo.webis.de)]
+>Accepted at EMNLP 2022 (Demo track).
 # Examples
 
 ## Summarize
