@@ -2,7 +2,6 @@
 
 Unifying the application and evaluation of text summarization models. [[Documentation](https://webis-de.github.io/summary-workbench/)] [[Live Demo](https://tldr.demo.webis.de)]
 >Accepted at EMNLP 2022 (Demo track).
-# Examples
 
 ## Summarize
 
