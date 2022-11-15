@@ -50,6 +50,7 @@ summarizers:
   - ./summarizers/textrank
   - ./summarizers/topicrank
   - ./summarizers/featuresum
+  - ./summarizers/aosumm
   - source: ./summarizers/cliffsum
     environment:
       model: MaskEnt

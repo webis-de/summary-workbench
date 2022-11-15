@@ -185,14 +185,14 @@ class Plugin(DockerMixin):
                 "buildargs": self.python_version_arg(),
             },
             {
+                "dockerfile": SETUP_SERVER_FILES_DOCKER_FILE,
+                "context_path": PLUGIN_SERVER_PATH,
+            },
+            {
                 "dockerfile": SETUP_PLUGIN_FILES_DOCKER_FILE.format(
                     environment=self.build_environment
                 ),
                 "context_path": self.plugin_path,
-            },
-            {
-                "dockerfile": SETUP_SERVER_FILES_DOCKER_FILE,
-                "context_path": PLUGIN_SERVER_PATH,
             },
         ]
 
