@@ -38,41 +38,47 @@ const routes = [
 ];
 
 const Footer = () => (
-  <footer className="h-32 w-full bg-gray-100 text-xs text-gray-600">
+  <footer className="min-h-[100px] flex items-center py-2 bg-gray-100 text-xs text-gray-600">
     <Container>
-      <div className="flex h-full justify-between">
-        <div className="flex gap-2 items-center">
-          <Button appearance="link" target="_blank" href="https://github.com/webis-de/summary-workbench/issues">
+      <div className="flex h-full py-2 gap-2 flex-col md:flex-row justify-between">
+        <div className="flex gap-2 items-center justify-center">
+          <Button
+            appearance="link"
+            target="_blank"
+            href="https://github.com/webis-de/summary-workbench/issues"
+          >
             <div className="flex gap-1 items-center">
               <FaGithub size={20} /> report issues or ask questions
             </div>
           </Button>
         </div>
-        <div className="h-full flex gap-2 items-center justify-end">
+        <div className="h-full flex flex-col md:flex-row gap-2 items-center justify-center">
           <span>
             &copy; 2022
             <a className="hover:text-gray-600" href="https://webis.de/">
               Webis Group
             </a>
           </span>
-          <span>&bull;</span>
-          <a href="https://github.com/webis-de">
-            <FaGithub className="text-base text-gray-400 hover:text-gray-400" />
-          </a>
-          <a href="https://twitter.com/webis_de">
-            <FaTwitter className="text-base text-gray-400 hover:text-gray-400" />
-          </a>
-          <a href="https://www.youtube.com/webis">
-            <FaYoutube className="text-base text-gray-400 hover:text-gray-400" />
-          </a>
-          <span>&bull;</span>
-          <a className="hover:text-gray-600" href="https://webis.de/people.html">
-            Contact
-          </a>
-          <span>&bull;</span>
-          <a className="hover:text-gray-600" href="https://webis.de/legal.html">
-            Impressum / Terms / Privacy
-          </a>
+          <div className="flex gap-2">
+            <span className="hidden md:visible">&bull;</span>
+            <a href="https://github.com/webis-de">
+              <FaGithub className="text-base text-gray-400 hover:text-gray-400" />
+            </a>
+            <a href="https://twitter.com/webis_de">
+              <FaTwitter className="text-base text-gray-400 hover:text-gray-400" />
+            </a>
+            <a href="https://www.youtube.com/webis">
+              <FaYoutube className="text-base text-gray-400 hover:text-gray-400" />
+            </a>
+            <span>&bull;</span>
+            <a className="hover:text-gray-600" href="https://webis.de/people.html">
+              Contact
+            </a>
+            <span>&bull;</span>
+            <a className="hover:text-gray-600" href="https://webis.de/legal.html">
+              Impressum / Terms / Privacy
+            </a>
+          </div>
         </div>
       </div>
     </Container>
@@ -171,9 +177,9 @@ const SettingsContent = ({ close, save }) => {
 
   return (
     <div>
-      <div className="bg-slate-100 p-5 sticky z-20 top-0 flex justify-between items-center border-b">
+      <div className="bg-slate-100 p-5 sticky z-20 top-0 flex flex-wrap justify-between items-center border-b">
         <ModalTitle>Settings</ModalTitle>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button appearance="soft" variant="primary" onClick={close}>
             Close
           </Button>
@@ -183,74 +189,76 @@ const SettingsContent = ({ close, save }) => {
         </div>
       </div>
       <div className="p-5 space-y-6">
-        <div className="flex gap-4">
-          <Card>
-            <CardHead>
-              <div>
-                <HeadingBig>Highlighting</HeadingBig>
-                <Hint small>
-                  Highlighting that is applied to matching word groups (agreement) in the hypothesis
-                  and reference
-                </Hint>
-              </div>
-            </CardHead>
-            <CardContent>
-              <div>
-                <HeadingMedium>Minimum Word Overlap</HeadingMedium>
-                <Hint small>
-                  Matching word groups in the hypothesis and reference with a length less than this
-                  value are not shown
-                </Hint>
-                <RadioGroup value={minOverlap} setValue={setMinOverlap}>
-                  <div className="flex justify-evenly m-1 flex-wrap">
-                    {[1, 2, 3, 5, 7, 10].map((value) => (
-                      <RadioBullet key={value} value={value}>
-                        {value}
-                      </RadioBullet>
-                    ))}
-                  </div>
-                </RadioGroup>
-              </div>
-              <div>
-                <HeadingMedium>Show Redundancy</HeadingMedium>
-                <div className="flex justify-between items-top">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="md:max-w-[400px]">
+            <Card full>
+              <CardHead>
+                <div>
+                  <HeadingBig>Highlighting</HeadingBig>
                   <Hint small>
-                    Show also the matching word groups within the reference or hypothesis
+                    Highlighting that is applied to matching word groups (agreement) in the
+                    hypothesis and reference
                   </Hint>
-                  <Toggle checked={selfSimilarities} onChange={setSelfSimilarities} />
                 </div>
-              </div>
-              <div>
-                <HeadingMedium>Ignore Stopwords</HeadingMedium>
-                <div className="flex justify-between items-top">
-                  <Hint small>{"Don't consider stopwords part of the match"}</Hint>
-                  <Toggle checked={ignoreStopwords} onChange={setIgnoreStopwords} />
+              </CardHead>
+              <CardContent>
+                <div>
+                  <HeadingMedium>Minimum Word Overlap</HeadingMedium>
+                  <Hint small>
+                    Matching word groups in the hypothesis and reference with a length less than
+                    this value are not shown
+                  </Hint>
+                  <RadioGroup value={minOverlap} setValue={setMinOverlap}>
+                    <div className="flex justify-evenly m-1 flex-wrap">
+                      {[1, 2, 3, 5, 7, 10].map((value) => (
+                        <RadioBullet key={value} value={value}>
+                          {value}
+                        </RadioBullet>
+                      ))}
+                    </div>
+                  </RadioGroup>
                 </div>
-              </div>
-              <div>
-                <HeadingMedium>Colorscheme</HeadingMedium>
-                <Hint small>Color palette used to highlight matching</Hint>
-                <RadioGroup value={colorMap.colorscheme} setValue={setColorMap}>
-                  <div className="pt-2 grid grid-cols-2 justify-items-center gap-4">
-                    {Object.keys(colorschemes).map((category) => (
-                      <HeadingSmall key={category}>{category}</HeadingSmall>
-                    ))}
+                <div>
+                  <HeadingMedium>Show Redundancy</HeadingMedium>
+                  <div className="flex justify-between items-top">
+                    <Hint small>
+                      Show also the matching word groups within the reference or hypothesis
+                    </Hint>
+                    <Toggle checked={selfSimilarities} onChange={setSelfSimilarities} />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    {Object.entries(colorschemes).map(([category, names]) => (
-                      <ButtonGroup key={category}>
-                        {names.map((name) => (
-                          <RadioButton value={name} key={name}>
-                            {name}
-                          </RadioButton>
-                        ))}
-                      </ButtonGroup>
-                    ))}
+                </div>
+                <div>
+                  <HeadingMedium>Ignore Stopwords</HeadingMedium>
+                  <div className="flex justify-between items-top">
+                    <Hint small>{"Don't consider stopwords part of the match"}</Hint>
+                    <Toggle checked={ignoreStopwords} onChange={setIgnoreStopwords} />
                   </div>
-                </RadioGroup>
-              </div>
-            </CardContent>
-          </Card>
+                </div>
+                <div>
+                  <HeadingMedium>Colorscheme</HeadingMedium>
+                  <Hint small>Color palette used to highlight matching</Hint>
+                  <RadioGroup value={colorMap.colorscheme} setValue={setColorMap}>
+                    <div className="pt-2 grid grid-cols-2 justify-items-center gap-4">
+                      {Object.keys(colorschemes).map((category) => (
+                        <HeadingSmall key={category}>{category}</HeadingSmall>
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      {Object.entries(colorschemes).map(([category, names]) => (
+                        <ButtonGroup key={category}>
+                          {names.map((name) => (
+                            <RadioButton value={name} key={name}>
+                              {name}
+                            </RadioButton>
+                          ))}
+                        </ButtonGroup>
+                      ))}
+                    </div>
+                  </RadioGroup>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
           <Card full>
             <CardHead>
               <HeadingBig>Preview</HeadingBig>

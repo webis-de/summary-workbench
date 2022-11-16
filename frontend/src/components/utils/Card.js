@@ -4,7 +4,7 @@ const Card = ({ children, full }) => (
   <div
     className={`${
       full ? "w-full" : "max-w-sm"
-    } flex h-full grow flex-col maw-w-sm divide-y bg-slate-50 rounded-lg border border-gray-200 shadow-md`}
+    } flex h-full grow flex-col divide-y bg-slate-50 rounded-lg border border-gray-200 shadow-md`}
   >
     {children}
   </div>

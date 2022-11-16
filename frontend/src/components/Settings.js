@@ -74,13 +74,17 @@ const Settings = ({ type, Context }) => {
 
   return (
     <div>
-      <div className="grid grid-cols-2 gap-2">
-        <LiveSearch query={query} setQuery={setQuery} />
-        <div className="flex items-center">
+      <div className="grid sm:grid-cols-2 grid-cols-1 gap-2">
+        <div className="order-1">
+          <LiveSearch query={query} setQuery={setQuery} />
+        </div>
+        <div className="order-3 sm:order-2 flex items-center">
           <HeadingMedium>Selected {type}</HeadingMedium>
         </div>
-        <SelectModels keys={filteredKeys} models={plugins} selectModel={toggle} />
-        <div className="flex flex-col gap-1 p-1 border border-slate-400 overflow-y-auto overflow-x-hidden h-[300px] shadow-md bg-white">
+        <div className="order-2 sm:order-3">
+          <SelectModels keys={filteredKeys} models={plugins} selectModel={toggle} />
+        </div>
+        <div className="order-4 flex flex-col gap-1 p-1 border border-slate-400 overflow-y-auto overflow-x-hidden h-[300px] shadow-md bg-white">
           {Object.entries(chosenModels).map(([key, { info, arguments: args, errors }]) => (
             <ModelBox
               key={key}
