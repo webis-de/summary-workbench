@@ -3,13 +3,13 @@ import spacy
 from summarizer.util import tokenize
 
 from .average_lexical_connectivity import average_lexical_connectivity
+from .content_words_ratio import content_words_ratio
 from .length import length_score
 from .position import position_score
 from .rank import rank_score
-from .content_words_ratio import content_words_ratio
+from .special_tokens import special_token_score
 from .tfidf import tfidf_score
 from .word_overlap import WordOverlap
-from .special_tokens import special_token_score
 
 
 def take_ratio(df, ratio):
@@ -33,8 +33,11 @@ class Scorer:
     def __init__(self, model, rank_score_limit=3, raise_invalid_lang=True):
         self.rank_score_limit = rank_score_limit
         self.raise_invalid_lang = raise_invalid_lang
-        nlp = spacy.load(model)
-        self.nlp = nlp
+        try:
+            self.nlp = spacy.load(model)
+        except OSError:
+            spacy.cli.download(model)
+            self.nlp = spacy.load(model)
 
     def get_features(
         self,
@@ -61,7 +64,9 @@ class Scorer:
         if use_position:
             scores["position"] = position_score(sentences, linear=False, use_exp=True)
         if use_average_lexical_connectivity:
-            scores["average_lexical_connectivity"] = average_lexical_connectivity(sentences)
+            scores["average_lexical_connectivity"] = average_lexical_connectivity(
+                sentences
+            )
         if use_content_words_ratio:
             scores["content_words_ratio"] = content_words_ratio(sentences)
         if use_length:

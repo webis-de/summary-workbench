@@ -1,11 +1,12 @@
-from model_setup import MODEL
+import os
 
 from .scores import Scorer
 
 
 class SummarizerPlugin:
-    def __init__(self):
-        self.model = Scorer(MODEL)
+    def __init__(self, model=None):
+        model = model or os.environ["model"]
+        self.model = Scorer(model)
 
     def summarize(
         self,
