@@ -20,8 +20,8 @@ def rank_score(sentences, scores, limit=3, use_exp=True):
         df = pd.DataFrame({"sentences": sentences, "scores": scores})
         df.reset_index(inplace=True)
         df.sort_values("scores", inplace=True, ascending=False)
-        query = df["sentences"][:limit]
-        docs = df["sentences"][limit:]
+        query = df["sentences"].iloc[:limit]
+        docs = df["sentences"].iloc[limit:]
         analyzer = partial(filter_tokens, use_lemma=True)
         vectorizer = TfidfVectorizer(analyzer=analyzer, smooth_idf=True)
         query = list(chain.from_iterable(query))

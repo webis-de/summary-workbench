@@ -18,7 +18,8 @@ def average_lexical_connectivity(sentences, use_exp=True):
     features = []
     for row_index in range(matrix.shape[0]):
         feature = shared_terms[matrix[row_index].nonzero()[1]].sum()
-        features.append(feature / len(analyzer(sentences[row_index])))
+        feature_len = max(len(analyzer(sentences[row_index])), 1)
+        features.append(feature / feature_len)
     scores = np.array(features)
     if use_exp:
         scores = np.exp(scores)

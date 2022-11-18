@@ -30,5 +30,6 @@ def tfidf_score(sentences, smooth_idf=False, use_lemma=False):
     except ValueError:
         return np.ones(len(sentences))
     sentence_lengths = np.array([len(analyzer(s)) for s in sentences])
+    sentence_lengths = np.maximum(sentence_lengths, 1)
     features = sum_feature(tfidf) / sentence_lengths
     return features
