@@ -1,7 +1,7 @@
 from itertools import chain
 
 import numpy as np
-from summarizer.util import filter_tokens, tokenize
+from .util import filter_tokens, tokenize
 
 
 class WordOverlap:

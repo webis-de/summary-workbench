@@ -2,7 +2,7 @@ from functools import partial
 
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
-from summarizer.util import filter_tokens
+from .util import filter_tokens
 
 
 def sum_feature(matrix):

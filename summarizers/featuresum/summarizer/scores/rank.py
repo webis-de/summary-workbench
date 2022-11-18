@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from summarizer.util import filter_tokens
+from .util import filter_tokens
 
 
 def rank_score(sentences, scores, limit=3, use_exp=True):

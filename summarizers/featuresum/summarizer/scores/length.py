@@ -1,5 +1,5 @@
 import numpy as np
-from summarizer.util import filter_tokens
+from .util import filter_tokens
 
 def length_score(sentences, use_exp=True):
     """length of the sentence divided by the maximum sentence length

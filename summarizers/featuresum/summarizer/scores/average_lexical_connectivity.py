@@ -2,7 +2,7 @@ from functools import partial
 
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
-from summarizer.util import filter_tokens
+from .util import filter_tokens
 
 
 def average_lexical_connectivity(sentences, use_exp=True):

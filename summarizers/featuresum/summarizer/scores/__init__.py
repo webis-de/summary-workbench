@@ -1,6 +1,6 @@
 import pandas as pd
 import spacy
-from summarizer.util import tokenize
+from .util import tokenize
 
 from .average_lexical_connectivity import average_lexical_connectivity
 from .content_words_ratio import content_words_ratio

@@ -1,6 +1,6 @@
 import numpy as np
 
-from summarizer.util import filter_tokens
+from .util import filter_tokens
 
 
 def get_stopwords(sentence):
