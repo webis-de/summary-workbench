@@ -1,6 +1,6 @@
 import "./css/App.css";
 
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useReducer, useContext, useEffect, useMemo, useState } from "react";
 import {
   FaChevronCircleUp,
   FaCog,
@@ -8,6 +8,7 @@ import {
   FaGithub,
   FaTwitter,
   FaYoutube,
+  FaBars,
 } from "react-icons/fa";
 import { useLocation } from "react-router";
 import { BrowserRouter, NavLink as Link, Navigate, useRoutes } from "react-router-dom";
@@ -93,7 +94,7 @@ const NavLink = ({ href, to, children }) => {
     return (
       <a
         href={href}
-        className={`flex items-center gap-2 justify-center ${className}`}
+        className={`flex items-center gap-2 ${className}`}
         target="_blank"
         rel="noreferrer"
       >
@@ -108,8 +109,12 @@ const NavLink = ({ href, to, children }) => {
   );
 };
 
-const NavRoutes = () => (
-  <div className="ml-10 flex gap-8 uppercase">
+const NavRoutes = ({ show }) => (
+  <div
+    className={`${
+      show ? "" : "hidden"
+    } overflow-hidden md:flex flex gap-4 col-span-2 mb-4 md:mb-0 md:gap-8 uppercase flex-col md:flex-row order-3 md:order-2 items-center`}
+  >
     {routes
       .filter(({ name }) => name)
       .map(({ path, name }) => (
@@ -121,28 +126,38 @@ const NavRoutes = () => (
   </div>
 );
 
-const Navbar = () => (
-  <>
-    <div className="h-16" />
-    <nav className="fixed bg-[#1B3451] top-0 right-0 z-30 left-0">
-      <Container>
-        <div className="h-16 flex justify-between items-center">
-          <a
-            href="/"
-            className="text-2xl no-underline text-slate-50 normal-case hover:text-blue-dark font-sans font-bold"
-          >
-            Summary Workbench
-          </a>
+const Navbar = () => {
+  const [showBars, toggleBars] = useReducer((v) => !v, false);
+  return (
+    <>
+      <div className="h-16" />
+      <nav className="fixed bg-[#1B3451] top-0 right-0 z-30 left-0">
+        <Container>
+          <div className="grid grid-cols-[1fr_auto] md:flex md:gap-8 md:items-center">
+            <a
+              href="/"
+              className="order-1 min-h-[70px] grow flex items-center text-2xl no-underline text-slate-50 normal-case hover:text-blue-dark font-sans font-bold"
+            >
+              Summary Workbench
+            </a>
 
-          <div className="flex gap-10">
-            <NavRoutes />
-            <NavbarOptions />
+            <NavRoutes show={showBars} />
+            <div className="order-2 md:order-3 flex items-center justify-end gap-2">
+              <NavbarOptions />
+              <FaBars
+                onClick={toggleBars}
+                className={`${
+                  showBars ? "rotate-90" : ""
+                } md:hidden transition text-gray-400 hover:text-slate-200 cursor-pointer`}
+                size={20}
+              />
+            </div>
           </div>
-        </div>
-      </Container>
-    </nav>
-  </>
-);
+        </Container>
+      </nav>
+    </>
+  );
+};
 
 const previewDoc = `Alan Mathison Turing was an English mathematician, computer scientist, logician, cryptanalyst, philosopher, and theoretical biologist.
 Turing was highly influential in the development of theoretical computer science, providing a formalisation of the concepts of algorithm and computation with the Turing machine, which can be considered a model of a general-purpose computer.
