@@ -25,4 +25,5 @@ class WordOverlap:
             words = set(filter_tokens(sentence, use_lemma=True))
             feature = len(words & self.words)
             features.append(feature)
-        return normalize(features)
+        features = np.array(features)
+        return (features - features.mean()) / (features.std() + 0.3)
