@@ -5,17 +5,18 @@ import numpy as np
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+
 from .util import filter_tokens
 
 
-def rank_score(sentences, scores, limit=3, use_exp=True):
+def rank_score(sentences, scores, limit=3):
     """cosine similarity of the tfidf vectors to the
     highest ranked sentences in the tfidf matrix.
     the highest ranked sentences are combined into
     one document.
     """
     if len(sentences) <= limit:
-        rank_scores = np.ones(len(sentences))
+        rank_scores = np.zeros(len(sentences))
     else:
         df = pd.DataFrame({"sentences": sentences, "scores": scores})
         df.reset_index(inplace=True)
@@ -31,6 +32,7 @@ def rank_score(sentences, scores, limit=3, use_exp=True):
         rank_scores = np.concatenate((np.ones(limit), rank_scores))
         rank_scores = pd.Series(rank_scores, index=df["index"])
         rank_scores = rank_scores.sort_index().values
-    if use_exp:
-        rank_scores = np.exp(rank_scores)
+        rank_scores = (rank_scores - rank_scores.mean()) / (
+            rank_scores.std() + 0.5
+        )  # + 0.5 because a lot of values are 0 and this would give a very low standard deviation, which would boost high ranks too much
     return rank_scores

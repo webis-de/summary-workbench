@@ -1,6 +1,5 @@
 import pandas as pd
 import spacy
-from .util import tokenize
 
 from .average_lexical_connectivity import average_lexical_connectivity
 from .content_words_ratio import content_words_ratio
@@ -9,6 +8,7 @@ from .position import position_score
 from .rank import rank_score
 from .special_tokens import special_token_score
 from .tfidf import tfidf_score
+from .util import tokenize
 from .word_overlap import WordOverlap
 
 
@@ -56,13 +56,12 @@ class Scorer:
         if not sentences:
             return []
         scores = pd.DataFrame(index=range(len(sentences)))
-        scores["default"] = 1
         if use_tfidf:
             scores["tfidf"] = tfidf_score(sentences, use_lemma=True)
         if use_special_tokens:
             scores["special_tokens"] = special_token_score(sentences)
         if use_position:
-            scores["position"] = position_score(sentences, linear=False, use_exp=True)
+            scores["position"] = position_score(sentences)
         if use_average_lexical_connectivity:
             scores["average_lexical_connectivity"] = average_lexical_connectivity(
                 sentences
@@ -75,7 +74,7 @@ class Scorer:
             scores["word_overlap"] = WordOverlap(title, nlp=self.nlp).score(sentences)
         if use_rank:
             scores["rank"] = rank_score(
-                sentences, scores.prod(axis=1), limit=self.rank_score_limit
+                sentences, scores.mean(axis=1), limit=self.rank_score_limit
             )
         sentences = [sent.text.strip() for sent in sentences]
         return sentences, scores
@@ -86,7 +85,7 @@ class Scorer:
         **kwargs,
     ):
         sentences, scores = self.get_features(document, **kwargs)
-        scores = scores.prod(axis=1).values
+        scores = scores.mean(axis=1).values
         return sentences, scores
 
     def summarize(
@@ -118,5 +117,5 @@ class Scorer:
         df = df.sort_values("scores", ascending=False)
         df = take_ratio(df, ratio)
         df = df.sort_values("index")
-        summary = " ".join(df["sentences"])
+        summary = df["sentences"].tolist()
         return summary

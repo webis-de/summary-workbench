@@ -1,4 +1,4 @@
-import numpy as np
+from .util import normalize
 
 ARTICLES = {"a", "an"}
 SPECIAL_POS_TAGS = {"NOUN", "ADJ", "PROPN"}
@@ -22,4 +22,4 @@ def special_token_score(sentences):
         special_tokens = [token for token in sentence if has_special_feature(token)]
         score = len(special_tokens) / len(sentence)
         features.append(score)
-    return np.array(features)
+    return normalize(features)
