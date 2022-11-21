@@ -55,7 +55,7 @@ const Footer = () => (
         </div>
         <div className="h-full flex flex-col md:flex-row gap-2 items-center justify-center">
           <span>
-            &copy; 2022
+            <span>&copy; 2022</span>{" "}
             <a className="hover:text-gray-600" href="https://webis.de/">
               Webis Group
             </a>
