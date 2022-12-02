@@ -93,7 +93,7 @@ const Settings = ({ type, Context }) => {
               args={args}
               setArgument={setArgument}
               errors={errors}
-              type={info.validators.type}
+              type={info.metadata.type}
               schema={info.validators.argument}
               close={() => toggle(key)}
             />
