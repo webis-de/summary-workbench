@@ -347,17 +347,23 @@ const InputDocument = ({ summarize, state, abort }) => {
           </CardHead>
           <CardContent>
             <Settings Context={SummarizersContext} type="Summarizers" />
-            <div className="border p-2">
-              <HeadingMedium>Summary length</HeadingMedium>
-              <Hint small>Length of the summary in percent</Hint>
-              <div className="px-7">
-                <Range
-                  defaultValue={summaryLength}
-                  setValue={setSummaryLength}
-                  min={15}
-                  max={50}
-                  step={5}
-                />
+            <div className="border-slate-300 py-4">
+              <div className="flex w-full gap-5">
+                <div className="basis-0">
+                  <HeadingMedium>
+                    <span className="whitespace-nowrap">Summary length</span>
+                  </HeadingMedium>
+                  <Hint small>Length of the summary in percent</Hint>
+                </div>
+                <div className="grow">
+                  <Range
+                    defaultValue={summaryLength}
+                    setValue={setSummaryLength}
+                    min={15}
+                    max={50}
+                    step={5}
+                  />
+                </div>
               </div>
             </div>
             <div className="flex flex-wrap justify-between items-center gap-5">
@@ -465,7 +471,7 @@ const SummaryTabView = ({ title, showOverlap, summaries, originals, sums, docume
 
   return (
     <div className="flex items-start flex-col sm:flex-row gap-3">
-    <div className="w-full sm:w-0 basis-[60%] min-w-0">
+      <div className="w-full sm:w-0 basis-[60%] min-w-0">
         <Card full>
           <CardHead>
             <h3 className="overflow-hidden overflow-ellipsis whitespace-nowrap text-bold capitalize text-slate-600 font-semibold">

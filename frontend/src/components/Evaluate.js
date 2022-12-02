@@ -220,7 +220,7 @@ const SubEvaluate = () => {
               />
             </div>
           </div>
-          <div className="lg:min-w-[500px]">
+          <div className="lg:w-1/2 lg:max-w-[600px] lg:min-w-[500px]">
             <div>
               <Card full>
                 <CardHead>

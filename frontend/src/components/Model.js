@@ -1,4 +1,5 @@
 import { FaCheck } from "react-icons/fa";
+import { Checkbox } from "./utils/Form";
 
 import { cyrb53 } from "../utils/color";
 
@@ -22,13 +23,11 @@ const typeToColor = (type) => {
 };
 
 const Bullet = ({ color }) => (
-  <div
-    className={`block min-w-[10px] min-h-[10px] shadow-gray-300 shadow-lg rounded-full ${color}`}
-  />
+  <div className={`block w-[7px] h-[7px] shadow-gray-300 shadow-lg rounded-full ${color}`} />
 );
 
 const ModelText = ({ type, text, healthy = true }) => (
-  <div className="flex items-center gap-2 overflow-hidden">
+  <div className="flex items-center gap-4 overflow-hidden">
     <Bullet color={typeToColor(type)} />
     <span className="block overflow-hidden whitespace-nowrap text-ellipsis">
       <span title={text} className={healthy ? "" : "line-through"}>
@@ -40,15 +39,16 @@ const ModelText = ({ type, text, healthy = true }) => (
 );
 
 const Model = ({ info, onClick, isSet }) => {
-  let className = "ring-1 ring-slate-300 flex items-center gap-2 px-2 py-1 bg-white";
-  if (info.disabled) className += " opacity-30";
+  let className = "flex items-center px-2 py-1 rounded-lg";
+  const available = !info.disabled && info.healthy;
+  if (info.disabled) className += " opacity-25";
   else if (!info.healthy) className += " opacity-60 bg-red-300";
-  else className += " hover:bg-slate-200";
+  else className += " hover:bg-white";
 
   return (
     <button className={className} onClick={onClick}>
-      <div>
-        <FaCheck size={15} className={`text-green-600 ${isSet ? "" : "invisible"}`} />
+      <div className="min-w-[25px] flex justify-right items-center">
+        {available && <Checkbox checked={isSet} bold />}
       </div>
       <ModelText
         type={info.metadata.type}

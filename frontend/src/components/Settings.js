@@ -9,7 +9,7 @@ import { HeadingMedium, Hint } from "./utils/Text";
 const SelectModels = ({ keys, models, selectModel }) => (
   <div>
     {Object.values(models).length ? (
-      <div className="flex flex-col border border-slate-400 overflow-y-auto overflow-x-hidden h-[300px] shadow-md">
+      <div className="flex flex-col overflow-y-auto overflow-x-hidden h-[300px] px-1">
         {keys.map((key) => {
           const { info, isSet } = models[key];
           return <Model key={key} info={info} onClick={() => selectModel(key)} isSet={isSet} />;
@@ -45,7 +45,7 @@ const ArgumentLayout = ({ value, schema, setValue, error }) => {
 };
 
 const ModelBox = ({ type, identifier, name, schema, errors, args, setArgument, close }) => (
-  <div className="border border-gray-400 bg-gray-100 flex flex-col divide-y divide-gray-300">
+  <div className="border border-gray-400 bg-gray-100 rounded-md flex flex-col divide-y divide-gray-300">
     <div className="px-2 py-[1px] flex justify-between">
       <ModelText type={type} text={name} />
       <button onClick={close}>
@@ -76,7 +76,7 @@ const Settings = ({ type, Context }) => {
     <div>
       <div className="grid sm:grid-cols-2 grid-cols-1 gap-2">
         <div className="order-1">
-          <LiveSearch query={query} setQuery={setQuery} />
+          <LiveSearch query={query} setQuery={setQuery} noring />
         </div>
         <div className="order-3 sm:order-2 flex items-center">
           <HeadingMedium>Selected {type}</HeadingMedium>
@@ -84,7 +84,7 @@ const Settings = ({ type, Context }) => {
         <div className="order-2 sm:order-3">
           <SelectModels keys={filteredKeys} models={plugins} selectModel={toggle} />
         </div>
-        <div className="order-4 flex flex-col gap-1 p-1 border border-slate-400 overflow-y-auto overflow-x-hidden h-[300px] shadow-md bg-white">
+        <div className="order-4 flex flex-col gap-1 p-1 overflow-y-auto overflow-x-hidden h-[300px]">
           {Object.entries(chosenModels).map(([key, { info, arguments: args, errors }]) => (
             <ModelBox
               key={key}

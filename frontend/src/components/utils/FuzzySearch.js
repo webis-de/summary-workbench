@@ -4,13 +4,14 @@ import { FaSearch } from "react-icons/fa";
 
 import { Input } from "./Form";
 
-const LiveSearch = ({ query, setQuery }) => (
+const LiveSearch = ({ query, setQuery, ...props }) => (
   <Input
     Icon={FaSearch}
     placeholder="Search"
     value={query}
     small
     onChange={(e) => setQuery(e.currentTarget.value)}
+    {...props}
   />
 );
 
