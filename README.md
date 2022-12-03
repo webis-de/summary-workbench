@@ -1,7 +1,12 @@
 # Summary Workbench
 
 Unifying the application and evaluation of text summarization models. [[Documentation](https://webis-de.github.io/summary-workbench/)] [[Live Demo](https://tldr.demo.webis.de)]
->Accepted at EMNLP 2022 (Demo track).
+>Accepted at EMNLP 2022 (Demo track). :tada: :tada:
+
+#### :loudspeaker: Updates (3-12-2022) 
+1. Integrated 2 new models and their variants (6 in total): [BRIO](https://arxiv.org/abs/2203.16804) trained on news, [Schnitsum](https://github.com/sobamchan/schnitsum) trained on scholary documents.
+2. Integrated [contrastive search](https://huggingface.co/blog/introducing-csearch) for more fluent summaries. User can now toggle between regular and contrasitve search for supported models. 
+2. Improvements to the UI responsiveness on smaller devices.
 
 ## Summarize
 
