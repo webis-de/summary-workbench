@@ -10,7 +10,7 @@ ipython = "*"
 torch = "*"
 sentence_transformers = "*"
 scikit-learn = "*"
-spacy = "<3.0.0"
+spacy = "*"
 
 [requires]
-python_version = "3.8"
+python_version = "3.10"

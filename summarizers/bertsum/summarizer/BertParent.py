@@ -45,7 +45,7 @@ class BertParent(object):
             self.tokenizer = custom_tokenizer
         else:
             self.tokenizer = base_tokenizer.from_pretrained(model)
-        print("Loaded model {}".format(self.model))
+        print("Loaded model {}".format(self.model.name_or_path))
         self.model.eval()
 
     def tokenize_input(self, text: str) -> torch.tensor:
