@@ -1,4 +1,4 @@
-FROM node:18-slim as build-stage
+FROM node:19-slim as build-stage
 
 WORKDIR /app
 COPY . /app/
