@@ -2,7 +2,7 @@ absl-py
 cython
 discreteMarkovChain==0.22
 nltk==3.5
-numpy==1.20
+numpy==1.22.0
 protobuf==3.20.*
 scikit-learn
 tensorflow==2.8.0
