@@ -35,7 +35,7 @@ const SavedEntry = ({ calculation, deleteCalculation }) => {
           <div className="border border-black rounded-lg divide-y divide-gray-300">
             <div className="flex items-center px-4 gap-4">
               <DisclosureToggle>
-                <div className="h-12 flex justify-between items-center w-full">
+                <div className="h-12 flex justify-between items-center w-full overflow-hidden">
                   <HeadingMedium raw>{id}</HeadingMedium>
                   <BadgeGroup>
                     {metrics.map((metric, i) => (

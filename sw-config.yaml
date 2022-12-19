@@ -50,6 +50,7 @@ summarizers:
   - ./summarizers/textrank
   - ./summarizers/topicrank
   - ./summarizers/featuresum
+  - ./summarizers/aosumm
   - source: ./summarizers/cliffsum
     environment:
       model: MaskEnt
@@ -89,3 +90,21 @@ summarizers:
   - source: ./summarizers/neuralsum
     environment:
       model: Pegasus-XSum
+  - source: ./summarizers/schnitsum
+    environment:
+      model: BART
+  - source: ./summarizers/schnitsum
+    environment:
+      model: BART-65-shrinked
+  - source: ./summarizers/schnitsum
+    environment:
+      model: BART-37-shrinked
+  - source: ./summarizers/brio
+    environment:
+      model: CNNDM-uncased
+  - source: ./summarizers/brio
+    environment:
+      model: CNNDM-cased
+  - source: ./summarizers/brio
+    environment:
+      model: XSUM-cased

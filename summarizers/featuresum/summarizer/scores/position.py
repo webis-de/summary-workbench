@@ -1,19 +1,13 @@
 import numpy as np
+from scipy.stats import norm
 
 
-def inverse_score(sentences, start=1):
-    """independent of number of sentences"""
-    return 1 / np.arange(start, len(sentences) + start)
-
-
-def linear_score(sentences):
-    """dependent of number of sentences"""
-    return np.linspace(1, 0, len(sentences), endpoint=False)
-
-
-def position_score(sentences, linear=True, use_exp=False):
-    """sentences at the beginning get a higher scores"""
-    scores = linear_score(sentences) if linear else inverse_score(sentences)
-    if use_exp:
-        scores = 1.5**scores
+def position_score(sentences):
+    """Percentiles of the normal distribution where the percentiles
+    correspond to the position of the sentences in the document and
+    are equally distributed in the interval (0, 1). Sentences closer
+    to the beginning of the document get a higher score."""
+    num_sentences = len(sentences)
+    percentile = (np.arange(num_sentences) + 1) / (num_sentences + 1)
+    scores = norm.isf(percentile)
     return scores

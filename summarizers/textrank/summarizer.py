@@ -1,5 +1,4 @@
 import spacy
-import os
 import pytextrank
 
 

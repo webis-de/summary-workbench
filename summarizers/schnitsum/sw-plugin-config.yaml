@@ -1,0 +1,5 @@
+version: "1.0"
+name: "Schnitsum ({model})"
+metadata:
+  type: abstractive
+  sourcecode: https://github.com/sobamchan/schnitsum

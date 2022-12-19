@@ -14,8 +14,14 @@ REMOTE_PLUGIN_FOLDER = Path("~/.summary_workbench_plugins").expanduser()
 REQUIRED_FILE_GROUPS = [{"Pipfile.lock", "Pipfile", "requirements.txt"}]
 SCHEMA_FOLDER = Path("./schema")
 DEFAULT_CONFIG = "sw-config.yaml"
-DEFAULT_PLUGIN_CONFIG =  "sw-plugin-config.yaml"
+DEFAULT_PLUGIN_CONFIG = "sw-plugin-config.yaml"
 DEFAULTS = {}
+
+SETUP_SERVER_FILES_DOCKER_FILE = f"""
+WORKDIR {CONTAINER_PLUGIN_SERVER_PATH}
+COPY . .
+RUN pip install -r requirements.txt
+"""
 
 SETUP_PLUGIN_FILES_DOCKER_FILE = f"""
 {{environment}}
@@ -23,12 +29,6 @@ WORKDIR {CONTAINER_PLUGIN_FILES_PATH}
 COPY . .
 RUN if [ -f Pipfile.lock -o -f Pipfile ]; then pip install pipenv && pipenv install --system; else pip install -r requirements.txt; fi
 RUN python model_setup.py
-"""
-
-SETUP_SERVER_FILES_DOCKER_FILE = f"""
-WORKDIR {CONTAINER_PLUGIN_SERVER_PATH}
-COPY . .
-RUN pip install -r requirements.txt
 WORKDIR {CONTAINER_PLUGIN_FILES_PATH}
 CMD ["uvicorn", "--app-dir", "/summary_workbench_plugin_server", "app:app", "--host", "0.0.0.0", "--port", "5000"]
 """

@@ -1,6 +1,6 @@
 import numpy as np
 
-from summarizer.util import filter_tokens
+from .util import filter_tokens, normalize
 
 
 def get_stopwords(sentence):
@@ -10,6 +10,11 @@ def get_stopwords(sentence):
 def content_words_ratio(sentences):
     """number of non-stopwords in the sentence divided by the
     number of words in the sentence"""
-    return 1 - np.array(
-        [len(get_stopwords(sent)) / np.max((len(filter_tokens(sent, remove_stopwords=False)), 1)) for sent in sentences]
+    score = 1 - np.array(
+        [
+            len(get_stopwords(sent))
+            / np.max((len(filter_tokens(sent, remove_stopwords=False)), 1))
+            for sent in sentences
+        ]
     )
+    return normalize(score)

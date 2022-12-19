@@ -130,7 +130,7 @@ class Api(NodeMixin, Service):
 
 class Frontend(NodeMixin, Service):
     def __init__(self):
-        NodeMixin.__init__(self, "api")
+        NodeMixin.__init__(self, "frontend")
         Service.__init__(self, "frontend")
 
     def patch(self):

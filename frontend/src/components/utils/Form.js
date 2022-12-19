@@ -11,7 +11,7 @@ const Textarea = ({ rounded, tight, ...props }) => (
   />
 );
 
-const Input = ({ Icon, flatLeft, flatRight, small, right, ...props }) => {
+const Input = ({ Icon, flatLeft, flatRight, small, right, noring, ...props }) => {
   let classExtra = "";
 
   if (small) classExtra += "p-1.5";
@@ -20,6 +20,7 @@ const Input = ({ Icon, flatLeft, flatRight, small, right, ...props }) => {
   if (!flatLeft) classExtra += " rounded-l-lg";
   if (!flatRight) classExtra += " rounded-r-lg";
   if (right) classExtra += " text-right";
+  if (!noring) classExtra += " ring-1 ring-gray-300"
   if (Icon) {
     if (small) classExtra += " pl-9";
     else classExtra += " pl-10";
@@ -35,34 +36,40 @@ const Input = ({ Icon, flatLeft, flatRight, small, right, ...props }) => {
       <input
         type="text"
         {...props}
-        className={`${classExtra} focus:z-10 bg-white text-gray-900 border-none ring-1 ring-gray-300 focus:ring-2 focus:ring-blue-500 block min-w-0 w-full text-sm`}
+        className={`${classExtra} focus:z-10 bg-white text-gray-900 border-none focus:ring-2 focus:ring-blue-500 block min-w-0 w-full text-sm`}
       />
     </div>
   );
 };
 
 const Checkbox = ({ children, checked, onChange, onClickText, bold }) => {
-  const ChildComponent = onClickText ? (
-    <Button appearance="link" onClick={onClickText}>
-      {children}
-    </Button>
-  ) : (
-    <span className={bold ? "font-bold text-sm" : null}>{children}</span>
+  let Component = (
+    <input
+      type="checkbox"
+      className="w-4 h-4 bg-gray-50 rounded border border-gray-300 focus:ring-1 focus:ring-blue-300"
+      checked={checked}
+      onChange={onChange}
+    />
   );
-  const Inner = (
-    <>
-      <input
-        type="checkbox"
-        className="w-4 h-4 bg-gray-50 rounded border border-gray-300 focus:ring-1 focus:ring-blue-300"
-        checked={checked}
-        onChange={onChange}
-      />
-      {ChildComponent}
-    </>
-  );
-  const className = "inline-flex items-center justify-center whitespace-nowrap gap-2";
-  if (onClickText) return <div className={className}>{Inner}</div>;
-  return <label className={className}>{Inner}</label>;
+  if (children) {
+    const ChildComponent = onClickText ? (
+      <Button appearance="link" onClick={onClickText}>
+        {children}
+      </Button>
+    ) : (
+      <span className={bold ? "font-bold text-sm" : null}>{children}</span>
+    );
+    Component = (
+      <>
+        {Component}
+        {ChildComponent}
+      </>
+    );
+    const className = "inline-flex items-center justify-center whitespace-nowrap gap-2";
+    if (onClickText) return <div className={className}>{Component}</div>;
+    return <label className={className}>{Component}</label>;
+  }
+  return Component
 };
 
 export { Textarea, Input, Checkbox };

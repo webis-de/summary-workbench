@@ -1,13 +1,13 @@
 import inspect
 import logging
 
-from summarizer import MODEL, SummarizerPlugin
+from summarizer import SummarizerPlugin
 
 
 def setup():
     logger = logging.getLogger(inspect.currentframe().f_code.co_name)
 
-    logger.info("downloading %s", MODEL)
+    logger.info("downloading model")
     SummarizerPlugin()
     logger.info("done")
 

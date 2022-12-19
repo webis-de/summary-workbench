@@ -1,7 +1,7 @@
 import os
 
 import torch
-from coop.coop import VAE, util
+from .coop.coop import VAE, util
 from nltk.tokenize import sent_tokenize
 
 MODEL = os.environ["model"]

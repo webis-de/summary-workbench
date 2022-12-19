@@ -1,12 +1,8 @@
-import os
-
-import spacy
-
-MODEL = os.environ["model"]
+from summarizer import SummarizerPlugin
 
 
 def setup():
-    spacy.cli.download(MODEL)
+    SummarizerPlugin()
 
 
 if __name__ == "__main__":

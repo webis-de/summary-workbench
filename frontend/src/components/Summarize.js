@@ -91,7 +91,7 @@ const PdfUpload = ({ setPdfExtract }) => {
   return (
     <div className="flex flex-col gap-3">
       <FileInput fileInputRef={fileInputRef} setFile={setFile} />
-      <div className="flex justify-between items-center w-full">
+      <div className="flex justify-between items-center w-full gap-2 flex-wrap">
         {loading ? (
           <LoadingButton appearance="soft" small text="Extracting" />
         ) : (
@@ -136,7 +136,7 @@ const TextInput = ({ setCallback, setErrors }) => {
   }, [setCallback, setErrors, documentText]);
 
   return (
-    <div className="relative h-full">
+    <div className="relative min-h-full h-full">
       <div className="absolute -top-3 right-5">
         <Button
           variant="primary"
@@ -160,7 +160,7 @@ const PdfSection = ({ index, selected, heading, texts, registerRef }) => {
   const scrollRef = useRef(null);
   registerRef(index, scrollRef);
   return (
-    <div className={selected ? "" : "opacity-25"}>
+    <div className={selected ? null : "opacity-25"}>
       <div ref={scrollRef}>
         <HeadingMedium>{heading}</HeadingMedium>
       </div>
@@ -172,7 +172,7 @@ const PdfSection = ({ index, selected, heading, texts, registerRef }) => {
 };
 
 const PdfDisplay = ({ title, sections, selected, registerRef }) => (
-  <div className="flex flex-col gap-4 divide-y-2 divide-gray-700">
+  <div className="flex break-words flex-col gap-4 divide-y-2 divide-gray-700">
     <HeadingSemiBig>{title}</HeadingSemiBig>
     {sections.map(({ title: heading, texts }, j) => (
       <PdfSection
@@ -225,10 +225,10 @@ const PdfInput = ({ setCallback, setErrors }) => {
   };
 
   return (
-    <div className="h-full flex flex-col gap-2">
+    <div className="flex flex-col gap-2 w-full overflow-hidden">
       <PdfUpload setPdfExtract={setPdfExtract} />
       {pdfExtract && (
-        <div className="flex overflow-hidden gap-2">
+        <div className="flex flex-col min-w-0 sm:flex-row overflow-hidden gap-2">
           <div className="border border-gray-500 pl-1 basis-[30%] overflow-x-hidden overflow-y-auto">
             <div className="flex flex-col items-start">
               <Checkbox checked={allIsChecked} onChange={toggleAll} bold>
@@ -309,8 +309,8 @@ const InputDocument = ({ summarize, state, abort }) => {
   }, []);
 
   return (
-    <div className="flex flex-col lg:flex-row gap-3">
-      <div className="grow min-w-[400px]">
+    <div className="flex flex-col min-w-0 lg:flex-row gap-3">
+      <div className="min-w-0 grow">
         <div>
           <Card full>
             <Tabs>
@@ -320,46 +320,53 @@ const InputDocument = ({ summarize, state, abort }) => {
                   <Tab>Pdf</Tab>
                   <Tab>Bulk</Tab>
                 </TabHead>
-                <div className="h-[50vh]">
-                  <TabContent>
-                    <TabPanel>
+                <TabContent>
+                  <TabPanel>
+                    <div className="h-[50vh]">
                       <TextInput setCallback={setCallback} setErrors={setComponentErrors} />
-                    </TabPanel>
-                    <TabPanel>
+                    </div>
+                  </TabPanel>
+                  <TabPanel>
+                    <div className="max-h-[50vh] flex overflow-hidden">
                       <PdfInput setCallback={setCallback} setErrors={setComponentErrors} />
-                    </TabPanel>
-                    <TabPanel>
-                      <BulkInput setCallback={setCallback} setErrors={setComponentErrors} />
-                    </TabPanel>
-                  </TabContent>
-                </div>
+                    </div>
+                  </TabPanel>
+                  <TabPanel>
+                    <BulkInput setCallback={setCallback} setErrors={setComponentErrors} />
+                  </TabPanel>
+                </TabContent>
               </CardContent>
             </Tabs>
           </Card>
         </div>
       </div>
-
-      <div className="lg:w-1/2 lg:max-w-[600px] min-w-[500px]">
+      <div className="lg:w-1/2 lg:max-w-[600px] lg:min-w-[500px]">
         <Card full>
           <CardHead>
             <HeadingSemiBig>Models</HeadingSemiBig>
           </CardHead>
           <CardContent>
             <Settings Context={SummarizersContext} type="Summarizers" />
-            <div className="border p-2">
-              <HeadingMedium>Summary length</HeadingMedium>
-              <Hint small>Length of the summary in percent</Hint>
-              <div className="px-7">
-                <Range
-                  defaultValue={summaryLength}
-                  setValue={setSummaryLength}
-                  min={15}
-                  max={50}
-                  step={5}
-                />
+            <div className="border-slate-300 py-4">
+              <div className="flex w-full gap-5">
+                <div className="basis-0">
+                  <HeadingMedium>
+                    <span className="whitespace-nowrap">Summary length</span>
+                  </HeadingMedium>
+                  <Hint small>Length of the summary in percent</Hint>
+                </div>
+                <div className="grow">
+                  <Range
+                    defaultValue={summaryLength}
+                    setValue={setSummaryLength}
+                    min={15}
+                    max={50}
+                    step={5}
+                  />
+                </div>
               </div>
             </div>
-            <div className="flex justify-between items-center gap-5">
+            <div className="flex flex-wrap justify-between items-center gap-5">
               {state.loading ? (
                 <>
                   <LoadingButton text="Summarizing" />
@@ -463,8 +470,8 @@ const SummaryTabView = ({ title, showOverlap, summaries, originals, sums, docume
   const scrollState = useMarkupScroll(summaryIndex);
 
   return (
-    <div className="flex items-start gap-3">
-      <div className="basis-[60%] min-w-0">
+    <div className="flex items-start flex-col sm:flex-row gap-3">
+      <div className="w-full sm:w-0 basis-[60%] min-w-0">
         <Card full>
           <CardHead>
             <h3 className="overflow-hidden overflow-ellipsis whitespace-nowrap text-bold capitalize text-slate-600 font-semibold">
@@ -620,8 +627,8 @@ const SummaryView = ({ summaries, documentLength }) => {
 
   return (
     <div className="scroll-mt-20" ref={scrollRef}>
-      <div className="flex gap-2 w-full">
-        <div className="overflow-hidden w-full">
+      <div className="flex gap-2 min-w-0 w-full">
+        <div className="min-w-0 w-full">
           {showTab ? (
             <SummaryTabView
               documentLength={documentLength}

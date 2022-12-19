@@ -1,7 +1,8 @@
 from itertools import chain
 
 import numpy as np
-from summarizer.util import filter_tokens, tokenize
+
+from .util import filter_tokens, normalize, tokenize
 
 
 class WordOverlap:
@@ -17,7 +18,7 @@ class WordOverlap:
             words = words.copy()
         self.words = set(words)
 
-    def score(self, sentences, log_smooth=True):
+    def score(self, sentences):
         """number of words shared with the title"""
         features = []
         for sentence in sentences:
@@ -25,8 +26,4 @@ class WordOverlap:
             feature = len(words & self.words)
             features.append(feature)
         features = np.array(features)
-        if log_smooth:
-            features = np.log(features + 1) + 1
-        else:
-            features += 1
-        return features
+        return (features - features.mean()) / (features.std() + 0.3)

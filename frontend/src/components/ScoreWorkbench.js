@@ -201,7 +201,7 @@ const ModelCard = ({
   <Card full key={name}>
     <CardHead tight>
       <HeadingSemiBig>{name}</HeadingSemiBig>
-      <div className="flex gap-4">
+      <div className="flex flex-wrap gap-4">
         {hasDocument && (
           <>
             <ToggleOverlap
@@ -753,7 +753,7 @@ const ScoreWorkbench = ({ calculation: calc, RightToken }) => {
   return (
     <div>
       <Tabs>
-        <div className="mb-5 flex items-center justify-between">
+        <div className="mb-5 flex flex-wrap gap-2 items-center justify-between">
           <TabHead>
             {hasScores && <Pill>Scores</Pill>}
             <Pill>Visualize Overlap</Pill>

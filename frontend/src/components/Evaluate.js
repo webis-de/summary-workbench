@@ -168,7 +168,7 @@ const SubEvaluate = () => {
         Object.entries(scores).forEach(([key, s]) => scoreBuilder.add(key, s));
         const data = {};
         if (!scoreBuilder.empty()) data.data = scoreBuilder.compile();
-        if (errors) data.errors = errors
+        if (errors) data.errors = errors;
         return data;
       }
       return { data: scoreBuilder.compile() };
@@ -209,7 +209,7 @@ const SubEvaluate = () => {
           </Hint>
         </div>
         <div className="flex flex-col lg:flex-row gap-3">
-          <div className="grow min-w-[400px]">
+          <div className="grow">
             <div>
               <FileInput
                 loading={state.loading}
@@ -220,7 +220,7 @@ const SubEvaluate = () => {
               />
             </div>
           </div>
-          <div className="min-w-[600px]">
+          <div className="lg:w-1/2 lg:max-w-[600px] lg:min-w-[500px]">
             <div>
               <Card full>
                 <CardHead>

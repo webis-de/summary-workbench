@@ -1,6 +1,6 @@
 import "./css/App.css";
 
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useReducer, useContext, useEffect, useMemo, useState } from "react";
 import {
   FaChevronCircleUp,
   FaCog,
@@ -8,6 +8,7 @@ import {
   FaGithub,
   FaTwitter,
   FaYoutube,
+  FaBars,
 } from "react-icons/fa";
 import { useLocation } from "react-router";
 import { BrowserRouter, NavLink as Link, Navigate, useRoutes } from "react-router-dom";
@@ -38,41 +39,47 @@ const routes = [
 ];
 
 const Footer = () => (
-  <footer className="h-32 w-full bg-gray-100 text-xs text-gray-600">
+  <footer className="min-h-[100px] flex items-center py-2 bg-gray-100 text-xs text-gray-600">
     <Container>
-      <div className="flex h-full justify-between">
-        <div className="flex gap-2 items-center">
-          <Button appearance="link" target="_blank" href="https://github.com/webis-de/summary-workbench/issues">
+      <div className="flex h-full py-2 gap-2 flex-col md:flex-row justify-between">
+        <div className="flex gap-2 items-center justify-center">
+          <Button
+            appearance="link"
+            target="_blank"
+            href="https://github.com/webis-de/summary-workbench/issues"
+          >
             <div className="flex gap-1 items-center">
               <FaGithub size={20} /> report issues or ask questions
             </div>
           </Button>
         </div>
-        <div className="h-full flex gap-2 items-center justify-end">
+        <div className="h-full flex flex-col md:flex-row gap-2 items-center justify-center">
           <span>
-            &copy; 2022
+            <span>&copy; 2022</span>{" "}
             <a className="hover:text-gray-600" href="https://webis.de/">
               Webis Group
             </a>
           </span>
-          <span>&bull;</span>
-          <a href="https://github.com/webis-de">
-            <FaGithub className="text-base text-gray-400 hover:text-gray-400" />
-          </a>
-          <a href="https://twitter.com/webis_de">
-            <FaTwitter className="text-base text-gray-400 hover:text-gray-400" />
-          </a>
-          <a href="https://www.youtube.com/webis">
-            <FaYoutube className="text-base text-gray-400 hover:text-gray-400" />
-          </a>
-          <span>&bull;</span>
-          <a className="hover:text-gray-600" href="https://webis.de/people.html">
-            Contact
-          </a>
-          <span>&bull;</span>
-          <a className="hover:text-gray-600" href="https://webis.de/legal.html">
-            Impressum / Terms / Privacy
-          </a>
+          <div className="flex gap-2">
+            <span className="hidden md:visible">&bull;</span>
+            <a href="https://github.com/webis-de">
+              <FaGithub className="text-base text-gray-400 hover:text-gray-400" />
+            </a>
+            <a href="https://twitter.com/webis_de">
+              <FaTwitter className="text-base text-gray-400 hover:text-gray-400" />
+            </a>
+            <a href="https://www.youtube.com/webis">
+              <FaYoutube className="text-base text-gray-400 hover:text-gray-400" />
+            </a>
+            <span>&bull;</span>
+            <a className="hover:text-gray-600" href="https://webis.de/people.html">
+              Contact
+            </a>
+            <span>&bull;</span>
+            <a className="hover:text-gray-600" href="https://webis.de/legal.html">
+              Impressum / Terms / Privacy
+            </a>
+          </div>
         </div>
       </div>
     </Container>
@@ -87,7 +94,7 @@ const NavLink = ({ href, to, children }) => {
     return (
       <a
         href={href}
-        className={`flex items-center gap-2 justify-center ${className}`}
+        className={`flex items-center gap-2 ${className}`}
         target="_blank"
         rel="noreferrer"
       >
@@ -102,8 +109,12 @@ const NavLink = ({ href, to, children }) => {
   );
 };
 
-const NavRoutes = () => (
-  <div className="ml-10 flex gap-8 uppercase">
+const NavRoutes = ({ show }) => (
+  <div
+    className={`${
+      show ? "" : "hidden"
+    } overflow-hidden md:flex flex gap-4 col-span-2 mb-4 md:mb-0 md:gap-8 uppercase flex-col md:flex-row order-3 md:order-2 items-center`}
+  >
     {routes
       .filter(({ name }) => name)
       .map(({ path, name }) => (
@@ -115,28 +126,38 @@ const NavRoutes = () => (
   </div>
 );
 
-const Navbar = () => (
-  <>
-    <div className="h-16" />
-    <nav className="fixed bg-[#1B3451] top-0 right-0 z-30 left-0">
-      <Container>
-        <div className="h-16 flex justify-between items-center">
-          <a
-            href="/"
-            className="text-2xl no-underline text-slate-50 normal-case hover:text-blue-dark font-sans font-bold"
-          >
-            Summary Workbench
-          </a>
+const Navbar = () => {
+  const [showBars, toggleBars] = useReducer((v) => !v, false);
+  return (
+    <>
+      <div className="h-16" />
+      <nav className="fixed bg-[#1B3451] top-0 right-0 z-30 left-0">
+        <Container>
+          <div className="grid grid-cols-[1fr_auto] md:flex md:gap-8 md:items-center">
+            <a
+              href="/"
+              className="order-1 min-h-[70px] grow flex items-center text-2xl no-underline text-slate-50 normal-case hover:text-blue-dark font-sans font-bold"
+            >
+              Summary Workbench
+            </a>
 
-          <div className="flex gap-10">
-            <NavRoutes />
-            <NavbarOptions />
+            <NavRoutes show={showBars} />
+            <div className="order-2 md:order-3 flex items-center justify-end gap-2">
+              <NavbarOptions />
+              <FaBars
+                onClick={toggleBars}
+                className={`${
+                  showBars ? "rotate-90" : ""
+                } md:hidden transition text-gray-400 hover:text-slate-200 cursor-pointer`}
+                size={20}
+              />
+            </div>
           </div>
-        </div>
-      </Container>
-    </nav>
-  </>
-);
+        </Container>
+      </nav>
+    </>
+  );
+};
 
 const previewDoc = `Alan Mathison Turing was an English mathematician, computer scientist, logician, cryptanalyst, philosopher, and theoretical biologist.
 Turing was highly influential in the development of theoretical computer science, providing a formalisation of the concepts of algorithm and computation with the Turing machine, which can be considered a model of a general-purpose computer.
@@ -171,9 +192,9 @@ const SettingsContent = ({ close, save }) => {
 
   return (
     <div>
-      <div className="bg-slate-100 p-5 sticky z-20 top-0 flex justify-between items-center border-b">
+      <div className="bg-slate-100 p-5 sticky z-20 top-0 flex flex-wrap justify-between items-center border-b">
         <ModalTitle>Settings</ModalTitle>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button appearance="soft" variant="primary" onClick={close}>
             Close
           </Button>
@@ -183,74 +204,76 @@ const SettingsContent = ({ close, save }) => {
         </div>
       </div>
       <div className="p-5 space-y-6">
-        <div className="flex gap-4">
-          <Card>
-            <CardHead>
-              <div>
-                <HeadingBig>Highlighting</HeadingBig>
-                <Hint small>
-                  Highlighting that is applied to matching word groups (agreement) in the hypothesis
-                  and reference
-                </Hint>
-              </div>
-            </CardHead>
-            <CardContent>
-              <div>
-                <HeadingMedium>Minimum Word Overlap</HeadingMedium>
-                <Hint small>
-                  Matching word groups in the hypothesis and reference with a length less than this
-                  value are not shown
-                </Hint>
-                <RadioGroup value={minOverlap} setValue={setMinOverlap}>
-                  <div className="flex justify-evenly m-1 flex-wrap">
-                    {[1, 2, 3, 5, 7, 10].map((value) => (
-                      <RadioBullet key={value} value={value}>
-                        {value}
-                      </RadioBullet>
-                    ))}
-                  </div>
-                </RadioGroup>
-              </div>
-              <div>
-                <HeadingMedium>Show Redundancy</HeadingMedium>
-                <div className="flex justify-between items-top">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="md:max-w-[400px]">
+            <Card full>
+              <CardHead>
+                <div>
+                  <HeadingBig>Highlighting</HeadingBig>
                   <Hint small>
-                    Show also the matching word groups within the reference or hypothesis
+                    Highlighting that is applied to matching word groups (agreement) in the
+                    hypothesis and reference
                   </Hint>
-                  <Toggle checked={selfSimilarities} onChange={setSelfSimilarities} />
                 </div>
-              </div>
-              <div>
-                <HeadingMedium>Ignore Stopwords</HeadingMedium>
-                <div className="flex justify-between items-top">
-                  <Hint small>{"Don't consider stopwords part of the match"}</Hint>
-                  <Toggle checked={ignoreStopwords} onChange={setIgnoreStopwords} />
+              </CardHead>
+              <CardContent>
+                <div>
+                  <HeadingMedium>Minimum Word Overlap</HeadingMedium>
+                  <Hint small>
+                    Matching word groups in the hypothesis and reference with a length less than
+                    this value are not shown
+                  </Hint>
+                  <RadioGroup value={minOverlap} setValue={setMinOverlap}>
+                    <div className="flex justify-evenly m-1 flex-wrap">
+                      {[1, 2, 3, 5, 7, 10].map((value) => (
+                        <RadioBullet key={value} value={value}>
+                          {value}
+                        </RadioBullet>
+                      ))}
+                    </div>
+                  </RadioGroup>
                 </div>
-              </div>
-              <div>
-                <HeadingMedium>Colorscheme</HeadingMedium>
-                <Hint small>Color palette used to highlight matching</Hint>
-                <RadioGroup value={colorMap.colorscheme} setValue={setColorMap}>
-                  <div className="pt-2 grid grid-cols-2 justify-items-center gap-4">
-                    {Object.keys(colorschemes).map((category) => (
-                      <HeadingSmall key={category}>{category}</HeadingSmall>
-                    ))}
+                <div>
+                  <HeadingMedium>Show Redundancy</HeadingMedium>
+                  <div className="flex justify-between items-top">
+                    <Hint small>
+                      Show also the matching word groups within the reference or hypothesis
+                    </Hint>
+                    <Toggle checked={selfSimilarities} onChange={setSelfSimilarities} />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    {Object.entries(colorschemes).map(([category, names]) => (
-                      <ButtonGroup key={category}>
-                        {names.map((name) => (
-                          <RadioButton value={name} key={name}>
-                            {name}
-                          </RadioButton>
-                        ))}
-                      </ButtonGroup>
-                    ))}
+                </div>
+                <div>
+                  <HeadingMedium>Ignore Stopwords</HeadingMedium>
+                  <div className="flex justify-between items-top">
+                    <Hint small>{"Don't consider stopwords part of the match"}</Hint>
+                    <Toggle checked={ignoreStopwords} onChange={setIgnoreStopwords} />
                   </div>
-                </RadioGroup>
-              </div>
-            </CardContent>
-          </Card>
+                </div>
+                <div>
+                  <HeadingMedium>Colorscheme</HeadingMedium>
+                  <Hint small>Color palette used to highlight matching</Hint>
+                  <RadioGroup value={colorMap.colorscheme} setValue={setColorMap}>
+                    <div className="pt-2 grid grid-cols-2 justify-items-center gap-4">
+                      {Object.keys(colorschemes).map((category) => (
+                        <HeadingSmall key={category}>{category}</HeadingSmall>
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      {Object.entries(colorschemes).map(([category, names]) => (
+                        <ButtonGroup key={category}>
+                          {names.map((name) => (
+                            <RadioButton value={name} key={name}>
+                              {name}
+                            </RadioButton>
+                          ))}
+                        </ButtonGroup>
+                      ))}
+                    </div>
+                  </RadioGroup>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
           <Card full>
             <CardHead>
               <HeadingBig>Preview</HeadingBig>

@@ -2,10 +2,11 @@ from functools import partial
 
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
-from summarizer.util import filter_tokens
+
+from .util import filter_tokens, normalize
 
 
-def average_lexical_connectivity(sentences, use_exp=True):
+def average_lexical_connectivity(sentences):
     """number of terms in a sentence shared with other sentences
     divided by the length of the sentence"""
     analyzer = partial(filter_tokens, use_lemma=True)
@@ -18,8 +19,6 @@ def average_lexical_connectivity(sentences, use_exp=True):
     features = []
     for row_index in range(matrix.shape[0]):
         feature = shared_terms[matrix[row_index].nonzero()[1]].sum()
-        features.append(feature / len(analyzer(sentences[row_index])))
-    scores = np.array(features)
-    if use_exp:
-        scores = np.exp(scores)
-    return scores
+        feature_len = max(len(analyzer(sentences[row_index])), 1)
+        features.append(feature / feature_len)
+    return normalize(features)
