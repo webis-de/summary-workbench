@@ -1,8 +1,9 @@
-from typing import Dict
+from typing import Dict, List
+import warnings
 
 from torch.distributions import Normal, kl_divergence
 from transformers import BertModel
-from transformers.modeling_gpt2 import *
+from transformers.models.gpt2.modeling_gpt2 import *
 
 from . import Model
 from .util import Losses, VAEOut
@@ -252,7 +253,7 @@ class Block(nn.Module):
         if config.add_cross_attention:
             self.crossattention = Attention(hidden_size, n_ctx, config, scale, is_cross_attention=True)
             self.ln_cross_attn = nn.LayerNorm(hidden_size, eps=config.layer_norm_epsilon)
-        self.mlp = MLP(inner_dim, config)
+        self.mlp = GPT2MLP(inner_dim, config)
 
     def forward(
             self,
@@ -516,7 +517,7 @@ class OptimusGPT2(GPT2PreTrainedModel):
         if not return_dict:
             return tuple(v for v in [hidden_states, presents, all_hidden_states, all_attentions] if v is not None)
 
-        return BaseModelOutputWithPast(
+        return BaseModelOutputWithPastAndCrossAttentions(
             last_hidden_state=hidden_states,
             past_key_values=presents,
             hidden_states=all_hidden_states,
@@ -561,7 +562,7 @@ class OptimusDecoder(GPT2PreTrainedModel):
             "latent_as_gpt_emb": True,
         }
 
-    @add_start_docstrings_to_callable(GPT2_INPUTS_DOCSTRING)
+    @add_start_docstrings_to_model_forward(GPT2_INPUTS_DOCSTRING)
     def forward(
             self,
             input_ids=None,
@@ -635,7 +636,7 @@ class OptimusDecoder(GPT2PreTrainedModel):
             output = (lm_logits,) + transformer_outputs[1:]
             return ((loss,) + output) if loss is not None else output
 
-        return CausalLMOutputWithPast(
+        return CausalLMOutputWithCrossAttentions(
             loss=loss,
             logits=lm_logits,
             past_key_values=transformer_outputs.past_key_values,

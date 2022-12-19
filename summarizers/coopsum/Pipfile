@@ -4,12 +4,13 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-torch = "~=1.7.0"
-transformers = "~=3.4.0"
+torch = "*"
+transformers = "*"
+sentencepiece = "==0.1.96"
 py-rouge = "*"
 tqdm = "*"
 pandas = "*"
-allennlp = "==1.2.0"
+allennlp = "*"
 requests = "*"
 nltk = "*"
 huggingface-hub = "*"
@@ -17,4 +18,4 @@ huggingface-hub = "*"
 [dev-packages]
 
 [requires]
-python_version = "3.8"
+python_version = "3.10"

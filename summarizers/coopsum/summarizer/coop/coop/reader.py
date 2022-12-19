@@ -3,7 +3,7 @@ import linecache
 from pathlib import Path
 from typing import List
 
-import torch.tensor
+import torch
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import Dataset
 

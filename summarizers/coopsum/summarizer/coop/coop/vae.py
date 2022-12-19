@@ -47,16 +47,26 @@ class VAE(nn.Module):
         else:
             assert str(model_name_or_path) in AVAILABLE_MODELS, AVAILABLE_MODELS
             # Lazy import
-            from huggingface_hub import hf_hub_url, cached_download
-            config_url = hf_hub_url(str(model_name_or_path), filename="config.json")
-            config = json.load(open(cached_download(url=config_url, library_name="coop")))
-            model_url = hf_hub_url(str(model_name_or_path), filename="pytorch_model.bin")
-            model_path = cached_download(url=model_url, library_name="coop")
+            from huggingface_hub import hf_hub_download
+            config_path = hf_hub_download(
+                repo_id=str(model_name_or_path),
+                filename="config.json",
+                library_name="coop"
+            )
+            config = json.load(open(config_path))
+            model_path = hf_hub_download(
+                repo_id=str(model_name_or_path),
+                filename="pytorch_model.bin",
+                library_name="coop"
+            )
             state_dict = torch.load(model_path, map_location=lambda storage, loc: storage)
 
             if "bimeanvae" in str(model_name_or_path):
-                spm_url = hf_hub_url(str(model_name_or_path), filename="spm.model")
-                spm_path = cached_download(url=spm_url, library_name="coop")
+                spm_path = hf_hub_download(
+                    repo_id=str(model_name_or_path),
+                    filename="spm.model",
+                    library_name="coop"
+                )
                 config["spm_path"] = spm_path
 
         self.src_tokenizer, self.tgt_tokenizers = load_tokenizer(config)
