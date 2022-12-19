@@ -4,14 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-click = "*"
-docker = "*"
-"ruamel.yaml" = "*"
-marshmallow = "*"
-termcolor = "*"
-giturlparse = "*"
-requests = "*"
-GitPython = "*"
+numpy = "*"
 torch = "*"
 transformers = "*"
 
@@ -19,4 +12,4 @@ transformers = "*"
 ipython = "*"
 
 [requires]
-python_version = "3.9"
+python_version = "3.10"
