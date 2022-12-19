@@ -7,10 +7,10 @@ name = "pypi"
 torch = "*"
 transformers = "*"
 sentencepiece = "*"
-protobuf = "==3.20.0"
+protobuf = "==3.20.*"
 nltk = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.9"
+python_version = "3.10"

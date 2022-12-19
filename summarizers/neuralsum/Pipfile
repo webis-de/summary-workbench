@@ -4,14 +4,12 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
-ipython = "*"
-ipdb = "*"
 
 [packages]
 transformers = "*"
 torch = "*"
 sentencepiece = "*"
-protobuf = "~=3.20.0"
+protobuf = "==3.20.*"
 
 [requires]
-python_version = "3.9"
+python_version = "3.10"
