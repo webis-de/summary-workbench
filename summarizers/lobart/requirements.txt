@@ -1,4 +1,0 @@
-tqdm
-requests
-torch
-transformers==2.11.0

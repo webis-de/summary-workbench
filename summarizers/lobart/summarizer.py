@@ -1,4 +1,3 @@
-import logging
 import math
 from asyncio.log import logger
 
@@ -7,8 +6,6 @@ import transformers
 from localattn import LoBART
 from model_setup import MODEL_PATH, URL_PODCAST_MODEL
 from transformers import BartTokenizer
-
-logging.basicConfig(level=logging.ERROR)
 
 
 class LoBARTModel(object):
