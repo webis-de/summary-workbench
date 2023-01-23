@@ -13,4 +13,4 @@ numpy = "*"
 gensim = "<4.0.0"
 
 [requires]
-python_version = "3.9"
+python_version = "3.9"  # 3.10 and higer does not work
