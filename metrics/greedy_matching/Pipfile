@@ -8,9 +8,9 @@ verify_ssl = true
 [packages]
 requests = "*"
 nltk = "*"
-sklearn = "*"
+scikit-learn = "*"
 numpy = "*"
 gensim = "<4.0.0"
 
 [requires]
-python_version = "3.9"  # 3.10 and higer does not work
+python_version = "3.9"  # 3.10 and higher does not work
