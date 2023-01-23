@@ -1,4 +1,5 @@
 import json
+import os
 import shutil
 import tarfile
 import tempfile
@@ -8,12 +9,29 @@ from typing import List, Union
 import torch
 import torch.nn as nn
 
-from .util import load_tokenizer, build_model
+from .util import build_model, load_tokenizer
 
-AVAILABLE_MODELS = {"megagonlabs/bimeanvae-yelp",
-                    "megagonlabs/bimeanvae-amzn",
-                    "megagonlabs/optimus-yelp",
-                    "megagonlabs/optimus-amzn"}
+AVAILABLE_MODELS = {
+    "megagonlabs/bimeanvae-yelp",
+    "megagonlabs/bimeanvae-amzn",
+    "megagonlabs/optimus-yelp",
+    "megagonlabs/optimus-amzn",
+}
+
+
+def is_within_directory(directory, target):
+    abs_directory = os.path.abspath(directory)
+    abs_target = os.path.abspath(target)
+    prefix = os.path.commonprefix([abs_directory, abs_target])
+    return prefix == abs_directory
+
+
+def safe_extract(tar, path=".", members=None, *, numeric_owner=False):
+    for member in tar.getmembers():
+        member_path = os.path.join(path, member.name)
+        if not is_within_directory(path, member_path):
+            raise Exception("Attempted Path Traversal in Tar File")
+    tar.extractall(path, members, numeric_owner=numeric_owner)
 
 
 class VAE(nn.Module):
@@ -32,13 +50,15 @@ class VAE(nn.Module):
             try:
                 # Extract archive
                 with tarfile.open(model_name_or_path, "r:gz") as archive:
-                    archive.extractall(tempdir)
+                    safe_extract(archive, path=tempdir)
                 model_dir = Path(tempdir)
                 # Load model
                 config = json.load(open(model_dir / "config.json"))
                 config["device"] = self.device
                 model_path = model_dir / "pytorch_model.bin"
-                state_dict = torch.load(model_path, map_location=lambda storage, loc: storage)
+                state_dict = torch.load(
+                    model_path, map_location=lambda storage, loc: storage
+                )
 
             finally:
                 # Clean-up
@@ -48,24 +68,27 @@ class VAE(nn.Module):
             assert str(model_name_or_path) in AVAILABLE_MODELS, AVAILABLE_MODELS
             # Lazy import
             from huggingface_hub import hf_hub_download
+
             config_path = hf_hub_download(
                 repo_id=str(model_name_or_path),
                 filename="config.json",
-                library_name="coop"
+                library_name="coop",
             )
             config = json.load(open(config_path))
             model_path = hf_hub_download(
                 repo_id=str(model_name_or_path),
                 filename="pytorch_model.bin",
-                library_name="coop"
+                library_name="coop",
             )
-            state_dict = torch.load(model_path, map_location=lambda storage, loc: storage)
+            state_dict = torch.load(
+                model_path, map_location=lambda storage, loc: storage
+            )
 
             if "bimeanvae" in str(model_name_or_path):
                 spm_path = hf_hub_download(
                     repo_id=str(model_name_or_path),
                     filename="spm.model",
-                    library_name="coop"
+                    library_name="coop",
                 )
                 config["spm_path"] = spm_path
 
@@ -75,9 +98,7 @@ class VAE(nn.Module):
         self.model.to(self.device)
 
     @torch.no_grad()
-    def encode(self,
-               reviews: Union[List[str], str],
-               device: str = None):
+    def encode(self, reviews: Union[List[str], str], device: str = None):
         if isinstance(reviews, str):
             reviews = [reviews]
 
@@ -87,11 +108,13 @@ class VAE(nn.Module):
         return self.model(src).q.loc
 
     @torch.no_grad()
-    def generate(self,
-                 z: torch.Tensor,
-                 num_beams: int = 4,
-                 max_tokens: int = 256,
-                 bad_words: Union[str, List[str], List[int]] = None):
+    def generate(
+        self,
+        z: torch.Tensor,
+        num_beams: int = 4,
+        max_tokens: int = 256,
+        bad_words: Union[str, List[str], List[int]] = None,
+    ):
         if z.dim() == 1:
             z = z.unsqueeze(0)
 
@@ -105,8 +128,11 @@ class VAE(nn.Module):
         else:
             bad_words_ids = None
 
-        return self.tgt_tokenizers.decode(self.model.generate(
-            z=z,
-            num_beams=num_beams,
-            max_tokens=max_tokens,
-            bad_words_ids=bad_words_ids))
+        return self.tgt_tokenizers.decode(
+            self.model.generate(
+                z=z,
+                num_beams=num_beams,
+                max_tokens=max_tokens,
+                bad_words_ids=bad_words_ids,
+            )
+        )

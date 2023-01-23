@@ -1,4 +1,5 @@
 import logging
+import os
 import shutil
 import sys
 import tarfile
@@ -48,6 +49,21 @@ def _init_logger(name, log_level):
     return logger
 
 
+def is_within_directory(directory, target):
+    abs_directory = os.path.abspath(directory)
+    abs_target = os.path.abspath(target)
+    prefix = os.path.commonprefix([abs_directory, abs_target])
+    return prefix == abs_directory
+
+
+def safe_extract(tar, path=".", members=None, *, numeric_owner=False):
+    for member in tar.getmembers():
+        member_path = os.path.join(path, member.name)
+        if not is_within_directory(path, member_path):
+            raise Exception("Attempted Path Traversal in Tar File")
+    tar.extractall(path, members, numeric_owner=numeric_owner)
+
+
 def setup():
     logger = _init_logger("setup", "INFO")
 
@@ -56,7 +72,7 @@ def setup():
         logger.info("Downloading data ...")
         response_data = requests.get(DATA_URL, stream=True)
         with tarfile.open(fileobj=response_data.raw, mode="r|gz") as file:
-            file.extractall(path=DATA_PATH)
+            safe_extract(file, path=DATA_PATH)
         logger.info("Downloaded and extracted data.")
 
     if not BART_PATH.exists() or _gen_md5_hash(BART_PATH) != CHECKPOINT_HASH_SUM:
