@@ -135,7 +135,7 @@ class InvalidFileError(Exception):
     pass
 
 
-def python_version_from_pipfile(root_path):
+def python_version_from_pipfile_lock(root_path):
     try:
         pipfilelock = root_path / "Pipfile.lock"
         with open(pipfilelock, "r") as file:
@@ -146,14 +146,14 @@ def python_version_from_pipfile(root_path):
         return None
 
 
-def python_version_from_pipfile_lock(root_path):
+def python_version_from_pipfile(root_path):
     try:
         pipfile = root_path / "Pipfile"
-        config_parser = configparser.ConfigParser()
+        config_parser = configparser.ConfigParser(inline_comment_prefixes=["#"])
         config_parser.read(pipfile)
         version = config_parser["requires"]["python_version"]
         if version is not None:
-            version = version.strip('"').strip("'")
+            version = version.strip().strip('"').strip("'")
         return version
     except FileNotFoundError:
         raise InvalidFileError()
