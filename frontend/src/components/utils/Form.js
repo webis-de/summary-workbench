@@ -20,7 +20,7 @@ const Input = ({ Icon, flatLeft, flatRight, small, right, noring, ...props }) =>
   if (!flatLeft) classExtra += " rounded-l-lg";
   if (!flatRight) classExtra += " rounded-r-lg";
   if (right) classExtra += " text-right";
-  if (!noring) classExtra += " ring-1 ring-gray-300"
+  if (!noring) classExtra += " ring-1 ring-gray-300";
   if (Icon) {
     if (small) classExtra += " pl-9";
     else classExtra += " pl-10";
@@ -48,7 +48,7 @@ const Checkbox = ({ children, checked, onChange, onClickText, bold }) => {
       type="checkbox"
       className="w-4 h-4 bg-gray-50 rounded border border-gray-300 focus:ring-1 focus:ring-blue-300"
       checked={checked}
-      onChange={onChange}
+      onChange={onChange || (() => {})}
     />
   );
   if (children) {
@@ -69,7 +69,7 @@ const Checkbox = ({ children, checked, onChange, onClickText, bold }) => {
     if (onClickText) return <div className={className}>{Component}</div>;
     return <label className={className}>{Component}</label>;
   }
-  return Component
+  return Component;
 };
 
 export { Textarea, Input, Checkbox };
