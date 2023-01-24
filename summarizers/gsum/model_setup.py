@@ -11,8 +11,8 @@ CHECKPOINT_URL = (
     "https://files.webis.de/summarization-models/gsum/checkpoints/bart_sentence.pt"
 )
 DATA_URL = "https://files.webis.de/summarization-models/gsum/data.tar.gz"
-SAVE_PATH = Path("~/checkpoints").expanduser()
-DATA_PATH = Path("~/data").expanduser()
+SAVE_PATH = Path("~/.cache/gsum_data").expanduser()
+DATA_PATH = Path("~/.cache/gsumbart").expanduser()
 BART_PATH = SAVE_PATH / "bart_sentence.pt"
 
 CHECKPOINT_HASH_SUM = "1e30621a262b5818e78ae9775d0512ad"
@@ -49,21 +49,6 @@ def _init_logger(name, log_level):
     return logger
 
 
-def is_within_directory(directory, target):
-    abs_directory = os.path.abspath(directory)
-    abs_target = os.path.abspath(target)
-    prefix = os.path.commonprefix([abs_directory, abs_target])
-    return prefix == abs_directory
-
-
-def safe_extract(tar, path=".", members=None, *, numeric_owner=False):
-    for member in tar.getmembers():
-        member_path = os.path.join(path, member.name)
-        if not is_within_directory(path, member_path):
-            raise Exception("Attempted Path Traversal in Tar File")
-    tar.extractall(path, members, numeric_owner=numeric_owner)
-
-
 def setup():
     logger = _init_logger("setup", "INFO")
 
@@ -71,8 +56,8 @@ def setup():
         Path(DATA_PATH).mkdir(parents=True, exist_ok=True)
         logger.info("Downloading data ...")
         response_data = requests.get(DATA_URL, stream=True)
-        with tarfile.open(fileobj=response_data.raw, mode="r|gz") as file:
-            safe_extract(file, path=DATA_PATH)
+        with tarfile.open(fileobj=response_data.raw, mode="r|gz") as tar:
+            tar.extractall(path=DATA_PATH)
         logger.info("Downloaded and extracted data.")
 
     if not BART_PATH.exists() or _gen_md5_hash(BART_PATH) != CHECKPOINT_HASH_SUM:

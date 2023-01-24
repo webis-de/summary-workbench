@@ -17,7 +17,7 @@ class GuidedBART(object):
             print("Initialized GuidedBART.")
             self.bart.eval()
 
-    def summarize(self, text, ratio=0.2, guidance=None):
+    def summarize(self, text, guidance, ratio=0.2):
         texts = [text]
         sents = self.bart.sample(
             texts,
@@ -37,4 +37,4 @@ class SummarizerPlugin:
         self.summarizer = GuidedBART()
 
     def summarize(self, batch, ratio, guidance: str):
-        return [self.summarizer.summarize(text, ratio, guidance) for text in batch]
+        return [self.summarizer.summarize(text, guidance, ratio) for text in batch]

@@ -10,29 +10,14 @@ from .download import get_stream
 from .transformer_summarizer import TransformerSummarizer
 
 
-def is_within_directory(directory, target):
-    abs_directory = os.path.abspath(directory)
-    abs_target = os.path.abspath(target)
-    prefix = os.path.commonprefix([abs_directory, abs_target])
-    return prefix == abs_directory
-
-
-def safe_extract(tar, path=".", members=None, *, numeric_owner=False):
-    for member in tar.getmembers():
-        member_path = os.path.join(path, member.name)
-        if not is_within_directory(path, member_path):
-            raise Exception("Attempted Path Traversal in Tar File")
-    tar.extractall(path, members, numeric_owner=numeric_owner)
-
-
 class CliffSum(object):
     def __init__(self, checkpoint_path, url):
         self.checkpoint_path = Path(checkpoint_path)
         try:
             self.tokenizer, self.model = self.load()
         except (OSError, HFValidationError):
-            with tarfile.open(fileobj=get_stream(url), mode="r|gz") as file:
-                safe_extract(file, path=checkpoint_path.parent)
+            with tarfile.open(fileobj=get_stream(url), mode="r|gz") as tar:
+                tar.extractall(path=checkpoint_path.parent)
             self.tokenizer, self.model = self.load()
         self.pipeline = pipeline(
             "summarization", model=self.model, tokenizer=self.tokenizer
