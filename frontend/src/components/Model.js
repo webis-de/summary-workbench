@@ -1,4 +1,3 @@
-import { FaCheck } from "react-icons/fa";
 import { Checkbox } from "./utils/Form";
 
 import { cyrb53 } from "../utils/color";

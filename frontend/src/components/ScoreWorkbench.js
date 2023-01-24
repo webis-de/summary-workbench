@@ -4,7 +4,7 @@ import { useKey, useToggle } from "react-use";
 
 import { HoverContext } from "../contexts/HoverContext";
 import { useMarkup } from "../hooks/markup";
-import { arrayEqual, omap, computeParagraphs, splitSentences  } from "../utils/common";
+import { arrayEqual, computeParagraphs, omap, splitSentences } from "../utils/common";
 import formatters from "../utils/export";
 import { range } from "../utils/python";
 import { CopyToClipboardButton } from "./utils/Button";
@@ -175,7 +175,7 @@ const SemanticMarkup = memo(({ markup }) => {
 });
 
 const MarkupOrText = ({ markup, markupState, scrollState }) => {
-  if (typeof markup === "string") return <Markup markups={markup} />
+  if (typeof markup === "string") return <Markup markups={markup} />;
   const { type } = markup;
   switch (type) {
     case "loading":
@@ -688,7 +688,9 @@ const Plotter = ({ calculation }) => {
               const metric = rownames[i];
               return (
                 <Tr key={metric} striped>
-                  <Td loose sticky>{metric}</Td>
+                  <Td loose sticky>
+                    {metric}
+                  </Td>
                   {row.map((isSet, j) => (
                     <Td key={j} loose center>
                       <Checkbox checked={isSet} onChange={() => toggleMetric([i, j])} />
@@ -745,10 +747,11 @@ const Plotter = ({ calculation }) => {
 
 const ScoreWorkbench = ({ calculation: calc, RightToken }) => {
   const calculation = useMemo(() => {
-    const c = {...calc}
-    if (Array.isArray(c.documents)) c.documents = c.documents.map(splitSentences).map(computeParagraphs)
-    return c
-  }, [calc])
+    const c = { ...calc };
+    if (Array.isArray(c.documents))
+      c.documents = c.documents.map(splitSentences).map(computeParagraphs);
+    return c;
+  }, [calc]);
   const hasScores = Boolean(calculation.table.length);
   return (
     <div>

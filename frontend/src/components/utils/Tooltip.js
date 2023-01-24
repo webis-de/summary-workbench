@@ -1,10 +1,22 @@
-import ReactTooltip from "react-tooltip";
+import "react-tooltip/dist/react-tooltip.css";
 
-const Tooltip = ({ place = "left", text, children }) => (
-  <div>
-    <div data-tip={text}>{children}</div>
-    <ReactTooltip place={place} effect="solid" backgroundColor="#656565" className="tooltip max-w-[400px]" />
-  </div>
-);
+import { useId } from "react";
+import { Tooltip as ReactTooltip } from "react-tooltip";
+
+const Tooltip = ({ place = "left", text, children }) => {
+  const id = useId();
+  return (
+    <div>
+      <div id={id} data-tooltip-content={text}>
+        {children}
+      </div>
+      <ReactTooltip
+        anchorId={id}
+        place={place}
+        style={{ backgroundColor: "#656565", maxWidth: "400px", padding: "2px 6px", opacity: 1 }}
+      />
+    </div>
+  );
+};
 
 export { Tooltip };
