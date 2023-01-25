@@ -3,6 +3,7 @@ import sys
 sys.path.insert(0, "./guided_summarization/bart")
 from fairseq.models.bart.guided_model import GuidedBARTModel
 from model_setup import DATA_PATH, SAVE_PATH
+from pydantic import Field
 
 MODEL_PATH = SAVE_PATH
 DATA_PATH = DATA_PATH / "data"
@@ -36,5 +37,5 @@ class SummarizerPlugin:
     def __init__(self):
         self.summarizer = GuidedBART()
 
-    def summarize(self, batch, ratio, guidance: str):
+    def summarize(self, batch, ratio, guidance: str = Field(..., min_length=1)):
         return [self.summarizer.summarize(text, guidance, ratio) for text in batch]
