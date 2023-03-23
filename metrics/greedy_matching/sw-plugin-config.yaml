@@ -2,6 +2,5 @@ version: "1.0"
 name: Greedy Matching
 metadata:
   type: lexical
-  model: glove.6B.300d
   homepage: https://www.aclweb.org/anthology/W12-2018.pdf
   sourcecode: https://github.com/Maluuba/nlg-eval

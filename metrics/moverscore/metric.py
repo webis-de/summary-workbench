@@ -2,7 +2,7 @@ import os
 
 from moverscore import MoverScore
 
-MODEL = os.environ.get("model")
+MODEL = os.environ.get("model") or "distilbert-base-uncased"
 
 
 class MetricPlugin:

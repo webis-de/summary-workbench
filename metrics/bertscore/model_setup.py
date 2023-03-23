@@ -1,7 +1,5 @@
 from metric import MetricPlugin
 import logging
-import os
-import contextlib
 import inspect
 
 def setup():

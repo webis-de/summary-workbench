@@ -3,4 +3,3 @@ name: BERTSummarizer
 metadata:
   type: extractive
   homepage: https://arxiv.org/abs/1906.04165
-  model: distilbert-base-uncased

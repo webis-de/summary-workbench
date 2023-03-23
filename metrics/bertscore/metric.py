@@ -2,7 +2,7 @@ import os
 
 from bert_score import BERTScorer
 
-MODEL = os.environ.get("model") or "roberta-large-mnli"
+MODEL = os.environ.get("model") or "microsoft/deberta-xlarge-mnli"
 
 
 class MetricPlugin:
@@ -12,3 +12,6 @@ class MetricPlugin:
     def evaluate(self, batch):
         hypotheses, references = zip(*batch)
         return self.bert.score(hypotheses, references)[0].tolist()
+
+    def metadata(self):
+        return {"model": MODEL}

@@ -2,4 +2,3 @@ version: "1.0"
 name: "FeatureSum"
 metadata:
   type: extractive
-  model: en_core_web_md

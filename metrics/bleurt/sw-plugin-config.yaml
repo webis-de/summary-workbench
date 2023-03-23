@@ -2,6 +2,5 @@ version: "1.0"
 name: BLEURT
 metadata:
   type: semantic
-  model: bleurt-base-128
   homepage: https://aclanthology.org/2020.acl-main.704/
   sourcecode: https://github.com/google-research/bleurt

@@ -6,8 +6,8 @@ import bleurt.score
 
 
 class MetricPlugin:
-    MODEL = os.environ.get("model") or "bleurt-base-128"
-    MODEL_BASE_URL = "https://storage.googleapis.com/bleurt-oss/"
+    MODEL = os.environ.get("model") or "BLEURT-20"
+    MODEL_BASE_URL = "https://storage.googleapis.com/bleurt-oss-21/"
     MODEL_PATH = Path("~/.cache/bleurt/").expanduser()
 
     @classmethod
@@ -19,4 +19,9 @@ class MetricPlugin:
 
     def evaluate(self, batch):
         hypotheses, references = zip(*batch)
-        return self.bleurt.score(references=references, candidates=hypotheses)
+        return self.bleurt.score(
+            references=references, candidates=hypotheses, batch_size=len(batch)
+        )
+
+    def metadata(self):
+        return {"model": self.MODEL_URL()}

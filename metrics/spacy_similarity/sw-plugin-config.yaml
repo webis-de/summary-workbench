@@ -2,5 +2,4 @@ version: "1.0"
 name: Spacy Similarity
 metadata:
   type: semantic
-  model: en_core_web_lg
   sourcecode: https://github.com/explosion/spaCy

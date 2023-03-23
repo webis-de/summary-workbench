@@ -68,3 +68,6 @@ class MetricPlugin:
     def evaluate(self, batch):
         hypotheses, references = zip(*batch)
         return self._evaluate(hypotheses, references)
+
+    def metadata(self):
+        return {"model": self.MODEL_URL()}

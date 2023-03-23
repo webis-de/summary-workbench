@@ -5,8 +5,8 @@ from .scores import Scorer
 
 class SummarizerPlugin:
     def __init__(self, model=None):
-        model = model or os.environ["model"]
-        self.model = Scorer(model)
+        self.model_name = model or os.environ.get("model") or "en_core_web_lg"
+        self.model = Scorer(self.model_name)
 
     def summarize(
         self,
@@ -36,3 +36,6 @@ class SummarizerPlugin:
             )
             for text in batch
         ]
+
+    def metadata(self):
+        return {"model": self.model_name}

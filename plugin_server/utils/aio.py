@@ -13,7 +13,7 @@ class EventWithResult(asyncio.Event):
         super().set()
 
 
-async def wait_first(coros):
+async def wait_first(coros, ensure_finished=False):
     futures = [asyncio.ensure_future(c) for c in coros]
     try:
         done, _ = await asyncio.wait(futures, return_when=asyncio.FIRST_COMPLETED)
@@ -23,11 +23,12 @@ async def wait_first(coros):
     finally:
         for future in futures:
             future.cancel()
-        for future in futures:
-            try:
-                await future
-            except:
-                pass
+        if ensure_finished:
+            for future in futures:
+                try:
+                    await future
+                except:
+                    pass
 
 
 def to_future(func):
@@ -43,10 +44,11 @@ async def to_thread(func, *args, **kwargs):
 
 
 @asynccontextmanager
-async def parallel(coro):
+async def parallel(coro, ensure_finished=False):
     future = asyncio.ensure_future(coro)
     try:
         yield
     finally:
         future.cancel()
-        await asyncio.wait([future])
+        if ensure_finished:
+            await asyncio.wait([future])

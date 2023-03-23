@@ -18,3 +18,6 @@ class MetricPlugin:
         hypotheses, references = zip(*batch)
         scores = self.rouge.get_scores(hypotheses, references, avg=False)
         return [score[self.key]["f"] for score in scores]
+
+    def metadata(self):
+        return {"model": model}

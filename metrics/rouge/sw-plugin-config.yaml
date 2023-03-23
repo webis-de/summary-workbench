@@ -1,7 +1,6 @@
 version: "1.0"
 name: "ROUGE-{model}"
 metadata:
-  model: "1"
   type: lexical
   homepage: https://www.aclweb.org/anthology/W04-1013.pdf
   sourcecode: https://github.com/pltrdy/rouge

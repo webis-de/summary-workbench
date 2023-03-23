@@ -10,7 +10,7 @@ sys.path.insert(0, "/summary_workbench_plugin_files")
 
 PLUGIN_CONFIG = json.loads(environ["PLUGIN_CONFIG"])
 NUM_THREADS = int(environ.get("THREADS", 1))
-BATCH_SIZE = int(environ.get("BATCH_SIZE", 32))
+BATCH_SIZE = int(environ.get("BATCH_SIZE", 8))
 CACHE_SIZE = int(environ.get("CACHE_SIZE", 0))
 
 

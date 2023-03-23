@@ -2,7 +2,7 @@ import os
 
 import spacy
 
-MODEL = os.environ["model"]
+MODEL = os.environ.get("model") or "en_core_web_lg"
 
 
 class MetricPlugin:
@@ -16,4 +16,7 @@ class MetricPlugin:
 
     def evaluate(self, batch):
         hypotheses, references = zip(*batch)
-        return self._evaluate(references, hypotheses)
+        return self._evaluate(hypotheses, references)
+
+    def metadata(self):
+        return {"model": MODEL}
