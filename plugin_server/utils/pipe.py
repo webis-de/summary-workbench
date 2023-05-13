@@ -47,9 +47,6 @@ class SortedPipe:
         self.queue.put((pos, element))
         self.added_event.set()
 
-    async def _wait_for_new_element(self):
-        self.added_event.clear()
-
     async def get(self):
         while True:
             await self.added_event.wait()
