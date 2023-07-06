@@ -8,7 +8,7 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 const config = {
   title: "Summary Workbench - documentation",
   tagline: "",
-  url: "https://webis-de.github.io",
+  url: "https://webis.de",
   baseUrl: "/summary-workbench/",
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
