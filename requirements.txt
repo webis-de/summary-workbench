@@ -2,7 +2,7 @@ GitPython
 click
 docker
 giturlparse
-pydantic
+pydantic<2
 requests
 ruamel.yaml
 termcolor

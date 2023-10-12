@@ -16,7 +16,7 @@ extern_environment:
 metrics:
   - ./debug_plugin
   - ./metrics/bartscore
-  - ./metrics/bert
+  - ./metrics/bertscore
   - ./metrics/bleu
   - ./metrics/bleurt
   - ./metrics/cider
